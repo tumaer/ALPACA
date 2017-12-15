@@ -1,0 +1,8 @@
+export MACHINE=LRZ
+module unload mpi.ibm
+module unload poe
+module unload intel
+module load gcc/5
+module load intel
+module load mpi.intel
+module load hdf5/mpi

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <domain>
+        <!-- size of a single block on level 0 -->
+        <blockSize> 0.25  </blockSize>
+
+        <!-- number of blocks per dimension-->
+        <blockRatio>
+            <x> 4 </x>
+            <y> 1 </y>
+            <z> 1 </z>
+        </blockRatio>
+
+        <boundaryConditions>
+            <fluid>
+                <!--types of fluid boundary conditions:
+                ZeroGradient,
+                Symmetry,
+                Wall
+                -->
+                <west>Symmetry</west>
+                <east>Symmetry</east>
+                <south>Symmetry</south>
+                <north>Symmetry</north>
+                <bottom>Symmetry</bottom>
+                <top>Symmetry</top>
+            </fluid>
+        </boundaryConditions>
+
+        <initialConditions>
+            <fluid1>
+            if (x &lt; 0.5)
+            {
+                DENSITY : = 1.0;
+                VELOCITY_X := 0.0;
+                VELOCITY_Y := 0.0;
+                VELOCITY_Z := 0.0;
+                PRESSURE := 1.0;
+            }
+                else
+            {
+                DENSITY := 0.125;
+                VELOCITY_X := 0.0;
+                VELOCITY_Y := 0.0;
+                VELOCITY_Z := 0.0;
+                PRESSURE := 0.1;
+            }
+            </fluid1>
+        </initialConditions>
+    </domain>
+
+    <fluids>
+        <numberOfFluids>              1   </numberOfFluids>
+        <fluid1>
+            <!--Material Types: StiffenedGas, Waterlike (Tait)-->
+            <type>StiffenedGas</type>
+            <gamma>                     1.4   </gamma>
+            <A>                         0.0   </A>
+            <B>                         0.0   </B>
+            <rho0>                      1.2   </rho0>
+            <viscosity>
+                <dynamicShear>          0.0   </dynamicShear>
+                <dynamicBulk>           0.0   </dynamicBulk>
+            </viscosity>
+        </fluid1>
+    </fluids>
+
+    <sourceTerms>
+        <gravity>
+            <x> 0 </x>
+            <y> 0 </y>
+            <z> 0 </z>
+        </gravity>
+    </sourceTerms>
+
+   <multiResolution>
+       <maximumLevel> 3 </maximumLevel>
+
+       <refinementCriterion>
+           <epsilonReference>    0.001 </epsilonReference>
+           <!-- allowed values [0-12] -->
+           <levelOfEpsilonReference> 2  </levelOfEpsilonReference>
+       </refinementCriterion>
+   </multiResolution>
+
+   <calculation>
+       <timeControl>
+           <startTime>            0.0           </startTime>
+           <endTime>              0.2           </endTime>
+       </timeControl>
+
+       <CFLNumber> 0.6 </CFLNumber>
+
+       <referenceParameter>
+           <lRef>   1  </lRef>    <!-- Length -->
+           <uRef>   1  </uRef>    <!-- Velocity -->
+           <rhoRef> 1  </rhoRef>  <!-- Density -->
+           <muRef>  1  </muRef>   <!-- Viscosity -->
+           <gRef>   1  </gRef>    <!-- Gravity -->
+           <tRef>   1  </tRef>    <!-- Time -->
+       </referenceParameter>
+   </calculation>
+
+   <output>
+       <outputFileType>XDMF</outputFileType>       <!--ASCII or XDMF-->
+       <outputTimesType>Interval</outputTimesType> <!--Interval OR Timestamps-->
+       <outputPeriod>         0.01            </outputPeriod>
+       <numberOfTimestamps>   4              </numberOfTimestamps>
+       <timestamps>
+           <ts1> 0.05 </ts1>
+           <ts2> 0.10 </ts2>
+           <ts3> 0.15 </ts3>
+           <ts4> 0.20 </ts4>
+       </timestamps>
+       <timeNamingFactor>1.e0</timeNamingFactor>
+   </output>
+</configuration>

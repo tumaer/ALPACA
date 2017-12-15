@@ -1,0 +1,19 @@
+#!/bin/sh
+#SBATCH -D <InitalDir>
+#SBATCH -o <OutputDir>/<Name>%j.out
+#SBATCH -J <JobName>
+# Use user Envrionment
+#SBATCH --get-user-env 
+#SBATCH --clusters=tum_aer
+#SBATCH --partition=tum_aer_batch
+#SBATCH --nodes=1 
+#SBATCH --ntasks=28
+#SBATCH --mail-type=end 
+#SBATCH --mail-user=your.email@host.domain
+#SBATCH --export=NONE 
+#SBATCH --time=6:00:00 
+source /etc/profile.d/modules.sh
+module load gcc/5
+module load hdf5/mpi
+
+mpiexec -n 28 ./ALPACA inputfile.xml

@@ -1,0 +1,224 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                        %
+% This file is part of ALPACA                                                            %
+%                                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  \\\\                                                                                  %
+%  l '>                                                                                  %
+%  | |                                                                                   %
+%  | |                                                                                   %
+%  | alpaca~                                                                             %
+%  ||    ||                                                                              %
+%  ''    ''                                                                              %
+%                                                                                        %
+% ALPACA                                                                                 %
+% Copyright (c) 2017 Nikolaus A. Adams and contributors (see AUTHORS list)               %
+% All rights reserved.                                                                   %
+%                                                                                        %
+% Chair of Aerodynamics and Fluid Mechanics                                              %
+% Technical University of Munich                                                         %
+%                                                                                        %
+% This code is developed by the 'Nanoshock group' at the Chair of Aerodynamics and       %
+% Fluid Mechanics, Technical University of Munich.                                       %
+%                                                                                        %
+% This project has received funding from the European Reseach Council (ERC)              %
+% under the European Union's Horizon 2020 research and innovation programme              %
+% (grant agreement No 667483).                                                           %
+%                                                                                        %
+% ERC Advanced Grant No 667483, Prof. Dr. Nikolaus A. Adams:                             %
+% "NANOSHOCK - Manufacturing Shock Interactions for Innovative Nanoscale Processes"      %
+%                                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                        %
+% Redistribution and use in source and binary forms, with or without                     %
+% modification, are permitted provided that the following conditions are met:            %
+%                                                                                        %
+% 1. Redistributions of source code must retain the above copyright notice,              %
+%    this list of conditions and the following disclaimer.                               %
+%                                                                                        %
+% 2. Redistributions in binary form must reproduce the above copyright notice            %
+%    this list of conditions and the following disclaimer in the documentation           %
+%    and/or other materials provided with the distribution.                              %
+%                                                                                        %
+% 3. Neither the name of the copyright holder nor the names of its                       %
+%    contributors may be used to endorse or promote products derived from this           %
+%    software without specific prior written permission.                                 %
+%                                                                                        %
+% 4. Any redistribution of substantial fractions of the code as a                        %
+%    different project should preserve the word ALPACA in the name                       %
+%    of the code                                                                         %
+%                                                                                        %
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"            %
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE              %
+% IMPLIED WARRANTIES OF  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE            %
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE              %
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR                    %
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF                   %
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS               %
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN                %
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)                %
+% ARISING IN ANY WAY OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE            %
+% POSSIBILITY OF SUCH DAMAGE.                                                            %
+%                                                                                        %
+% Please note, several third-party tools are used within the ALPACA code under           %
+% their own license agreement.                                                           %
+%                                                                                        %
+% 1. xdmf_writer        : Licensed by Technische Universitaet Muenchen                   %
+%                         See 'COPYING_XDMF_WRITER' for more information.                %
+%                                                                                        %
+% 2. tiny_xml           : This software is provided 'as-is', without any express or      %
+%                         implied warranty. In no event will the authors be held         %
+%                         liable for any damages arising from the use of this software.  %
+%                         See COPYING_TINY_XMLfor more information.                      %
+%                                                                                        %
+% 3. expression_toolkit : Free use of The C++ Mathematical Expression Toolkit Library is %
+%                         permitted under the guidelines and in accordance with the most %
+%                         current version of the Common Public License.                  %
+%                         http://www.opensource.org/licenses/cpl1.0.php                  %
+%                         See COPYING_EXPRESSION_TOOLKITfor more information.            %
+%                                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                        %
+% AUTHORS                                                                                %
+%                                                                                        %
+%   Prof. Dr. Nikolaus A. Adams                                                          %
+%                                                                                        %
+%   Dr. Stefan Adami                                                                     %
+%   Vladimir Bogdanov                                                                    %
+%   Nico Fleischmann                                                                     %
+%   Nils Hoppe                                                                           %
+%   Naeimeh Hosseini                                                                     %
+%   Jakob Kaiser                                                                         %
+%   Aleksandr Lunkov                                                                     %
+%   Thomas Paula                                                                         %
+%   Josef Winter                                                                         %
+%                                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                        %
+% CONTACT                                                                                %
+%                                                                                        %
+%   nanoshock@aer.mw.tum.de                                                              %
+%                                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                        %
+% Munich, December 15th 2017                                                             %
+%                                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+@article{Jiang1996,
+	author = {Jiang, G. S. and Shu, C. W.},
+	journal = {Journal of Computational Physics},
+	keywords = {ENO/WENO},
+	pages = {202--228},
+	title = {{Efficient implementation of weighted ENO schemes}},
+	volume = {126},
+	year = {1996}
+}
+
+@article{Hu2010,
+	author = {Hu, X. Y. and Wang, Q. and Adams, N. A.},
+	doi = {10.1016/j.jcp.2010.08.019},
+	issn = {00219991},
+	journal = {Journal of Computational Physics},
+	keywords = {ENO/WENO},
+	month = {nov},
+	number = {23},
+	pages = {8952--8965},
+	title = {{An adaptive central-upwind weighted essentially non-oscillatory scheme}},
+	url = {http://linkinghub.elsevier.com/retrieve/pii/S0021999110004560},
+	volume = {229},
+	year = {2010}
+}
+
+@article{Fu2016a,
+    abstract = {Although classical WENO schemes have achieved great success and are widely accepted, they exhibit several shortcomings. They are too dissipative for direct simulations of turbulence and lack robustness when very-high-order versions are applied to complex flows. In this paper, we propose a family of high-order targeted ENO schemes which are applicable for compressible-fluid simulations involving a wide range of flow scales. In order to increase the numerical robustness as compared to very-high-order classical WENO schemes, the reconstruction dynamically assembles a set of low-order candidate stencils with incrementally increasing width. While discontinuities and small-scale fluctuations are efficiently separated, the numerical dissipation is significantly diminished by an ENO-like stencil selection, which either applies a candidate stencil with its original linear weight, or removes its contribution when it is crossed by a discontinuity. The background linear scheme is optimized under the constraint of preserving an approximate dispersion-dissipation relation. By means of quasi-linear analyses and practical numerical experiments, a set of case-independent parameters is determined. The general formulation of arbitrarily high-order schemes is presented in a straightforward way. A variety of benchmark-test problems, including broadband waves, strong shock and contact discontinuities are studied. Compared to well-established classical WENO schemes, the present schemes exhibit significantly improved robustness, low numerical dissipation and sharp discontinuity capturing. They are particularly suitable for DNS and LES of shock-turbulence interactions.},
+    author = {Fu, L. and Hu, X. Y. and Adams, N. A.},
+    doi = {10.1016/j.jcp.2015.10.037},
+    isbn = {0021-9991},
+    issn = {10902716},
+    journal = {Journal of Computational Physics},
+    keywords = {ENO/WENO,High-order scheme,Optimal scheme,Shock-turbulence interaction,WENO-CU6,WENO-JS,WENO-Z},
+    pages = {333--359},
+    title = {{A family of high-order targeted ENO schemes for compressible-fluid simulations}},
+    url = {http://linkinghub.elsevier.com/retrieve/pii/S0021999115007147},
+    volume = {305},
+    year = {2016}
+}
+
+@article{Kaiser,
+    Author = {Kaiser, J. W. J. and Hoppe, N. and Adami, S. and Adams, N. A.},
+    Journal = {In preparation},
+    Title = {In preparation},
+    Year = {In preparation}
+}
+
+@article{Fedkiw1999a,
+    author = {Fedkiw, R. P. and Aslam, T. D. and Merriman, B. and Osher, S.},
+    journal = {Journal of Computational Physics},
+    keywords = {Level-Set},
+    pages = {457--492},
+    title = {{A Non-oscillatory Eulerian Approach to Interfaces in Multimaterial Flows (The Ghost Fluid Method)}},
+    volume = {152},
+    year = {1999}
+}
+
+@article{Roe1981,
+    author = {Roe, P. L.},
+    journal = {Journal of computational physics},
+    keywords = {Riemann solvers},
+    number = {2},
+    pages = {357--372},
+    title = {{Approximate Riemann solvers, parameter vectors, and difference schemes}},
+    url = {http://www.sciencedirect.com/science/article/pii/0021999181901285},
+    volume = {43},
+    year = {1981}
+}
+
+@incollection{Shu1999,
+    title={High order ENO and WENO schemes for computational fluid dynamics},
+    author={Shu, C. W.},
+    booktitle={High-order methods for computational physics},
+    pages={439--582},
+    year={1999},
+    publisher={Springer}
+}
+
+@article{Roussel2003,
+    abstract = {We present a new adaptive numerical scheme for solving parabolic PDEs in Cartesian geometry. Applying a finite volume discretization with explicit time integration, both of second order, we employ a fully adaptive multiresolution scheme to represent the solution on locally refined nested grids. The fluxes are evaluated on the adaptive grid. A dynamical adaption strategy to advance the grid in time and to follow the time evolution of the solution directly exploits the multiresolution representation. Applying this new method to several test problems in one, two and three space dimensions, like convection-diffusion, viscous Burgers and reaction-diffusion equations, we show its second-order accuracy and demonstrate its computational efficiency. {\textcopyright} 2003 Elsevier Science B.V. All rights reserved.},
+    author = {Roussel, O. and Schneider, K. and Tsigulin, A. and Bockhorn, H.},
+    doi = {10.1016/S0021-9991(03)00189-X},
+    isbn = {00219991},
+    issn = {00219991},
+    journal = {Journal of Computational Physics},
+    keywords = {Adaptivity,Finite volume,Multiresolution,Parabolic partial differential equation},
+    number = {2},
+    pages = {493--523},
+    title = {{A conservative fully adaptive multiresolution algorithm for parabolic PDEs}},
+    volume = {188},
+    year = {2003}
+}
+
+@article{Harten1993,
+    author = {Harten, A.},
+    journal = {Communications on Pure and Applied Mathematics},
+    number = {12},
+    pages = {1305--1342},
+    title = {{Multiresolution algorithms for the numerical solution of hyperbolic conservation laws}},
+    volume = {48},
+    year = {1993}
+}
+
+@book{Toro2009,
+    address = {Dordrecht ; New York},
+    author = {Toro, E. F.},
+    edition = {3rd ed},
+    isbn = {978-3-540-25202-3 978-3-540-49834-6},
+    keywords = {Computational fluid dynamics,Fluid dynamics},
+    pages = {724},
+    publisher = {Springer},
+    shorttitle = {Riemann solvers and numerical methods for fluid dy},
+    title = {{Riemann solvers and numerical methods for fluid dynamics: a practical introduction}},
+    year = {2009}
+}
+

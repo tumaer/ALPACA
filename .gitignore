@@ -1,0 +1,17 @@
+ALPACA
+ALPACA_*
+*.log
+doc/html
+doc/latex
+objects/
+/.cproject
+/.project
+*.config
+*.files
+*.includes
+*.creator
+*.creator.user
+TestSuite/Results/*
+TestSuite/Scripts/*.pyc
+TestSuite/*.err
+TestSuite/*.out
