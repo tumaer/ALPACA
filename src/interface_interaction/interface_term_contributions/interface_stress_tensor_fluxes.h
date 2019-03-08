@@ -68,7 +68,7 @@
 #ifndef INTERFACE_STRESS_TENSOR_FLUXES_H
 #define INTERFACE_STRESS_TENSOR_FLUXES_H
 
-#include "materials/material_names.h"
+#include "materials/equation_of_state_definitions.h"
 #include "topology/node.h"
 #include <vector>
 
@@ -80,7 +80,7 @@ class InterfaceStressTensorFluxes {
    /**
     * @brief A struct to bundle viscous flux related information of a fluid.
     */
-   struct ViscousFluidProperties {
+   struct ViscousMaterialProperties {
       MaterialName const material_;
       double const mu_shear_;
       double const mu_bulk_;
@@ -89,27 +89,27 @@ class InterfaceStressTensorFluxes {
        * @brief      Default constructor of the struct.
        *
        * @param[in]  material  The material for which viscosities are saved.
-       * @param[in]  mu        A vector containing the shear and bulk viscosity of the fluid.
+       * @param[in]  mu        A vector containing the shear and bulk viscosity of the material.
        */
-      ViscousFluidProperties( MaterialName const material, std::vector<double> const mu ) :
+      ViscousMaterialProperties( MaterialName const material, std::vector<double> const mu ) :
          material_(material),
          mu_shear_(mu[0]),
          mu_bulk_(mu[1]) { /* Empty, besides initializer list */ }
    };
 
-   ViscousFluidProperties const positive_fluid_properties_;
-   ViscousFluidProperties const negative_fluid_properties_;
+   ViscousMaterialProperties const positive_material_properties_;
+   ViscousMaterialProperties const negative_material_properties_; 
 
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
 
    std::array<double, 3> ComputeInterfaceViscosities( double const volume_fraction ) const;
 
    void AddInviscidPartToInterfaceStressTensor( Node const& node
-                                                , double (&interface_stress_tensor_positive_fluid)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
-                                                , double (&interface_stress_tensor_negative_fluid)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
+                                                , double (&interface_stress_tensor_positive_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
+                                                , double (&interface_stress_tensor_negative_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
    void AddViscousPartToInterfaceStressTensor( Node const& node
-                                               , double (&interface_stress_tensor_positive_fluid)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
-                                               , double (&interface_stress_tensor_negative_fluid)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
+                                               , double (&interface_stress_tensor_positive_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
+                                               , double (&interface_stress_tensor_negative_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
 
    void CalculateVelocityGradientAtInterface( Node const& node
                                               , double (&velocity_gradient_at_interface)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
@@ -118,16 +118,19 @@ class InterfaceStressTensorFluxes {
                                     , double const (&velocity_gradient)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
                                     , double (&tau)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
 
+   void AddAxisymmetricPartToViscousStressTensor( Node const& node
+                                                , double (&tau)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]) const;
+
    void AddFluxesToRightHandSide( Node& node
                                   , double const (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
                                   , double const (&u_interface_normal_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
-                                  , double const (&interface_stress_tensor_positive_fluid)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
-                                  , double const (&interface_stress_tensor_negative_fluid)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
+                                  , double const (&interface_stress_tensor_positive_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
+                                  , double const (&interface_stress_tensor_negative_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
 
-   void ComputeRealFluidVelocity( Node const& node
-                                  , double (&real_fluid_velocity_x)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                                  , double (&real_fluid_velocity_y)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                                  , double (&real_fluid_velocity_z)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   void ComputeRealMaterialVelocity( Node const& node
+                                  , double (&real_material_velocity_x)[CC::TCX()][CC::TCY()][CC::TCZ()]
+                                  , double (&real_material_velocity_y)[CC::TCX()][CC::TCY()][CC::TCZ()]
+                                  , double (&real_material_velocity_z)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
 
 public:
    InterfaceStressTensorFluxes() = delete;

@@ -70,6 +70,7 @@
 
 #include "user_specifications/numerical_setup.h"
 #include "aperture_cut_cell_mixer.h"
+#include "lauer_cut_cell_mixer.h"
 
 
 /**
@@ -91,6 +92,13 @@ namespace CutCellMixerSetup {
    template<>
    struct Concretize<CutCellMixers::ApertureBased> {
       typedef ApertureCutCellMixer type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<CutCellMixers::Lauer> {
+      typedef LauerCutCellMixer type;
    };
 
 }

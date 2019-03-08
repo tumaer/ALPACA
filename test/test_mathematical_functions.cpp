@@ -70,7 +70,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 
 SCENARIO( "Signum function correctness", "[1rank]" ) {
 

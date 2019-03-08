@@ -72,7 +72,7 @@
 #include <limits>
 
 /**
- * @brief The SpatialReconstructionStencil class provides an interface for computational stencils needed throughout the simulation.
+ * @brief The SpatialReconstructionStencil class provides an interface for computational Stencils needed throughout the simulation.
  */
 template<typename DerivedSpatialReconstructionStencil>
 class SpatialReconstructionStencil {
@@ -92,30 +92,26 @@ public:
    SpatialReconstructionStencil& operator=( SpatialReconstructionStencil&& ) = delete;
 
    /**
-    * @brief Applies the SpatialReconstructionStencil to the provided array.
-    * @param stencil_offset Gives an offset to be used to weight the data in upwind direction stronger.
-    * @param stencil_sign Indicates from which direction the solution should be calculated. Positive (1) or negative (-1) direction is possible.
+    * @brief Applies the SpatialReconstructionStencil to the provided Array
+    * @param evaluation_properties[0] Gives an offset to be used to weight the data in upwind direction stronger.
+    * @param evaluation_properties[1] Indicates from which direction the solution should be calculated. Positive (1) or negative (-1) direction is possible.
     * @param cell_size .
     * @return Value at the position of interest.
     * @note Hotpath function.
     */
-   double Apply(std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size) const {
-      return static_cast<DerivedSpatialReconstructionStencil const&>(*this).ApplyImplementation(array, stencil_offset, stencil_sign, cell_size);
+   double Apply(const std::vector<double>& array, const int evaluation_properties[0], const int evaluation_properties[1], const double cell_size) const {
+      return static_cast<DerivedSpatialReconstructionStencil const&>(*this).ApplyImplementation(array, evaluation_properties[0], evaluation_properties[1], cell_size);
    }
    /**
     * @brief Gives the number of cells needed for a single stencil evaluation.
     * @return Size of the stencil, i.e. number of data cells the stencil works on.
     */
-   static constexpr unsigned int StencilSize() {
-      return DerivedSpatialReconstructionStencil::stencil_size_;
-   }
+   static constexpr unsigned int StencilSize() {return DerivedSpatialReconstructionStencil::stencil_size_;}
    /**
-    * @brief Gives the size of the stencil in downstream direction.
-    * @return Size of the stencil arm reaching downstream, i.e. number of data cells that lay down stream the stencil works on.
+    * @brief Gives the size of the stencil in down stream direction.
+    * @return Size of the stencil arm reaching down stream, i.e. number of data cells that lay down stream the stencil works on.
     */
-   static constexpr unsigned int DownstreamStencilSize() {
-      return DerivedSpatialReconstructionStencil::downstream_stencil_size_;
-   }
+   static constexpr unsigned int DownstreamStencilSize() {return DerivedSpatialReconstructionStencil::downstream_stencil_size_;}
 };
 
 #endif // SPATIAL_RECONSTRUCTION_STENCIL_H

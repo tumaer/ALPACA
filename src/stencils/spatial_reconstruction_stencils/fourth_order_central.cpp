@@ -70,18 +70,21 @@
 #include <stdexcept>
 
 /**
- * @brief Computes the flux at one cell face according to a central forth-order scheme. Also See base class.
- * @note The input cell_size, stencil_sign and stencil_offset is not required in all stencils, but for unified interface all derived classes inherit it.
- * @note Hotpath function.
+ * @brief Computes the flux at one cell face according to a first order scheme. Also See base class.
  */
-double FourthOrderCentral::ApplyImplementation( std::vector<double> const& array, int const, int const, double const ) const {
+double FourthOrderCentral::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
-   if( array.size() < stencil_size_ ) {
-      throw std::logic_error("Stencil size for the central fourth-order evaluation is longer than the provided array");
+   (void)cell_size;
+   (void)evaluation_properties;
+
+   // Output error in case something went wrong with the stencil size
+   if(array.size() < stencil_size_) {
+      throw std::logic_error("Stencil size in First Order is longer than provided Array");
    }
 #endif
 
-   return (9.0 * (array[downstream_stencil_size_ - 0] + array[downstream_stencil_size_ + 1])
-      - 1.0 * (array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ + 2])) * one_sixteenth_;
+   double const result = 9.0 * (array[downstream_stencil_size_ - 0] + array[downstream_stencil_size_ + 1]) - 1.0 * (array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ + 2]);
+
+   return result * one_sixteenth_;
 }

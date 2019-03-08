@@ -68,7 +68,7 @@
 #ifndef SYMMETRY_BOUNDARY_CONDITION_H
 #define SYMMETRY_BOUNDARY_CONDITION_H
 
-#include "fluid_boundary_condition.h"
+#include "material_boundary_condition.h"
 #include "levelset_boundary_condition.h"
 #include "boundary_constants.h"
 #include "user_specifications/compile_time_constants.h"
@@ -78,35 +78,22 @@
  */
 template<BoundaryLocation LOC>
 
-class SymmetryBoundaryCondition : public FluidBoundaryCondition, public LevelsetBoundaryCondition {
+class SymmetryBoundaryCondition : public MaterialBoundaryCondition, public LevelsetBoundaryCondition {
 
-   /**
-    * @brief Gives the symmetry sign for a specific fluid field and index
-    * @param field_type Fluid field identifier (conservatives, prime states)
-    * @param field_index Index of the fluid field type 
-    * @return Symmetry sign  
-    */
-   static constexpr double SymmetrySign( FluidFieldType const field_type, unsigned int const field_index ) {
+   static constexpr double SymmetrySign( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case FluidFieldType::Conservatives:
-            return SymmetrySign( FF::ASOE()[field_index] );
-         default: /* FluidFieldType::PrimeStates */
-            return SymmetrySign( FF::ASOP()[field_index] );
+         case MaterialFieldType::Conservatives:
+            return SymmetrySign( MF::ASOE()[field_index] );
+         case MaterialFieldType::Parameters:
+            return SymmetrySign( MF::ASOPA()[field_index] );
+         default: // case MaterialFieldType::PrimeStates:
+            return SymmetrySign( MF::ASOP()[field_index] );
       }
    }
 
-   /**
-    * @brief Gives the symmetry sign for a conservative field
-    * @param equation Conservative buffer identifier
-    * @return Symmetry sign  
-    */
    static constexpr double SymmetrySign( Equation const ) { return 1.0; }
-   /**
-    * @brief Gives the symmetry sign for a prime state field
-    * @param prime_state Primestate buffer identifier
-    * @return Symmetry sign  
-    */
    static constexpr double SymmetrySign( PrimeState const ) { return 1.0; }
+   static constexpr double SymmetrySign( Parameter const ) { return 1.0; }
 
    /**
     * @brief Updates the halo cells from the internal cells according to simple symmetry (same sign).
@@ -137,11 +124,11 @@ public:
    /**
     * @brief Mirrors the domain values near the interface into the halo cells. See base class.
     */
-   void UpdateFluidExternal( Node& node, FluidFieldType const field_type ) const override {
-      auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
-      auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
+   void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type ) const override {
+      constexpr auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
+      constexpr auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
 
-      unsigned int const number_of_fields = FF::ANOF( field_type );
+      unsigned int const number_of_fields = MF::ANOF( field_type );
       for( auto& host_mat_block : node.GetPhases() ) {
          for( unsigned int field_index = 0; field_index < number_of_fields; ++field_index ) {
             double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
@@ -159,12 +146,12 @@ public:
    /**
     * @brief See base class. Adjusted to symmetry condition.
     */
-   void UpdateLevelsetExternal( Node& node, LevelsetBlockBufferType const buffer_type ) const override {
+   void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type ) const override {
       /*  NH TODO this if construct should be avoided, therefore different neighbor relations
-       *  in CommunicationManger needed for levelset vs. Fluid/Tag Halo updates.
+       *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
        */
       if( node.HasLevelset() ) {
-          double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetBuffer( buffer_type );
+          double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
           UpdateSimpleSymmetry( buffer );
       }
    }
@@ -305,6 +292,48 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySi
       default:
          return 1.0;
    }
+}
+
+template<>
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( Parameter const parameter) {
+   // currently not needed
+   (void) parameter;
+   return 1.0;
+}
+
+template<>
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( Parameter const parameter) {
+   // currently not needed
+   (void) parameter;
+   return 1.0;
+}
+
+template<>
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::North>::SymmetrySign( Parameter const parameter ) {
+   // currently not needed
+   (void) parameter;
+   return 1.0;
+}
+
+template<>
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::South>::SymmetrySign( Parameter const parameter ) {
+   // currently not needed
+   (void) parameter;
+   return 1.0;
+}
+
+template<>
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::Top>::SymmetrySign( Parameter const parameter ) {
+   // currently not needed
+   (void) parameter;
+   return 1.0;
+}
+
+template<>
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySign( Parameter const parameter ) {
+   // currently not needed
+   (void) parameter;
+   return 1.0;
 }
 
 #endif // SYMMETRY_BOUNDARY_CONDITION_H

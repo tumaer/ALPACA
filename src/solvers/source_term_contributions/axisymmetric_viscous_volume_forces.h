@@ -84,8 +84,9 @@ private:
 
    void ComputeVelocityGradient( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()]
                                , double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                               , double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size
-                               , double (&velocity_gradient)[CC::TCX()][CC::TCY()][1][dim_][dim_] ) const;
+                               , double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()]
+                               , double const cell_size
+                               , double (&velocity_gradient)[CC::TCX()][CC::TCY()][dim_][dim_] ) const;
 
 public:
    AxisymmetricViscousVolumeForces() = delete;
@@ -96,8 +97,9 @@ public:
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces const& ) = delete;
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces&& ) = delete;
 
-   void ComputeForces( std::pair<const MaterialName, Block> const& mat_block, double (&axisymmetric_viscous_volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
-                       double const cell_size, double const x_block_coordinate ) const;
+   void ComputeForces( std::pair<const MaterialName, Block> const& mat_block, double (&axisymmetric_viscous_volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
+                       double const cell_size, double const node_origin_x ) const;
+
 };
 
 #endif //AXISYMMETRIC_VISCOUS_VOLUME_FORCES_H

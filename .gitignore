@@ -27,3 +27,6 @@ Utilities/Executables/
 compile_commands.json
 Build/*
 build/*
+.ccls-cache
+.vscode
+.ccls

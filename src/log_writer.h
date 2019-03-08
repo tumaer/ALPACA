@@ -104,6 +104,7 @@ public:
 
    void SetLogfileName(const std::string name);
    void LogMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
+   void LogLinebreakMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
    void AddBreakLine(const bool print_to_terminal = false);
    void FlushWelcomeMessage();
    void Flush();

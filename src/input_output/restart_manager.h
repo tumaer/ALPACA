@@ -70,8 +70,10 @@
 
 #include <string>
 
+#include "unit_handler.h"
 #include "topology/tree.h"
 #include "topology/topology_manager.h"
+#include "input_output/hdf5/hdf5_manager.h"
 
 /**
  * @brief The RestartManager class handles the writing and reading of restart snapshot files. The restart files are written in 
@@ -79,29 +81,32 @@
  *        the simulations are required. The restart file cannot be visualized in ParaView.
  */
 class RestartManager {
-   // Instances containing node data
+   // Member variables to get topology information on current and all ranks
    Tree& tree_;
    TopologyManager& topology_;
-   // data from input file
-   SimulationSetup const& setup_;
-   std::string const output_folder_;
-
+   // Instance for logging to terminal/file
    LogWriter& logger_;
+   // Instance to provide access to hdf5 functionality
+   Hdf5Manager & hdf5_manager_;
 
+   unsigned int const maximum_level_;
+   double const length_reference_;
+   double const density_reference_;
+   double const temperature_reference_;
+   double const velocity_reference_;
 
 public:
    RestartManager() = delete;
-   explicit RestartManager(Tree& flower, TopologyManager& topology, SimulationSetup const& setup, std::string const& output_folder);
+   explicit RestartManager( UnitHandler const& unit_handler, TopologyManager & topology_manager, Tree & tree, unsigned int const maximum_level );
    ~RestartManager() = default;
    RestartManager( RestartManager const& ) = delete;
    RestartManager& operator=( RestartManager const& ) = delete;
    RestartManager( RestartManager&& ) = delete;
    RestartManager& operator=( RestartManager&& ) = delete;
 
-   // Function to trigger restoring 
-   double RestoreSimulation() const;
-   std::string WriteSnapshotFile(double const timestep) const;
-   static inline std::string RestartSubfolderName() { return "/restart"; }
+   // Functions to restore simulation or write restart file
+   double RestoreSimulation( std::string const& restore_filename ) const;
+   std::string WriteRestartFile( double const timestep, std::string const& filename_without_extension ) const;
 };
 
 #endif // RESTART_MANAGER_H

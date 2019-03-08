@@ -73,4 +73,10 @@
  */
 enum class CutCellCriteria { SignChangeBased, ValueBased };
 
+/**
+ * @brief Identifer whther to use differentiation or reconstruction stencil inside the geometry calculator.
+ */
+
+enum class GeometryStencilType : unsigned short {Reconstruction = 0, Derivative = 1};
+
 #endif // GEOMETRY_SETTINGS_H

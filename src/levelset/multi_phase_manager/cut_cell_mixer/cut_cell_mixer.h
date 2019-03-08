@@ -92,7 +92,7 @@ protected:
     * @brief Default constructor of the CutCellMixer class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit CutCellMixer( HaloManager& halo_manager ) :
+   explicit CutCellMixer( HaloManager & halo_manager ) :
       geometry_calculator_(),
       halo_manager_( halo_manager )
    {

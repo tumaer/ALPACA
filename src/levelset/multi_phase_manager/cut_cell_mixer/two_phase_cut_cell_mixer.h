@@ -105,7 +105,7 @@ private:
     * @brief The default constructor for the TwoPhaseCutCellMixer class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit TwoPhaseCutCellMixer( HaloManager& halo_manager, unsigned int const number_of_mixing_operations ) :
+   explicit TwoPhaseCutCellMixer( HaloManager & halo_manager, unsigned int const number_of_mixing_operations ) :
       CutCellMixer<DerivedTwoPhaseCutCellMixer>( halo_manager ),
       number_of_mixing_operations_(number_of_mixing_operations)
    {
@@ -131,12 +131,12 @@ private:
       * Second vector (double): mixing fraction, factor to calculate mixing fluxes.
       */
       std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>> mixing_contributions;
-      double mixing_fluxes[FF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()];
+      double mixing_fluxes[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()];
 
       for(auto const& phase : node.GetPhases()) {
          const MaterialName material = phase.first;
          //reset mixing fluxes and mixing contributions for the respective phase
-         for(unsigned int e = 0; e < FF::ANOE(); ++e) {
+         for(unsigned int e = 0; e < MF::ANOE(); ++e) {
             for(unsigned int i = 0; i < CC::TCX(); ++i) {
                for(unsigned int j = 0; j < CC::TCY(); ++j) {
                   for(unsigned int k = 0; k < CC::TCZ(); ++k) {
@@ -161,12 +161,12 @@ private:
     * @param material The material which specifies the phase that has to be mixed.
     * @param mixing_fluxes The mixing fluxes which are added to the right-hand side buffer.
     */
-   void AddMixingFluxesToConservatives(Node& node, const MaterialName material, double const (&mixing_fluxes)[FF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()]) const {
+   void AddMixingFluxesToConservatives(Node& node, const MaterialName material, double const (&mixing_fluxes)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()]) const {
 
       Block& phase = node.GetPhaseByMaterial(material);
       std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
-      for(const Equation eq : FF::ASOE()) {
+      for(const Equation eq : MF::ASOE()) {
          double (&conservatives)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.GetRightHandSideBuffer(eq);
          for(unsigned int i = FICMOX; i <= LICPOX; ++i) {
             for(unsigned int j = FICMOY; j <= LICPOY; ++j) {
@@ -193,11 +193,11 @@ private:
    void CalculateMixingFluxes( Node const& node, MaterialName const material,
                                std::vector<std::pair<std::vector<std::array<unsigned int,6>>,std::vector<std::array<double,2>>>> const& mixing_contributions,
                                unsigned int const contribution_identifier,
-                               double (&mixing_fluxes)[FF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
+                               double (&mixing_fluxes)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
 
       Block const& phase = node.GetPhaseByMaterial(material);
       std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);
-      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetVolumeFraction();
+      double const(&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
       double const reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;
       double const material_sign_double = double(material_sign);
@@ -217,7 +217,7 @@ private:
             double const volume_fraction_target = reference_volume_fraction + material_sign_double * volume_fraction[i_target][j_target][k_target];
             double const volume_fraction_self   = reference_volume_fraction + material_sign_double * volume_fraction[i       ][j       ][k       ];
 
-            for(const Equation eq : FF::ASOE()) {
+            for(const Equation eq : MF::ASOE()) {
                double const conservative_target = phase.GetRightHandSideBuffer(eq)[i_target][j_target][k_target];
                double const conservative_self   = phase.GetRightHandSideBuffer(eq)[i       ][j       ][k       ];
                double const M                   = factor*(conservative_target*volume_fraction_self-conservative_self*volume_fraction_target);

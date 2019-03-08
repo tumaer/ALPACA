@@ -71,9 +71,6 @@
 
 #include "stencils/stencil.h"
 
-/**
- * @brief The HOUC5 class implements a fifth-order High-Order-Upwind-Central stencil.
- */
 class HOUC5 : public Stencil<HOUC5> {
 
    friend Stencil;
@@ -92,7 +89,7 @@ class HOUC5 : public Stencil<HOUC5> {
    static constexpr double coefficient_4_ = +30.0;
    static constexpr double coefficient_5_ = -3.0;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit HOUC5() = default;
@@ -100,7 +97,8 @@ public:
    HOUC5( HOUC5 const& ) = delete;
    HOUC5& operator=( HOUC5 const& ) = delete;
    HOUC5( HOUC5&& ) = delete;
-   HOUC5& operator=( HOUC5&& ) = delete;
+   HOUC5& operator=( HOUC5&&) = delete;
 };
+
 
 #endif //HOUC_5_H

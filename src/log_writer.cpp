@@ -73,13 +73,14 @@
 #include <mpi.h>
 #include <sys/stat.h>
 #include <fstream>
+#include <sstream>
 #include <stdlib.h>     /* getenv */
 #include <typeinfo>
 #include <functional>
 
 #include "user_specifications/compile_time_constants.h"
 #include "user_specifications/riemann_solver_settings.h"
-#include "helper_functions.h"
+#include "utilities/helper_functions.h"
 #include "enums/flux_splitting.h"
 
 #include "solvers/riemann_solver_setup.h"
@@ -206,23 +207,25 @@ LogWriter::LogWriter(const bool save_all_ranks) :
    if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe_M || RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
       LogMessage( "Low-Mach-number limit factor             : " + std::to_string( RoeSolverSettings::low_mach_number_limit_factor ) );
    }
-   LogMessage("Prime state handler                      : " + RemoveLeadingNumber(std::string(typeid(PrimeStateHandlerSetup::Concretize<prime_state_handler>::type).name())));
-   LogMessage("Reconstruction stencil                   : " + RemoveLeadingNumber(std::string(typeid(ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type).name())));
-   LogMessage("Viscous fluxes reconstruction stencil    : " + RemoveLeadingNumber(std::string(typeid(ReconstructionStencilSetup::Concretize<viscous_fluxes_reconstruction_stencil>::type).name())));
-   LogMessage("Derivative stencil                       : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<derivative_stencil>::type).name())));
-   LogMessage("Viscous fluxes derivative stencil        : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil>::type).name())));
-   LogMessage("Temperature gradient cell center         : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<temperature_gradient_derivative_stencil_cell_center>::type).name())));
-   LogMessage("Temperature gradient cell face           : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<temperature_gradient_derivative_stencil_cell_face>::type).name())));
-   LogMessage("Curvature calculation derivative stencil : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<curvature_calculation_derivative_stencil>::type).name())));
-   LogMessage("Normal calculation derivative stencil    : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<normal_calculation_derivative_stencil>::type).name())));
+   LogMessage("Prime state handler                           : " + RemoveLeadingNumber(std::string(typeid(PrimeStateHandlerSetup::Concretize<prime_state_handler>::type).name())));
+   LogMessage("Reconstruction stencil                        : " + RemoveLeadingNumber(std::string(typeid(ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type).name())));
+   LogMessage("Viscous fluxes reconstruction stencil         : " + RemoveLeadingNumber(std::string(typeid(ReconstructionStencilSetup::Concretize<viscous_fluxes_reconstruction_stencil>::type).name())));
+   LogMessage("Heat fluxes reconstruction stencil            : " + RemoveLeadingNumber(std::string(typeid(ReconstructionStencilSetup::Concretize<heat_fluxes_reconstruction_stencil>::type).name())));
+   LogMessage("Derivative stencil                            : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<derivative_stencil>::type).name())));
+   LogMessage("Viscous fluxes derivative stencil cell center : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil_cell_center>::type).name())));
+   LogMessage("Viscous fluxes derivative stencil cell face   : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil_cell_face>::type).name())));
+   LogMessage("Heat fluxes derivative stencil cell center    : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_center>::type).name())));
+   LogMessage("Heat fluxes derivative stencil cell face      : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_face>::type).name())));
+   LogMessage("Curvature calculation derivative stencil      : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<curvature_calculation_derivative_stencil>::type).name())));
+   LogMessage("Normal calculation derivative stencil         : " + RemoveLeadingNumber(std::string(typeid(DerivativeStencilSetup::Concretize<normal_calculation_derivative_stencil>::type).name())));
    AddBreakLine(true);
    LogMessage("Multi-phase manager        : " + RemoveLeadingNumber(std::string(typeid(MultiPhaseManagerSetup::Concretize<phase_manager>::type).name())));
    LogMessage("LS Advection               : " + RemoveLeadingNumber(std::string(typeid(LevelsetAdvectorSetup::Concretize<levelset_advector>::type).name())));
    LogMessage("LS Reinitialization        : " + RemoveLeadingNumber(std::string(typeid(LevelsetReinitializerSetup::Concretize<levelset_reinitializer>::type).name())));
    LogMessage("Geometry calculator        : " + RemoveLeadingNumber(std::string(typeid(GeometryCalculatorSetup::Concretize<geometry_calculator>::type).name())));
    LogMessage("Mixing method              : " + RemoveLeadingNumber(std::string(typeid(CutCellMixerSetup::Concretize<cut_cell_mixer>::type).name())));
-   LogMessage("Extension method           : " + RemoveLeadingNumber(std::string(typeid(GhostFluidExtenderSetup::Concretize<extender>::type).name())));
-   LogMessage("Interface Extension method : " + RemoveLeadingNumber(std::string(typeid(InterfaceExtenderSetup::Concretize<interface_extender>::type).name())));
+   LogMessage("Extension method           : " + RemoveLeadingNumber(std::string(typeid(GhostFluidExtenderSetup::Concretize<extender>::type_primestates).name())));
+   LogMessage("Interface Extension method : " + RemoveLeadingNumber(std::string(typeid(InterfaceExtenderSetup::Concretize<interface_extender>::type_states).name())));
    LogMessage("Interface Riemann solver   : " + RemoveLeadingNumber(std::string(typeid(InterfaceRiemannSolverSetup::Concretize<interface_riemann_solver>::type).name())));
    LogMessage("Scale Separation method    : " + RemoveLeadingNumber(std::string(typeid(ScaleSeparatorSetup::Concretize<scale_separator>::type).name())));
    LogMessage("Buffer handler             : " + RemoveLeadingNumber(std::string(typeid(BufferHandlerSetup::Concretize<buffer_handler>::type).name())));
@@ -457,6 +460,28 @@ void LogWriter::LogMessage( std::string const& message, bool const print_to_term
       }
    }
 }
+
+/**
+ * @brief Writes a message to the terminal (std::cout) and/or save the message in order to include it in the log file.
+ * @param message String containing the message to be printed/logged.
+ * @param print_to_terminal Decider if message is to be printed to std::cout.
+ * @param save_in_logfile Decider if message is to be saved in the log file.
+ */
+void LogWriter::LogLinebreakMessage( std::string const& message, bool const print_to_terminal, bool const save_in_logfile ) {
+  // Instantiate vector containing split strings if needed
+  std::vector<std::string> all_lines;
+  std::string line;
+  std::stringstream stream( message );
+  while ( std::getline( stream, line, '\n' ) ) {
+      all_lines.push_back( line );
+  }
+ 
+  // Loop through all single_messages and call single send message function
+  for( auto const& single_message : all_lines ) {
+    LogMessage( single_message, print_to_terminal, save_in_logfile );
+  }
+}
+
 
 /**
  * @brief Writes a delayed message to the terminal (std::cout) and/or save the message in order to include it in the log file.

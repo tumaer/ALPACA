@@ -81,7 +81,7 @@ class ScaleSeparator {
 
 protected:
    const MaterialManager& material_manager_;
-   HaloManager& halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
 
    ScaleSeparator() = delete;
 
@@ -90,7 +90,7 @@ protected:
     * @param material_manager Instance of a MaterialManager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit ScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager ) :
+   explicit ScaleSeparator( MaterialManager const& material_manager, HaloManager & halo_manager ) :
       material_manager_( material_manager ),
       halo_manager_( halo_manager )
    {

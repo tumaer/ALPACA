@@ -233,17 +233,17 @@ SCENARIO( "Communication chache is properly (in-)validated", "[1rank],[2rank]" )
 
 SCENARIO( "The neighborhood relations are correct", "[1rank]" ) {
 
-   constexpr MaterialName material = MaterialName::StiffenedGas;
+   constexpr MaterialName material = MaterialName::MaterialOne;
 
    GIVEN( "A topology with two nodes in x-direction, one refined node (single jump boundary) and an empty tree" ) {
       constexpr unsigned int level_zero = 0;
       constexpr unsigned int maximum_level = 1;
-      TopologyManager simplest_jump_topo = TopologyManager( maximum_level, 2 );
-      simplest_jump_topo.AddFluidToNode( 0x1400001, material );
+      TopologyManager simplest_jump_topo = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
+      simplest_jump_topo.AddMaterialToNode( 0x1400001, material );
       simplest_jump_topo.RefineNodeWithId( 0x1400001 );
       simplest_jump_topo.UpdateTopology();
       for( auto const& id : simplest_jump_topo.LocalLeafIds() ) {
-         simplest_jump_topo.AddFluidToNode( id, material );
+         simplest_jump_topo.AddMaterialToNode( id, material );
       }
       simplest_jump_topo.UpdateTopology();
       WHEN( "Setting up the communication manager and generating the neighbor relations" ) {
@@ -293,9 +293,9 @@ SCENARIO( "Testing send and receive functions in multi-core settings", "[2rank]"
 
    GIVEN( "A(ny) topology, a(ny) tree and a communication manager" ) {
       constexpr unsigned int maximum_level = 0;
-      TopologyManager topology = TopologyManager( maximum_level );
+      TopologyManager topology = TopologyManager( { 1, 1, 1 }, maximum_level, 0 );
       CommunicationManager communicator = CommunicationManager( topology,maximum_level );
-      WHEN( "We send and receive some arbitrary data according to the communicator function descriptions" ) {
+      WHEN( "We send and receive some arbitraty data according to the communicator function descriptions" ) {
          int const my_rank = MpiUtilities::MyRankId();
          constexpr double value = 42.0;
          std::vector<double> const data_to_send( 2, value );

@@ -90,25 +90,25 @@ SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std
  * @param face_fluxes_x, face_fluxes_y, face_fluxes_z Fluxes across the cell face.
  * @param volume_forces .
  */
-void SourceTermSolver::Sources( std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const x_block_coordinate,
-   double (&face_fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&face_fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&face_fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
+void SourceTermSolver::Sources(const std::pair<const MaterialName, Block>& mat_block, const double cell_size, const double x_block_coordinate,
+   double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]       ) const {
 
-   // Compute dissipative fluxes
-   if constexpr( CC::ViscosityIsActive() ) {
+   //compute dissipative fluxes
+   if constexpr( CC::ViscosityIsActive() ){
       viscous_fluxes_.ComputeFluxes( mat_block, face_fluxes_x, face_fluxes_y, face_fluxes_z, cell_size );
    }
 
-   // Compute changes due to gravity
-   if constexpr( CC::GravityIsActive() ) {
+   //compute changes due to gravity
+   if constexpr( CC::GravityIsActive() ){
       gravity_.ComputeForces( mat_block.second, volume_forces );
    }
 
-   // Compute terms for axisymmetric simulations
-   if constexpr( CC::Axisymmetric() ) {
-      axisymmetric_fluxes_.ComputeAxisymmetricContributions( mat_block.second, volume_forces, cell_size, x_block_coordinate);
+   //compute terms for axisymmetric simulations
+   if constexpr( CC::Axisymmetric() ){
+      axisymmetric_fluxes_.ComputeAxisymmetricContributions( mat_block.second, volume_forces, cell_size, x_block_coordinate );
    }
 
    if constexpr( CC::ViscosityIsActive() && CC::Axisymmetric() ) {

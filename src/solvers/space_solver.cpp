@@ -68,7 +68,7 @@
 #include "space_solver.h"
 
 #include <cmath>
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 
 /**
  * @brief Standard constructor using an already existing MaterialManager and the user-defined gravity.
@@ -91,14 +91,14 @@ SpaceSolver::SpaceSolver( MaterialManager const& material_manager, std::array<do
  */
 void SpaceSolver::UpdateFluxes( Node& node ) const {
 
-   double face_fluxes_x[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1];
-   double face_fluxes_y[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1];
-   double face_fluxes_z[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1];
+   double face_fluxes_x[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1];
+   double face_fluxes_y[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1];
+   double face_fluxes_z[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1];
 
-   double volume_forces[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
+   double volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
 
    for( auto& phase : node.GetPhases() ) {
-      for( const Equation eq : FF::ASOE() ) {
+      for( const Equation eq : MF::ASOE() ) {
          double (&rhs_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetRightHandSideBuffer( eq );
          for( unsigned int i = 0; i < CC::TCX(); ++i ) {
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -112,18 +112,19 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
 
    // For multi-phase + Lmax nodes (which have a levelset)
    if( node.HasLevelset() ) {
-      double (&phi_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiRightHandSide();
+
+      double (&levelset_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-               phi_rhs[i][j][k] = 0.0;
+               levelset_rhs[i][j][k] = 0.0;
             } //k
          } //j
       } //i
 
       // Solve interface Riemann problem to obtain interface velocity and interface exchange terms
       interface_term_solver_.SolveInterfaceInteraction( node );
-      // Compute levelset right side (from phi and interface velocity)
+      // compute levelset rhs (from levelset and interface velocity)
       levelset_advector_.Advect( node );
    }
 
@@ -132,7 +133,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
 
    for( auto& phase : node.GetPhases() ) {
       // RHS-buffers have to be reset for each phase!
-      for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
+      for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
          for( unsigned int i = 0; i < CC::ICX()+1; ++i ) {
             for( unsigned int j = 0; j < CC::ICY()+1; ++j ) {
                for( unsigned int k = 0; k < CC::ICZ()+1; ++k ) {
@@ -144,7 +145,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
          } //i
       } //equation
 
-      for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
+      for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
          for( unsigned int i = 0; i < CC::ICX(); ++i ) {
             for( unsigned int j = 0; j < CC::ICY(); ++j ) {
                for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
@@ -167,8 +168,8 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
          interface_term_solver_.WeightVolumeForces( node, phase.first, volume_forces );
       }
 
-      // Update cells for determined fluxes
-      for( const Equation eq : FF::ASOE() ) {
+      //update cells due to fluxes
+      for( const Equation eq : MF::ASOE() ) {
          auto const e = ETI(eq);
          double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetRightHandSideBuffer( eq );
          for( unsigned int i = 0; i < CC::ICX(); ++i ) {
@@ -185,14 +186,14 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
          } //i
       } //equation
 
-      // Save boundary fluxes for the necessary correction at jump boundary conditions to maintain physical conservation
-      double   (&boundary_fluxes_west)[FF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::West );
-      double   (&boundary_fluxes_east)[FF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::East );
-      double  (&boundary_fluxes_south)[FF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::South );
-      double  (&boundary_fluxes_north)[FF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::North );
-      double (&boundary_fluxes_bottom)[FF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::Bottom );
-      double    (&boundary_fluxes_top)[FF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::Top );
-      for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
+      //save boundary fluxes for correction at jump boundary conditions
+      double   (&boundary_fluxes_west)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::West );
+      double   (&boundary_fluxes_east)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::East );
+      double  (&boundary_fluxes_south)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::South );
+      double  (&boundary_fluxes_north)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::North );
+      double (&boundary_fluxes_bottom)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::Bottom );
+      double    (&boundary_fluxes_top)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::Top );
+      for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
          for( unsigned int i = 0; i < CC::ICY(); ++i ) {
             for( unsigned int j = 0; j < CC::ICZ(); ++j ) {
                boundary_fluxes_west[e][i][j]   += face_fluxes_x[e][0][i+1][j+1];
@@ -212,7 +213,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
  * @param block The block for which the eigenvalues are to be computed.
  * @param eigenvalues Indirect return parameter.
  */
-void SpaceSolver::ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const {
+void SpaceSolver::ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const {
    eigendecomposition_calculator_.ComputeMaxEigenvaluesOnBlock( mat_block, eigenvalues );
 }
 
@@ -220,6 +221,6 @@ void SpaceSolver::ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, B
  * @brief Stores the given (GLF) eigenvalues for later usage in a globally valid location.
  * @param eigenvalues Values to be stored.
  */
-void SpaceSolver::SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const {
+void SpaceSolver::SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const {
    eigendecomposition_calculator_.SetGlobalEigenvalues( eigenvalues );
 }

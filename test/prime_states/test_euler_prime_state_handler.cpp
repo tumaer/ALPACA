@@ -69,35 +69,50 @@
 
 #include "prime_states/euler_prime_state_handler.h"
 
+#include "materials/equations_of_state/stiffened_gas.h"
+
 SCENARIO( "Conservative quantities and prime state values can be converted into each other", "[1rank]" ) {
-   std::unordered_map<std::string, double> const material_parameters = {
-      {"gamma", 1.4 },
-      {"A", 0.0},
-      {"B", 0.0},
-      {"C", 0.0},
-      {"rho0", 0.0},
-      {"specificGasConstant", 0.0},
-      {"thermalConductivity", 0.0},
-      {"dynamicShear", 0.0},
-      {"dynamicBulk", 0.0}
-   };
-   constexpr MaterialName material = MaterialName::UserStiffenedGasOne;
-   auto const material_manager = MaterialManager( {std::make_tuple(MaterialName::StiffenedGas, material, material_parameters)}, {1.0} );
+
+   // Initialize the unit handler class 
+   UnitHandler const unit_handler( 1.0, 1.0, 1.0, 1.0 );
+
+   // Here the stiffened gas complete safe equation of state is used since it provides a temperature computatation and the unit test does not depend on the
+   // activation of the temperature in the primestate struct
+   std::unordered_map<std::string, double> const eos_data = { { "gamma", 1.4 }, { "B", 1.0 } };
+   std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
+
+   // Define material properties and initialize material 
+   double const shear_viscosity = 1.0;
+   double const bulk_viscosity = 2.0;
+   double const specific_heat_capacity = 3.0; 
+   double const thermal_heat_conductivity = 4.0;
+
+   // Instantiate material
+   std::vector<Material> materials;
+   materials.emplace_back( Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity, 
+                                     nullptr, nullptr, unit_handler ) );
+
+   // Instantiate material pairing
+   std::vector<MaterialPairing> material_pairings;
+
+   auto const material_manager = MaterialManager( std::move( materials ), std::move( material_pairings ) );
    auto const euler_prime_state_handler = EulerPrimeStateHandler( material_manager );
 
    GIVEN( "A set of prime states" ) {
-      std::array<double, FF::ANOP()> prime_states;
-      for( unsigned int p = 0; p < FF::ANOP(); ++p ) {
+      std::array<double, MF::ANOP()> prime_states;
+      for( unsigned int p = 0; p < MF::ANOP(); ++p ) {
          prime_states[p] = double(p + 1);
       }
 
-      WHEN( "Prime states are converted to conservatives" ) {
-         std::array<double, FF::ANOE()> conservatives;
-         euler_prime_state_handler.ConvertPrimeStatesToConservatives( material, prime_states, conservatives );
+      // Obtain the material name of the single initialized material
+      MaterialName const material_name = material_manager.GetMaterialNames().front();
 
+      WHEN( "Prime states are converted to conservatives" ) {
+         std::array<double, MF::ANOE()> conservatives;
+         euler_prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
          THEN( "Momenta equal the product of density and velocity" ) {
             for( unsigned int m = 0; m < DTI(CC::DIM()); ++m ) {
-               REQUIRE( conservatives[ETI(FF::AME()[m])] == Approx( prime_states[PTI(PrimeState::Density)] * prime_states[PTI(FF::AV()[m])] ) );
+               REQUIRE( conservatives[ETI(MF::AME()[m])] == Approx( prime_states[PTI(PrimeState::Density)] * prime_states[PTI(MF::AV()[m])] ) );
             }
          }
 
@@ -109,14 +124,17 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
       }
 
       WHEN( "Prime states are converted to conservatives and converted back to prime states" ) {
-         std::array<double, FF::ANOE()> conservatives;
-         std::array<double, FF::ANOP()> prime_states_new;
-         euler_prime_state_handler.ConvertPrimeStatesToConservatives( material, prime_states, conservatives );
-         euler_prime_state_handler.ConvertConservativesToPrimeStates( material, conservatives, prime_states_new );
+         std::array<double, MF::ANOE()> conservatives;
+         std::array<double, MF::ANOP()> prime_states_new;
+         euler_prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
+         euler_prime_state_handler.ConvertConservativesToPrimeStates( material_name, conservatives, prime_states_new );
 
          THEN( "The resulting prime states equal the original prime states" ) {
-            for( unsigned int p = 0; p < FF::ANOP(); ++p ) {
-               REQUIRE( prime_states_new[p] == Approx( prime_states[p] ) );
+            for( auto const& prime : MF::ASOP() ) {
+               // Do not take the temperature, since it depends on the equation of state.
+               if( prime != PrimeState::Temperature ) {
+                  REQUIRE( prime_states_new[PTI( prime )] == Approx( prime_states[PTI( prime )] ) );
+               }
             }
          }
       }

@@ -69,7 +69,7 @@
 #define ZERO_GRADIENT_BOUNDARY_CONDITION_H
 
 #include "boundary_constants.h"
-#include "fluid_boundary_condition.h"
+#include "material_boundary_condition.h"
 #include "levelset_boundary_condition.h"
 #include "user_specifications/compile_time_constants.h"
 
@@ -77,7 +77,7 @@
  * @brief The ZeroGradientBoundaryCondition class implements a zero gradient (extending) external boundary condition of the domain.
  */
 template<BoundaryLocation LOC>
-class ZeroGradientBoundaryCondition : public FluidBoundaryCondition, public LevelsetBoundaryCondition {
+class ZeroGradientBoundaryCondition : public MaterialBoundaryCondition, public LevelsetBoundaryCondition {
 
    /**
     * @brief Updates the halo cells from the internal cells according to the zero-gradient condition.
@@ -108,8 +108,8 @@ public:
    /**
     * @brief See base class. Imposes a zero-gradient condition at the boundary.
     */
-   void UpdateFluidExternal( Node& node, FluidFieldType const field_type ) const override {
-      unsigned int const number_of_fields = FF::ANOF( field_type );
+   void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type ) const override {
+      unsigned int const number_of_fields = MF::ANOF( field_type );
       for( auto& host_mat_block : node.GetPhases() ) {
          for( unsigned int field_index = 0; field_index < number_of_fields; ++field_index ) {
             double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
@@ -121,12 +121,12 @@ public:
    /**
     * @brief See base class. Adjusted to zero-gradient condition.
     */
-   void UpdateLevelsetExternal(Node& node, LevelsetBlockBufferType const buffer_type) const override {
+   void UpdateLevelsetExternal(Node& node, InterfaceBlockBufferType const buffer_type) const override {
       /*  NH TODO this if construct should be avoided, therefore different neighbor relations
-       *  in CommunicationManger needed for levelset vs. Fluid/Tag Halo updates.
+       *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
        */
       if( node.HasLevelset() ) {
-         double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetBuffer( buffer_type );
+         double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
          UpdateZeroGradient( buffer );
       }
    }

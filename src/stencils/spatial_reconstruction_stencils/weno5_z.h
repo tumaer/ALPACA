@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute WENO5Z fluxes according to \cite borges2008
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to \cite borges2008
  */
 class WENO5Z : public Stencil<WENO5Z> {
 
@@ -117,10 +117,11 @@ class WENO5Z : public Stencil<WENO5Z> {
    static constexpr double coef_stencils_8_ =  5.0/6.0;
    static constexpr double coef_stencils_9_ = -1.0/6.0;
 
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 6;
    static constexpr unsigned int downstream_stencil_size_ = 2;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit WENO5Z() = default;

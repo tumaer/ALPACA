@@ -87,7 +87,7 @@ public:
    GravitationalForce& operator=( GravitationalForce const& ) = delete;
    GravitationalForce& operator=( GravitationalForce&& ) = delete;
 
-   void ComputeForces( Block const& block, double (&gravity_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const;
+   void ComputeForces( Block const& block, double (&gravity_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const;
 
 };
 

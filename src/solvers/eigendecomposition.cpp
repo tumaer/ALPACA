@@ -66,12 +66,12 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "eigendecomposition.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 #include "user_specifications/numerical_setup.h"
 
 #include <cmath>
 
-double EigenDecomposition::global_eigenvalues_[DTI(CC::DIM())][FF::ANOE()];
+double EigenDecomposition::global_eigenvalues_[DTI(CC::DIM())][MF::ANOE()];
 
 /**
  * @brief Standard constructor using an already existing MaterialManager
@@ -87,7 +87,7 @@ EigenDecomposition::EigenDecomposition( MaterialManager const& material_manager)
  * @param mat_block The block in which the eigenvalues are to be computed.
  * @param eigenvalues Indirect return parameter.
  */
-void EigenDecomposition::ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()]) const {
+void EigenDecomposition::ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const {
 
    // We save u-c,u,u+c, i.e. three values, for the eigenvalues per direction
    std::array<double,3> max_eigenvalue_x = {0.0};
@@ -102,14 +102,14 @@ void EigenDecomposition::ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName co
    for(unsigned int i = CC::FICX(); i <= CC::LICX(); ++i) {
       for(unsigned int j = CC::FICY(); j <= CC::LICY(); ++j) {
          for(unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
+            /**
+              * This if statement is necessary due to the ghost-fluid method. In ghost-material cells which do not lie on the extension band, i.e. therein
+              * we do not have extended or integrated values, the density is zero. Therefore, we cannot compute Lax-Friedrichs eigenvalues in those cells.
+              */
+            if(density[i][j][k] <= 0.0) continue;
 
-            // This if statement is necessary due to the ghost-fluid method. In ghost-fluid cells which do not lie on the extension band, i.e. therein
-            // we do not have extended or integrated values, the density is zero. Therefore, we cannot compute Lax-Friedrichs eigenvalues in those cells.
-
-            if( density[i][j][k] <= 0.0 ) continue;
-
-            double const c = material_manager_.GetSpeedOfSound( material, density[i][j][k], block.GetPrimeStateBuffer(PrimeState::Pressure )[i][j][k]);
-            double const u = block.GetPrimeStateBuffer( PrimeState::VelocityX )[i][j][k];
+            double const c = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(density[i][j][k], block.GetPrimeStateBuffer(PrimeState::Pressure)[i][j][k]);
+            double const u = block.GetPrimeStateBuffer(PrimeState::VelocityX)[i][j][k];
 
             max_eigenvalue_x[0] = std::max( max_eigenvalue_x[0], std::abs(u - c) );
             max_eigenvalue_x[1] = std::max( max_eigenvalue_x[1], std::abs(u) );
@@ -149,9 +149,9 @@ void EigenDecomposition::ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName co
  * @brief Stores the global Lax-Friedrichs eigenvalues for later usage.
  * @param eigenvalues The eigenvalues to be set .
  */
-void EigenDecomposition::SetGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const {
+void EigenDecomposition::SetGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const {
    for( unsigned int d = 0; d < DTI(CC::DIM()); ++d ) {
-      for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
+      for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
          global_eigenvalues_[d][e] = eigenvalues[d][e];
       }
    }
@@ -160,6 +160,6 @@ void EigenDecomposition::SetGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM
 /**
  * @brief Gives the stored global Lax-Friedrichs eigenvalues.
  */
-auto EigenDecomposition::GetGlobalEigenvalues() const -> double const (&)[DTI(CC::DIM())][FF::ANOE()] {
+auto EigenDecomposition::GetGlobalEigenvalues() const -> double const (&)[DTI(CC::DIM())][MF::ANOE()] {
    return global_eigenvalues_;
 }

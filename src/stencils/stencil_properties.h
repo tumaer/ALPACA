@@ -77,5 +77,12 @@ enum class StencilType : unsigned short {Reconstruction = 0, Derivative = 1};
  * @brief Unique identifier to indicate whether a stencil should be applied UpwindLeft, UpwindRight or Central.
  */
 enum class StencilProperty : unsigned short {UpwindLeft = 0, UpwindRight = 1, Central = 2};
+using SP = StencilProperty;
+
+/**
+ * @brief Unique identifier to indicate whether a stencil should reconstruct based on cell-centered values or based
+ * on differences (HJ-WENO like reconstruction).
+ */
+enum class ReconstructionType : unsigned short {Values, Differences};
 
 #endif // STENCIL_PROPERTIES_H

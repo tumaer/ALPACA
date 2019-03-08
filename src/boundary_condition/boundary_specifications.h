@@ -69,11 +69,15 @@
 #define BOUNDARY_SPECIFICATIONS_H
 
 #include <type_traits>
+#include <string>
+#include <stdexcept>
+
+#include "utilities/string_operations.h"
 
 /**
- * @brief Unique identifier to separate the (implemented) types of fluid boundary condition
+ * @brief Unique identifier to separate the (implemented) types of material boundary condition
  */
-enum class FluidBoundaryType { Internal, ZeroGradient, Symmetry, FixedValue, Wall, Periodic };
+enum class MaterialBoundaryType { Internal, ZeroGradient, Symmetry, FixedValue, Wall, Periodic };
 
 /**
  * @brief Unique identifier to separate the (implemented) types of level-set boundary condition
@@ -109,8 +113,8 @@ static inline constexpr std::underlying_type<BoundaryLocation>::type LTI(const B
  * @param location The direction that is to be inverted.
  * @return The inverse direction.
  */
-constexpr BoundaryLocation OppositeDirection(const BoundaryLocation location) {
-   switch (location) {
+constexpr BoundaryLocation OppositeDirection( BoundaryLocation const location ) {
+   switch( location ) {
       case BoundaryLocation::East: //Planes
          return BoundaryLocation::West;
       case BoundaryLocation::West:
@@ -167,6 +171,92 @@ constexpr BoundaryLocation OppositeDirection(const BoundaryLocation location) {
          return BoundaryLocation::EastNorthBottom;
       default: // Only remaning case: BoundaryLocation::WestSouthBottom:
          return BoundaryLocation::EastNorthTop;
+   }
+}
+
+/**
+ * @brief Gives the string for each boundary location
+ * @param location Boundary location for which the string should be returned
+ * @param first_capitalized Flag whether the first letter should be capitalized or not
+ * @return string of boundary location
+ * 
+ * @note Do not change leading Upper case letter. Required for rading of boundary conditions
+ */
+inline std::string BoundaryLocationToString( BoundaryLocation const location, bool const first_capitalized ) {
+   switch( location ) {
+      case BoundaryLocation::East : {
+         return first_capitalized ? "East" : "east";
+      }
+      case BoundaryLocation::West : {
+         return first_capitalized ? "West" : "west";
+      }
+      case BoundaryLocation::North : {
+         return first_capitalized ? "North" : "north";
+      }
+      case BoundaryLocation::South : {
+         return first_capitalized ? "South" : "south";
+      }
+      case BoundaryLocation::Top : {
+         return first_capitalized ? "Top" : "top";
+      }
+      case BoundaryLocation::Bottom : {
+         return first_capitalized ? "Bottom" : "bottom";
+      }
+      default : {
+         throw std::logic_error( "Boundary location not known!" );
+      }
+   }
+}
+
+/**
+ * @brief Gives the proper Material boundary type for a given string 
+ * @param boundary_string String that should be converted
+ * @return Material boundary type identifier
+ */
+inline MaterialBoundaryType StringToMaterialBoundaryType( std::string const& boundary_string ) {
+   // transform string to upper case without spaces
+   std::string const boundary_upper_case( StringOperations::ToUpperCaseWithoutSpaces( boundary_string ) );
+   // switch statements cannot be used with strings 
+   if( boundary_upper_case == "ZEROGRADIENT" ) { 
+      return MaterialBoundaryType::ZeroGradient; 
+   }
+   else if( boundary_upper_case == "SYMMETRY" ) { 
+      return MaterialBoundaryType::Symmetry; 
+   }
+   else if( boundary_upper_case == "WALL" ) { 
+      return MaterialBoundaryType::Wall; 
+   }
+   else if( boundary_upper_case == "FIXEDVALUE" ) { 
+      return MaterialBoundaryType::FixedValue; 
+   }
+   else if( boundary_upper_case == "PERIODIC" ) { 
+      return MaterialBoundaryType::Periodic; 
+   }
+   else {
+      throw std::logic_error( "Material boundary type '" + boundary_upper_case + "' not known!" ); 
+   }
+}
+
+/**
+ * @brief Gives the proper Levelset boundary type for a given string 
+ * @param boundary_string String that should be converted
+ * @return Levelset boundary type identifier
+ */
+inline LevelSetBoundaryType StringToLevelSetBoundaryType( std::string const& boundary_string ) {
+   // transform string to upper case without spaces
+   std::string const boundary_upper_case( StringOperations::ToUpperCaseWithoutSpaces( boundary_string ) );
+   // switch statements cannot be used with strings 
+   if( boundary_upper_case == "ZEROGRADIENT" ) { 
+      return LevelSetBoundaryType::ZeroGradient; 
+   }
+   else if( boundary_upper_case == "SYMMETRY" ) { 
+      return LevelSetBoundaryType::Symmetry; 
+   }
+   else if( boundary_upper_case == "PERIODIC" ) { 
+      return LevelSetBoundaryType::Periodic; 
+   }
+   else {
+      throw std::logic_error( "Levelset boundary type '" + boundary_upper_case + "' not known!" ); 
    }
 }
 

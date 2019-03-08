@@ -2,19 +2,19 @@
 <!-- Toro Section 4.3.3 - Numerical Tests (Riemann problem for Euler equations) -->
 <configuration>
     <domain>
-        <!-- size of a single block on level 0 -->
-        <blockSize> 0.25  </blockSize>
+        <!-- size of a single node on level 0 -->
+        <nodeSize> 0.25  </nodeSize>
 
-        <!-- number of blocks per dimension-->
-        <blockRatio>
+        <!-- number of nodes per dimension-->
+        <nodeRatio>
             <x> 4 </x>
             <y> 1 </y>
             <z> 1 </z>
-        </blockRatio>
+        </nodeRatio>
 
         <boundaryConditions>
-            <fluid>
-                <!--types of fluid boundary conditions:
+            <material>
+                <!--types of material boundary conditions:
                 zeroGradient,
                 symmetry,
                 Wall
@@ -25,7 +25,7 @@
                 <north>Symmetry</north>
                 <bottom>Symmetry</bottom>
                 <top>Symmetry</top>
-            </fluid>
+            </material>
 
             <!-- TO BE IMPLEMENTED -->
             <levelSet>
@@ -44,33 +44,33 @@
         </boundaryConditions>
 
         <initialConditions>
-            <fluid1>
+            <material1>
                 if (x &lt; 0.5)
                 {
-                DENSITY := 1.0;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 0.1;
+                density := 1.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 0.1;
                 }
                 else
                 {
-                DENSITY := 1.0;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 100.0;
+                density := 1.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 100.0;
                 }
-            </fluid1>
+            </material1>
 
             <!-- TO BE IMPLEMENTED -->
-            <fluid2>
-                DENSITY := 1.0;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
-            </fluid2>
+            <material2>
+                density := 1.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
+            </material2>
 
             <levelSet1>
                 phi := 1.0;
@@ -79,48 +79,26 @@
         </initialConditions>
     </domain>
 
-    <fluids>
-        <numberOfFluids>              1   </numberOfFluids>
-        <fluid1>
-            <type>StiffenedGasSafe</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      1.2   </rho0>
-            <specificGasConstant>       1.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid1>
-
-        <fluid2>
-            <type>StiffenedGas</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      1.2   </rho0>
-            <specificGasConstant>       1.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid2>
-
-        <surfaceTensionCoefficients> 0.0 </surfaceTensionCoefficients>
-    </fluids>
-
-    <sourceTerms>
-        <gravity>
-            <x> 0 </x>
-            <y> 0 </y>
-            <z> 0 </z>
-        </gravity>
-    </sourceTerms>
+    <materials>
+        <numberOfMaterials>              1   </numberOfMaterials>
+        <material1>
+            <equationOfState>
+                <type>StiffenedGasSafe</type>
+                <gamma>                     1.4   </gamma>
+                <A>                         0.0   </A>
+                <B>                         0.0   </B>
+                <C>                         0.0   </C>
+                <rho0>                      1.2   </rho0>
+                <specificGasConstant>       1.0   </specificGasConstant>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 0.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material1>   
+    </materials>
 
     <multiResolution>
         <maximumLevel> 5 </maximumLevel>
@@ -132,59 +110,46 @@
         </refinementCriterion>
     </multiResolution>
 
-    <calculation>
-        <!-- TO BE IMPLEMENTED -->
-        <restart>
-            <useRestart>         0		   </useRestart>
-            <fileName>              test.restart    </fileName>
-        </restart>
-        <!-- END - TO BE IMPLEMENTED -->
+   <timeControl>
+       <startTime> 0.0 </startTime>
+       <endTime>   0.035 </endTime>
+       <CFLNumber> 0.6 </CFLNumber>
+   </timeControl>
 
-        <timeControl>
-            <startTime>            0.0           </startTime>
-            <endTime>              0.035         </endTime>
-        </timeControl>
+   <dimensionalization>
+       <lengthReference>         1  </lengthReference>
+       <velocityReference>       1  </velocityReference>
+       <densityReference>        1  </densityReference>
+       <temperatureReference>    1  </temperatureReference>
+   </dimensionalization>
 
-        <CFLNumber> 0.6 </CFLNumber>
+   <restart>
+      <restore>
+         <mode> Off </mode> <!-- Off, Soft OR Forced -->
+         <fileName> ToroCase4/restart/restart_***.h5 </fileName>
+      </restore>
+      <snapshots>
+         <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep> 
+      </snapshots>
+   </restart>
 
-        <referenceParameter>
-            <lengthReference>         1  </lengthReference>
-            <velocityReference>       1  </velocityReference>
-            <densityReference>        1  </densityReference>
-            <temperatureReference>    1  </temperatureReference>
-        </referenceParameter>
-
-        <levelSet>
-            <mixingThreshold> 0.6 </mixingThreshold>
-        </levelSet>
-    </calculation>
-
-    <restart>
-        <restoreMode>      0 </restoreMode> <!-- 0: disabled, 1: restore if file exists, 2: force restore -->
-        <restoreFileName>  sod_x/restart/restart_***.h5 </restoreFileName>
-        <snapshotInterval> 3600 </snapshotInterval> <!-- in wall seconds, use 0 to disable interval-based snapshots -->
-        <snapshotsToKeep>  2 </snapshotsToKeep> <!-- timestamp-based snapshots are always kept -->
-        <snapshotTimestamps>
-            <!-- <ts1> 0.1 </ts1> -->
-            <!-- <ts2> 0.2 </ts2> -->
-        </snapshotTimestamps>
-    </restart>
-
-    <output>
-        <!-- TO BE IMPLEMENTED -->
-        <enableOutput>         1               </enableOutput>
-        <!-- END - TO BE IMPLEMENTED -->
-        <outputFileType>XDMF</outputFileType> <!--XDMF-->
-        <outputTimesType>Timestamps</outputTimesType> <!--Interval OR Timestamps-->
-        <outputPeriod>         1.0e-6          </outputPeriod>
-        <numberOfTimestamps>   5               </numberOfTimestamps>
-        <timestamps>
-            <ts1> 0.0004</ts1>
-            <ts2> 0.006 </ts2>
-            <ts3> 0.010 </ts3>
-            <ts4> 0.020 </ts4>
-            <ts5> 0.035 </ts5>
-        </timestamps>
-        <timeNamingFactor>1.e0</timeNamingFactor>
-    </output>
+   <output>
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <standardOutput> <!-- for general or debug output -->
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e-6 </interval>
+	      <stamps>
+            <ts1> 0.0004 </ts1>
+         </stamps>
+      </standardOutput>
+      <interfaceOutput> 
+         <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e3 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+         </stamps>
+      </interfaceOutput>
+   </output>
 </configuration>

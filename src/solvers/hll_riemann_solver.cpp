@@ -67,9 +67,9 @@
 *****************************************************************************************/
 #include "hll_riemann_solver.h"
 
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 #include "solvers/hll_signal_speed_calculator.h"
-#include "stencils/differentiation_utilities.h"
+#include "stencils/stencil_utilities.h"
 
 /**
  * @brief Standard constructor using an already existing MaterialManager and EigenDecomposition object. See base class.
@@ -88,20 +88,20 @@ HllRiemannSolver::HllRiemannSolver( MaterialManager const& material_manager, Eig
  * See base class.
  */
 void HllRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-   double (&fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const {
+   double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const {
 
-   double  roe_eigenvectors_left[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()];
-   double roe_eigenvectors_right[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()];
-   double        roe_eigenvalues[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()];
+   double  roe_eigenvectors_left[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()];
+   double roe_eigenvectors_right[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()];
+   double        roe_eigenvalues[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()];
 
    // Resetting the eigenvectors, eigenvalues is necessary for two-phase simulations.
    for( unsigned int i = 0; i < CC::ICX() + 1; ++i ) {
       for( unsigned int j = 0; j < CC::ICY() + 1; ++j ) {
          for( unsigned int k = 0; k < CC::ICZ() + 1; ++k ) {
-            for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
-               for( unsigned int f = 0; f < FF::ANOE(); ++f ) {
+            for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
+               for( unsigned int f = 0; f < MF::ANOE(); ++f ) {
                   roe_eigenvectors_left[i][j][k][e][f] = 0.0;
                   roe_eigenvectors_right[i][j][k][e][f] = 0.0;
                }
@@ -137,21 +137,21 @@ void HllRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block
  */
 template<Direction DIR>
 void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-   double (&fluxes)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double const  (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-   double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
+   double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double const  (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+   double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
    double const cell_size ) const {
 
-   using ReconstructionStencilConcretization = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
+   using ReconstructionStencil = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
 
    // declaration of applied vectors
-   std::vector<double> state_face_left( FF::ANOE() );             //variable vector containing interpolated states of left patch of cell face i/j/k+1/2
-   std::vector<double> state_face_right( FF::ANOE() );            //variable vector containing interpolated states of right patch of cell face i/j/k+1/2
-   std::vector<double> u_characteristic( ReconstructionStencilConcretization::StencilSize() );    //temp storage for characteristic decomposition
-   std::vector<double> characteristic_average_plus( FF::ANOE() ); // state_face_left  in characteristic space
-   std::vector<double> characteristic_average_minus( FF::ANOE() );// state_face_right in characteristic space
-   std::vector<double> flux_left( FF::ANOE() );                   // F(state_face_left)
-   std::vector<double> flux_right( FF::ANOE() );                  // F(state_face_right)
+   std::vector<double> state_face_left( MF::ANOE() );             //variable vector containing interpolated states of left patch of cell face i/j/k+1/2
+   std::vector<double> state_face_right( MF::ANOE() );            //variable vector containing interpolated states of right patch of cell face i/j/k+1/2
+   std::array<double, ReconstructionStencil::StencilSize()> u_characteristic;    //temp storage for characteristic decomposition
+   std::vector<double> characteristic_average_plus( MF::ANOE() ); // state_face_left  in characteristic space
+   std::vector<double> characteristic_average_minus( MF::ANOE() );// state_face_right in characteristic space
+   std::vector<double> flux_left( MF::ANOE() );                   // F(state_face_left)
+   std::vector<double> flux_right( MF::ANOE() );                  // F(state_face_right)
 
    unsigned int constexpr principal_momentum = momentum_order_[DTI(DIR)][0];
 
@@ -175,10 +175,10 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
    auto const& [material, block] = mat_block;
 
    // To check for invalid cells due to ghost fluid method
-   double const B = material_manager_.GetB( material );
+   double const B = material_manager_.GetMaterial( material ).GetEquationOfState().GetB();
 
-   // Required for Toro signal speeds
-   double const gamma = material_manager_.GetGamma( material );
+   // For Toro signal speeds
+   double const gamma = material_manager_.GetMaterial( material ).GetEquationOfState().GetGamma();
 
    for( unsigned int i = x_start; i <= x_end; ++i ) {
       for( unsigned int j = y_start; j <= y_end; ++j ) {
@@ -188,27 +188,27 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
             int const j_index = j-total_to_internal_offset_y;
             int const k_index = k-total_to_internal_offset_z;
 
-            // Reconstruct fluxes at face i+1/2 by characteristic decomposition using a selected reconstruction procedure
-            for( unsigned int n = 0; n < FF::ANOE(); ++n ) { // n is index of characteristic field (eigenvalue, eigenvector)
-               // Characteristic decomposition
-               for( unsigned int m = 0; m < ReconstructionStencilConcretization::StencilSize(); ++m ) {
+            // Reconstruct conservative values at cell face using characteristic decomposition in combination with WENO stencil
+            for( unsigned int n = 0; n < MF::ANOE(); ++n ) { // n is index of characteristic field (eigenvalue, eigenvector)
+               //characteristic decomposition
+               for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
                   u_characteristic[m] = 0.0;
                   // Compute characteristics for U
                   for( const unsigned int l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
                      u_characteristic[m] += Roe_eigenvectors_left[i_index][j_index][k_index][n][l] *
-                        block.GetAverageBuffer( FF::ASOE()[l] )[i + x_reconstruction_offset * ( m - ReconstructionStencilConcretization::DownstreamStencilSize())]
-                                                               [j + y_reconstruction_offset * ( m - ReconstructionStencilConcretization::DownstreamStencilSize())]
-                                                               [k + z_reconstruction_offset * ( m - ReconstructionStencilConcretization::DownstreamStencilSize())];
+                        block.GetAverageBuffer( MF::ASOE()[l] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
+                                                               [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
+                                                               [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())];
                   } // L-Loop
                } // M-Loop
 
-               // Apply reconstruction scheme to characteristic values
-               characteristic_average_minus[n]  = DifferentiationUtilities::ApplyStencil<ReconstructionStencilConcretization, StencilProperty::UpwindLeft,  double>( u_characteristic, cell_size );
-               characteristic_average_plus[n]   = DifferentiationUtilities::ApplyStencil<ReconstructionStencilConcretization, StencilProperty::UpwindRight, double>( u_characteristic, cell_size );
+               //apply reconstruction scheme to characteristic values
+               characteristic_average_minus[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( u_characteristic, cell_size );
+               characteristic_average_plus[n]   = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( u_characteristic, cell_size );
             } // N-Loop
 
-            // Back-transformation into physical space
-            for( unsigned int l = 0; l < FF::ANOE(); ++l ) {
+            // back-transformation into physical space
+            for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
                state_face_left[l]  = 0.0;
                state_face_right[l] = 0.0;
                for( unsigned int const n : characteristic_field_summation_sequence_[DTI( DIR )] ) {
@@ -217,22 +217,22 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
                } // N-Loop
                // Non-linear contributions have to be added together to maintain full symmetry
                state_face_left [l] += ( characteristic_average_minus[0]            * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
-                                        characteristic_average_minus[FF::ANOE()-1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][FF::ANOE()-1] );
+                                        characteristic_average_minus[MF::ANOE()-1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE()-1] );
                state_face_right[l] += ( characteristic_average_plus[0]             * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
-                                        characteristic_average_plus[FF::ANOE()-1]  * Roe_eigenvectors_right[i_index][j_index][k_index][l][FF::ANOE()-1] );
+                                        characteristic_average_plus[MF::ANOE()-1]  * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE()-1] );
             } // L-Loop
 
             // Check for invalid cells due to ghost fluid method
             if( state_face_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || state_face_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
 
             // Compute pressure, velocity and speed of sound for both cells for reconstructed values
-            double const pressure_left  = material_manager_.GetPressure( material,
+            double const pressure_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetPressure(
                                                                          state_face_left[ETI( Equation::Mass )],
                                                                          state_face_left[ETI( Equation::MomentumX )],
                                          CC::DIM()  > Dimension::One   ? state_face_left[ETI( Equation::MomentumY )] : 0.0,
                                          CC::DIM() == Dimension::Three ? state_face_left[ETI( Equation::MomentumZ )] : 0.0,
                                                                          state_face_left[ETI( Equation::Energy )] );
-            double const pressure_right = material_manager_.GetPressure( material,
+            double const pressure_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetPressure(
                                                                          state_face_right[ETI( Equation::Mass )],
                                                                          state_face_right[ETI( Equation::MomentumX )],
                                          CC::DIM()  > Dimension::One   ? state_face_right[ETI( Equation::MomentumY )] : 0.0,
@@ -244,8 +244,8 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
 
             double const velocity_left  = state_face_left [principal_momentum] / state_face_left [ETI( Equation::Mass )];
             double const velocity_right = state_face_right[principal_momentum] / state_face_right[ETI( Equation::Mass )];
-            double const speed_of_sound_left  = material_manager_.GetSpeedOfSound( material, state_face_left[ ETI( Equation::Mass )], pressure_left );
-            double const speed_of_sound_right = material_manager_.GetSpeedOfSound( material, state_face_right[ETI( Equation::Mass )], pressure_right );
+            double const speed_of_sound_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_left[ ETI( Equation::Mass )], pressure_left );
+            double const speed_of_sound_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_right[ETI( Equation::Mass )], pressure_right );
 
             // Calculation of signal speeds
             auto const [wave_speed_left_simple, wave_speed_right_simple] = CalculateSignalSpeed (state_face_left [ETI( Equation::Mass )], state_face_right [ETI( Equation::Mass )],
@@ -271,7 +271,7 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
                flux_right[momentum_order_[DTI( DIR )][d]] = velocity_right * state_face_right[momentum_order_[DTI( DIR )][d]];
             }
 
-            for( unsigned int n = 0; n < FF::ANOE(); ++n ) {
+            for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
                fluxes[n][i_index][j_index][k_index] += ( ( ( wave_speed_right * flux_left[n] ) - ( wave_speed_left * flux_right[n] ) ) +
                                                          ( ( wave_speed_right * wave_speed_left ) * ( state_face_right[n] - state_face_left[n] ) ) )
                                                        / ( wave_speed_right - wave_speed_left );

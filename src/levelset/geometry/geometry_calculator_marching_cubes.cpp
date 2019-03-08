@@ -66,7 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "geometry_calculator_marching_cubes.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 
 #include <algorithm>
 #include <cmath>

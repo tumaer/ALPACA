@@ -81,7 +81,6 @@ enum PeriodicBoundariesLocations : unsigned int {
 
 std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const level_zero_blocks_xyz,
                                      unsigned int const active_periodic_locations );
-
 bool PeriodicIsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const level_zero_blocks_xyz,
                                  unsigned int const active_periodic_locations );
 

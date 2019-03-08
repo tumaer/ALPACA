@@ -68,6 +68,7 @@
 #include "id_information.h"
 
 #include <bitset>
+#include "user_specifications/compile_time_constants.h"
 
 namespace {
 /**

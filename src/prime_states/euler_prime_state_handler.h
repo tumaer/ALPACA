@@ -88,7 +88,7 @@ class EulerPrimeStateHandler : public PrimeStateHandler<EulerPrimeStateHandler> 
       if constexpr( CC::DIM() == Dimension::Three ) {
          conservatives_container[ETI(Equation::MomentumZ)] = prime_states_container[PTI(PrimeState::VelocityZ)] * density;
       }
-      conservatives_container[ETI(Equation::Energy)] = material_manager_.GetEnergy( material,
+      conservatives_container[ETI(Equation::Energy)] = material_manager_.GetMaterial(material).GetEquationOfState().GetEnergy(
                                                             density,
                                                             conservatives_container[ETI(Equation::MomentumX)],
                                                             CC::DIM() != Dimension::One   ? conservatives_container[ETI(Equation::MomentumY)] : 0.0,
@@ -108,16 +108,16 @@ class EulerPrimeStateHandler : public PrimeStateHandler<EulerPrimeStateHandler> 
       if constexpr( CC::DIM() == Dimension::Three ) {
          prime_states_container[PTI(PrimeState::VelocityZ)] = conservatives_container[ETI(Equation::MomentumZ)] * one_density;
       }
-      prime_states_container[PTI(PrimeState::Pressure)] = material_manager_.GetPressure( material,
+      prime_states_container[PTI(PrimeState::Pressure)] = material_manager_.GetMaterial(material).GetEquationOfState().GetPressure(
                                                                conservatives_container[ETI(Equation::Mass)],
                                                                conservatives_container[ETI(Equation::MomentumX)],
                                                                CC::DIM() != Dimension::One   ? conservatives_container[ETI(Equation::MomentumY)] : 0.0,
                                                                CC::DIM() == Dimension::Three ? conservatives_container[ETI(Equation::MomentumZ)] : 0.0,
                                                                conservatives_container[ETI(Equation::Energy)]
                                                             );
-      if constexpr( FF::IsPrimeStateActive( PrimeState::Temperature ) ) {
+      if constexpr( MF::IsPrimeStateActive( PrimeState::Temperature ) ) {
          // only calculate temperature if the prime state is activated
-         prime_states_container[PTI(PrimeState::Temperature)] = material_manager_.GetTemperature( material,
+         prime_states_container[PTI(PrimeState::Temperature)] = material_manager_.GetMaterial(material).GetEquationOfState().GetTemperature(
                                                                   conservatives_container[ETI(Equation::Mass)],
                                                                   conservatives_container[ETI(Equation::MomentumX)],
                                                                   CC::DIM() != Dimension::One   ? conservatives_container[ETI(Equation::MomentumY)] : 0.0,

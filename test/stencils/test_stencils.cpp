@@ -70,23 +70,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "stencils/stencil.h"
-#include "stencils/spatial_reconstruction_stencils/weno3.h"
-#include "stencils/spatial_reconstruction_stencils/weno5.h"
-#include "stencils/spatial_reconstruction_stencils/weno5_z.h"
-#include "stencils/spatial_reconstruction_stencils/weno7.h"
-#include "stencils/spatial_reconstruction_stencils/weno9.h"
-#include "stencils/spatial_reconstruction_stencils/weno-ao53.h"
-#include "stencils/spatial_reconstruction_stencils/weno5_hm.h"
-#include "stencils/spatial_reconstruction_stencils/weno-cu6.h"
-#include "stencils/spatial_reconstruction_stencils/teno5.h"
-#include "stencils/spatial_reconstruction_stencils/first_order.h"
-#include "stencils/spatial_reconstruction_stencils/fourth_order_central.h"
-
-#include "stencils/spatial_derivative_stencils/houc_5.h"
-#include "stencils/spatial_derivative_stencils/fourth_order_central_difference.h"
-#include "stencils/spatial_derivative_stencils/fourth_order_cell_face.h"
-#include "stencils/spatial_derivative_stencils/central_difference.h"
+#include "stencils/stencil_utilities.h"
 
 template<typename S>
 void TestStencilSizes( S const& stencil, unsigned int const stencil_size, unsigned int const downstream_size ) {
@@ -108,27 +92,29 @@ void TestStencilParameters( S const& stencil, StencilType const type, unsigned i
 }
 
 template<typename S>
-void TestUnityOnUnitArrayWithMargin( S const& stencil, double const allowed_margin ) {
+void TestUnityOnUnitArrayWithMargin( double const allowed_margin ) {
    WHEN( "Stencil is applied to unit-array (with cell size one)" ) {
-      std::vector<double> const unit_array( stencil.StencilSize(), 1.0 );
+      std::array<double, S::StencilSize()> unit_array;
+      unit_array.fill( 1.0 );
       constexpr double cell_size = 1.0;
       THEN( "The resulting value is unity" ) {
-         REQUIRE( stencil.template Apply<StencilProperty::UpwindLeft>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
-         REQUIRE( stencil.template Apply<StencilProperty::UpwindRight>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindLeft,double>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindRight,double>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
       }
    }
 }
 
 template<typename S>
-void TestWenoValuesLeftAndRightOfStepWithMargin( S const& stencil, double const allowed_margin ) {
+void TestWenoValuesLeftAndRightOfStepWithMargin( double const allowed_margin ) {
    WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-      unsigned int const size = stencil.StencilSize();
-      std::vector<double> step_array( size, 1.0 );
+      unsigned int const size = S::StencilSize();
+      std::array<double, size> step_array;
+      step_array.fill( 1.0 );
       std::fill_n( step_array.begin(), size / 2 , 0.0 );
       constexpr double cell_size = 1.0;
       THEN( "The left or right value of the step is returned - according to upwinding direction" ) {
-         REQUIRE( stencil.template Apply<StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
-         REQUIRE( stencil.template Apply<StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindLeft,double>( step_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindRight,double>( step_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
       }
    }
 }
@@ -136,11 +122,13 @@ void TestWenoValuesLeftAndRightOfStepWithMargin( S const& stencil, double const 
 template<typename S>
 void TestZeronessOnUnitArrayWithMargin( S const& stencil, double const allowed_margin ) {
    WHEN( "Stencil is applied to unit-array (with cell size one)" ) {
-      std::vector<double> const unit_array( stencil.StencilSize(), 1.0 );
+      unsigned int const size = S::StencilSize();
+      std::array<double, size> unit_array;
+      unit_array.fill( 1.0 );
       constexpr double cell_size = 1.0;
       THEN( "The resulting value is zero" ) {
-         REQUIRE( stencil.template Apply<StencilProperty::UpwindLeft>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
-         REQUIRE( stencil.template Apply<StencilProperty::UpwindRight>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
+         REQUIRE( SU::Derivative<S,StencilProperty::UpwindLeft>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
+         REQUIRE( SU::Derivative<S,StencilProperty::UpwindRight>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
       }
    }
 }
@@ -149,83 +137,84 @@ SCENARIO( "Reconstruction stencil correctness", "[1rank]" ) {
    GIVEN( "A WENO-3 reconstruction stencil" ) {
       constexpr auto weno3 = WENO3();
       TestStencilParameters( weno3, StencilType::Reconstruction, 4, 1 );
-      TestUnityOnUnitArrayWithMargin( weno3, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( weno3, 1e-16 );
+      TestUnityOnUnitArrayWithMargin<WENO3>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO3>( 1e-16 );
    }
    GIVEN( "A WENO-5 reconstruction stencil" ) {
       constexpr auto weno5 = WENO5();
       TestStencilParameters( weno5, StencilType::Reconstruction, 6, 2 );
-      TestUnityOnUnitArrayWithMargin( weno5, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( weno5, 1e-11 );
+      TestUnityOnUnitArrayWithMargin<WENO5>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO5>( 1e-11 );
    }
    GIVEN( "A WENO-5-Z reconstruction stencil" ) {
       constexpr auto weno5z = WENO5Z();
       TestStencilParameters( weno5z, StencilType::Reconstruction, 6, 2 );
-      TestUnityOnUnitArrayWithMargin( weno5z, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( weno5z, 1e-15 );
+      TestUnityOnUnitArrayWithMargin<WENO5Z>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO5Z>( 1e-15 );
    }
    GIVEN( "A WENO-7 reconstruction stencil" ) {
       constexpr auto weno7 = WENO7();
       TestStencilParameters( weno7, StencilType::Reconstruction, 8, 3 );
-      TestUnityOnUnitArrayWithMargin( weno7, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( weno7, 1e-16 );
+      TestUnityOnUnitArrayWithMargin<WENO7>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO7>( 1e-16 );
    }
    GIVEN( "A WENO-9 reconstruction stencil" ) {
       constexpr auto weno9 = WENO9();
       TestStencilParameters( weno9, StencilType::Reconstruction, 10, 4 );
-      TestUnityOnUnitArrayWithMargin( weno9, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( weno9, 1e-16 );
+      TestUnityOnUnitArrayWithMargin<WENO9>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO9>( 1e-16 );
    }
 
    GIVEN( "A WENO-AO53 reconstruction stencil" ) {
       constexpr auto wenoao53 = WENOAO53();
       TestStencilParameters( wenoao53, StencilType::Reconstruction, 6, 2 );
-      TestUnityOnUnitArrayWithMargin( wenoao53, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( wenoao53, 1e-16 );
+      TestUnityOnUnitArrayWithMargin<WENOAO53>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENOAO53>( 1e-16 );
    }
 
    GIVEN( "A WENO-5HM reconstruction stencil" ) {
       constexpr auto weno5hm = WENO5HM();
       TestStencilParameters( weno5hm, StencilType::Reconstruction, 6, 2 );
-      TestUnityOnUnitArrayWithMargin( weno5hm, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( weno5hm, 1e-15 );
+      TestUnityOnUnitArrayWithMargin<WENO5HM>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO5HM>( 1e-15 );
    }
 
    GIVEN( "A WENO-CU6 reconstruction stencil" ) {
       constexpr auto wenocu6 = WENOCU6();
       TestStencilParameters( wenocu6, StencilType::Reconstruction, 6, 2 );
-      TestUnityOnUnitArrayWithMargin( wenocu6, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( wenocu6, 1e-8 );
+      TestUnityOnUnitArrayWithMargin<WENOCU6>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENOCU6>( 1e-8 );
    }
 
    GIVEN( "A TENO-5 reconstruction stencil" ) {
       constexpr auto teno5 = TENO5();
       TestStencilParameters( teno5, StencilType::Reconstruction, 6, 2 );
-      TestUnityOnUnitArrayWithMargin( teno5, 1e-16 );
-      TestWenoValuesLeftAndRightOfStepWithMargin( teno5, 1e-16 );
+      TestUnityOnUnitArrayWithMargin<TENO5>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<TENO5>( 1e-16 );
    }
 
    GIVEN( "A first order reconstruction stencil" ) {
       constexpr auto first_order = FirstOrder();
       TestStencilParameters( first_order, StencilType::Reconstruction, 2, 0 );
-      TestUnityOnUnitArrayWithMargin( first_order, 0.0 );
+      TestUnityOnUnitArrayWithMargin<FirstOrder>( 0.0 );
       //First order must give WENO-like upwind value ...
-      TestWenoValuesLeftAndRightOfStepWithMargin( first_order, 0.0 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<FirstOrder>( 0.0 );
    }
 
    GIVEN( "A fourth-order central reconstruction stencil" ) {
       constexpr auto fourth_order = FourthOrderCentral();
       TestStencilParameters( fourth_order, StencilType::Reconstruction, 4, 1 );
-      TestUnityOnUnitArrayWithMargin( fourth_order, 1e-16 );
+      TestUnityOnUnitArrayWithMargin<FourthOrderCentral>( 1e-16 );
       //Central (as the name suggests) does not follow WENO-like upwinding
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-         unsigned int const size = fourth_order.StencilSize();
-         std::vector<double> step_array( size, 1.0 );
+         unsigned int const size = FourthOrderCentral::StencilSize();
+         std::array<double, size> step_array;
+         step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2 , 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.5 is returned regardless the upwinding direction" ) {
-            REQUIRE( fourth_order.Apply<StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
-            REQUIRE( fourth_order.Apply<StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
+            REQUIRE( StencilUtilities::Reconstruction<FourthOrderCentral,StencilProperty::UpwindLeft, double>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
+            REQUIRE( StencilUtilities::Reconstruction<FourthOrderCentral,StencilProperty::UpwindRight, double>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
          }
       }
    }
@@ -238,12 +227,13 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestZeronessOnUnitArrayWithMargin( houc5, 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
          unsigned int const size = houc5.StencilSize();
-         std::vector<double> step_array( size, 1.0 );
+         std::array<double, size> step_array;
+         step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2 , 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.78333 is returned for upwind right direction and 0.45 for upwind left" ) {
-            REQUIRE( houc5.Apply<StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 0.7833333333333333333333333333333 ).margin( 1e-16 ) );
-            REQUIRE( houc5.Apply<StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 0.45 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<HOUC5,StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 0.7833333333333333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<HOUC5,StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 0.45 ).margin( 1e-16 ) );
          }
       }   
    }
@@ -254,11 +244,12 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestZeronessOnUnitArrayWithMargin( fourth_order_central_difference, 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
          unsigned int const size = fourth_order_central_difference.StencilSize();
-         std::vector<double> step_array( size, 1.0 );
+         std::array<double, size> step_array;
+         step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2 , 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.58333 is returned for the central difference direction" ) {
-            REQUIRE( fourth_order_central_difference.Apply<StencilProperty::Central>( step_array, cell_size ) == Approx( 0.583333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<FourthOrderCentralDifference,StencilProperty::Central>( step_array, cell_size ) == Approx( 0.583333333333333333333 ).margin( 1e-16 ) );
          }
       }   
    }
@@ -269,12 +260,13 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestZeronessOnUnitArrayWithMargin( fourth_order_cell_face, 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
          unsigned int const size = fourth_order_cell_face.StencilSize();
-         std::vector<double> step_array( size, 1.0 );
+         std::array<double, size> step_array;
+         step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2 , 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "1.0833333 is returned for the upwind left direction" ) {
-            REQUIRE( fourth_order_cell_face.Apply<StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
-            REQUIRE( fourth_order_cell_face.Apply<StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<FourthOrderCellFace,StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<FourthOrderCellFace,StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
          }
       }   
    }
@@ -285,11 +277,12 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestZeronessOnUnitArrayWithMargin( central_difference, 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
          unsigned int const size = central_difference.StencilSize();
-         std::vector<double> step_array( size, 1.0 );
+         std::array<double, size> step_array;
+         step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2 , 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.5 is returned for the central difference direction" ) {
-            REQUIRE( central_difference.Apply<StencilProperty::Central>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<CentralDifference,StencilProperty::Central>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
          }
       }   
    }

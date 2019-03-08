@@ -74,12 +74,9 @@
 #include "enums/dimension_definition.h"
 #include "enums/datatype_for_mpi_definition.h"
 
-#include "fluid_fields_definitions.h"
+#include "field_material_definitions.h"
 
 class CommunicationTypes{
-
-   // Distinction between Fluid Data and Tag MPI_Datatype
-   static constexpr std::array<MPI_Datatype,2> type_ = { MPI_DOUBLE, MPI_INT8_T };
 
    static constexpr std::array<int,3 > block_size_ = { CC::TCX(), CC::TCY(), CC::TCZ() };
    // 26 Elements for 3 Dimensions, numbering like boundary_specification.h -> BoundaryLocation
@@ -247,6 +244,6 @@ constexpr int DomainBlockSendingSize() {return CC::ICX()*CC::ICY()*CC::ICZ();}
  *        one rank to another at once.
  * @return The size of jump flux buffer.
  */
-constexpr int JumpBufferSendingSize() {return FF::ANOE()*CC::ICY()*CC::ICZ();}
+constexpr int JumpBufferSendingSize() {return MF::ANOE()*CC::ICY()*CC::ICZ();}
 
 #endif /* COMMUNICATION_TYPES_H_ */

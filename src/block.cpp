@@ -67,6 +67,7 @@
 *****************************************************************************************/
 #include "block.h"
 #include <stdexcept>
+#include "utilities/buffer_operations.h"
 
 /**
  * @brief Standard constructor, creates a Block of the provided material. Initializes all buffers
@@ -75,20 +76,60 @@
 Block::Block() {
 
    // We initialize a Block with zero in all its buffers
-   ResetAverageBuffer();
+   BufferOperations::SetFieldBuffer( GetAverageBuffer(), 0.0 );
+   BufferOperations::SetFieldBuffer( GetRightHandSideBuffer(), 0.0 );
+   BufferOperations::SetFieldBuffer( GetInitialBuffer(), 0.0 );
+   BufferOperations::SetFieldBuffer( GetPrimeStateBuffer(), 0.0 );
 
-   ResetRightHandSideBuffer();
-
-   ResetInitialBuffer();
-
-   ResetPrimeStateBuffer();
-
-   for(const BoundaryLocation location : CC::NBS()) {
-      ResetJumpFluxes(location);
+   // Only reset buffer of parameter if they are present
+   if constexpr(CC::ParameterModelActive()) {
+      BufferOperations::SetFieldBuffer( GetParameterBuffer(), 0.0 );
    }
 
-   for(const BoundaryLocation location : CC::NBS()) {
-      ResetJumpConservatives(location);
+   for( BoundaryLocation const location : CC::NBS() ) {
+      ResetJumpFluxes( location );
+   }
+
+   for( BoundaryLocation const location : CC::NBS() ) {
+      ResetJumpConservatives( location );
+   }
+}
+
+/**
+ * @brief Gives a reference to the corresponding buffer.
+ * @param field_type The material field type of the buffer.
+ * @param field_index The index of the field asked for.
+ * @param conservative_type If a conservative field is wanted, the conservative buffer type. Defaults to ConservativeBufferType::RightHandSide.
+ * @return Reference to Array that is the requested buffer.
+ */
+auto Block::GetFieldBuffer( MaterialFieldType const field_type, unsigned int const field_index, ConservativeBufferType const conservative_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   switch( field_type ) {
+      case MaterialFieldType::Conservatives : {
+         return GetConservativeBuffer( conservative_type )[field_index];
+      }
+      case MaterialFieldType::Parameters : {
+         return parameters_[field_index];
+      }
+      default : { // MaterialFieldType::PrimeStates:
+         return prime_states_[field_index];
+      }
+   }
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetFieldBuffer( MaterialFieldType const field_type, unsigned int const field_index, ConservativeBufferType const conservative_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   switch( field_type ) {
+      case MaterialFieldType::Conservatives : {
+         return GetConservativeBuffer( conservative_type )[field_index];
+      }
+      case MaterialFieldType::Parameters : {
+         return parameters_[field_index];
+      }
+      default : { // MaterialFieldType::PrimeStates:
+         return prime_states_[field_index];
+      }
    }
 }
 
@@ -97,7 +138,14 @@ Block::Block() {
  * @param equation Decider which buffer is to be returned.
  * @return Reference to the array, that is the requested buffer.
  */
-auto Block::GetAverageBuffer(const Equation equation) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto Block::GetAverageBuffer( Equation const equation ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return averages_[equation];
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetAverageBuffer( Equation const equation ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return averages_[equation];
 }
 
@@ -106,7 +154,14 @@ auto Block::GetAverageBuffer(const Equation equation) -> double (&)[CC::TCX()][C
  * @param equation Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto Block::GetRightHandSideBuffer(const Equation equation) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto Block::GetRightHandSideBuffer( Equation const equation ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return right_hand_sides_[equation];
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetRightHandSideBuffer( Equation const equation ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return right_hand_sides_[equation];
 }
 
@@ -115,8 +170,15 @@ auto Block::GetRightHandSideBuffer(const Equation equation) -> double (&)[CC::TC
  * @param equation Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto Block::GetInitialBuffer(const Equation equation) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   return initial_buffer_[equation];
+auto Block::GetInitialBuffer( Equation const equation ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return initials_[equation];
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetInitialBuffer( Equation const equation ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return initials_[equation];
 }
 
 /**
@@ -177,75 +239,17 @@ Conservatives const& Block::GetConservativeBuffer<ConservativeBufferType::Initia
 }
 
 /**
- * @brief Gives a Reference to the corresponding Prime-state buffer.
- * @param prime_state_type Decider which buffer is to be returned.
- * @return Reference to Array that is the requested buffer.
- */
-auto Block::GetPrimeStateBuffer(const PrimeState prime_state_type) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   return prime_states_[prime_state_type];
-}
-
-/**
- * @brief Gives a reference to the corresponding buffer.
- * @param field_type The fluid field type of the buffer.
- * @param field_index The index of the field asked for.
- * @param conservative_type If a conservative field is wanted, the conservative buffer type. Defaults to ConservativeBufferType::RightHandSide.
- * @return Reference to Array that is the requested buffer.
- */
-auto Block::GetFieldBuffer(const FluidFieldType field_type, const unsigned int field_index, const ConservativeBufferType conservative_type) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   switch(field_type) {
-      case FluidFieldType::Conservatives:
-         return GetConservativeBuffer(conservative_type)[field_index];
-      default: // FluidFieldType::PrimeStates:
-         return prime_states_[field_index];
-   }
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetAverageBuffer(const Equation equation) const -> const double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   return averages_[equation];
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetRightHandSideBuffer(const Equation equation) const -> const double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   return right_hand_sides_[equation];
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetInitialBuffer(const Equation equation) const -> const double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   return initial_buffer_[equation];
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetPrimeStateBuffer(const PrimeState prime_state_type) const -> const double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   return prime_states_[prime_state_type];
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetFieldBuffer(const FluidFieldType field_type, const unsigned int field_index, const ConservativeBufferType conservative_type) const -> const double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-   switch(field_type) {
-      case FluidFieldType::Conservatives:
-         return GetConservativeBuffer(conservative_type)[field_index];
-      default: // FluidFieldType::PrimeStates:
-         return prime_states_[field_index];
-   }
-}
-
-/**
  * @brief Gives access to the average buffer.
  * @return Average buffer struct.
  */
 Conservatives& Block::GetAverageBuffer() {
+   return averages_;
+}
+
+/**
+ * @brief Const overload.
+ */
+Conservatives const& Block::GetAverageBuffer() const {
    return averages_;
 }
 
@@ -255,6 +259,80 @@ Conservatives& Block::GetAverageBuffer() {
  */
 Conservatives& Block::GetRightHandSideBuffer() {
    return right_hand_sides_;
+}
+
+/**
+ * @brief Const overload.
+ */
+Conservatives const& Block::GetRightHandSideBuffer() const {
+   return right_hand_sides_;
+}
+
+/**
+ * @brief Gives access to the initial buffer.
+ * @return initial buffer struct.
+ */
+Conservatives& Block::GetInitialBuffer() {
+   return initials_;
+}
+
+/**
+ * @brief Const overload
+ */
+Conservatives const& Block::GetInitialBuffer() const {
+   return initials_;
+}
+
+/**
+ * @brief Gives access to the conservative buffer of given type.
+ * @param conservative_type Conservative type of the buffer asked for.
+ * @return buffer struct of given type.
+ */
+Conservatives& Block::GetConservativeBuffer( ConservativeBufferType const conservative_type ) {
+   switch( conservative_type ) {
+      case ConservativeBufferType::RightHandSide : {
+         return right_hand_sides_;
+      }
+      case ConservativeBufferType::Average : {
+         return averages_;
+      }
+      default : { // case ConservativeBufferType::Initial:
+         return initials_;
+      }
+   }
+}
+
+/**
+ * @brief Const overload
+ */
+Conservatives const& Block::GetConservativeBuffer( ConservativeBufferType const conservative_type ) const {
+   switch( conservative_type ) {
+      case ConservativeBufferType::RightHandSide : {
+         return right_hand_sides_;
+      }
+      case ConservativeBufferType::Average : {
+         return averages_;
+      }
+      default : { // case ConservativeBufferType::Initial:
+         return initials_;
+      }
+   }
+}
+
+/**
+ * @brief Gives a Reference to the corresponding Prime-state buffer.
+ * @param prime_state_type Decider which buffer is to be returned.
+ * @return Reference to Array that is the requested buffer.
+ */
+auto Block::GetPrimeStateBuffer( PrimeState const prime_state_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return prime_states_[prime_state_type];
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetPrimeStateBuffer( PrimeState const prime_state_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return prime_states_[prime_state_type];
 }
 
 /**
@@ -268,22 +346,71 @@ PrimeStates& Block::GetPrimeStateBuffer() {
 /**
  * @brief Const overload.
  */
-const Conservatives& Block::GetAverageBuffer() const {
-   return averages_;
-}
-
-/**
- * @brief Const overload.
- */
-const Conservatives& Block::GetRightHandSideBuffer() const {
-   return right_hand_sides_;
-}
-
-/**
- * @brief Const overload.
- */
-const PrimeStates& Block::GetPrimeStateBuffer() const {
+PrimeStates const& Block::GetPrimeStateBuffer() const {
    return prime_states_;
+}
+
+/**
+ * @brief Gives a Reference to the corresponding Parameter buffer.
+ * @param parameter_type Decider which buffer is to be returned.
+ * @return Reference to Array that is the requested buffer.
+ */
+auto Block::GetParameterBuffer( Parameter const parameter_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return parameters_[parameter_type];
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetParameterBuffer( Parameter const parameter_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return parameters_[parameter_type];
+}
+
+/**
+ * @brief Gives access to the parameters struct.
+ * @return Parameter buffer struct.
+ */
+Parameters& Block::GetParameterBuffer() {
+   return parameters_;
+}
+
+/**
+ * @brief Const overload.
+ */
+Parameters const& Block::GetParameterBuffer() const {
+   return parameters_;
+}
+
+/**
+ * @brief Gives a reference to the corresponding jump flux buffer.
+ * @param location Decider which face of the block is to be returned.
+ * @return Reference to Array that is the requested buffer.
+ */
+auto Block::GetBoundaryJumpFluxes( BoundaryLocation const location ) -> double (&)[MF::ANOE()][CC::ICY()][CC::ICZ()] {
+   return GetBoundaryJump( jump_fluxes_, location );
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetBoundaryJumpFluxes( BoundaryLocation const location ) const -> double const (&)[MF::ANOE()][CC::ICY()][CC::ICZ()] {
+   return GetBoundaryJump( jump_fluxes_, location );
+}
+
+/**
+ * @brief Gives a reference to the corresponding jump conservative buffer.
+ * @param location Decider which face of the block is to be returned.
+ * @return Reference to Array that is the requested buffer.
+ */
+auto Block::GetBoundaryJumpConservatives( BoundaryLocation const location ) -> double (&)[MF::ANOE()][CC::ICY()][CC::ICZ()] {
+   return GetBoundaryJump( jump_conservatives_, location );
+}
+
+/**
+ * @brief Const overload.
+ */
+auto Block::GetBoundaryJumpConservatives( BoundaryLocation const location ) const -> double const (&)[MF::ANOE()][CC::ICY()][CC::ICZ()] {
+   return GetBoundaryJump( jump_conservatives_, location );
 }
 
 /**
@@ -297,7 +424,7 @@ SurfaceBuffer& Block::GetBoundaryJumpFluxes() {
 /**
  * @brief const overload.
  */
-const SurfaceBuffer& Block::GetBoundaryJumpFluxes() const {
+SurfaceBuffer const& Block::GetBoundaryJumpFluxes() const {
    return jump_fluxes_;
 }
 
@@ -312,71 +439,21 @@ SurfaceBuffer& Block::GetBoundaryJumpConservatives() {
 /**
  * @brief const overload.
  */
-const SurfaceBuffer& Block::GetBoundaryJumpConservatives() const {
+SurfaceBuffer const& Block::GetBoundaryJumpConservatives() const {
    return jump_conservatives_;
-}
-
-/**
- * @brief Gives a reference to the corresponding jump flux buffer.
- * @param location Decider which face of the block is to be returned.
- * @return Reference to Array that is the requested buffer.
- */
-auto Block::GetBoundaryJumpFluxes(const BoundaryLocation location) -> double (&)[FF::ANOE()][CC::ICY()][CC::ICZ()] {
-   return GetBoundaryJump(jump_fluxes_, location);
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetBoundaryJumpFluxes(const BoundaryLocation location) const -> double const (&)[FF::ANOE()][CC::ICY()][CC::ICZ()] {
-   return GetBoundaryJump(jump_fluxes_, location);
-}
-
-/**
- * @brief Gives a reference to the corresponding jump conservative buffer.
- * @param location Decider which face of the block is to be returned.
- * @return Reference to Array that is the requested buffer.
- */
-auto Block::GetBoundaryJumpConservatives(const BoundaryLocation location) -> double (&)[FF::ANOE()][CC::ICY()][CC::ICZ()] {
-   return GetBoundaryJump(jump_conservatives_, location);
-}
-
-/**
- * @brief Const overload.
- */
-auto Block::GetBoundaryJumpConservatives(const BoundaryLocation location) const -> double const (&)[FF::ANOE()][CC::ICY()][CC::ICZ()] {
-   return GetBoundaryJump(jump_conservatives_, location);
-}
-
-/**
- * @brief Resets the corresponding jump conservative buffer, i.e. set all values in the buffer to zero.
- * @param location Decider which face of the block is to be resetted.
- */
-void Block::ResetJumpConservatives(const BoundaryLocation location) {
-
-   double (&jump)[FF::ANOE()][CC::ICY()][CC::ICZ()] = GetBoundaryJumpConservatives(location);
-
-   for(unsigned int e = 0; e < FF::ANOE(); ++e) {
-      for(unsigned int i = 0; i < CC::ICY(); ++i) {
-         for(unsigned int j = 0; j < CC::ICZ(); ++j) {
-            jump[e][i][j] = 0.0;
-         }
-      }
-   }
-
 }
 
 /**
  * @brief Resets the corresponding jump flux buffer, i.e. set all values in the buffer to zero.
  * @param location Decider which face of the block is to be resetted.
  */
-void Block::ResetJumpFluxes(const BoundaryLocation location) {
+void Block::ResetJumpFluxes( BoundaryLocation const location ) {
 
-   double (&jump)[FF::ANOE()][CC::ICY()][CC::ICZ()] = GetBoundaryJumpFluxes(location);
+   double (&jump)[MF::ANOE()][CC::ICY()][CC::ICZ()] = GetBoundaryJumpFluxes( location );
 
-   for(unsigned int e = 0; e < FF::ANOE(); ++e){
-      for(unsigned int i = 0; i < CC::ICY(); ++i){
-         for(unsigned int j = 0; j < CC::ICZ(); ++j){
+   for( unsigned int e = 0; e < MF::ANOE(); ++e ){
+      for( unsigned int i = 0; i < CC::ICY(); ++i ) {
+         for( unsigned int j = 0; j < CC::ICZ(); ++j ) {
             jump[e][i][j] = 0.0;
          }
       }
@@ -384,67 +461,20 @@ void Block::ResetJumpFluxes(const BoundaryLocation location) {
 }
 
 /**
- * @brief Resets the corresponding right hand side buffer, i.e. set all values in the buffer to zero.
+ * @brief Resets the corresponding jump conservative buffer, i.e. set all values in the buffer to zero.
+ * @param location Decider which face of the block is to be resetted.
  */
-void Block::ResetRightHandSideBuffer(){
-   for(const Equation eq : FF::ASOE()) {
-      double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = GetRightHandSideBuffer(eq);
-      for(unsigned int i = 0; i < CC::TCX(); ++i){
-         for(unsigned int j = 0; j < CC::TCY(); ++j){
-            for(unsigned int k = 0; k < CC::TCZ(); ++k){
-               cells[i][j][k] = 0.0;
-            }
+void Block::ResetJumpConservatives( BoundaryLocation const location ) {
+
+   double (&jump)[MF::ANOE()][CC::ICY()][CC::ICZ()] = GetBoundaryJumpConservatives( location );
+
+   for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
+      for( unsigned int i = 0; i < CC::ICY(); ++i) {
+         for( unsigned int j = 0; j < CC::ICZ(); ++j) {
+            jump[e][i][j] = 0.0;
          }
       }
    }
-}
-
-/**
- * @brief Resets the corresponding average buffer, i.e. set all values in the buffer to zero.
- */
-void Block::ResetAverageBuffer() {
-   for(const Equation eq : FF::ASOE()) {
-      double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = GetAverageBuffer(eq);
-      for(unsigned int i = 0; i < CC::TCX(); ++i){
-         for(unsigned int j = 0; j < CC::TCY(); ++j){
-            for(unsigned int k = 0; k < CC::TCZ(); ++k){
-               cells[i][j][k] = 0.0;
-            }
-         }
-      }
-   }
-}
-
-/**
- * @brief Resets all arrays in the prime state struct, i.e. set all values in the arrays to zero.
- */
-void Block::ResetPrimeStateBuffer() {
-   for(const PrimeState ps : FF::ASOP()) {
-      double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = GetPrimeStateBuffer(ps);
-      for(unsigned int i = 0; i < CC::TCX(); ++i){
-         for(unsigned int j = 0; j < CC::TCY(); ++j){
-            for(unsigned int k = 0; k < CC::TCZ(); ++k){
-               cells[i][j][k] = 0.0;
-            } // k
-         } // j
-      } // i
-   } // prime states
-}
-
-/**
- * @brief Resets the initial buffer, i.e. set all values in the buffer to zero.
- */
-void Block::ResetInitialBuffer(){
-   for(const Equation eq : FF::ASOE()) {
-      double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = GetInitialBuffer(eq);
-      for(unsigned int i = 0; i < CC::TCX(); ++i){
-         for(unsigned int j = 0; j < CC::TCY(); ++j){
-            for(unsigned int k = 0; k < CC::TCZ(); ++k){
-               cells[i][j][k] = 0.0;
-            } // k
-         } // j
-      } // i
-   } // equation
 }
 
 /**
@@ -453,26 +483,34 @@ void Block::ResetInitialBuffer(){
  * @param location The location identifer of the desired location.
  * @return Reference to the desired array.
  */
-auto GetBoundaryJump(SurfaceBuffer& jump, const BoundaryLocation location) -> double (&)[FF::ANOE()][CC::ICY()][CC::ICZ()]{
-   switch (location) {
-      case BoundaryLocation::East:
+auto GetBoundaryJump( SurfaceBuffer& jump, BoundaryLocation const location ) -> double (&)[MF::ANOE()][CC::ICY()][CC::ICZ()] {
+   switch( location ) {
+      case BoundaryLocation::East : {
          return jump.east_;
-      case BoundaryLocation::West:
+      }
+      case BoundaryLocation::West : {
          return jump.west_;
-      case BoundaryLocation::North:
+      }
+      case BoundaryLocation::North : {
          return jump.north_;
-      case BoundaryLocation::South:
+      }
+      case BoundaryLocation::South : {
          return jump.south_;
-      case BoundaryLocation::Bottom:
+      }
+      case BoundaryLocation::Bottom : {
          return jump.bottom_;
-#ifdef PERFOMANCE
-      default:
-        return jump.top;
+      }
+#ifdef PERFORMANCE
+      default : {
+        return jump.top_;
+      }
 #else
-      case BoundaryLocation::Top:
+      case BoundaryLocation::Top : {
          return jump.top_;
-      default:
+      }
+      default : {
          throw std::logic_error("Jump flux Buffer with given Index does not exist"); //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
+      }
 #endif
    }
 }
@@ -480,71 +518,34 @@ auto GetBoundaryJump(SurfaceBuffer& jump, const BoundaryLocation location) -> do
 /**
  * @brief Const overload.
  */
-auto GetBoundaryJump(const SurfaceBuffer& jump, const BoundaryLocation location) -> double const (&)[FF::ANOE()][CC::ICY()][CC::ICZ()]{
-   switch (location) {
-      case BoundaryLocation::East:
+auto GetBoundaryJump( const SurfaceBuffer& jump, BoundaryLocation const location ) -> double const (&)[MF::ANOE()][CC::ICY()][CC::ICZ()] {
+   switch( location ) {
+      case BoundaryLocation::East : {
          return jump.east_;
-      case BoundaryLocation::West:
+      }
+      case BoundaryLocation::West : {
          return jump.west_;
-      case BoundaryLocation::North:
+      }
+      case BoundaryLocation::North : {
          return jump.north_;
-      case BoundaryLocation::South:
+      }
+      case BoundaryLocation::South : {
          return jump.south_;
-      case BoundaryLocation::Bottom:
+      }
+      case BoundaryLocation::Bottom : {
          return jump.bottom_;
+      }
 #ifdef PERFORMANCE
-      default:
+      default : {
         return jump.top_;
+      }
 #else
-      case BoundaryLocation::Top:
+      case BoundaryLocation::Top : {
          return jump.top_;
-      default:
+      }
+      default : {
          throw std::logic_error("Jump flux Buffer with given Index does not exist"); //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
+      }
 #endif
-   }
-}
-
-/**
- * @brief Gives access to the initial buffer.
- * @return initial buffer struct.
- */
-Conservatives& Block::GetInitialBuffer() {
-   return initial_buffer_;
-}
-
-/**
- * @brief Gives access to the conservative buffer of given type.
- * @param conservative_type Conservative type of the buffer asked for.
- * @return buffer struct of given type.
- */
-Conservatives& Block::GetConservativeBuffer(const ConservativeBufferType conservative_type) {
-   switch(conservative_type) {
-      case ConservativeBufferType::RightHandSide:
-         return right_hand_sides_;
-      case ConservativeBufferType::Average:
-         return averages_;
-      default: // case ConservativeBufferType::Initial:
-         return initial_buffer_;
-   }
-}
-
-/**
- * @brief Const overload
- */
-const Conservatives& Block::GetInitialBuffer() const {
-   return initial_buffer_;
-}
-
-/**
- * @brief Const overload
- */
-const Conservatives& Block::GetConservativeBuffer(const ConservativeBufferType conservative_type) const {
-   switch(conservative_type) {
-      case ConservativeBufferType::RightHandSide:
-         return right_hand_sides_;
-      case ConservativeBufferType::Average:
-         return averages_;
-      default: // case ConservativeBufferType::Initial:
-         return initial_buffer_;
    }
 }

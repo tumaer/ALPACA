@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute fourth-order central fluxes.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute first-order fluxes.
  */
 class FourthOrderCentral : public Stencil<FourthOrderCentral> {
 
@@ -81,18 +81,16 @@ class FourthOrderCentral : public Stencil<FourthOrderCentral> {
 
    static constexpr double one_sixteenth_  = 1.0/16.0;
 
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit FourthOrderCentral() = default;
    ~FourthOrderCentral() = default;
-   FourthOrderCentral( FourthOrderCentral const& ) = delete;
-   FourthOrderCentral& operator=( FourthOrderCentral const& ) = delete;
-   FourthOrderCentral( FourthOrderCentral&& ) = delete;
-   FourthOrderCentral& operator=( FourthOrderCentral&& ) = delete;
+
 };
 
 #endif // STENCIL_FOURTH_ORDER_CENTRAL_H

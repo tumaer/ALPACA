@@ -66,81 +66,93 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "initial_condition.h"
-#include "simulation_setup.h"
-#include "user_expression.h"
 
 #include <stdexcept>
-
-const std::string InitialCondition::variable_name_phi_ = "phi";
+#include "topology/id_information.h"
 
 /**
  * @brief Default constructor requiring a parse-able inputfile %Currently only XML file%
  * @param parser An user inputfile parser instance.
  */
-InitialCondition::InitialCondition(const InputFileParser& parser) :
-   phi_expression_(parser.ReadInitialConditionOfLevelSet()),
-   number_of_fluids_(parser.ReadNumberOfFluids()),
-   fluid_initialisation_(parser.ReadInitialConditionOfFluids()),
-   fluids_(SimulationSetup::MapUserInputToMaterialType(parser.ReadParameterOfAllFluids()))
-{
+InitialCondition::InitialCondition( std::vector<std::string> const& material_initial_expressions,
+                                    std::vector<std::string> const& levelset_initial_expressions,
+                                    std::vector<MaterialName> const& material_names,
+                                    std::vector<std::string> const& variable_names_prime_states,
+                                    std::string const& variable_name_levelset,
+                                    double const node_size_on_level_zero,
+                                    unsigned int const maximum_level,
+                                    UnitHandler const& unit_handler ) :
+   // Start initializer list
+   unit_handler_( unit_handler ),
+   material_initial_expressions_( material_initial_expressions ),
+   levelset_initial_expressions_( levelset_initial_expressions ),
+   material_names_( material_names ),
+   variable_names_prime_states_( variable_names_prime_states ),
+   variable_name_levelset_( variable_name_levelset ),
+   node_size_on_level_zero_( node_size_on_level_zero ),
+   maximum_level_( maximum_level ) {
+   /** Empty besides initializer list */
 }
 
 /**
- * @brief Compiles the given expression such that it is capable to give the desired fluid variables.
+ * @brief Compiles the given expression such that it is capable to give the desired material variables.
  * @param expression The expression in original text form.
  * @param x,y,z Reference to spatial variable.
  * @return The compiled expression ready to be evaluated.
+ *
+ * @note The return type must be a pointer to allow the creation of UserExpressions inside of a vector (required for the initial materials). This is due to
+ *       the deleted move operators of the user_expression library
  */
-UserExpression InitialCondition::CreateInputExpression( std::string const expression, std::vector<std::string> const& variables_out, double &x, double &y, double &z ) const {
+std::unique_ptr<UserExpression const> InitialCondition::CreateInputExpression( std::string const& expression,
+                                                                               std::vector<std::string> const& variables_out,
+                                                                               double &x, double &y, double &z ) const {
    std::vector<std::tuple<std::string,double&>> variables_in;
-   variables_in.push_back( std::make_tuple(std::string("x"), std::ref(x)) );
-   variables_in.push_back( std::make_tuple(std::string("y"), std::ref(y)) );
-   variables_in.push_back( std::make_tuple(std::string("z"), std::ref(z)) );
+   variables_in.push_back( std::make_tuple( std::string( variable_name_x_ ), std::ref( x ) ) );
+   variables_in.push_back( std::make_tuple( std::string( variable_name_y_ ), std::ref( y ) ) );
+   variables_in.push_back( std::make_tuple( std::string( variable_name_z_ ), std::ref( z ) ) );
 
-   return UserExpression( expression, variables_in, variables_out );
+   return std::make_unique<UserExpression const>( expression, variables_in, variables_out );
 }
 
 /**
- * @brief Evaluates the user input for the initial density at the provided X-/Y- and Z-coordinates.
- * @param origin The origin coordinates of the node.
- * @param cell_size The size of cells in the node.
- * @param material Identifier to fill the cells with the state associated with its material.
+ * @brief Gives the initial density at the provided location for the given material.
+ * @param node_id The id of the node to be initialized.
+ * @param material The material in the block to be filled with the returned data
+ * @param initial_values Reference to array holding the resulting density. Indirect return value.
  */
-void InitialCondition::GetInitialPrimeStates( const std::array<double, 3> origin, const double cell_size, const MaterialName material,
-   double (&initial_values)[FF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
+void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
+                                              MaterialName const material,
+                                              double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
-   std::string initial_condition_input;
+   // get the origin of this node id
+   // AB tODO: Here the dimensionalized size is required
+   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, node_size_on_level_zero_ ) );
+   // cell_size on level
+   double const cell_size = node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
 
-   for( unsigned int ii = 0; ii < number_of_fluids_; ++ii ){
-      if( fluids_[ii] == material ){
-         initial_condition_input = fluid_initialisation_[ii];
-      }
-   }
-
-   std::vector<std::string> variable_names;
-   for( PrimeState const p : FF::ASOP() ) {
-      // TP: Do not check for empty names here! We need them later to assign 0.0 to the respective prime states and exprtk can handle the empty names
-      variable_names.emplace_back( FF::FieldInputName( p ) );
-   }
+   // Obtain the correct initial condition string for the material
+   std::string const initial_condition_input( material_initial_expressions_[MTI( material )]);
 
    // TP here we need non-const variables as UserExpression stores references to them in order to reflect changes
    double running_x;
    double running_y;
    double running_z;
 
-   UserExpression const input_expression = CreateInputExpression( initial_condition_input, variable_names, running_x, running_y, running_z );
-
-   for(unsigned int i = 0; i < CC::ICX(); ++i) {
-      running_x = origin[0] + (double(i) + 0.5) * cell_size;
-      for(unsigned int j = 0; j < CC::ICY(); ++j) {
-         running_y = CC::DIM() != Dimension::One ? origin[1] + (double(j) + 0.5) * cell_size : 0.0;
-         for(unsigned int k = 0; k < CC::ICZ(); ++k) {
-            running_z = CC::DIM() == Dimension::Three ? origin[2] + (double(k) + 0.5) * cell_size : 0.0;
-            for( unsigned int p = 0; p < FF::ANOP(); ++p ) {
-               if( variable_names[p].empty() ) {
-                  initial_values[p][i][j][k] = 0.0;
-               } else {
-                  initial_values[p][i][j][k] = input_expression.GetValue( variable_names[p] );
+   // create the expression
+   std::unique_ptr<UserExpression const> input_expression( CreateInputExpression( initial_condition_input, variable_names_prime_states_, running_x, running_y, running_z ) );
+   // Loop through all cells to assign correct values to the buffer
+   for( unsigned int i = 0; i < CC::ICX(); ++i ) {
+      running_x = origin[0] + ( double( i ) + 0.5 ) * cell_size;
+      for( unsigned int j = 0; j < CC::ICY(); ++j ) {
+         running_y = CC::DIM() != Dimension::One ? origin[1] + ( double( j ) + 0.5 ) * cell_size : 0.0;
+         for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
+            running_z = CC::DIM() == Dimension::Three ? origin[2] + ( double( k ) + 0.5 ) * cell_size : 0.0;
+            for( PrimeState const p : MF::ASOP() ) {
+               // If the variable name is not empty obtain value from expression.
+               if( !variable_names_prime_states_[PTI( p )].empty() ) {
+                  initial_values[PTI( p )][i][j][k] = unit_handler_.NonDimensionalizeValue( input_expression->GetValue( variable_names_prime_states_[PTI( p )] ), MF::FieldUnit( p ) );
+               } else { // Otherwise set zero value
+                  initial_values[PTI( p )][i][j][k] = 0.0;
                }
             }
          }
@@ -149,52 +161,64 @@ void InitialCondition::GetInitialPrimeStates( const std::array<double, 3> origin
 }
 
 /**
- * @brief Evaluates the user input for the initial levelset for a node with the given coordinates and expansion.
- * @param origin The origin coordinates of the node.
- * @param cell_size The size of cells in the node.
- * @param initial_values Indirect return parameter for the determined levelset values.
- * @note Works on total cells
+ * @brief Gives the initial levelset for the node with the given id.
+ * @param node_id The id of the node to be initialized.
+ * @param initial_levelset Indirect return parameter for the determined levelset.
  */
-void InitialCondition::GetInitialLevelset(const std::array<double, 3> origin, const double cell_size, double (&initial_values)[CC::TCX()][CC::TCY()][CC::TCZ()]) const{
+void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
+   // get the origin of this node id
+   // AB tODO: Here the dimensionalized size is required
+   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, node_size_on_level_zero_ ) );
+   // cell_size on level zero divided by 2^level
+   double const cell_size = node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
+   double const one_cell_size = 1.0 / cell_size;
 
-   std::string number_phi = phi_expression_[0];
+   // AB TODO: THis must be changed for Multi-material approach (all initial levelset should be referenced to material1)
+   std::string initial_levelset_input = levelset_initial_expressions_[0];
 
    // TP here we need non-const variables as UserExpression stores references to them in order to reflect changes
    double running_x;
    double running_y;
    double running_z;
-   const double one_cell_size = 1.0 / cell_size;
 
-   UserExpression const phi_expr = CreateInputExpression(number_phi, {variable_name_phi_}, running_x, running_y, running_z);
-
-   for(unsigned int i = 0; i < CC::TCX(); ++i) {
-      running_x = origin[0] + (double(i) - double(CC::FICX()) + 0.5) * cell_size;
-      for(unsigned int j = 0; j < CC::TCY(); ++j) {
-         running_y = CC::DIM() != Dimension::One ? origin[1] + (double(j) - double(CC::FICY()) + 0.5) * cell_size : 0.0;
-         for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-            running_z = CC::DIM() == Dimension::Three ? origin[2] + (double(k) - double(CC::FICZ()) + 0.5) * cell_size : 0.0;
-            initial_values[i][j][k] = phi_expr.GetValue(variable_name_phi_) * one_cell_size;
+   // create the expression
+   std::unique_ptr<UserExpression const> levelset_expression( CreateInputExpression( initial_levelset_input, { variable_name_levelset_ }, running_x, running_y, running_z ) );
+   // Loop through all cells to assign correct values to tje buffer
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      running_x = origin[0] + ( double( i ) - double( CC::FICX() ) + 0.5 ) * cell_size;
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         running_y = CC::DIM() != Dimension::One ? origin[1] + ( double( j ) - double( CC::FICY() ) + 0.5 ) * cell_size : 0.0;
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+            running_z = CC::DIM() == Dimension::Three ? origin[2] + ( double( k ) - double( CC::FICZ() ) + 0.5 ) * cell_size : 0.0;
+            // Non-dimensionalize value with cell size
+            initial_levelset[i][j][k] = levelset_expression->GetValue( variable_name_levelset_ ) * one_cell_size;
          }
       }
    }
-
 }
 
 /**
- * @brief Evaluates the user input for the initial materials for a node with the given coordinates and expansion.
- * @param origin The origin coordinates of the node.
- * @param smallest_cell_size The smallest possible size of cells in the simulation, i.e. on the maximum level.
- * @param level_factor The refinement factor between the considered level and the finest level, e.g. 4 if level 2 is considered and the maximum is level 4.
- * @return A boolean value for each material indicating whether the material is present in the considered region.
- * @note Works on total cells.
+ * @brief Gives the initial materials for the node with the given id.
+ * @param node_id The id of the node to be initialized.
+ * @return A list of the materials present in the considered node.
  */
-std::vector<bool> InitialCondition::GetInitialMaterials(const std::array<double, 3> origin, const double smallest_cell_size, const unsigned int level_factor) const {
+std::vector<MaterialName> InitialCondition::GetInitialMaterials( std::uint64_t const node_id ) const {
+   // get the origin of this node id
+   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, node_size_on_level_zero_ ) );
+   // bit shift is of type "( unsigned? ) int"
+   unsigned int const level_factor = ( 1 << ( maximum_level_ - LevelOfNode( node_id ) ) );
+   // cell size on maximum level
+   double const cell_size_on_maximum_level = node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << maximum_level_ );
 
-   std::vector<bool> material_is_contained(fluids_.size());
+   //************************************************************************************************************
+   // Vector that is returned (yet not known which size it has)
+   std::vector<MaterialName> materials_contained;
+   std::vector<bool> material_is_contained( material_names_.size() );
 
-   if(fluids_.size() == 1) {
-      material_is_contained[0] = true;
-      return material_is_contained;
+   // Single material can be returned immediately
+   if( material_names_.size() == 1 ) {
+      materials_contained.push_back( material_names_[0] );
+      return materials_contained;
    } else {
 
       // TP here we need non-const variables as UserExpression stores references to them in order to reflect changes
@@ -202,43 +226,70 @@ std::vector<bool> InitialCondition::GetInitialMaterials(const std::array<double,
       double running_y;
       double running_z;
 
-      if(fluids_.size() == 2) {
-         // if we only have two materials (positive, negative) we only consider the sign of the single level-set function
-         // first material is the positive, second one the negative
+      // create all levelset expressions (total number is number of materials - 1). All materials are referred to material One which has a positive value.
+      // All other take a negative value
+      std::vector<std::unique_ptr<UserExpression const>> levelset_expressions;
+      levelset_expressions.reserve( levelset_initial_expressions_.size() );
+      for( auto const& input_expression : levelset_initial_expressions_ ) {
+         levelset_expressions.emplace_back( CreateInputExpression( input_expression, { variable_name_levelset_ }, running_x, running_y, running_z ) );
+      }
 
-         std::string number_phi = phi_expression_[0];
-         UserExpression const phi_expr = CreateInputExpression(number_phi, {variable_name_phi_}, running_x, running_y, running_z);
+      // Level factors for difference between current node level and maximum level of simulation
+      unsigned int const level_factor_y = CC::DIM() != Dimension::One   ? level_factor : 1;
+      unsigned int const level_factor_z = CC::DIM() == Dimension::Three ? level_factor : 1;
 
-         material_is_contained[0] = false; // positive material
-         material_is_contained[1] = false; // negative material
+      // variables required to identify correct assignment of present materials
+      double levelset_value;
+      // Vector containing flags for each material if it was already added for this node
+      std::vector<bool> materials_present( material_names_.size(), false );
 
-         const unsigned int level_factor_y = CC::DIM() != Dimension::One   ? level_factor : 1;
-         const unsigned int level_factor_z = CC::DIM() == Dimension::Three ? level_factor : 1;
+      // In the following loop we run over all cells on the finest level that would cover the same region as the node of interest including its halo region
+      for( unsigned int i = 0; i < level_factor * CC::TCX(); ++i ) {
+         running_x = origin[0] + ( double( i ) - double( level_factor * CC::FICX() ) + 0.5 ) * cell_size_on_maximum_level;
+         for( unsigned int j = 0; j < level_factor_y * CC::TCY(); ++j ) {
+            running_y = CC::DIM() != Dimension::One ? origin[1] + ( double( j ) - double( level_factor_y * CC::FICY() ) + 0.5 ) * cell_size_on_maximum_level : 0.0;
+            for( unsigned int k = 0; k < level_factor_z * CC::TCZ(); ++k ) {
+               running_z = CC::DIM() == Dimension::Three ? origin[2] + ( double( k ) - double( level_factor_z * CC::FICZ() ) + 0.5 ) * cell_size_on_maximum_level : 0.0;
 
-         // in the following loop we run over all cells on the finest level that would cover the same region as the node of interest including its halo region
-         double phi;
-         for(unsigned int i = 0; i < level_factor*CC::TCX(); ++i) {
-            running_x = origin[0] + (double(i) - double(level_factor*CC::FICX()) + 0.5) * smallest_cell_size;
-            for(unsigned int j = 0; j < level_factor_y*CC::TCY(); ++j) {
-               running_y = CC::DIM() != Dimension::One ? origin[1] + (double(j) - double(level_factor_y*CC::FICY()) + 0.5) * smallest_cell_size : 0.0;
-               for(unsigned int k = 0; k < level_factor_z*CC::TCZ(); ++k) {
-                  running_z = CC::DIM() == Dimension::Three ? origin[2] + (double(k) - double(level_factor_z*CC::FICZ()) + 0.5) * smallest_cell_size : 0.0;
-                  phi = phi_expr.GetValue(variable_name_phi_);
-                  if(phi < 0.0) {
-                     material_is_contained[1] = true;
-                  } else {
-                     material_is_contained[0] = true;
+               // Flag that a cell already contains another negative material
+               bool cell_contains_negative_material = false;
+               // counter for the levelset expressions (start at 1 since MaterialOne does not have an expression)
+               unsigned int levelset_counter = 1;
+
+               // Get all levelset values at the current cell
+               for( auto const& levelset_expression : levelset_expressions ) {
+                  levelset_value = levelset_expression->GetValue( variable_name_levelset_ );
+                  if( levelset_value < 0.0 ) {
+                     // If the flag, that a negative material was already found in this cell, is true
+                     // throw error since two negative materials at the same time are not allowed
+                     if( cell_contains_negative_material ) {
+                        throw std::logic_error( "Error! At least two materials have negative levelset values in the same cell. "
+                                                "Check initial levelset conditions for all materials!" );
+                     } else { // Otherwise take the negative and assign it
+                        cell_contains_negative_material = true;
+                        // Only set the flag and append to final vector if not already done for this material
+                        if( !materials_present[levelset_counter] ) {
+                           materials_present[levelset_counter] = true;
+                           materials_contained.push_back( material_names_[levelset_counter] );
+                        }
+                     }
                   }
-                  // if both materials are contained, we can already return
-                  if(material_is_contained[0] && material_is_contained[1]) return material_is_contained;
+                  // increment counter for next expression
+                  levelset_counter++;
                }
+
+               // If no cell has a negative value append the positive (MaterialOne) if not already done
+               if( !cell_contains_negative_material && !materials_present[0] ) {
+                  materials_present[0] = true;
+                  materials_contained.push_back( material_names_[0] );
+               }
+
+               // If all materials are contained, we can already return
+               if( material_names_.size() == materials_contained.size() ) return materials_contained;
             }
          }
-      } else { // real multi-fluid
-         // for multi fluids we have one level-set function for each fluid, thus there is a one-to-one mapping
-         throw std::logic_error("InitialCondition::GetInitialMaterials not implemented yet for multi-fluid");
       }
-   }
 
-   return material_is_contained;
+      return materials_contained;
+   }
 }

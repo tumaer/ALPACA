@@ -74,6 +74,8 @@
 #include "boundary_condition/boundary_specifications.h"
 #include "enums/interface_tag_definition.h"
 #include "topology/node.h"
+#include "utilities/buffer_operations_material.h"
+#include "utilities/buffer_operations_interface.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
@@ -102,10 +104,10 @@ class TimeIntegrator {
      */
    void IntegrateJumpConservatives(Block& block, double const timestep) const {
 
-      for(auto const& location : CC::ANBS()) {
-         double (&boundary_conservatives)[FF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpConservatives(location);
-         double        (&boundary_fluxes)[FF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpFluxes(location);
-         for(unsigned int e = 0; e < FF::ANOE(); ++e) {
+      for( auto const& location : CC::ANBS() ) {
+         double (&boundary_conservatives)[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpConservatives(location);
+         double        (&boundary_fluxes)[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpFluxes(location);
+         for(unsigned int e = 0; e < MF::ANOE(); ++e) {
             for(unsigned int i = 0; i < CC::ICY(); ++i) {
                for(unsigned int j = 0; j < CC::ICZ(); ++j) {
                   //integrate change of conservatives over the block boundary
@@ -128,7 +130,7 @@ class TimeIntegrator {
      */
    void IntegrateConservatives(Block& block, double const timestep) const {
 
-      for(Equation const eq : FF::ASOE()) {
+      for(Equation const eq : MF::ASOE()) {
          double (&u_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(eq);
          double (&u_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer(eq);
          for(unsigned int i = CC::FICX(); i <= CC::LICX(); ++i) {
@@ -152,7 +154,7 @@ class TimeIntegrator {
      */
    void IntegrateHalo(Block& block, double const timestep, std::array<int,3> const start_indices_halo, std::array<int,3> const halo_size) const {
 
-      for(Equation const eq : FF::ASOE()) {
+      for(Equation const eq : MF::ASOE()) {
          double (&u_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(eq);
          double (&u_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer(eq);
 
@@ -174,20 +176,19 @@ class TimeIntegrator {
      * @note  This function works only for RK2 and RK3. In order to use higher-order schemes, it might be necessary to adapt it.
      */
    void IntegrateLevelset(Node& node, double const timestep) const {
-
-      double (&phi_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiRightHandSide();
-      double const (&phi_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhi();
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
+      double (&levelset_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
+      double const(&levelset_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::Levelset);
+      std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const(&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
       for(unsigned int i = 0; i < CC::TCX(); ++i) {
          for(unsigned int j = 0; j < CC::TCY(); ++j) {
             for(unsigned int k = 0; k < CC::TCZ(); ++k) {
                //integrate narrow band including cut-cells
                if(std::abs(interface_tags[i][j][k]) < ITTI(IT::BulkPhase)){
-                  phi_new[i][j][k] = phi_old[i][j][k] + timestep * phi_new[i][j][k];
+                  levelset_new[i][j][k] = levelset_old[i][j][k] + timestep * levelset_new[i][j][k];
                } else {
-                  phi_new[i][j][k] = phi_reinitialized[i][j][k];
+                  levelset_new[i][j][k] = levelset_reinitialized[i][j][k];
                }
             } //k
          } //j
@@ -332,12 +333,12 @@ public:
          if( node.HasLevelset() ) {
             for( auto& mat_block : node.GetPhases() ) {
                std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(mat_block.first);
-               double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetVolumeFraction();
+               double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
    
                double const reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;
                double const material_sign_double = double(material_sign);
    
-               for( Equation const eq : FF::ASOE() ) {
+               for( Equation const eq : MF::ASOE() ) {
                   double const     (&u)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetAverageBuffer(eq);
                   double   (&u_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer(eq);
                   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -350,8 +351,8 @@ public:
                } //equations
             } //phases
 
-            double const       (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhi();
-            double     (&phi_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiInitial();
+            double const       (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+            double     (&phi_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
    
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -362,7 +363,7 @@ public:
             } //i
          } else { //nodes without levelset
             for( auto& mat_block : node.GetPhases() ) {
-               for( Equation const eq : FF::ASOE() ) {
+               for( Equation const eq : MF::ASOE() ) {
                   double const     (&u)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetAverageBuffer(eq);
                   double       (&u_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer(eq);
                   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -390,7 +391,7 @@ public:
          auto const multipliers = GetBufferMultiplier(stage);
    
          for( auto& mat_block : node.GetPhases() ) {
-            for( Equation const eq : FF::ASOE() ) {
+            for( Equation const eq : MF::ASOE() ) {
                double               (&u)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetAverageBuffer(eq);
                double const (&u_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer(eq);
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -404,8 +405,8 @@ public:
          } //phases
    
          if( node.HasLevelset() ) {
-            double               (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhi();
-            double const (&phi_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiInitial();
+            double (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+            double const(&phi_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
    
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -439,15 +440,11 @@ public:
      * @note This function must be inherited properly as soon as other integrators are implemented!
      */
    void SwapBuffersForNextStage(Node& node) const {
-
-      for(auto& mat_block : node.GetPhases()) {
-         for(Equation const eq : FF::ASOE()) {
-            std::swap(mat_block.second.GetRightHandSideBuffer(eq), mat_block.second.GetAverageBuffer(eq));
-         }
-      }
-
-      if(node.HasLevelset()) {
-         std::swap(node.GetLevelsetBlock().GetPhiRightHandSide(), node.GetLevelsetBlock().GetPhi());
+      // swap the conservative buffers
+      BufferOperationsMaterial::SwapConservativeBuffersForNode<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( node );
+      // swap the levelset buffer properly if required
+      if( node.HasLevelset() ) {
+         BufferOperationsInterface::SwapInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Base>( node );
       }
    }
 };

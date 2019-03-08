@@ -100,10 +100,10 @@ public:
    SourceTermSolver& operator=( SourceTermSolver&& ) = delete;
 
    void Sources( std::pair<const MaterialName, Block> const& mat_block, double const cell_size, double const x_block_coordinate,
-      double (&face_fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
+      double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 };
 
 #endif // SOURCE_TERM_SOLVER_H

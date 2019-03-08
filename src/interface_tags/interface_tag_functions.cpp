@@ -68,7 +68,7 @@
 #include "interface_tag_functions.h"
 
 #include "enums/interface_tag_definition.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 #include "levelset/geometry/geometry_calculator.h"
 #include "user_specifications/two_phase_constants.h"
 

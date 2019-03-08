@@ -81,7 +81,7 @@
  *
  *                        = 4  -> was a cut-cell in last RK-step, now empty/full cell away from interface.
  *
- * Extension-band         = 7  -> indicates whether fluid is extended in this region, tags 0, 1, 2 and 3 are dominating,
+ * Extension-band         = 7  -> indicates whether material is extended in this region, tags 0, 1, 2 and 3 are dominating,
  *                                bit-shift gives width of extension (3 currently), keep this in mind when changing extension width!
  *
  * Reinitialization-band  = 8  -> indicates whether levelset is reinitialized in this region, usually one cell-layer more than extension-width,
@@ -101,7 +101,7 @@
 enum class InterfaceTag : std::int8_t { OldCutCell           = 0,    //this cell was a cut-cell in the last iteration and still is
                                         NewCutCell           = 1,    //this cell is now a cut-cell, but was not before
                                         CutCellNeighbor      = 3,    //this cell has a cut-cell neighbor, i.e. its levelset is advected but not reinitialized
-                                        ExtensionBand        = 7,    //the ghost fluid of these cells needs to be filled by extension
+                                        ExtensionBand        = 7,    //the ghost material of these cells needs to be filled by extension
                                         ReinitializationBand = 8,    //the level set of these cells needs to be reinitialized
                                         BulkPhase            = 10,   //these are cells far away from the interface
                                         ScaleSeparatedCell   = 50 }; //these cells were changed during the scale-separation algorithm

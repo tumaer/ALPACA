@@ -72,47 +72,48 @@
 
 /**
  * @brief Computes the flux at one cell face according to used TENO-5 scheme. Also See base class.
- * @note The input cell_size is not required in all stencils, but for unified interface all derived classes inherit it.
- * @note Hotpath function.
  */
-double TENO5::ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const ) const {
+double TENO5::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
+   (void)cell_size;
+
+   // Output error in case something went wrong with the stencil size
    if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size for the TENO5 evaluation is longer than the provided array");
+      throw std::logic_error("Stencil size in TENO5 is longer than provided Array");
    }
 #endif
 
-   // Assign values to v_i to enhance readability
-   double const v1 = array[downstream_stencil_size_ + stencil_offset - 2 * stencil_sign];
-   double const v2 = array[downstream_stencil_size_ + stencil_offset - 1 * stencil_sign];
-   double const v3 = array[downstream_stencil_size_ + stencil_offset];
-   double const v4 = array[downstream_stencil_size_ + stencil_offset + 1 * stencil_sign];
-   double const v5 = array[downstream_stencil_size_ + stencil_offset + 2 * stencil_sign];
+   // Assign values to v_i to make it easier to read
+   const double v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 2 * evaluation_properties[1]];
+   const double v2 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+   const double v3 = array[downstream_stencil_size_ + evaluation_properties[0]];
+   const double v4 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+   const double v5 = array[downstream_stencil_size_ + evaluation_properties[0] + 2 * evaluation_properties[1]];
 
    // Compute smoothness indicators si
-   double const s11 = coef_smoothness_11_ * v2 + coef_smoothness_12_ * v3 + coef_smoothness_13_ * v4;
-   double const s12 = coef_smoothness_14_ * v2 + coef_smoothness_15_ * v4;
+   const double s11 = coef_smoothness_11_ * v2 + coef_smoothness_12_ * v3 + coef_smoothness_13_ * v4;
+   const double s12 = coef_smoothness_14_ * v2 + coef_smoothness_15_ * v4;
 
-   double const s1 = coef_smoothness_1_*s11*s11 + coef_smoothness_2_*s12*s12;
+   const double s1 = coef_smoothness_1_*s11*s11 + coef_smoothness_2_*s12*s12;
 
-   double const s21 = coef_smoothness_21_ * v3 + coef_smoothness_22_ * v4 + coef_smoothness_23_ * v5;
-   double const s22 = coef_smoothness_24_ * v3 + coef_smoothness_25_ * v4 + coef_smoothness_26_ * v5;
+   const double s21 = coef_smoothness_21_ * v3 + coef_smoothness_22_ * v4 + coef_smoothness_23_ * v5;
+   const double s22 = coef_smoothness_24_ * v3 + coef_smoothness_25_ * v4 + coef_smoothness_26_ * v5;
 
-   double const s2 = coef_smoothness_1_*s21*s21 + coef_smoothness_2_*s22*s22;
+   const double s2 = coef_smoothness_1_*s21*s21 + coef_smoothness_2_*s22*s22;
 
-   double const s31 = coef_smoothness_31_ * v1 + coef_smoothness_32_ * v2 + coef_smoothness_33_ * v3;
-   double const s32 = coef_smoothness_34_ * v1 + coef_smoothness_35_ * v2 + coef_smoothness_36_ * v3;
+   const double s31 = coef_smoothness_31_ * v1 + coef_smoothness_32_ * v2 + coef_smoothness_33_ * v3;
+   const double s32 = coef_smoothness_34_ * v1 + coef_smoothness_35_ * v2 + coef_smoothness_36_ * v3;
 
-   double const s3 = coef_smoothness_1_*s31*s31 + coef_smoothness_2_*s32*s32;
+   const double s3 = coef_smoothness_1_*s31*s31 + coef_smoothness_2_*s32*s32;
 
-   double const tau5 = std::abs( s3 - s2 );
+   const double tau5 = std::abs( s3 - s2 );
 
    double a1 = 1.0 + tau5 / (s1 + epsilon_);
    double a2 = 1.0 + tau5 / (s2 + epsilon_);
    double a3 = 1.0 + tau5 / (s3 + epsilon_);
 
-   // Calculate a^6 without using std::pow to improve performance drastically
+   // NF Calculate a^6 without using std::pow to improve performance drastically
    a1 *= (a1*a1);
    a2 *= (a2*a2);
    a3 *= (a3*a3);
@@ -120,25 +121,29 @@ double TENO5::ApplyImplementation( std::vector<double> const& array, int const s
    a2 *= a2;
    a3 *= a3;
 
-   double const one_a_sum_tmp = 1.0 / (a1 + a2 + a3);
+   double one_a_sum = 1.0 / (a1 + a2 + a3);
 
-   double const b1 = (a1 * one_a_sum_tmp) < CT_ ? 0. : 1.;
-   double const b2 = (a2 * one_a_sum_tmp) < CT_ ? 0. : 1.;
-   double const b3 = (a3 * one_a_sum_tmp) < CT_ ? 0. : 1.;
+   double b1 = a1 * one_a_sum;
+   double b2 = a2 * one_a_sum;
+   double b3 = a3 * one_a_sum;
 
-   double const Variation1 = coef_stencils_1_ * v2 + coef_stencils_2_ * v3 + coef_stencils_3_ * v4;
-   double const Variation2 = coef_stencils_4_ * v3 + coef_stencils_5_ * v4 + coef_stencils_6_ * v5;
-   double const Variation3 = coef_stencils_7_ * v1 + coef_stencils_8_ * v2 + coef_stencils_9_ * v3;
+   b1 = b1 < CT_ ? 0. : 1.;
+   b2 = b2 < CT_ ? 0. : 1.;
+   b3 = b3 < CT_ ? 0. : 1.;
+
+   const double Variation1 = coef_stencils_1_ * v2 + coef_stencils_2_ * v3 + coef_stencils_3_ * v4;
+   const double Variation2 = coef_stencils_4_ * v3 + coef_stencils_5_ * v4 + coef_stencils_6_ * v5;
+   const double Variation3 = coef_stencils_7_ * v1 + coef_stencils_8_ * v2 + coef_stencils_9_ * v3;
 
    a1 = d1_ * b1;
    a2 = d2_ * b2;
    a3 = d3_ * b3;
 
-   double const one_a_sum = 1.0 / (a1 + a2 + a3);
+   one_a_sum = 1.0 / (a1 + a2 + a3);
 
-   double const w1 = a1 * one_a_sum;
-   double const w2 = a2 * one_a_sum;
-   double const w3 = a3 * one_a_sum;
+   const double w1 = a1 * one_a_sum;
+   const double w2 = a2 * one_a_sum;
+   const double w3 = a3 * one_a_sum;
 
    return (w1 * Variation1 + w2 * Variation2 + w3 * Variation3) * multiplyer_stencils_;
 }

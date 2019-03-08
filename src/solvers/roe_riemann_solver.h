@@ -71,8 +71,8 @@
 #include "riemann_solver.h"
 #include "block.h"
 #include "enums/direction_definition.h"
-#include "helper_functions.h"
-#include "materials/material.h"
+#include "utilities/helper_functions.h"
+#include "materials/equation_of_state.h"
 #include "materials/material_manager.h"
 #include "user_specifications/compile_time_constants.h"
 
@@ -85,16 +85,16 @@ class RoeRiemannSolver : public RiemannSolver<RoeRiemannSolver> {
    friend RiemannSolver;
 
    template<Direction DIR>
-   void ComputeFluxes( Block const& block, double (&fluxes)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&advection)[FF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
-      double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-      double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-      double (&fluxfunction_wavespeed)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()] ) const;
+   void ComputeFluxes(Block const& b, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&advection)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
+      double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double (&fluxfunction_wavespeed)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()]) const;
 
-   void UpdateImplementation( std::pair<const MaterialName, Block> const& mat_block, double const cell_size,
-      double (&fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const;
+   void UpdateImplementation(std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+      double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const;
 
 public:
    RoeRiemannSolver() = delete;

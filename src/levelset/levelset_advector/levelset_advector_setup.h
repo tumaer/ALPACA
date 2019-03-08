@@ -71,6 +71,8 @@
 #include "user_specifications/numerical_setup.h"
 #include "derivative_stencil_single_levelset_advector.h"
 #include "reconstruction_stencil_single_levelset_advector.h"
+#include "hj_reconstruction_stencil_single_levelset_advector.h"
+#include "hj_derivative_stencil_single_levelset_advector.h"
 
 
 /**
@@ -99,6 +101,20 @@ namespace LevelsetAdvectorSetup {
    template<>
    struct Concretize<LevelsetAdvectors::ReconstructionStencil> {
       typedef ReconstructionStencilSingleLevelsetAdvector type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<LevelsetAdvectors::HjReconstructionStencil> {
+      typedef HjReconstructionStencilSingleLevelsetAdvector type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<LevelsetAdvectors::HjDerivativeStencil> {
+      typedef HjDerivativeStencilSingleLevelsetAdvector type;
    };
 
 }

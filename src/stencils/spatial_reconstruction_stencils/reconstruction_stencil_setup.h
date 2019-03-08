@@ -71,15 +71,16 @@
 #include "user_specifications/stencil_setup.h"
 #include "first_order.h"
 #include "weno3.h"
-#include "fourth_order_central.h"
 #include "weno5.h"
-#include "weno5_z.h"
-#include "weno5_hm.h"
-#include "weno-ao53.h"
-#include "teno5.h"
 #include "weno-cu6.h"
+#include "weno5_z.h"
+#include "teno5.h"
 #include "weno7.h"
 #include "weno9.h"
+#include "weno-ao53.h"
+#include "weno5_hm.h"
+#include "fourth_order_central.h"
+
 
 /**
  * @brief A namespace to get a ReconstructionStencil type based on a specified constexpr.
@@ -133,13 +134,6 @@ namespace ReconstructionStencilSetup {
     * @brief See generic implementation.
     */
    template<>
-   struct Concretize<ReconstructionStencils::WENO5HM> {
-      typedef WENO5HM type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
    struct Concretize<ReconstructionStencils::WENOAO53> {
       typedef WENOAO53 type;
    };
@@ -171,6 +165,14 @@ namespace ReconstructionStencilSetup {
    struct Concretize<ReconstructionStencils::WENO9> {
       typedef WENO9 type;
    };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<ReconstructionStencils::WENO5HM> {
+      typedef WENO5HM type;
+   };
+
 }
 
 #endif // RECONSTRUCTION_STENCIL_SETUP_H

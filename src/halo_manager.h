@@ -73,37 +73,37 @@
 #include "communication/communication_manager.h"
 
 class HaloManager {
-private:
-   Tree& tree_;
-   ExternalHaloManager const& external_halo_manager_;
-   InternalHaloManager& internal_halo_manager_;
-   CommunicationManager& communication_manager_;
-   unsigned int const maximum_level_;
 
+private:
+   Tree & tree_;
+   ExternalHaloManager const& external_halo_manager_;
+   InternalHaloManager & internal_halo_manager_;
+   CommunicationManager const& communication_manager_;
+   unsigned int const maximum_level_;
 
 public:
    HaloManager() = delete;
-   explicit HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager& internal_halo_manager,
-                         CommunicationManager& communication_manager, unsigned int const maximum_level );
-
+   explicit HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager & internal_halo_manager,
+                         CommunicationManager const& communication_manager, unsigned int const maximum_level );
    ~HaloManager() = default;
    HaloManager( HaloManager const& ) = delete;
    HaloManager& operator=( HaloManager const& ) = delete;
    HaloManager( HaloManager&& ) = delete;
    HaloManager& operator=( HaloManager&& ) = delete;
 
-   void FluidHaloUpdate( std::vector<unsigned int> const& levels_ascending, FluidFieldType const field_type, bool const cut_jumps = false );
-   void FluidHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps = false );
-   void FluidHaloUpdateOnLmax( FluidFieldType const field_type, bool const cut_jumps = true );
+   void MaterialHaloUpdate( std::vector<unsigned int> const& levels_ascending, MaterialFieldType const field_type, bool const cut_jumps = false ) const;
+   void MaterialHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps = false ) const;
+   void MaterialHaloUpdateOnLmax( MaterialFieldType const field_type, bool const cut_jumps = true ) const;
+   void MaterialHaloUpdateOnLmaxMultis( MaterialFieldType const field_type ) const;
 
-   void FluidInternalHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps = false );
-   void FluidExternalHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type );
+   void MaterialInternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps = false ) const;
+   void MaterialExternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type ) const;
 
    void InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> const& updated_levels ) const;
-   void InterfaceTagHaloUpdateOnLmax();
+   void InterfaceTagHaloUpdateOnLmax() const;
 
-   void LevelsetHaloUpdateOnLevelList( std::vector<unsigned int> const updated_levels, LevelsetBlockBufferType const halo_type );
-   void LevelsetHaloUpdateOnLmax( LevelsetBlockBufferType const type );
+   void InterfaceHaloUpdateOnLevelList( std::vector<unsigned int> const updated_levels, InterfaceBlockBufferType const halo_type ) const;
+   void InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType const type ) const;
 };
 
 #endif //HALO_MANAGER_H

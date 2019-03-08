@@ -85,14 +85,14 @@ class LevelsetReinitializer {
    friend DerivedLevelsetReinitializer;
 
 protected:
-   HaloManager& halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
    LogWriter& logger_;
 
    /**
     * @brief The default constructor for a LevelsetReinitializer object.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit LevelsetReinitializer( HaloManager& halo_manager ) :
+   explicit LevelsetReinitializer( HaloManager & halo_manager ) :
        halo_manager_( halo_manager ),
        logger_( LogWriter::Instance() )
    {
@@ -112,8 +112,8 @@ public:
     * @param nodes The nodes for which the level-set field is reinitialized.
     * @param stage The current stage of the Runge-Kutta method.
     */
-   void Reinitialize(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedLevelsetReinitializer const&>(*this).ReinitializeImplementation(nodes, stage);
+   void Reinitialize(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
+      static_cast<DerivedLevelsetReinitializer const&>(*this).ReinitializeImplementation(nodes, is_last_stage);
    }
 };
 

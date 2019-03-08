@@ -10,6 +10,7 @@ def main( output_file_full_path ) :
    sp.run( ["sed", "-i", "/Output\ Folder/d", str( output_file_full_path )] )
    sp.run( ["sed", "-i", "/Total\ Time\ Spent/d", str( output_file_full_path )] )
    sp.run( ["sed", "-i", "/Restart\ File/d", str( output_file_full_path )] )
+   sp.run( ["sed", "-i", "/Wall\ clock/d", str( output_file_full_path )] )
 
 def RemoveVolatileStringFromLogFile( file_name ) :
    main( os.path.abspath( os.path.realpath( file_name ) ) )

@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute WENO9 fluxes according to \cite Balsara2000.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to \cite Balsara2000.
  */
 class WENO9 : public Stencil<WENO9> {
 
@@ -199,10 +199,11 @@ class WENO9 : public Stencil<WENO9> {
    // Small values to avoid division by 0, but also to adjust dissipation
    static constexpr double epsilon_weno9_ = 1.0e-10;
 
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 10;
    static constexpr unsigned int downstream_stencil_size_ = 4;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit WENO9() = default;

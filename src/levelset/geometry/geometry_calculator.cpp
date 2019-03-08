@@ -66,9 +66,10 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "geometry_calculator.h"
-#include "stencils/differentiation_utilities.h"
+#include "stencils/stencil_utilities.h"
 #include "enums/interface_tag_definition.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
+#include "user_specifications/two_phase_constants.h"
 
 #include <algorithm>
 #include <cmath>
@@ -353,11 +354,19 @@ bool IsCutCell<CutCellCriteria::ValueBased>(double const (&levelset)[CC::TCX()][
 std::array<double, 3> GetNormal(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
    unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign) {
 
-   std::array<double, 3> normal = DifferentiationUtilities::ComputeGradient<DerivativeStencilSetup::Concretize<normal_calculation_derivative_stencil>::type, double>(levelset, i, j, k, 1.0);
-   double const one_length = 1.0 / std::sqrt( DimensionAwareConsistencyManagedSum(normal[0] * normal[0] , normal[1] * normal[1] , normal[2] * normal[2]) );
+   std::array<double, 3> normal = {0.0, 0.0, 0.0};
+   if constexpr( GeometryCalculationSettings::GeometryStencilType == GeometryStencilType::Reconstruction ) {
+      using ReconstructionStencil = ReconstructionStencilSetup::Concretize<geometry_reconstruction_stencil>::type;
+      normal = SU::GradientVector<ReconstructionStencil>(levelset, i, j, k, 1.0);
+   } else if constexpr( GeometryCalculationSettings::GeometryStencilType == GeometryStencilType::Derivative ) {
+      using DerivativeStencil = DerivativeStencilSetup::Concretize<normal_calculation_derivative_stencil>::type;
+      normal = SU::GradientVector<DerivativeStencil>(levelset, i, j, k, 1.0);
+   }
+   double const one_length = 1.0 / std::sqrt(DimensionAwareConsistencyManagedSum(normal[0] * normal[0] , normal[1] * normal[1] , normal[2] * normal[2]));
    double const multiplicator = material_sign * one_length;
    std::transform(normal.begin(), normal.end(), normal.begin(), [&multiplicator](double const& normal_component) {return normal_component * multiplicator;});
    return normal;
+
 }
 
 /**
@@ -372,19 +381,20 @@ void ComputeInterfaceCurvature(Node const& node, double (&curvature)[CC::TCX()][
     */
    constexpr double dimension_double = double(DTI(CC::DIM()));
 
-   using StencilConcretization = DerivativeStencilSetup::Concretize<curvature_calculation_derivative_stencil>::type;
+   using ReconstructionStencil = ReconstructionStencilSetup::Concretize<geometry_reconstruction_stencil>::type;
+   using Stencil = DerivativeStencilSetup::Concretize<curvature_calculation_derivative_stencil>::type;
 
-   static_assert(2 * StencilConcretization::DownstreamStencilSize() <= CC::HS(), "Halo size not enough to calculate curvature with the chosen stencil. Increase the halo size in compile_time_constants.h or choose another stencil to calculate curvature!");
+   static_assert(2 * (ReconstructionStencil::DownstreamStencilSize() + 1) <= CC::HS(), "Halo size not enough to calculate curvature with the chosen stencil. Increase the halo size in compile_time_constants.h or choose another stencil to calculate curvature!");
 
    /**
     * Offsets in order to also calculate first derivatives in halo cells. This is necessary for the calculation of
     * second derivatives.
     */
-   constexpr unsigned int offset_x = StencilConcretization::DownstreamStencilSize();
-   constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? StencilConcretization::DownstreamStencilSize() : 0;
-   constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? StencilConcretization::DownstreamStencilSize() : 0;
+   constexpr unsigned int offset_x = ReconstructionStencil::DownstreamStencilSize() + 1;
+   constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? ReconstructionStencil::DownstreamStencilSize() + 1: 0;
+   constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? ReconstructionStencil::DownstreamStencilSize() + 1: 0;
 
-   double const (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
    std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
    double const cell_size = node.GetCellSize();
    double const one_cell_size = 1.0 / cell_size;
@@ -402,11 +412,18 @@ void ComputeInterfaceCurvature(Node const& node, double (&curvature)[CC::TCX()][
       }
    }
 
+   std::array<std::array<double, 3>, 3> second_derivatives;
+   std::array<double, 3> gradient;
+
    for(unsigned int i = 0 + offset_x; i < CC::TCX() - offset_x; ++i){
       for(unsigned int j = 0 + offset_y; j < CC::TCY() - offset_y; ++j){
          for(unsigned int k = 0 + offset_z; k < CC::TCZ() - offset_z; ++k){
             if(std::abs(interface_tags[i][j][k]) <= ITTI(IT::ReinitializationBand)){
-               std::array<double, 3> gradient = DifferentiationUtilities::ComputeGradient<StencilConcretization, double>(phi_reinitialized, i, j, k, 1.0);
+               if constexpr( GeometryCalculationSettings::GeometryStencilType == GeometryStencilType::Reconstruction ) {
+                  gradient = SU::GradientVector<ReconstructionStencil>(levelset_reinitialized, i, j, k, 1.0);
+               } else if constexpr( GeometryCalculationSettings::GeometryStencilType == GeometryStencilType::Derivative ) {
+                  gradient = SU::GradientVector<Stencil>(levelset_reinitialized, i, j, k, 1.0);
+               }
                levelset_x[i][j][k] = gradient[0];
                levelset_y[i][j][k] = gradient[1];
                levelset_z[i][j][k] = gradient[2];
@@ -419,8 +436,11 @@ void ComputeInterfaceCurvature(Node const& node, double (&curvature)[CC::TCX()][
       for(unsigned int j = CC::FICY(); j <= CC::LICY(); ++j) {
          for(unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
             if(std::abs(interface_tags[i][j][k]) <= ITTI(IT::NewCutCell)){
-
-               std::array<std::array<double, 3>, 3> const second_derivatives = DifferentiationUtilities::ComputeVectorGradient<StencilConcretization, double>(levelset_x, levelset_y, levelset_z, i, j, k, cell_size);
+               if constexpr( GeometryCalculationSettings::GeometryStencilType == GeometryStencilType::Reconstruction ) {
+                  second_derivatives = SU::JacobianMatrix<ReconstructionStencil>(levelset_x, levelset_y, levelset_z, i, j, k, cell_size);
+               } else if constexpr( GeometryCalculationSettings::GeometryStencilType == GeometryStencilType::Derivative ) {
+                  second_derivatives = SU::JacobianMatrix<Stencil>(levelset_x, levelset_y, levelset_z, i, j, k, cell_size);
+               }
 
                double const first_summand = ConsistencyManagedSum(
                   levelset_x[i][j][k] * levelset_x[i][j][k] * ( second_derivatives[1][1] + second_derivatives[2][2] )
@@ -444,7 +464,7 @@ void ComputeInterfaceCurvature(Node const& node, double (&curvature)[CC::TCX()][
 
                single_cell_curvature /= denominator;
 
-               double const corrected_curvature = (dimension_double - 1.0) * single_cell_curvature / (dimension_double - 1.0 - phi_reinitialized[i][j][k]*cell_size*single_cell_curvature);
+               double const corrected_curvature = (dimension_double - 1.0) * single_cell_curvature / (dimension_double - 1.0 - levelset_reinitialized[i][j][k]*cell_size*single_cell_curvature);
 
                /**
                 * Limit the curvature as described in \cite kang2000boundary.

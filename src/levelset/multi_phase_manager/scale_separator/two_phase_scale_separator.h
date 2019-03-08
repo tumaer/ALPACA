@@ -82,7 +82,7 @@ private:
 public:
 
    TwoPhaseScaleSeparator() = delete;
-   explicit TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager );
+   explicit TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager & halo_manager );
    ~TwoPhaseScaleSeparator() = default;
 
 };

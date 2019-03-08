@@ -70,7 +70,6 @@
 
 #include <cstdint>
 #include "user_specifications/compile_time_constants.h"
-#include "simulation_setup.h"
 #include "enums/norms.h"
 #include "enums/remesh_identifier.h"
 #include "block.h"

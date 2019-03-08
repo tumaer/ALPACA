@@ -83,8 +83,7 @@ private:
 
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
 
-   void ComputeRealFluidTemperature( Node const& node
-                                   , double (&real_fluid_temperature)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   void ComputeRealMaterialTemperature( Node const& node, double (&real_material_temperature)[CC::TCX()][CC::TCY()][CC::TCZ()]) const;
 
 public:
    HeatExchangeFluxes() = delete;

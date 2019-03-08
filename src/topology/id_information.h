@@ -72,7 +72,6 @@
 #include <array>
 #include <vector>
 #include "boundary_condition/boundary_specifications.h"
-#include "simulation_setup.h"
 
 std::uint64_t EastNeighborOfNodeWithId(std::uint64_t const id);
 std::uint64_t WestNeighborOfNodeWithId(std::uint64_t const id);

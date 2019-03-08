@@ -4,7 +4,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-*  \\                                                                                    *
+*  \\\\                                                                                  *
 *  l '>                                                                                  *
 *  | |                                                                                   *
 *  | |                                                                                   *
@@ -12,57 +12,97 @@
 *  ||    ||                                                                              *
 *  ''    ''                                                                              *
 *                                                                                        *
-* ALPACA is a MPI-parallelized C++ code framework to simulate compressible multiphase    *
-* flow physics. It allows for advanced high-resolution sharp-interface modeling          *
-* empowered with efficient multiresolution compression. The modular code structure       *
-* offers a broad flexibility to select among many most-recent numerical methods covering *
-* WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-  *
-* Kutta time integration schemes, level set methods and many more.                       *
+* ALPACA                                                                                 *
+* Copyright (c) 2017-2018 Nikolaus A. Adams and contributors (see AUTHORS list)          *
+* All rights reserved.                                                                   *
+*                                                                                        *
+* Chair of Aerodynamics and Fluid Mechanics                                              *
+* Technical University of Munich                                                         *
 *                                                                                        *
 * This code is developed by the 'Nanoshock group' at the Chair of Aerodynamics and       *
 * Fluid Mechanics, Technical University of Munich.                                       *
 *                                                                                        *
-******************************************************************************************
+* This project has received funding from the European Reseach Council (ERC)              *
+* under the European Union's Horizon 2020 research and innovation programme              *
+* (grant agreement No 667483).                                                           *
 *                                                                                        *
-* LICENSE                                                                                *
-*                                                                                        *
-* ALPACA - Adaptive Level-set PArallel Code Alpaca                                       *
-* Copyright (C) 2020 Nikolaus A. Adams and contributors (see AUTHORS list)               *
-*                                                                                        *
-* This program is free software: you can redistribute it and/or modify it under          *
-* the terms of the GNU General Public License as published by the Free Software          *
-* Foundation version 3.                                                                  *
-*                                                                                        *
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY        *
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A        *
-* PARTICULAR PURPOSE. See the GNU General Public License for more details.               *
-*                                                                                        *
-* You should have received a copy of the GNU General Public License along with           *
-* this program (gpl-3.0.txt).  If not, see <https://www.gnu.org/licenses/gpl-3.0.html>   *
+* ERC Advanced Grant No 667483, Prof. Dr. Nikolaus A. Adams:                             *
+* "NANOSHOCK - Manufacturing Shock Interactions for Innovative Nanoscale Processes"      *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* THIRD-PARTY tools                                                                      *
+* Redistribution and use in source and binary forms, with or without                     *
+* modification, are permitted provided that the following conditions are met:            *
 *                                                                                        *
-* Please note, several third-party tools are used by ALPACA. These tools are not shipped *
-* with ALPACA but available as git submodule (directing to their own repositories).      *
-* All used third-party tools are released under open-source licences, see their own      *
-* license agreement in 3rdParty/ for further details.                                    *
+* 1. Redistributions of source code must retain the above copyright notice,              *
+*    this list of conditions and the following disclaimer.                               *
 *                                                                                        *
-* 1. tiny_xml           : See LICENSE_TINY_XML.txt for more information.                 *
-* 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
-* 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
-* 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 2. Redistributions in binary form must reproduce the above copyright notice            *
+*    this list of conditions and the following disclaimer in the documentation           *
+*    and/or other materials provided with the distribution.                              *
+*                                                                                        *
+* 3. Neither the name of the copyright holder nor the names of its                       *
+*    contributors may be used to endorse or promote products derived from this           *
+*    software without specific prior written permission.                                 *
+*                                                                                        *
+* 4. Any redistribution of substantial fractions of the code as a                        *
+*    different project should preserve the word ALPACA in the name                       *
+*    of the code                                                                         *
+*                                                                                        *
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"            *
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE              *
+* IMPLIED WARRANTIES OF  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE            *
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE              *
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR                    *
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF                   *
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS               *
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN                *
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)                *
+* ARISING IN ANY WAY OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE            *
+* POSSIBILITY OF SUCH DAMAGE.                                                            *
+*                                                                                        *
+* Please note, several third-party tools are used within the ALPACA code under           *
+* their own license agreement.                                                           *
+*                                                                                        *
+* 1. tiny_xml           : TinyXML-2 is released under the zlib license.                  *
+*                         This software is provided 'as-is', without any express or      *
+*                         implied warranty. In no event will the authors be held liable  *
+*                         for any damages arising from the use of this software.         *
+*                         https://opensource.org/licenses/Zlib                           *
+*                         See COPYING_TINY_XML.txt for more information.                 *
+*                                                                                        *
+* 2. expression_toolkit : Free use of the C++ Mathematical Expression Library is         *
+*                         permitted under the guidelines and in accordance with the MIT  *
+*                         License.                                                       *
+*                         https://opensource.org/licenses/MIT                            *
+*                         See COPYING_EXPRESSION_TOOLKIT.txt for more information.       *
+*                                                                                        *
+******************************************************************************************
+*                                                                                        *
+* AUTHORS                                                                                *
+*                                                                                        *
+*   Prof. Dr. Nikolaus A. Adams                                                          *
+*                                                                                        *
+*   Dr. Stefan Adami                                                                     *
+*   Vladimir Bogdanov                                                                    *
+*   Aaron Buhendwa                                                                       *
+*   Nico Fleischmann                                                                     *
+*   Nils Hoppe                                                                           *
+*   Naeimeh Hosseini                                                                     *
+*   Jakob Kaiser                                                                         *
+*   Aleksandr Lunkov                                                                     *
+*   Thomas Paula                                                                         *
+*   Josef Winter                                                                         *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
 * CONTACT                                                                                *
 *                                                                                        *
-* nanoshock@aer.mw.tum.de                                                                *
+*   nanoshock@aer.mw.tum.de                                                              *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, June 13th 2019                                                                 *
 *                                                                                        *
 *****************************************************************************************/
 #include "weno5_hm.h"
@@ -72,58 +112,59 @@
 
 /**
  * @brief Computes the flux at one cell face according to used fifth-order HM-WENO scheme. Also See base class.
- * @note The input cell_size is not required in all stencils, but for unified interface all derived classes inherit it.
- * @note Hotpath function.
  */
-double WENO5HM::ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const ) const {
+double WENO5HM::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
-   if( array.size() < stencil_size_ ) {
-      throw std::logic_error("Stencil size for the WENO5HM evaluation is longer than the provided array");
-   }
+    (void) cell_size;
+
+    // Output error in case something went wrong with the stencil size
+    if( array.size() < stencil_size_ ) {
+        throw std::logic_error( "Stencil size in WENO5-HM is longer than provided Array" );
+    }
 #endif
 
-   // Assign values to v_i to enhance readability
-   double const v1 = array[downstream_stencil_size_ + stencil_offset - 2 * stencil_sign];
-   double const v2 = array[downstream_stencil_size_ + stencil_offset - 1 * stencil_sign];
-   double const v3 = array[downstream_stencil_size_ + stencil_offset];
-   double const v4 = array[downstream_stencil_size_ + stencil_offset + 1 * stencil_sign];
-   double const v5 = array[downstream_stencil_size_ + stencil_offset + 2 * stencil_sign];
+    // Assign values to v_i to make it easier to read
+    const double v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 2 * evaluation_properties[1]];
+    const double v2 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+    const double v3 = array[downstream_stencil_size_ + evaluation_properties[0]];
+    const double v4 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+    const double v5 = array[downstream_stencil_size_ + evaluation_properties[0] + 2 * evaluation_properties[1]];
 
-   // Compute smoothness indicators s_i
-   double const s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2 + coef_smoothness_13_ * v3;
-   double const s12 = coef_smoothness_14_ * v1 + coef_smoothness_15_ * v2 + coef_smoothness_16_ * v3;
+    // Compute smoothness indicators s_i
+    const double s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2 + coef_smoothness_13_ * v3;
+    const double s12 = coef_smoothness_14_ * v1 + coef_smoothness_15_ * v2 + coef_smoothness_16_ * v3;
 
-   double const s1 = coef_smoothness_1_ * s11 * s11 + coef_smoothness_2_ * s12 * s12;
+    const double s1 = coef_smoothness_1_ * s11 * s11 + coef_smoothness_2_ * s12 * s12;
 
-   double const s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3 + coef_smoothness_23_ * v4;
-   double const s22 = coef_smoothness_24_ * v2 + coef_smoothness_25_ * v4;
+    const double s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3 + coef_smoothness_23_ * v4;
+    const double s22 = coef_smoothness_24_ * v2 + coef_smoothness_25_ * v4;
 
-   double const s2 = coef_smoothness_1_ * s21 * s21 + coef_smoothness_2_ * s22 * s22;
+    const double s2 = coef_smoothness_1_ * s21 * s21 + coef_smoothness_2_ * s22 * s22;
 
-   double const s31 = coef_smoothness_31_ * v3 + coef_smoothness_32_ * v4 + coef_smoothness_33_ * v5;
-   double const s32 = coef_smoothness_34_ * v3 + coef_smoothness_35_ * v4 + coef_smoothness_36_ * v5;
+    const double s31 = coef_smoothness_31_ * v3 + coef_smoothness_32_ * v4 + coef_smoothness_33_ * v5;
+    const double s32 = coef_smoothness_34_ * v3 + coef_smoothness_35_ * v4 + coef_smoothness_36_ * v5;
 
-   double const s3 = coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
+    const double s3 = coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
 
-   // New multi-step function that gives higher-order accuracy in transition region
-   double const h1 = 2.0 * s1 + ( ( s1 - s2 ) / ( s1 + s2 + epsilon_ ) ) * ( ( s1 - s2 ) / ( s1 + s2 + epsilon_ ) ) * s2;
-   double const h3 = 2.0 * s3 + ( ( s3 - s2 ) / ( s3 + s2 + epsilon_ ) ) * ( ( s3 - s2 ) / ( s3 + s2 + epsilon_ ) ) * s2;
+    // New multi-step function that gives higher-order accuracy in transition region
+    const double h1 = 2.0 * s1 + ( ( s1 - s2 ) / ( s1 + s2 + epsilon_ ) ) * ( ( s1 - s2 ) / ( s1 + s2 + epsilon_ ) ) * s2;
+    const double h3 = 2.0 * s3 + ( ( s3 - s2 ) / ( s3 + s2 + epsilon_ ) ) * ( ( s3 - s2 ) / ( s3 + s2 + epsilon_ ) ) * s2;
 
-   // Compute weights Note: For epsilon value machine precision is applied.
-   double const tau = std::abs( s1 - s3 );
-   double const a1 = coef_weights_1_ * ( 1.0 + tau / ( s1 + epsilon_ ) );
-   double const a2 = coef_weights_2_ * ( 1.0 + tau / ( h1 + epsilon_ ) + tau / ( h3 + epsilon_ ) );
-   double const a3 = coef_weights_3_ * ( 1.0 + tau / ( s3 + epsilon_ ) );
+    // Compute weights Note: For epsilon value we use machine precision.
+    const double tau = std::abs( s1 - s3 );
+    const double a1 = coef_weights_1_ * ( 1.0 + tau / ( s1 + epsilon_ ) );
+    const double a2 = coef_weights_2_ * ( 1.0 + tau / ( h1 + epsilon_ ) + tau / ( h3 + epsilon_ ) );
+    const double a3 = coef_weights_3_ * ( 1.0 + tau / ( s3 + epsilon_ ) );
 
-   double const one_a_sum = 1.0 / ( a1 + a2 + a3 );
+    const double one_a_sum = 1.0 / ( a1 + a2 + a3 );
 
-   double const w1 = a1 * one_a_sum;
-   double const w2 = a2 * one_a_sum;
-   double const w3 = a3 * one_a_sum;
+    const double w1 = a1 * one_a_sum;
+    const double w2 = a2 * one_a_sum;
+    const double w3 = a3 * one_a_sum;
 
-   // Return weighted average
-   return w1 * ( coef_stencils_1_ * v1 + coef_stencils_2_ * v2 + coef_stencils_3_ * v3 )
-      + w2 * ( coef_stencils_4_ * v2 + coef_stencils_5_ * v3 + coef_stencils_6_ * v4 )
-      + w3 * ( coef_stencils_7_ * v3 + coef_stencils_8_ * v4 + coef_stencils_9_ * v5 );
+    // Return weighteed average
+    return w1 * ( coef_stencils_1_ * v1 + coef_stencils_2_ * v2 + coef_stencils_3_ * v3 )
+         + w2 * ( coef_stencils_4_ * v2 + coef_stencils_5_ * v3 + coef_stencils_6_ * v4 )
+         + w3 * ( coef_stencils_7_ * v3 + coef_stencils_8_ * v4 + coef_stencils_9_ * v5 );
 }

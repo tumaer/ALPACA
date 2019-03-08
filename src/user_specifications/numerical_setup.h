@@ -82,20 +82,20 @@ enum class PhaseManagers {TwoPhase, NumerousPhase};
 constexpr PhaseManagers phase_manager = PhaseManagers::TwoPhase;
 
 // LEVELSET_ADVECTOR
-enum class LevelsetAdvectors {DerivativeStencil, ReconstructionStencil};
-constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::ReconstructionStencil;
+enum class LevelsetAdvectors {DerivativeStencil, ReconstructionStencil, HjReconstructionStencil, HjDerivativeStencil};
+constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::HjReconstructionStencil;
 
 // LEVELSET_REINITIALIZER
 enum class LevelsetReinitializers {Min, Weno, Explicit};
 constexpr LevelsetReinitializers levelset_reinitializer = LevelsetReinitializers::Weno;
 
 // MIXING_METHOD
-enum class CutCellMixers {ApertureBased, NormalBased};
+enum class CutCellMixers {ApertureBased, NormalBased, Lauer};
 constexpr CutCellMixers cut_cell_mixer = CutCellMixers::ApertureBased;
 
 // EXTENSION_METHOD
-enum class Extenders {Iterative, Explicit};
-constexpr Extenders extender = Extenders::Iterative;
+enum class Extenders {Fedkiw, Upwind, Explicit}; 
+constexpr Extenders extender = Extenders::Fedkiw;
 
 // GEOMETRY_CALCULATOR
 enum class GeometryCalculators {MarchingCubes};

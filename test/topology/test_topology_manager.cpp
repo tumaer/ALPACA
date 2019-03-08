@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include <catch.hpp>
 #include "topology/topology_manager.h"
-#include "materials/material_names.h"
+#include "materials/material_definitions.h"
 
 namespace {
    constexpr std::uint64_t root_node_id = 0x1400000;
@@ -78,7 +78,7 @@ namespace {
     * @return Created TopologyManager.
     */
    TopologyManager SingleRootNodeTopoloyWithMaximumLevel( unsigned int const maximum_level = 1 ) {
-      return TopologyManager( maximum_level );
+      return TopologyManager( { 1, 1, 1 }, maximum_level, 0 );
    }
    /**
     * @brief Refines the node on level 0 contained in a topology.
@@ -93,10 +93,10 @@ namespace {
     * @param topology Instance holding the node information (indirect return).
     * @param material Material identifier that should be added.
     */
-   void AddFluidToAllNodes( TopologyManager& topology, MaterialName const material ) {
+   void AddMaterialToAllNodes( TopologyManager& topology, MaterialName const material ) {
       auto all_nodes = topology.DescendantIdsOfNode( root_node_id );
       all_nodes.push_back( root_node_id );
-      std::for_each( all_nodes.begin(), all_nodes.end(), [&topology, material]( std::uint64_t const id ) { topology.AddFluidToNode( id, material ); } );
+      std::for_each( all_nodes.begin(), all_nodes.end(), [&topology, material]( std::uint64_t const id ) { topology.AddMaterialToNode( id, material ); } );
       topology.UpdateTopology();
    }
 }
@@ -133,8 +133,8 @@ SCENARIO( "Topology offsets work properly on differently configured topologies",
          }
       }
       WHEN( "The nodes are distributed on 2 ranks" ) {
-         // For load balancing to work, the nodes must have a weight = fluids inside them
-         AddFluidToAllNodes( topology, MaterialName::StiffenedGas );
+         // For load balancing to work, the nodes must have a weight = material inside them
+         AddMaterialToAllNodes( topology, MaterialName::MaterialOne );
          topology.GetLoadBalancedTopology( 2 );
 
          THEN( "The offset of rank 0 is zero" ) {
@@ -155,19 +155,19 @@ SCENARIO( "The number of multi-phase nodes is correctly reported", "[1rank]" ) {
    GIVEN( "A topology with 8 Leaves on Lmax = 1 and one node on L0" ) {
       TopologyManager topology = SingleRootNodeTopoloyWithMaximumLevel( 2 );
       RefineZerothRootNode( topology );
-      WHEN( "All nodes hold one fuild and the one leaf holds another one" ) {
-         AddFluidToAllNodes( topology, MaterialName::StiffenedGas );
-         topology.AddFluidToNode( 0xA000000, MaterialName::WaterlikeFluid );
+      WHEN( "All nodes hold one material and the one leaf holds another one" ) {
+         AddMaterialToAllNodes( topology, MaterialName::MaterialOne );
+         topology.AddMaterialToNode( 0xA000000, MaterialName::MaterialTwo );
          topology.UpdateTopology();
          THEN( "The multi-node count is 1" ) {
             REQUIRE( topology.MultiPhaseNodeCount() == 1 );
          }
       }
-      WHEN( "All nodes hold one fluid and two leaves and the root node hold another one" ) {
-         AddFluidToAllNodes( topology, MaterialName::StiffenedGas );
-         topology.AddFluidToNode( root_node_id, MaterialName::WaterlikeFluid );
-         topology.AddFluidToNode( 0xA000001, MaterialName::WaterlikeFluid );
-         topology.AddFluidToNode( 0xA000002, MaterialName::WaterlikeFluid );
+      WHEN( "All nodes hold one material and 2 leaves and the root node hold another one" ) {
+         AddMaterialToAllNodes( topology, MaterialName::MaterialOne );
+         topology.AddMaterialToNode( root_node_id, MaterialName::MaterialTwo );
+         topology.AddMaterialToNode( 0xA000001, MaterialName::MaterialTwo );
+         topology.AddMaterialToNode( 0xA000002, MaterialName::MaterialTwo );
          topology.UpdateTopology();
          THEN( "The multi-node count is 3" ) {
             REQUIRE( topology.MultiPhaseNodeCount() == 3 );

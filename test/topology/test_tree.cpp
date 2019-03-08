@@ -84,7 +84,7 @@ SCENARIO( "Retriving nodes from a tree with a different number of nodes on two l
       }
       WHEN( "When the tree holds one parent node" ) {
          Tree tree = Tree( topology, geometric_size, maximum_level );
-         tree.CreateNode( 0x1400000, { MaterialName::StiffenedGas } );
+         tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
          THEN( "The number of nodes on level zero should contain one element and on level 1 zero elements" ) {
             REQUIRE( tree.NodesOnLevel( 0 ).size() == 1 );
             REQUIRE( tree.NodesOnLevel( 1 ).size() == 0 );
@@ -92,9 +92,9 @@ SCENARIO( "Retriving nodes from a tree with a different number of nodes on two l
       }
       WHEN( "When the tree holds one parent node and two child nodes" ) {
          Tree tree = Tree( topology, geometric_size, maximum_level );
-         tree.CreateNode( 0x1400000, { MaterialName::StiffenedGas } );
-         tree.CreateNode( 0xA000000, { MaterialName::StiffenedGas } );
-         tree.CreateNode( 0xA000001, { MaterialName::StiffenedGas } );
+         tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
+         tree.CreateNode( 0xA000000, { MaterialName::MaterialOne } );
+         tree.CreateNode( 0xA000001, { MaterialName::MaterialOne } );
          THEN( "The number of nodes on level zero should contain one element and on level 1 two elements" ) {
             REQUIRE( tree.NodesOnLevel( 0 ).size() == 1 );
             REQUIRE( tree.NodesOnLevel( 1 ).size() == 2 );

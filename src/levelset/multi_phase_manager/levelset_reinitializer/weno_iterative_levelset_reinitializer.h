@@ -78,20 +78,13 @@ class WenoIterativeLevelsetReinitializer : public IterativeLevelsetReinitializer
 
    friend IterativeLevelsetReinitializerBase;
 
-private:
-
-   /**
-    * @brief Constexpr bool to decide whether also cut cells are reinitialized.
-    */
-   static constexpr bool reinitialize_cut_cells_ = true;
-
 protected:
 
-   double ReinitializeSingleNodeImplementation(Node& node) const;
+   double ReinitializeSingleNodeImplementation(Node& node, bool const is_last_stage) const;
 
 public:
    WenoIterativeLevelsetReinitializer() = delete;
-   explicit WenoIterativeLevelsetReinitializer( HaloManager& halo_manager );
+   explicit WenoIterativeLevelsetReinitializer( HaloManager & halo_manager );
    ~WenoIterativeLevelsetReinitializer() = default;
    WenoIterativeLevelsetReinitializer( WenoIterativeLevelsetReinitializer const& ) = delete;
    WenoIterativeLevelsetReinitializer& operator=( WenoIterativeLevelsetReinitializer const& ) = delete;

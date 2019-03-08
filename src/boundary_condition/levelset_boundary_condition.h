@@ -68,7 +68,7 @@
 #ifndef LEVELSET_BOUNDARY_CONDITION_H
 #define LEVELSET_BOUNDARY_CONDITION_H
 
-#include "levelset_block.h"
+#include "interface_block.h"
 #include "topology/node.h"
 
 /**
@@ -91,7 +91,7 @@ public:
     * @param node Node on which the halo update is done
     * @param buffer_type Identifier of the buffer type of the levelset block to be updated
     */
-   virtual void UpdateLevelsetExternal( Node& node, LevelsetBlockBufferType const buffer_type ) const = 0;
+   virtual void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type ) const = 0;
 
    /**
     * @brief Performs all interface tag halo updates in external boundaries.

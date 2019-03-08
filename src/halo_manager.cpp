@@ -65,11 +65,9 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "communication/exchange_types.h"
-#include "multiresolution/multiresolution.h"
-#include "topology/id_information.h"
-#include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "halo_manager.h"
+#include "communication/exchange_types.h"
+#include "topology/id_information.h"
 
 /**
  * @brief Default constructor.
@@ -79,8 +77,8 @@
  * @param communication_manager .
  * @param maximum_level .
  */
-HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager& internal_halo_manager,
-                          CommunicationManager& communication_manager, unsigned int const maximum_level ) :
+HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager & internal_halo_manager,
+                          CommunicationManager const& communication_manager, unsigned int const maximum_level ) :
    tree_( tree ),
    external_halo_manager_( external_halo_manager ),
    internal_halo_manager_( internal_halo_manager ),
@@ -96,7 +94,7 @@ HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_m
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on all specified level. If true: jumps will not be updated on the coarsest level in "upddate_levels".
  */
-void HaloManager::FluidHaloUpdate( std::vector<unsigned int> const& levels_ascending, FluidFieldType const field_type, bool const cut_jumps ) {
+void HaloManager::MaterialHaloUpdate( std::vector<unsigned int> const& levels_ascending, MaterialFieldType const field_type, bool const cut_jumps ) const {
    std::vector<unsigned int> no_jump_update_levels(levels_ascending);
    /* NH 2017-02-20: It may be that no-jump halos are not to be updated on the coarsest level in the input list. Therefore this level is handled separately.
     * Afterwards a normal Halo update is performed on all remaining levels in the input list.
@@ -104,22 +102,22 @@ void HaloManager::FluidHaloUpdate( std::vector<unsigned int> const& levels_ascen
    if( cut_jumps ) {
       unsigned int no_jump_extra_level = no_jump_update_levels.front();
       no_jump_update_levels.erase( no_jump_update_levels.begin() );
-      FluidHaloUpdateOnLevel( no_jump_extra_level, field_type, true );
+      MaterialHaloUpdateOnLevel( no_jump_extra_level, field_type, true );
    }
    for( unsigned int const level : no_jump_update_levels ) {
-      FluidHaloUpdateOnLevel( level, field_type, false );
+      MaterialHaloUpdateOnLevel( level, field_type, false );
    }
 }
 
 /**
- * @brief Adjusts the fluid values in all halo cells, according to their type
+ * @brief Adjusts the material values in all halo cells, according to their type
  * @param level The level on which halos of nodes will be modified.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on specified level. If true: jumps will not be updated on the current level.
  */
-void HaloManager::FluidHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps ) {
-   FluidInternalHaloUpdateOnLevel( level, field_type, cut_jumps );
-   FluidExternalHaloUpdateOnLevel( level, field_type );
+void HaloManager::MaterialHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps ) const {
+   MaterialInternalHaloUpdateOnLevel( level, field_type, cut_jumps );
+   MaterialExternalHaloUpdateOnLevel( level, field_type );
 }
 
 /**
@@ -128,45 +126,52 @@ void HaloManager::FluidHaloUpdateOnLevel( unsigned int const level, FluidFieldTy
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on specified level. If true: jumps will not be updated on the current level.
  */
-void HaloManager::FluidInternalHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps ) {
-   internal_halo_manager_.FluidHaloUpdateOnLevel( level, field_type, cut_jumps );
+void HaloManager::MaterialInternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps ) const {
+   internal_halo_manager_.MaterialHaloUpdateOnLevel( level, field_type, cut_jumps );
 }
 
 /**
- * @brief Adjusts the fluid values in external halo cells, according to their type
+ * @brief Adjusts the material values in external halo cells, according to their type
  * @param level The level on which halos of nodes will be modified.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void HaloManager::FluidExternalHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type ) {
+void HaloManager::MaterialExternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type ) const {
    for( std::tuple<std::uint64_t, BoundaryLocation> const& boundary : communication_manager_.ExternalBoundaries( level ) ) {
-      external_halo_manager_.UpdateFluidExternal( tree_.GetNodeWithId( std::get<0>( boundary ) ), field_type, std::get<1>( boundary ) );
+      external_halo_manager_.UpdateMaterialExternal( tree_.GetNodeWithId( std::get<0>( boundary ) ), field_type, std::get<1>( boundary ) );
    }
 }
 
 /**
- * @brief Adjusts the fluid values in the halo cells on the finest level, according to their type.
+ * @brief Adjusts the material values in the halo cells on the finest level, according to their type.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on specified level. If true: jumps will not be updated on the current level.
  * @note The default value for cut_jumps is true.
  */
-void HaloManager::FluidHaloUpdateOnLmax( FluidFieldType const field_type, bool const cut_jumps ) {
-   FluidHaloUpdateOnLevel( maximum_level_, field_type, cut_jumps );
+void HaloManager::MaterialHaloUpdateOnLmax( MaterialFieldType const field_type, bool const cut_jumps ) const {
+   MaterialHaloUpdateOnLevel( maximum_level_, field_type, cut_jumps );
+}
+
+void HaloManager::MaterialHaloUpdateOnLmaxMultis( MaterialFieldType const field_type ) const {
+   internal_halo_manager_.MaterialHaloUpdateOnMultis( field_type );
+   for( std::tuple<std::uint64_t, BoundaryLocation> const boundary : communication_manager_.ExternalMultiBoundaries() ) {
+      external_halo_manager_.UpdateMaterialExternal( tree_.GetNodeWithId( std::get<0>( boundary ) ), field_type, std::get<1>( boundary ) );
+   }
 }
 
 /**
  * @brief Calls an interface tag halo update on Lmax only.
  */
-void HaloManager::InterfaceTagHaloUpdateOnLmax() {
+void HaloManager::InterfaceTagHaloUpdateOnLmax() const {
    InterfaceTagHaloUpdateOnLevelList( { maximum_level_ } );
 }
 
 /**
- * @brief Calls a Levelset halo update of the specified "levelset-tag (levelset + interface tags)" buffer on Lmax (only!).
+ * @brief Calls a interface halo update of the specified "interface-tag" buffer on Lmax (only!).
  * @param type The identifier of the buffer that is to be updated.
  */
-void HaloManager::LevelsetHaloUpdateOnLmax( LevelsetBlockBufferType const type ) {
-   // perform levelset halo update on Lmax
-   LevelsetHaloUpdateOnLevelList( { maximum_level_ }, type );
+void HaloManager::InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType const type ) const {
+   // perform interface halo update on Lmax
+   InterfaceHaloUpdateOnLevelList( { maximum_level_ }, type );
 }
 
 /**
@@ -186,13 +191,13 @@ void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> c
 }
 
 /**
- * @brief Adjusts the values in the stated levelset block buffer according to their type (symmetry, internal ...).
+ * @brief Adjusts the values in the stated interface block buffer according to their type (symmetry, internal ...).
  * @param updated_levels The levels on which halos of nodes will be modified.
  * @param type The identifier of the buffer that is to be updated.
  */
-void HaloManager::LevelsetHaloUpdateOnLevelList( std::vector<unsigned int> const updated_levels, LevelsetBlockBufferType const type ) {
+void HaloManager::InterfaceHaloUpdateOnLevelList( std::vector<unsigned int> const updated_levels, InterfaceBlockBufferType const type ) const {
    for( auto const& level : updated_levels ) {
-      internal_halo_manager_.LevelsetHaloUpdateOnLevel( level, type );
+      internal_halo_manager_.InterfaceHaloUpdateOnLevel( level, type );
       // Update of domain boundaries
       for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
          std::uint64_t const id = std::get<0>( domain_boundary );
@@ -200,5 +205,4 @@ void HaloManager::LevelsetHaloUpdateOnLevelList( std::vector<unsigned int> const
          external_halo_manager_.UpdateLevelsetExternal( tree_.GetNodeWithId( id ), type, location );
       }
    } //levels
-
 }

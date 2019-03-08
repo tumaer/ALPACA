@@ -67,8 +67,8 @@
 *****************************************************************************************/
 #include "gravitational_force.h"
 
-#include "index_transformations.h"
-#include "mathematical_functions.h"
+#include "utilities/index_transformations.h"
+#include "utilities/mathematical_functions.h"
 
 /**
  * @brief The default constructor of the class.
@@ -85,10 +85,10 @@ GravitationalForce::GravitationalForce( std::array<double, 3> const gravity ) :
  * @param block Block of the considered phase.
  * @param gravity_forces Reference to array of volume forces increments to be filled here (indirect return parameter).
  */
-void GravitationalForce::ComputeForces( Block const& block, double (&gravity_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
+void GravitationalForce::ComputeForces( Block const& block, double (&gravity_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    Conservatives const& conservatives = block.GetAverageBuffer();
-   const double (&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
+   double const(&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {

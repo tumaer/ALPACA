@@ -72,7 +72,7 @@
  * @param block Block of the considered phase.
  * @param volume_forces Reference to array of volume forces increments to be filled here (indirect return parameter).
  */
-void AxisymmetricFluxes::ComputeAxisymmetricContributions( Block const& block, double (&volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
+void AxisymmetricFluxes::ComputeAxisymmetricContributions( Block const& block, double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
    double const cell_size, double const x_block_coordinate ) const {
 
    double const (&velocity_x)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::VelocityX);

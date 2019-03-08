@@ -72,7 +72,7 @@
 #include "topology/id_information.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "enums/interface_tag_definition.h"
-#include "boundary_condition/fluid_boundary_condition.h"
+#include "boundary_condition/material_boundary_condition.h"
 #include "mpi_utilities.h"
 #include "communication/communication_statistics.h"
 
@@ -84,17 +84,19 @@
 CommunicationManager::CommunicationManager(TopologyManager & topology, unsigned int const maximum_level) :
    // Start initializer list
    CommunicationTypes(), // For allocation of the MPI Datatypes
-   topology_(topology),
-   maximum_level_(maximum_level),
-   my_rank_id_(MpiUtilities::MyRankId()),
-   mpi_tag_ub_(MpiUtilities::MpiTagUb()),
-   partner_tag_map_( MpiUtilities::NumberOfRanks(), 0 ),
-   internal_boundaries_(maximum_level_ + 1),
-   internal_boundaries_mpi_(maximum_level_ + 1),
-   internal_boundaries_jump_(maximum_level_ + 1),
-   internal_boundaries_jump_mpi_(maximum_level_ + 1),
-   external_boundaries_(maximum_level_ + 1),
-   boundaries_valid_(maximum_level_ + 1, false) {
+   topology_( topology ),
+   maximum_level_( maximum_level ),
+   my_rank_id_( MpiUtilities::MyRankId() ),
+   mpi_tag_ub_( MpiUtilities::MpiTagUb() ),
+   internal_boundaries_( maximum_level_ + 1 ),
+   internal_boundaries_mpi_( maximum_level_ + 1 ),
+   internal_multi_boundaries_(),
+   internal_multi_boundaries_mpi_(),
+   internal_boundaries_jump_( maximum_level_ + 1 ),
+   internal_boundaries_jump_mpi_( maximum_level_ + 1 ),
+   external_boundaries_( maximum_level_ + 1 ),
+   external_multi_boundaries_(),
+   boundaries_valid_( maximum_level_ + 1, false ) {
    // Initialize cache for Halo Update
    for(unsigned int level = 0; level <= maximum_level_; level++) {
       jump_send_count_.emplace_back(std::array<unsigned int, 3>({ 0, 0, 0 }));
@@ -130,6 +132,11 @@ void CommunicationManager::GenerateNeighborRelationForHaloUpdate(unsigned int co
    internal_boundaries_jump_[level].clear();
    internal_boundaries_jump_mpi_[level].clear();
    external_boundaries_[level].clear();
+   if( level == maximum_level_ ) {
+      internal_multi_boundaries_.clear();
+      internal_multi_boundaries_mpi_.clear();
+      external_multi_boundaries_.clear();
+   }
 
    // Declare temporary variables and reserve maximum possible space for vectors
    jump_send_count_[level] = {0, 0, 0};
@@ -143,6 +150,9 @@ void CommunicationManager::GenerateNeighborRelationForHaloUpdate(unsigned int co
       NeighborsOfNode(global_id, tmp_neighbor_location_vector, tmp_external_id_location_vector);
       if(topology_.NodeIsOnRank(global_id, my_rank_id_)) {
          external_boundaries_[level].insert(external_boundaries_[level].end(), tmp_external_id_location_vector.begin(), tmp_external_id_location_vector.end());
+         if( level == maximum_level_ && topology_.IsNodeMultiPhase( global_id ) ) {
+            external_multi_boundaries_.insert(external_multi_boundaries_.end(), tmp_external_id_location_vector.begin(), tmp_external_id_location_vector.end());
+         }
       }
       for(auto const& neighbor_id_location_element : tmp_neighbor_location_vector) {
          //sort boundary type into vector
@@ -181,6 +191,22 @@ void CommunicationManager::GenerateNeighborRelationForHaloUpdate(unsigned int co
                   internal_boundaries_mpi_[level].push_back(
                      std::make_tuple(std::get<0>(neighbor_id_location_element), OppositeDirection(std::get<1>(neighbor_id_location_element)),
                                      InternalBoundaryType::NoJumpBoundaryMpiSend));
+               }
+            }
+            if( level == maximum_level_ && topology_.IsNodeMultiPhase( global_id ) && topology_.IsNodeMultiPhase( std::get<0>(neighbor_id_location_element) ) ) {
+               if(my_node) {
+                  if(my_neighbor) {
+                     internal_multi_boundaries_.push_back(std::make_tuple(global_id, std::get<1>(neighbor_id_location_element), InternalBoundaryType::NoJumpBoundaryLocal));
+                  } else {
+                     internal_multi_boundaries_mpi_.push_back(
+                           std::make_tuple(global_id, std::get<1>(neighbor_id_location_element), InternalBoundaryType::NoJumpBoundaryMpiRecv));
+                  }
+               } else {
+                  if(my_neighbor) {
+                     internal_multi_boundaries_mpi_.push_back(
+                           std::make_tuple(std::get<0>(neighbor_id_location_element), OppositeDirection(std::get<1>(neighbor_id_location_element)),
+                                           InternalBoundaryType::NoJumpBoundaryMpiSend));
+                  }
                }
             }
          }
@@ -233,7 +259,7 @@ void CommunicationManager::NeighborsOfNode(std::uint64_t const global_id, std::v
 }
 
 /**
- * Tells the communication manager that there was a change in the topology and it needs to generate the fluid boundaries from scratch.
+ * Tells the communication manager that there was a change in the topology and it needs to generate the material boundaries from scratch.
  */
 void CommunicationManager::InvalidateCache() {
    for(unsigned i = 0; i < boundaries_valid_.size(); i++) {
@@ -338,13 +364,27 @@ std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const&
    return internal_boundaries_[level];
 }
 
+const std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> &
+CommunicationManager::InternalMultiBoundariesMpi() const {
+   return internal_multi_boundaries_mpi_;
+}
+
+const std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> &
+CommunicationManager::InternalMultiBoundaries() const {
+   return internal_multi_boundaries_;
+}
+
 /**
  * @brief Gives a reference to the list for a given level holding all external boundary relations
  * @param level Level for which the list should be returned
  * @return List with relations for all external boundary nodes
  */
-std::vector<std::tuple<uint64_t, BoundaryLocation>> const& CommunicationManager::ExternalBoundaries(unsigned int const level) const {
+const std::vector<std::tuple<uint64_t, BoundaryLocation>>& CommunicationManager::ExternalBoundaries( unsigned int const level ) const {
    return external_boundaries_[level];
+}
+
+const std::vector<std::tuple<uint64_t, BoundaryLocation>>& CommunicationManager::ExternalMultiBoundaries() const {
+   return external_multi_boundaries_;
 }
 
 /**
@@ -352,7 +392,7 @@ std::vector<std::tuple<uint64_t, BoundaryLocation>> const& CommunicationManager:
  * @param level Level for which the list should be returned
  * @return List with internal mpi jump boundaries
  */
-bool CommunicationManager::AreBoundariesValid(unsigned const level) const {
+bool CommunicationManager::AreBoundariesValid( unsigned const level ) const {
    return boundaries_valid_[level];
 }
 

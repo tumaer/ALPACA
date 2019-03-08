@@ -73,23 +73,23 @@
 #include "prime_states/prime_state_handler_setup.h"
 
 
-using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
+using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize< prime_state_handler >::type;
 
 /**
  * @brief The TwoPhaseBufferHandler class is a specification of the BufferHandler for two phase simulations.
  */
-class TwoPhaseBufferHandler : public BufferHandler<TwoPhaseBufferHandler> {
+class TwoPhaseBufferHandler : public BufferHandler< TwoPhaseBufferHandler > {
 
    friend BufferHandler;
 
    PrimeStateHandlerConcretization const prime_state_handler_;
 
 private:
-   void TransformToConservativesImplementation(Node& node) const;
-   void TransformToVolumeAveragedConservativesImplementation(Node& node) const;
-   void AdaptConservativesToWellResolvedDistanceFunctionImplementation(Node& node) const;
-   void CalculatePrimesFromIntegratedConservativesImplementation(Node& node) const;
-   void CalculateConservativesFromExtendedPrimesImplementation(Node& node) const;
+   void TransformToConservativesImplementation( Node& node ) const;
+   void TransformToVolumeAveragedConservativesImplementation( Node& node ) const;
+   void AdaptConservativesToWellResolvedDistanceFunctionImplementation( Node& node ) const;
+   void CalculatePrimesFromIntegratedConservativesImplementation( Node& node ) const;
+   void CalculateConservativesFromExtendedPrimesImplementation( Node& node ) const;
 
 public:
    TwoPhaseBufferHandler() = delete;

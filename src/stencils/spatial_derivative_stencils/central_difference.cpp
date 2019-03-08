@@ -66,21 +66,23 @@
 *                                                                                        *
 *****************************************************************************************/
 #include <algorithm>
-#include <stdexcept>
 #include "central_difference.h"
 
 /**
-* @brief Implements a central difference stencil. See also base class.
-* @note The input stencil_sign and stencil_offset is not required in all stencils, but for unified interface all derived classes inherit it.
+* @brief Implements a central difference stencil. Also See base class.
 * @note Hotpath function.
 */
-double CentralDifference::ApplyImplementation( std::vector<double> const& array, int const, int const, double const cell_size ) const {
+double CentralDifference::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
-   if( array.size() < stencil_size_ ) {
-      throw std::logic_error("Stencil size for the central difference evaluation is longer than the provided array");
+   // Suppress Compiler Warning "Wunused. The Input cell_size is not needed in all stencils, but for unified interface all derived inherite it.
+   (void)evaluation_properties;
+
+   // Output error in case something went wrong with the stencil size
+   if(array.size() < stencil_size_) {
+      throw std::logic_error("Stencil size in HOUC is longer than provided Array");
    }
 #endif
 
-   return 0.5 * ( array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ - 1] ) / cell_size;
+   return 0.5 * (array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ - 1]) / cell_size;
 }

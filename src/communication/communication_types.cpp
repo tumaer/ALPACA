@@ -68,7 +68,7 @@
 #include "communication_types.h"
 
 #include "boundary_condition/boundary_specifications.h"
-#include "fluid_fields_definitions.h"
+#include "field_material_definitions.h"
 #include <stdexcept>
 
 /**
@@ -92,20 +92,20 @@ void CommunicationTypes::CreateDataTypes(){
 
    //creates all Datatypes for Halo Updates
    for(unsigned int type = 0; type < 2; type++) {
-      // fluid data types
+      // material data types
       for(BoundaryLocation const location: CC::HBS()){
          //send
-         MPI_Type_create_subarray(3, block_size_.data(), halo_size_[LTI(location)].data(), start_indices_halo_send_[LTI(location)].data(), MPI_ORDER_C, type_[type], &send_types_[type][LTI(location)]);
+         MPI_Type_create_subarray(3, block_size_.data(), halo_size_[LTI(location)].data(), start_indices_halo_send_[LTI(location)].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &send_types_[type][LTI(location)]);
          MPI_Type_commit(&send_types_[type][LTI(location)]);
 
          //recv
-         MPI_Type_create_subarray(3, block_size_.data(), halo_size_[LTI(location)].data(), start_indices_halo_recv_[LTI(location)].data(), MPI_ORDER_C, type_[type], &recv_types_[type][LTI(location)]);
+         MPI_Type_create_subarray(3, block_size_.data(), halo_size_[LTI(location)].data(), start_indices_halo_recv_[LTI(location)].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &recv_types_[type][LTI(location)]);
          MPI_Type_commit(&recv_types_[type][LTI(location)]);
       }
 
       //ProjectLevel representation of child-memory
       for(unsigned int child = 0; child < CC::NOC(); ++child) {
-         MPI_Type_create_subarray(3, block_size_.data(), child_size_.data(), start_index_child_[child].data(), MPI_ORDER_C, type_[type], &averaging_send_[type][child]);
+         MPI_Type_create_subarray(3, block_size_.data(), child_size_.data(), start_index_child_[child].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &averaging_send_[type][child]);
          MPI_Type_commit(&averaging_send_[type][child]);
       }
    }
@@ -132,7 +132,7 @@ void CommunicationTypes::CreateDataTypes(){
 
    int const tc_per_conservative = CC::TCX() * CC::TCY() * CC::TCZ();
    MPI_Type_contiguous(tc_per_conservative, MPI_DOUBLE, &single_conservatives_);
-   int const tc_per_jump = FF::ANOE() * CC::ICY() * CC::ICZ();
+   int const tc_per_jump = MF::ANOE() * CC::ICY() * CC::ICZ();
    MPI_Type_contiguous(tc_per_jump, MPI_DOUBLE, &single_boundary_jump_);
 
    MPI_Type_commit(&single_conservatives_);
@@ -146,7 +146,7 @@ void CommunicationTypes::CreateDataTypes(){
 void CommunicationTypes::FreeTypes(){
 
    for(unsigned int type = 0; type < 2; type++) {
-      // fluid data types
+      // material data types
       for(BoundaryLocation location: CC::HBS()){
          MPI_Type_free(&send_types_[type][LTI(location)]);
          MPI_Type_free(&recv_types_[type][LTI(location)]);

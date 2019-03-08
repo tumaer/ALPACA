@@ -77,16 +77,17 @@ class NumerousPhaseManager : public MultiPhaseManager<NumerousPhaseManager> {
 
    friend MultiPhaseManager;
 
-   void MixImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, const bool is_last_stage = false) const;
-   void ExtendImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void PropagateLevelsetImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void ObtainInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, const bool reset_interface_states = false) const;
-   void InitializeVolumeFractionBufferImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const;
+   void EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, bool const is_last_stage = false ) const;
+   void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const;
+   void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const;
 
 public:
    NumerousPhaseManager() = delete;
-   explicit NumerousPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager );
+   explicit NumerousPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager );
    ~NumerousPhaseManager() = default;
    NumerousPhaseManager( NumerousPhaseManager const& ) = delete;
    NumerousPhaseManager& operator=( NumerousPhaseManager const& ) = delete;

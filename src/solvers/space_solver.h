@@ -103,8 +103,8 @@ public:
    SpaceSolver& operator=( SpaceSolver&& ) = delete;
 
    void UpdateFluxes( Node& node ) const;
-   void ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const;
-   void SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const;
+   void ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
+   void SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
 };
 
 #endif // SPACE_SOLVER_H

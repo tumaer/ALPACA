@@ -69,46 +69,45 @@
 #define BLOCK_H
 
 #include "user_specifications/compile_time_constants.h"
-#include "fluid_fields_definitions.h"
-#include "fluid_field_buffers.h"
 #include "boundary_condition/boundary_specifications.h"
+#include "field_buffer.h"
+#include "field_material_definitions.h"
 
 /**
  * @brief Gives a buffer for the values on the six (in 3D) surfaces of the block.
  */
 struct SurfaceBuffer{
-   double east_[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   double west_[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   double north_[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   double south_[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   double top_[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   double bottom_[FF::ANOE()][CC::ICY()][CC::ICZ()];
+   double east_[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   double west_[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   double north_[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   double south_[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   double top_[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   double bottom_[MF::ANOE()][CC::ICY()][CC::ICZ()];
 };
 // Check Memory Layout at compile time for safe MPI sending (Ensures Compiler did not pad the struct)
-static_assert(sizeof(SurfaceBuffer) == 6*FF::ANOE()*CC::ICY()*CC::ICZ()*sizeof(double),"Surface Struct is not contiguous in Memory");
+static_assert( sizeof(SurfaceBuffer) == 6 * MF::ANOE() * CC::ICY() * CC::ICZ() * sizeof(double), "Surface Struct is not contiguous in Memory" );
 
 /**
  * @brief The Block class holds the data on which the simulation is running. They do NOT manipulate the data themselves, but provide data access
- *        to the solvers and integrators. One Block only contains fluid data for one material. >>A block is always single-phase<<.
+ *        to the solvers and integrators. One Block only contains material data for one material. >>A block is always single-phase<<.
  */
 class Block {
-
+   // buffers for the conservatives (different buffer types required for the integration)
    Conservatives averages_;
    Conservatives right_hand_sides_;
-   Conservatives initial_buffer_;
+   Conservatives initials_;
 
+   // buffers for the primestates (e.g. temperature, pressure, velocity)
    PrimeStates prime_states_;
+
+   //buffer to store location-dependent material parameter (e.g., viscosity, conductivity)
+   Parameters parameters_;
 
    //buffer to save fluxes at internal jump boundaries
    SurfaceBuffer jump_fluxes_;
 
    //buffer to store conservative fluxes at internal jump boundaries
    SurfaceBuffer jump_conservatives_;
-
-   void ResetRightHandSideBuffer();
-   void ResetAverageBuffer();
-   void ResetPrimeStateBuffer();
-   void ResetInitialBuffer();
 
 public:
    explicit Block();
@@ -118,14 +117,19 @@ public:
    Block( Block&& ) = delete;
    Block& operator=( Block&& ) = delete;
 
-   auto GetAverageBuffer(const Equation equation) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetAverageBuffer(const Equation equation) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   // Returning general field buffer
+   auto GetFieldBuffer( MaterialFieldType const field_type, unsigned int const field_index, ConservativeBufferType const conservative_type = ConservativeBufferType::RightHandSide ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetFieldBuffer( MaterialFieldType const field_type, unsigned int const field_index, ConservativeBufferType const conservative_type = ConservativeBufferType::RightHandSide ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   auto GetRightHandSideBuffer(const Equation equation) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetRightHandSideBuffer(const Equation equation) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   // Returning conservative buffers
+   auto GetAverageBuffer( Equation const equation ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetAverageBuffer( Equation const equation ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   auto GetInitialBuffer(const Equation equation) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetInitialBuffer(const Equation equation) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetRightHandSideBuffer( Equation const equation ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetRightHandSideBuffer( Equation const equation ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   auto GetInitialBuffer( Equation const equation ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInitialBuffer( Equation const equation ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    template<ConservativeBufferType C>
    Conservatives& GetConservativeBuffer();
@@ -133,39 +137,45 @@ public:
    template<ConservativeBufferType C>
    Conservatives const& GetConservativeBuffer() const;
 
-   auto GetPrimeStateBuffer(const PrimeState prime_state_type) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetPrimeStateBuffer(const PrimeState prime_state_type) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-
-   auto GetFieldBuffer(const FluidFieldType field_type, const unsigned int field_index, const ConservativeBufferType conservative_type = ConservativeBufferType::RightHandSide) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetFieldBuffer(const FluidFieldType field_type, const unsigned int field_index, const ConservativeBufferType conservative_type = ConservativeBufferType::RightHandSide) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-
-   auto GetBoundaryJumpFluxes(const BoundaryLocation location) -> double (&)[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   auto GetBoundaryJumpFluxes(const BoundaryLocation location) const -> double const (&)[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   auto GetBoundaryJumpConservatives(const BoundaryLocation location) -> double (&)[FF::ANOE()][CC::ICY()][CC::ICZ()];
-   auto GetBoundaryJumpConservatives(const BoundaryLocation location) const -> double const (&)[FF::ANOE()][CC::ICY()][CC::ICZ()];
-
    Conservatives& GetAverageBuffer();
+   Conservatives const& GetAverageBuffer() const;
    Conservatives& GetRightHandSideBuffer();
+   Conservatives const& GetRightHandSideBuffer() const;
    Conservatives& GetInitialBuffer();
-   Conservatives& GetConservativeBuffer(const ConservativeBufferType conservative_type);
+   Conservatives const& GetInitialBuffer() const;
+   Conservatives& GetConservativeBuffer( ConservativeBufferType const conservative_type );
+   Conservatives const& GetConservativeBuffer( ConservativeBufferType const conservative_type ) const;
+
+   // Returning primestate buffers
+   auto GetPrimeStateBuffer( PrimeState const prime_state_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetPrimeStateBuffer( PrimeState const prime_state_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
    PrimeStates& GetPrimeStateBuffer();
-   const Conservatives& GetAverageBuffer() const;
-   const Conservatives& GetRightHandSideBuffer() const;
-   const Conservatives& GetInitialBuffer() const;
-   const Conservatives& GetConservativeBuffer(const ConservativeBufferType conservative_type) const;
-   const PrimeStates& GetPrimeStateBuffer() const;
+   PrimeStates const& GetPrimeStateBuffer() const;
+
+   // returning parameter buffers
+   auto GetParameterBuffer( Parameter const parameter_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetParameterBuffer( Parameter const parameter_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   Parameters& GetParameterBuffer();
+   Parameters const& GetParameterBuffer() const;
+
+   // Returning surface buffer
+   auto GetBoundaryJumpFluxes( BoundaryLocation const location ) -> double (&)[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   auto GetBoundaryJumpFluxes( BoundaryLocation const location ) const -> double const (&)[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   auto GetBoundaryJumpConservatives( BoundaryLocation const location ) -> double (&)[MF::ANOE()][CC::ICY()][CC::ICZ()];
+   auto GetBoundaryJumpConservatives( BoundaryLocation const location ) const -> double const (&)[MF::ANOE()][CC::ICY()][CC::ICZ()];
 
    SurfaceBuffer& GetBoundaryJumpFluxes();
-   const SurfaceBuffer& GetBoundaryJumpFluxes() const;
+   SurfaceBuffer const& GetBoundaryJumpFluxes() const;
    SurfaceBuffer& GetBoundaryJumpConservatives();
-   const SurfaceBuffer& GetBoundaryJumpConservatives() const;
+   SurfaceBuffer const& GetBoundaryJumpConservatives() const;
 
-   void ResetJumpConservatives(const BoundaryLocation location);
-   void ResetJumpFluxes(const BoundaryLocation location);
-
+   void ResetJumpFluxes( BoundaryLocation const location );
+   void ResetJumpConservatives( BoundaryLocation const location );
 };
 
-auto GetBoundaryJump(SurfaceBuffer& jump, const BoundaryLocation location) -> double       (&)[FF::ANOE()][CC::ICY()][CC::ICZ()];
-auto GetBoundaryJump(const SurfaceBuffer& jump, const BoundaryLocation location) -> double const (&)[FF::ANOE()][CC::ICY()][CC::ICZ()];
+auto GetBoundaryJump( SurfaceBuffer& jump, BoundaryLocation const location ) -> double (&)[MF::ANOE()][CC::ICY()][CC::ICZ()];
+auto GetBoundaryJump( SurfaceBuffer const& jump, BoundaryLocation const location ) -> double const (&)[MF::ANOE()][CC::ICY()][CC::ICZ()];
 
 #endif // BLOCK_H

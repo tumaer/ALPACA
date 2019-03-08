@@ -70,9 +70,9 @@
 #include <bitset>
 #include "boundary_condition/boundary_specifications.h"
 #include "topology/id_information.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 #include "enums/interface_tag_definition.h"
-#include "helper_functions.h"
+#include "utilities/string_operations.h"
 
 namespace {
    constexpr unsigned int xyz_look_up_table_[3][8] = {
@@ -138,7 +138,7 @@ void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, Surf
       int j_child = 0;
 
       if(index_one_start >= 0 && index_two_start >= 0){
-         for(unsigned int e = 0; e < FF::ANOE(); ++e){
+         for(unsigned int e = 0; e < MF::ANOE(); ++e){
             i_child = 0;
             // std::ceil need to ensure exactly one iteration if necessary.
             for(unsigned int i=index_one_start; i < index_one_start + std::ceil(double(CC::ICY()) / 2); ++i){
@@ -188,7 +188,7 @@ void Multiresolution::Average( Conservatives const& child_buffer, Conservatives&
    unsigned int j_child = j_child_start;
    unsigned int k_child = k_child_start;
 
-   for( Equation const eq : FF::ASOE()) {
+   for( Equation const eq : MF::ASOE()) {
       auto const& child_values  = child_buffer[eq];
       auto&       parent_values = parent_buffer[eq];
 
@@ -375,7 +375,7 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block co
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
 
-   for( Equation const eq : FF::EWA() ) {
+   for( Equation const eq : MF::EWA() ) {
       double const (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer(eq);
       Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -402,7 +402,7 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& 
 
    double const one_number_of_cells = 1.0 / (CC::TCX()*CC::TCY()*CC::TCZ());
 
-   for( Equation const eq : FF::EWA()) {
+   for( Equation const eq : MF::EWA()) {
       const double (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] =  child.GetRightHandSideBuffer(eq);
       Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
       error_norm = 0.0;
@@ -431,7 +431,7 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Ltwo>( Block const& 
 
    double const one_number_of_cells = 1.0 / (CC::TCX()*CC::TCY()*CC::TCZ());
 
-   for( Equation const eq : FF::EWA() ) {
+   for( Equation const eq : MF::EWA() ) {
       double const (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer(eq);
       Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
       error_norm = 0.0;
@@ -572,9 +572,9 @@ Multiresolution InstantiateMultiresolution( unsigned int const maximum_level, un
    LogWriter& logger = LogWriter::Instance();
    logger.AddBreakLine( true );
    if( maximum_level > 1 ) {
-      logger.LogMessage( "Epsilon Level 0 and Level 1  : " + ToScientificNotationString( thresholder.ThresholdOnLevel( 1 ) ) );
+      logger.LogMessage( "Epsilon Level 0 and Level 1  : " + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( 1 ) ) );
       logger.LogMessage( "Epsilon Level " + std::to_string( maximum_level - 1 ) + " and Level " + std::to_string( maximum_level ) + "  : "
-                         + ToScientificNotationString( thresholder.ThresholdOnLevel( maximum_level ) ) );
+                         + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( maximum_level ) ) );
    } else if( maximum_level == 1 ) {
       logger.LogMessage("Homogenous Mesh - Level 1 cannot be coarsed. Provided Epsilon is ignored");
    } else {

@@ -69,8 +69,8 @@
 #define GHOST_FLUID_EXTENDER_SETUP_H
 
 #include "user_specifications/numerical_setup.h"
-#include "iterative_ghost_fluid_extender.h"
-
+#include "levelset/multi_phase_manager/ghost_fluid_extender/fedkiw_iterative_ghost_fluid_extender.h"
+#include "levelset/multi_phase_manager/ghost_fluid_extender/upwind_iterative_ghost_fluid_extender.h"
 
 /**
  * @brief A namespace to get a GhostFluidExtender type based on a specified constexpr.
@@ -78,7 +78,7 @@
 namespace GhostFluidExtenderSetup {
 
    /**
-    * @brief Function returning the typedef of a GhostFluidExtender based on a constexpr template.
+    * @brief Function returning the typedef of a GhostFluidExtender based on a constexpr template. For each MaterialFieldType an extension exists.
     * 
     * @tparam GhostFluidExtenders The constexpr template parameter to specify the exact GhostFluidExtender type.
     */
@@ -89,10 +89,21 @@ namespace GhostFluidExtenderSetup {
     * @brief See generic implementation.
     */
    template<>
-   struct Concretize<Extenders::Iterative> {
-      typedef IterativeGhostFluidExtender type;
+   struct Concretize<Extenders::Fedkiw> {
+      typedef FedkiwGhostFluidExtender<MaterialFieldType::Conservatives> type_conservatives;
+      typedef FedkiwGhostFluidExtender<MaterialFieldType::PrimeStates> type_primestates;
+      typedef FedkiwGhostFluidExtender<MaterialFieldType::Parameters> type_parameters;
    };
 
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<Extenders::Upwind> {
+      typedef UpwindGhostFluidExtender<MaterialFieldType::Conservatives> type_conservatives;
+      typedef UpwindGhostFluidExtender<MaterialFieldType::PrimeStates> type_primestates;
+      typedef UpwindGhostFluidExtender<MaterialFieldType::Parameters> type_parameters;
+   };
 }
 
 #endif // GHOST_FLUID_EXTENDER_SETUP_H

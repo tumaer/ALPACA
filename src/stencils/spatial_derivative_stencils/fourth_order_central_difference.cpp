@@ -66,22 +66,27 @@
 *                                                                                        *
 *****************************************************************************************/
 #include <algorithm>
-#include <stdexcept>
 #include "fourth_order_central_difference.h"
 
 /**
-* @brief Implements a fourth-order central difference stencil. Also See base class.
-* @note The input stencil_sign and stencil_offset is not required in all stencils, but for unified interface all derived classes inherit it.
+* @brief Implements a fourth order central difference stencil. Also See base class.
 * @note Hotpath function.
 */
-double FourthOrderCentralDifference::ApplyImplementation( std::vector<double> const& array, int const, int const, double const cell_size ) const {
+double FourthOrderCentralDifference::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
+   // Suppresses Compiler Warning "Wunused. The Input cell_size is not needed in all stencils, but for unified interface all derived inherite it.
+   (void)evaluation_properties;
+
+   // Output error in case something went wrong with the stencil size
    if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size for the fourth-order central difference evaluation is longer than the provided array");
+      throw std::logic_error("Stencil size in fourth order central difference is longer than provided Array");
    }
 #endif
 
-   return ( -array[downstream_stencil_size_ + 2] + 8.0 * array[downstream_stencil_size_ + 1]
-      - 8.0 * array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ - 2] ) / ( cell_size * 12.0 );
+   double const denominator = cell_size * 12.0;
+
+   double const result = - array[downstream_stencil_size_ + 2] + 8.0 * array[downstream_stencil_size_ + 1] - 8.0 * array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ - 2];
+
+   return result / denominator;
 }

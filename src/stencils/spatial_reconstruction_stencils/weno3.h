@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute WENO3 fluxes according to \cite Shu1999.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to \cite Shu1999.
  */
 class WENO3 : public Stencil<WENO3> {
 
@@ -94,13 +94,15 @@ class WENO3 : public Stencil<WENO3> {
    static constexpr double coef_stencils_3_ =  1.0/2.0;
    static constexpr double coef_stencils_4_ =  1.0/2.0;
 
+   // Small values to avoid division by 0, but also to adjust dissipation. Optimized according to F. Schranner (same as WENO5)
    static constexpr double epsilon_1_ = 1.0e-6;
-   static constexpr double epsilon_2_ = 1.0e-6;
+   static constexpr double epsilon_2_ = 1.0e-15;
 
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit WENO3() = default;

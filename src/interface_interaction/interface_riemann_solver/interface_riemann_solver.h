@@ -68,7 +68,6 @@
 #ifndef INTERFACE_RIEMANN_SOLVER_H
 #define INTERFACE_RIEMANN_SOLVER_H
 
-
 #include "materials/material_manager.h"
 
 /**
@@ -86,7 +85,7 @@ protected:
 
    /**
     * @brief Constructor for the InterfaceRiemannSolver class.
-    * @param material_manager Contains information about the fluids present in the simulation.
+    * @param material_manager Contains information about the materials present in the simulation.
     */
    explicit InterfaceRiemannSolver( MaterialManager const& material_manager ) : material_manager_( material_manager ) {
       // Empty besides initializer list.

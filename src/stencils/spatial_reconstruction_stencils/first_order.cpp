@@ -71,16 +71,18 @@
 
 /**
  * @brief Computes the flux at one cell face according to a first order scheme. Also See base class.
- * @note The input cell_size and stencil_sign is not required in all stencils, but for unified interface all derived classes inherit it.
- * @note Hotpath function.
  */
-double FirstOrder::ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const, double const ) const {
+double FirstOrder::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
-   if( array.size() < stencil_size_ ) {
-      throw std::logic_error("Stencil size for the first-order evaluation is longer than the provided array");
+   (void)cell_size;
+
+   // Output error in case something went wrong with the stencil size
+   if(array.size() < stencil_size_) {
+      throw std::logic_error("Stencil size in First Order is longer than provided Array");
    }
 #endif
 
-   return array[stencil_offset];
+   // Return left/right value
+   return array[evaluation_properties[0]];
 }

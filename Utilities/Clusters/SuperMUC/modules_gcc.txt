@@ -1,0 +1,9 @@
+export ALPACA_ENVIRONMENT=SNG
+export COMPILER=GCC
+module unload mkl mpi.intel intel
+module load intel/19.1
+module load gcc/9
+module load mpi.intel/2020_gcc
+module load cmake
+module load slurm_setup
+module load hdf5/1.8.20-intel-impi-frt-threadsafe

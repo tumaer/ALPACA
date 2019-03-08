@@ -68,6 +68,9 @@
 #ifndef EIGENVALUE_CALCULATOR_H
 #define EIGENVALUE_CALCULATOR_H
 
+#include <cmath>
+#include "utilities/mathematical_functions.h"
+
 #include "materials/material_manager.h"
 #include "block.h"
 #include "user_specifications/compile_time_constants.h"
@@ -94,8 +97,8 @@ class EigenDecomposition {
       {3, 1, 2}
    }};
 
-   // Using static to cheat constness (for this global varibale okay)
-   static double global_eigenvalues_[DTI(CC::DIM())][FF::ANOE()];
+   // Using static to cheat constness (for this global variable okay - don't do this at home (we are what you a call Experts) ;)
+   static double global_eigenvalues_[DTI(CC::DIM())][MF::ANOE()];
 
 public:
    EigenDecomposition() = delete;
@@ -107,14 +110,14 @@ public:
    EigenDecomposition& operator=( EigenDecomposition&& ) = delete;
 
    template<Direction DIR>
-   void ComputeRoeEigendecomposition( std::pair<const MaterialName, Block> const& mat_block,
-      double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-      double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-      double (&fluxfunction_eigenvalues)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()] ) const;
+   void ComputeRoeEigendecomposition( const std::pair<const MaterialName, Block>& mat_block,
+      double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double (&fluxfunction_eigenvalues)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()] ) const;
 
-   void ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()]) const;
-   void SetGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const;
-   auto GetGlobalEigenvalues() const -> double const (&)[DTI(CC::DIM())][FF::ANOE()];
+   void ComputeMaxEigenvaluesOnBlock(const std::pair<const MaterialName, Block>& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const;
+   void SetGlobalEigenvalues(double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const;
+   auto GetGlobalEigenvalues() const -> double const (&)[DTI(CC::DIM())][MF::ANOE()];
 };
 
 namespace {
@@ -126,10 +129,10 @@ namespace {
     * @param u .
     * @param u_plus_c .
     */
-   inline void SaveForAllFields( double (&eigenvalues)[FF::ANOE()], double const u_minus_c, double const u, double const u_plus_c ) {
+   inline void SaveForAllFields(double (&eigenvalues)[MF::ANOE()], const double u_minus_c, const double u, const double u_plus_c){
       eigenvalues[0]            = u_minus_c;
-      eigenvalues[FF::ANOE()-1] = u_plus_c;
-      for(unsigned int l = 1; l < FF::ANOE() - 1; ++l) {
+      eigenvalues[MF::ANOE()-1] = u_plus_c;
+      for(unsigned int l = 1; l < MF::ANOE()-1; ++l) {
          eigenvalues[l] = u;
       }
    }
@@ -144,10 +147,10 @@ namespace {
  * @note Hotpath function.
  */
 template<Direction DIR>
-void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName const, Block> const& mat_block,
-   double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-   double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()][FF::ANOE()],
-   double (&fluxfunction_eigenvalues)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][FF::ANOE()] ) const {
+void EigenDecomposition::ComputeRoeEigendecomposition( const std::pair<const MaterialName, Block>& mat_block,
+   double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+   double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+   double (&fluxfunction_eigenvalues)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()] ) const {
 
    constexpr int total_to_internal_offset_x = CC::FICX() - 1;
    constexpr int total_to_internal_offset_y = CC::DIM() != Dimension::One   ? int(CC::FICY()) - 1 : -1;
@@ -161,7 +164,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
    constexpr unsigned int y_varying = DIR == Direction::Y ? 1 : 0;
    constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
 
-   // Indices of principal and first/second minor momentum/velocity within the three-packs FF::AME and FF::AV
+   // indices of principal and first/second minor momentum/velocity within the three-packs MF::AME and MF::AV
    constexpr unsigned int principal = direction_momentum_indices_[DTI(DIR)][0];
    constexpr unsigned int minor1    = direction_momentum_indices_[DTI(DIR)][1];
    constexpr unsigned int minor2    = direction_momentum_indices_[DTI(DIR)][2];
@@ -182,7 +185,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
    PrimeStates const& prime_states = block.GetPrimeStateBuffer();
    double const   (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
 
-   double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetGruneisen(material);
+   const double gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen();
 
    for( unsigned int i = start_x; i <= CC::LICX(); ++i ) {
       for( unsigned int j = start_y; j <= CC::LICY(); ++j ) {
@@ -191,9 +194,10 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             unsigned int const in = i + x_varying;
             unsigned int const jn = j + y_varying;
             unsigned int const kn = k + z_varying;
-
-            // This if statement is necessary due to the ghost-fluid method. In ghost-fluid cells which do not lie on the extension band, i.e. therein
-            // we do not have extended or integrated values, the density is zero. Therefore, we cannot compute Roe eigenvalues in those cells.
+            /**
+             * This if statement is necessary due to the ghost-fluid method. In ghost-material cells which do not lie on the extension band, i.e. therein
+             * we do not have extended or integrated values, the density is zero. Therefore, we cannot compute Roe eigenvalues in those cells.
+             */
             if(density[i][j][k] <= 0.0 || density[in][jn][kn] <= 0.0) continue;
 
             // References to write directly to the buffers of the currently considered cell face
@@ -201,48 +205,48 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             auto& right_eigenvector = roe_eigenvectors_right  [i - total_to_internal_offset_x][j - total_to_internal_offset_y][k - total_to_internal_offset_z];
             auto& eigenvalues       = fluxfunction_eigenvalues[i - total_to_internal_offset_x][j - total_to_internal_offset_y][k - total_to_internal_offset_z];
 
-            // Extract required conservatives and primes
-            double const rho_target                 =       density[i][j][k];
-            double const one_rho_target             = 1.0 / density[i][j][k];
-            double const energy_target              =     energy[i][j][k];
-            double const x_momentum_target          = conservatives[Equation::MomentumX][i][j][k];
-            double const y_momentum_target          = CC::DIM() != Dimension::One ? conservatives[Equation::MomentumY][i][j][k] : 0.0;
-            double const z_momentum_target          = CC::DIM() == Dimension::Three ? conservatives[Equation::MomentumZ][i][j][k] : 0.0;
-            double const principal_velocity_target  = prime_states[FF::AV()[principal]][i][j][k];
-            double const minor1_velocity_target     = CC::DIM() != Dimension::One   ? prime_states[FF::AV()[minor1]][i][j][k] : 0.0;
-            double const minor2_velocity_target     = CC::DIM() == Dimension::Three ? prime_states[FF::AV()[minor2]][i][j][k] : 0.0;
-            double const pressure_target            = pressure[i][j][k];
-            double const generalized_psi_target     = material_manager_.GetPsi(material, pressure_target, one_rho_target);
-            double const gruneisen_target           = CC::GruneisenDensityDependent() ? material_manager_.GetGruneisen(material, rho_target) : 0.0;
+            // extract required conservatives and primes
+            const double rho_target                 =       density[i][j][k];
+            const double one_rho_target             = 1.0 / density[i][j][k];
+            const double energy_target              =     energy[i][j][k];
+            const double x_momentum_target          = conservatives[Equation::MomentumX][i][j][k];
+            const double y_momentum_target          = CC::DIM() != Dimension::One ? conservatives[Equation::MomentumY][i][j][k] : 0.0;
+            const double z_momentum_target          = CC::DIM() == Dimension::Three ? conservatives[Equation::MomentumZ][i][j][k] : 0.0;
+            const double principal_velocity_target  = prime_states[MF::AV()[principal]][i][j][k];
+            const double minor1_velocity_target     = CC::DIM() != Dimension::One   ? prime_states[MF::AV()[minor1]][i][j][k] : 0.0;
+            const double minor2_velocity_target     = CC::DIM() == Dimension::Three ? prime_states[MF::AV()[minor2]][i][j][k] : 0.0;
+            const double pressure_target            = pressure[i][j][k];
+            const double generalized_psi_target     = material_manager_.GetMaterial(material).GetEquationOfState().GetPsi(pressure_target, one_rho_target);
+            const double gruneisen_target           = CC::GruneisenDensityDependent() ? material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen(rho_target) : 0.0;
 
-            double const rho_neighbor               =       density[in][jn][kn];
-            double const one_rho_neighbor           = 1.0 / density[in][jn][kn];
-            double const energy_neighbor            =     energy[in][jn][kn];
-            double const x_momentum_neighbor        = conservatives[Equation::MomentumX][in][jn][kn];
-            double const y_momentum_neighbor        = CC::DIM() != Dimension::One ? conservatives[Equation::MomentumY][in][jn][kn] : 0.0;
-            double const z_momentum_neighbor        = CC::DIM() == Dimension::Three ? conservatives[Equation::MomentumZ][in][jn][kn] : 0.0;
-            double const principal_velocity_neighbor= prime_states[FF::AV()[principal]][in][jn][kn];
-            double const minor1_velocity_neighbor   = CC::DIM() != Dimension::One   ? prime_states[FF::AV()[minor1]][in][jn][kn] : 0.0;
-            double const minor2_velocity_neighbor   = CC::DIM() == Dimension::Three ? prime_states[FF::AV()[minor2]][in][jn][kn] : 0.0;
-            double const pressure_neighbor          =   pressure[in][jn][kn];
-            double const generalized_psi_neighbor   = material_manager_.GetPsi(material, pressure_neighbor, one_rho_neighbor);
-            double const gruneisen_neighbor         = CC::GruneisenDensityDependent() ? material_manager_.GetGruneisen(material, rho_neighbor) : 0.0;
+            const double rho_neighbor               =       density[in][jn][kn];
+            const double one_rho_neighbor           = 1.0 / density[in][jn][kn];
+            const double energy_neighbor            =     energy[in][jn][kn];
+            const double x_momentum_neighbor        = conservatives[Equation::MomentumX][in][jn][kn];
+            const double y_momentum_neighbor        = CC::DIM() != Dimension::One ? conservatives[Equation::MomentumY][in][jn][kn] : 0.0;
+            const double z_momentum_neighbor        = CC::DIM() == Dimension::Three ? conservatives[Equation::MomentumZ][in][jn][kn] : 0.0;
+            const double principal_velocity_neighbor= prime_states[MF::AV()[principal]][in][jn][kn];
+            const double minor1_velocity_neighbor   = CC::DIM() != Dimension::One   ? prime_states[MF::AV()[minor1]][in][jn][kn] : 0.0;
+            const double minor2_velocity_neighbor   = CC::DIM() == Dimension::Three ? prime_states[MF::AV()[minor2]][in][jn][kn] : 0.0;
+            const double pressure_neighbor          =   pressure[in][jn][kn];
+            const double generalized_psi_neighbor   = material_manager_.GetMaterial(material).GetEquationOfState().GetPsi(pressure_neighbor, one_rho_neighbor);
+            const double gruneisen_neighbor         = CC::GruneisenDensityDependent() ? material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen(rho_neighbor) : 0.0;
 
-            // Compute expensive and frequently used temporaries
-            double const sqrt_rho_target   = std::sqrt(rho_target);
-            double const sqrt_rho_neighbor = std::sqrt(rho_neighbor);
-            double const rho_div = 1.0 / ( sqrt_rho_target + sqrt_rho_neighbor );
-            double const density_roe_ave = sqrt_rho_target * sqrt_rho_neighbor;
-            double const one_density_roe_ave = 1.0 / density_roe_ave;
+            // compute expensive and frequently used temporaries
+            const double sqrt_rho_target   = std::sqrt(rho_target);
+            const double sqrt_rho_neighbor = std::sqrt(rho_neighbor);
+            const double rho_div = 1.0 / ( sqrt_rho_target + sqrt_rho_neighbor );
+            const double density_roe_ave = sqrt_rho_target * sqrt_rho_neighbor;
+            const double one_density_roe_ave = 1.0 / density_roe_ave;
 
-            // Compute Roe averages
-            double const principal_velocity_roe_ave = ((principal_velocity_target * sqrt_rho_target) + (principal_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
-            double const minor1_velocity_roe_ave = ((minor1_velocity_target * sqrt_rho_target) + (minor1_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
-            double const minor2_velocity_roe_ave = ((minor2_velocity_target * sqrt_rho_target) + (minor2_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
-            double const generalized_psi_roe_ave = ((generalized_psi_target * sqrt_rho_target) + (generalized_psi_neighbor * sqrt_rho_neighbor)) * rho_div;
-            double const gruneisen_roe_ave = CC::GruneisenDensityDependent() ? ((gruneisen_target * sqrt_rho_target) + (gruneisen_neighbor * sqrt_rho_neighbor)) * rho_div : gruneisen_coefficient_material;
-            double const enthalpy_roe_ave = ( material_manager_.GetEnthalpy( material, rho_target,   x_momentum_target,   y_momentum_target,   z_momentum_target,   energy_target )   * sqrt_rho_target
-                                            + material_manager_.GetEnthalpy( material, rho_neighbor, x_momentum_neighbor, y_momentum_neighbor, z_momentum_neighbor, energy_neighbor ) * sqrt_rho_neighbor)
+            // compute Roe averages
+            const double principal_velocity_roe_ave = ((principal_velocity_target * sqrt_rho_target) + (principal_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
+            const double minor1_velocity_roe_ave = ((minor1_velocity_target * sqrt_rho_target) + (minor1_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
+            const double minor2_velocity_roe_ave = ((minor2_velocity_target * sqrt_rho_target) + (minor2_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
+            const double generalized_psi_roe_ave = ((generalized_psi_target * sqrt_rho_target) + (generalized_psi_neighbor * sqrt_rho_neighbor)) * rho_div;
+            const double gruneisen_roe_ave = CC::GruneisenDensityDependent() ? ((gruneisen_target * sqrt_rho_target) + (gruneisen_neighbor * sqrt_rho_neighbor)) * rho_div : gruneisen_coefficient_material;
+            const double enthalpy_roe_ave = ( material_manager_.GetMaterial(material).GetEquationOfState().GetEnthalpy(rho_target,   x_momentum_target,   y_momentum_target,   z_momentum_target,   energy_target )   * sqrt_rho_target
+                                            + material_manager_.GetMaterial(material).GetEquationOfState().GetEnthalpy(rho_neighbor, x_momentum_neighbor, y_momentum_neighbor, z_momentum_neighbor, energy_neighbor ) * sqrt_rho_neighbor)
                                             * rho_div;
 
             // Absolute roe averaged velocity, speed of sound
@@ -261,49 +265,49 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Eigenvector for lambda = u-c
             left_eigenvector[         0     ][ETI(Equation::Mass)       ] = 0.5 * one_cc * (gruneisen_roe_ave*q_squared - gruneisen_roe_ave*enthalpy_roe_ave + (principal_velocity_roe_ave+c) * c);
-            left_eigenvector[         0     ][ETI(FF::AME()[principal]) ] = 0.5 * one_cc * (-principal_velocity_roe_ave * gruneisen_roe_ave - c);
+            left_eigenvector[         0     ][ETI(MF::AME()[principal]) ] = 0.5 * one_cc * (-principal_velocity_roe_ave * gruneisen_roe_ave - c);
             if constexpr( CC::DIM() != Dimension::One )
-               left_eigenvector[      0     ][ETI(FF::AME()[minor1])    ] = 0.5 * one_cc * (-minor1_velocity_roe_ave*gruneisen_roe_ave);
+               left_eigenvector[      0     ][ETI(MF::AME()[minor1])    ] = 0.5 * one_cc * (-minor1_velocity_roe_ave*gruneisen_roe_ave);
             if constexpr( CC::DIM() == Dimension::Three )
-               left_eigenvector[      0     ][ETI(FF::AME()[minor2])    ] = 0.5 * one_cc * (-minor2_velocity_roe_ave*gruneisen_roe_ave);
+               left_eigenvector[      0     ][ETI(MF::AME()[minor2])    ] = 0.5 * one_cc * (-minor2_velocity_roe_ave*gruneisen_roe_ave);
             left_eigenvector[         0     ][ETI(Equation::Energy)     ] = 0.5 * one_cc * gruneisen_roe_ave;
 
             // Eigenvector for lambda = u related to principal momentum direction
             left_eigenvector[   ev_principal][ETI(Equation::Mass)       ] =  one_cc * (enthalpy_roe_ave - q_squared);
-            left_eigenvector[   ev_principal][ETI(FF::AME()[principal]) ] =  one_cc * principal_velocity_roe_ave;
+            left_eigenvector[   ev_principal][ETI(MF::AME()[principal]) ] =  one_cc * principal_velocity_roe_ave;
             if constexpr( CC::DIM() != Dimension::One )
-               left_eigenvector[ev_principal][ETI(FF::AME()[minor1])    ] =  one_cc * minor1_velocity_roe_ave;
+               left_eigenvector[ev_principal][ETI(MF::AME()[minor1])    ] =  one_cc * minor1_velocity_roe_ave;
             if constexpr( CC::DIM() == Dimension::Three )
-               left_eigenvector[ev_principal][ETI(FF::AME()[minor2])    ] =  one_cc * minor2_velocity_roe_ave;
+               left_eigenvector[ev_principal][ETI(MF::AME()[minor2])    ] =  one_cc * minor2_velocity_roe_ave;
             left_eigenvector[   ev_principal][ETI(Equation::Energy)     ] = -one_cc;
 
             if constexpr( CC::DIM() != Dimension::One ) {
                // Additional eigenvector for lambda = u related to second momentum equation (= first minor momentum)
                left_eigenvector[   ev_minor1][ETI(Equation::Mass)       ] = minor1_velocity_roe_ave * one_density_roe_ave;
-               left_eigenvector[   ev_minor1][ETI(FF::AME()[principal]) ] = 0.0;
-               left_eigenvector[   ev_minor1][ETI(FF::AME()[minor1])    ] = -one_density_roe_ave;
+               left_eigenvector[   ev_minor1][ETI(MF::AME()[principal]) ] = 0.0;
+               left_eigenvector[   ev_minor1][ETI(MF::AME()[minor1])    ] = -one_density_roe_ave;
                if constexpr( CC::DIM() == Dimension::Three )
-                  left_eigenvector[ev_minor1][ETI(FF::AME()[minor2])    ] = 0.0;
+                  left_eigenvector[ev_minor1][ETI(MF::AME()[minor2])    ] = 0.0;
                left_eigenvector[   ev_minor1][ETI(Equation::Energy)     ] = 0.0;
             }
 
             if constexpr( CC::DIM() == Dimension::Three ) {
                // Additional eigenvector for lambda = u related to third momentum equation (= second minor momentum)
                left_eigenvector[   ev_minor2][ETI(Equation::Mass)       ] = -minor2_velocity_roe_ave * one_density_roe_ave;
-               left_eigenvector[   ev_minor2][ETI(FF::AME()[principal]) ] = 0.0;
-               left_eigenvector[   ev_minor2][ETI(FF::AME()[minor1])    ] = 0.0;
-               left_eigenvector[   ev_minor2][ETI(FF::AME()[minor2])    ] = one_density_roe_ave;
+               left_eigenvector[   ev_minor2][ETI(MF::AME()[principal]) ] = 0.0;
+               left_eigenvector[   ev_minor2][ETI(MF::AME()[minor1])    ] = 0.0;
+               left_eigenvector[   ev_minor2][ETI(MF::AME()[minor2])    ] = one_density_roe_ave;
                left_eigenvector[   ev_minor2][ETI(Equation::Energy)     ] = 0.0;
             }
 
-            // Eigenvector for lambda = u+c
-            left_eigenvector[   FF::ANOE()-1][ETI(Equation::Mass)       ] = 0.5 * one_cc * (gruneisen_roe_ave*q_squared - gruneisen_roe_ave*enthalpy_roe_ave - (principal_velocity_roe_ave-c) * c);
-            left_eigenvector[   FF::ANOE()-1][ETI(FF::AME()[principal]) ] = 0.5 * one_cc * (-principal_velocity_roe_ave*gruneisen_roe_ave + c);
+            // eigenvector for lambda = u+c
+            left_eigenvector[   MF::ANOE()-1][ETI(Equation::Mass)       ] = 0.5 * one_cc * (gruneisen_roe_ave*q_squared - gruneisen_roe_ave*enthalpy_roe_ave - (principal_velocity_roe_ave-c) * c);
+            left_eigenvector[   MF::ANOE()-1][ETI(MF::AME()[principal]) ] = 0.5 * one_cc * (-principal_velocity_roe_ave*gruneisen_roe_ave + c);
             if constexpr( CC::DIM() != Dimension::One )
-               left_eigenvector[FF::ANOE()-1][ETI(FF::AME()[minor1])    ] = 0.5 * one_cc * (-minor1_velocity_roe_ave*gruneisen_roe_ave);
+               left_eigenvector[MF::ANOE()-1][ETI(MF::AME()[minor1])    ] = 0.5 * one_cc * (-minor1_velocity_roe_ave*gruneisen_roe_ave);
             if constexpr( CC::DIM() == Dimension::Three )
-               left_eigenvector[FF::ANOE()-1][ETI(FF::AME()[minor2])    ] = 0.5 * one_cc * (-minor2_velocity_roe_ave*gruneisen_roe_ave);
-            left_eigenvector[   FF::ANOE()-1][ETI(Equation::Energy)     ] = 0.5 * one_cc * gruneisen_roe_ave;
+               left_eigenvector[MF::ANOE()-1][ETI(MF::AME()[minor2])    ] = 0.5 * one_cc * (-minor2_velocity_roe_ave*gruneisen_roe_ave);
+            left_eigenvector[   MF::ANOE()-1][ETI(Equation::Energy)     ] = 0.5 * one_cc * gruneisen_roe_ave;
 
 
             // RIGHT EIGENVECTORS *********************************************
@@ -316,34 +320,34 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
                right_eigenvector[ETI(Equation::Mass)      ][ev_minor1   ] = 0.0;
             if constexpr( CC::DIM() == Dimension::Three )
                right_eigenvector[ETI(Equation::Mass)      ][ev_minor2   ] = 0.0;
-            right_eigenvector[   ETI(Equation::Mass)      ][FF::ANOE()-1] = 1.0;
+            right_eigenvector[   ETI(Equation::Mass)      ][MF::ANOE()-1] = 1.0;
 
-            // Principal momentum equation entries
-            right_eigenvector[   ETI(FF::AME()[principal])][      0     ] = principal_velocity_roe_ave - c;
-            right_eigenvector[   ETI(FF::AME()[principal])][ev_principal] = gruneisen_roe_ave * principal_velocity_roe_ave;
+            // principal momentum equation entries
+            right_eigenvector[   ETI(MF::AME()[principal])][      0     ] = principal_velocity_roe_ave - c;
+            right_eigenvector[   ETI(MF::AME()[principal])][ev_principal] = gruneisen_roe_ave * principal_velocity_roe_ave;
             if constexpr( CC::DIM() != Dimension::One )
-               right_eigenvector[ETI(FF::AME()[principal])][ev_minor1   ] = 0.0;
+               right_eigenvector[ETI(MF::AME()[principal])][ev_minor1   ] = 0.0;
             if constexpr( CC::DIM() == Dimension::Three )
-               right_eigenvector[ETI(FF::AME()[principal])][ev_minor2   ] = 0.0;
-            right_eigenvector[   ETI(FF::AME()[principal])][FF::ANOE()-1] = principal_velocity_roe_ave + c;
+               right_eigenvector[ETI(MF::AME()[principal])][ev_minor2   ] = 0.0;
+            right_eigenvector[   ETI(MF::AME()[principal])][MF::ANOE()-1] = principal_velocity_roe_ave + c;
 
             if constexpr( CC::DIM() != Dimension::One ) {
-               // First minor momentum equation entries
-               right_eigenvector[   ETI(FF::AME()[minor1])][      0     ] = minor1_velocity_roe_ave;
-               right_eigenvector[   ETI(FF::AME()[minor1])][ev_principal] = gruneisen_roe_ave * minor1_velocity_roe_ave;
-               right_eigenvector[   ETI(FF::AME()[minor1])][ev_minor1   ] = -density_roe_ave;
+               // first minor momentum equation entries
+               right_eigenvector[   ETI(MF::AME()[minor1])][      0     ] = minor1_velocity_roe_ave;
+               right_eigenvector[   ETI(MF::AME()[minor1])][ev_principal] = gruneisen_roe_ave * minor1_velocity_roe_ave;
+               right_eigenvector[   ETI(MF::AME()[minor1])][ev_minor1   ] = -density_roe_ave;
                if constexpr( CC::DIM() == Dimension::Three )
-                  right_eigenvector[ETI(FF::AME()[minor1])][ev_minor2   ] = 0.0;
-               right_eigenvector[   ETI(FF::AME()[minor1])][FF::ANOE()-1] = minor1_velocity_roe_ave;
+                  right_eigenvector[ETI(MF::AME()[minor1])][ev_minor2   ] = 0.0;
+               right_eigenvector[   ETI(MF::AME()[minor1])][MF::ANOE()-1] = minor1_velocity_roe_ave;
             }
 
             if constexpr( CC::DIM() == Dimension::Three ) {
-               // Second minor momentum equation entries
-               right_eigenvector[ETI(FF::AME()[minor2])   ][      0     ] = minor2_velocity_roe_ave;
-               right_eigenvector[ETI(FF::AME()[minor2])   ][ev_principal] = gruneisen_roe_ave * minor2_velocity_roe_ave;
-               right_eigenvector[ETI(FF::AME()[minor2])   ][ev_minor1   ] = 0.0;
-               right_eigenvector[ETI(FF::AME()[minor2])   ][ev_minor2   ] = density_roe_ave;
-               right_eigenvector[ETI(FF::AME()[minor2])   ][FF::ANOE()-1] = minor2_velocity_roe_ave;
+               // second minor momentum equation entries
+               right_eigenvector[ETI(MF::AME()[minor2])   ][      0     ] = minor2_velocity_roe_ave;
+               right_eigenvector[ETI(MF::AME()[minor2])   ][ev_principal] = gruneisen_roe_ave * minor2_velocity_roe_ave;
+               right_eigenvector[ETI(MF::AME()[minor2])   ][ev_minor1   ] = 0.0;
+               right_eigenvector[ETI(MF::AME()[minor2])   ][ev_minor2   ] = density_roe_ave;
+               right_eigenvector[ETI(MF::AME()[minor2])   ][MF::ANOE()-1] = minor2_velocity_roe_ave;
             }
 
             // Energy equation entries
@@ -353,7 +357,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
                right_eigenvector[ETI(Equation::Energy)    ][ev_minor1   ] = -minor1_velocity_roe_ave * density_roe_ave;
             if constexpr( CC::DIM() == Dimension::Three )
                right_eigenvector[ETI(Equation::Energy)    ][ev_minor2   ] = density_roe_ave * minor2_velocity_roe_ave;
-            right_eigenvector[   ETI(Equation::Energy)    ][FF::ANOE()-1] = enthalpy_roe_ave + principal_velocity_roe_ave * c;
+            right_eigenvector[   ETI(Equation::Energy)    ][MF::ANOE()-1] = enthalpy_roe_ave + principal_velocity_roe_ave * c;
 
 
             // EIGENVALUES ****************************************************
@@ -377,8 +381,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Flux-function artificial viscosity -> Local-Lax-Friedrichs eigenvalues
             if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs ) {
-               double const c_target   = material_manager_.GetSpeedOfSound(material, rho_target,   pressure_target);
-               double const c_neighbor = material_manager_.GetSpeedOfSound(material, rho_neighbor, pressure_neighbor);
+               const double c_target   = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_target,   pressure_target);
+               const double c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_neighbor, pressure_neighbor);
 
                SaveForAllFields( eigenvalues,
                   std::max(std::abs(principal_velocity_target - c_target),std::abs(principal_velocity_neighbor - c_neighbor)),
@@ -388,8 +392,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Flux-function artificial viscosity -> LLF-M eigenvalues
             if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
-               double const c_target   = material_manager_.GetSpeedOfSound(material, rho_target,   pressure_target);
-               double const c_neighbor = material_manager_.GetSpeedOfSound(material, rho_neighbor, pressure_neighbor);
+               const double c_target   = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_target,   pressure_target);
+               const double c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_neighbor, pressure_neighbor);
 
                double const c_target_m   = std::min( RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_target )  , c_target );
                double const c_neighbor_m = std::min( RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_neighbor ), c_neighbor );
@@ -402,7 +406,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Flux-function artificial viscosity -> Global-Lax-Friedrichs or LaxFriedrichs scheme
             if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::GlobalLaxFriedrichs ) {
-               for(unsigned int l = 0; l < FF::ANOE(); ++l) {
+               for(unsigned int l = 0; l < MF::ANOE(); ++l) {
                   eigenvalues[l] = global_eigenvalues_[0][l];
                }
             }

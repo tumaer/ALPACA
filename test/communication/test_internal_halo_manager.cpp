@@ -74,23 +74,23 @@
 
 
 SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
-   constexpr MaterialName material_one = MaterialName::StiffenedGas;
-   constexpr MaterialName material_two = MaterialName::StiffenedGas;
+   constexpr MaterialName material_one = MaterialName::MaterialOne;
+   constexpr MaterialName material_two = MaterialName::MaterialTwo;
 
    GIVEN( "A single-level all multi-phase topology with 2x2x2 neighboring nodes" ) {
       constexpr unsigned int maximum_level = 0;
-      TopologyManager two_nodes_level_zero_topo = TopologyManager( maximum_level, 2, 2, 2 );
+      TopologyManager two_nodes_level_zero_topo = TopologyManager( { 2, 2, 2 }, maximum_level, 0 );
       Tree tree = Tree( two_nodes_level_zero_topo, maximum_level, 1.0 );
       for( auto const id : two_nodes_level_zero_topo.LocalLeafIds() ){
-         two_nodes_level_zero_topo.AddFluidToNode( id, material_one );
-         two_nodes_level_zero_topo.AddFluidToNode( id, material_two );
-         tree.CreateNode( id, {material_one} );
+         two_nodes_level_zero_topo.AddMaterialToNode( id, material_one );
+         two_nodes_level_zero_topo.AddMaterialToNode( id, material_two );
+         tree.CreateNode( id, {material_one, material_two} );
       }
       two_nodes_level_zero_topo.UpdateTopology();
 
-      WHEN( "Fluid, interface tag and levelset values are set and halo-updated" ) {
+      WHEN( "Material, interface tag and levelset values are set and halo-updated" ) {
          for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
-            node.SetLevelsetBlock( std::make_unique<LevelsetBlock>( static_cast<double>( id ) ) );
+            node.SetInterfaceBlock( std::make_unique<InterfaceBlock>( static_cast<double>( id ) ) );
             auto& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
             auto& interface_tags = node.GetInterfaceTags();
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -102,11 +102,12 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
                }
             }
          }
+
          CommunicationManager communication = CommunicationManager( two_nodes_level_zero_topo, maximum_level );
          InternalHaloManager internal_halos = InternalHaloManager( tree, two_nodes_level_zero_topo, communication, 1 );
-         internal_halos.FluidHaloUpdateOnLevel( maximum_level, FluidFieldType::Conservatives, false );
+         internal_halos.MaterialHaloUpdateOnLevel( maximum_level, MaterialFieldType::Conservatives, false );
          internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level );
-         internal_halos.LevelsetHaloUpdateOnLevel( maximum_level, LevelsetBlockBufferType::PhiRightHandSide );
+         internal_halos.InterfaceHaloUpdateOnLevel( maximum_level, InterfaceBlockBufferType::LevelsetRightHandSide );
 
          THEN( "The halo values contain the proper values from the neighbor node" ) {
             std::unordered_map<int, std::vector<BoundaryLocation>> sides_to_check_for_id( {
@@ -122,7 +123,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
                auto const& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
                auto const& interface_tags = node.GetInterfaceTags();
-               auto const& levelset = node.GetLevelsetBlock().GetPhiRightHandSide();
+               auto const& levelset = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
                for( auto const& side : sides_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) ) ) {
                   auto const recv_indices = communication.GetStartIndicesHaloRecv( side );
                   auto const size = communication.GetHaloSize( side );
@@ -143,26 +144,26 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
 
    GIVEN( "The simplest all two-phase single-jump topology" ) {
       constexpr unsigned int maximum_level = 1;
-      TopologyManager simple_jump_topo = TopologyManager( maximum_level, 2 );
+      TopologyManager simple_jump_topo = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
       constexpr std::uint64_t jump_parent_id = 0x1400001;
       Tree tree = Tree( simple_jump_topo, maximum_level, 1.0 );
       if( simple_jump_topo.NodeIsOnRank( jump_parent_id, MpiUtilities::MyRankId() ) ) {
-         simple_jump_topo.AddFluidToNode( jump_parent_id, material_one );
-         simple_jump_topo.AddFluidToNode( jump_parent_id, material_two );
-         tree.CreateNode( jump_parent_id, {material_one} );
+         simple_jump_topo.AddMaterialToNode( jump_parent_id, material_one );
+         simple_jump_topo.AddMaterialToNode( jump_parent_id, material_two );
+         tree.CreateNode( jump_parent_id, {material_one, material_two} );
       }
       simple_jump_topo.RefineNodeWithId( jump_parent_id );
       simple_jump_topo.UpdateTopology();
       for( auto const id : simple_jump_topo.LocalLeafIds() ) {
-         simple_jump_topo.AddFluidToNode( id, material_one );
-         simple_jump_topo.AddFluidToNode( id, material_two );
-         tree.CreateNode( id, {material_one} );
+         simple_jump_topo.AddMaterialToNode( id, material_one );
+         simple_jump_topo.AddMaterialToNode( id, material_two );
+         tree.CreateNode( id, {material_one, material_two} );
       }
       simple_jump_topo.UpdateTopology();
 
-      WHEN( "Fluid, interface tag and levelset values are set and halo-updated" ) {
+      WHEN( "Material, interface tag and levelset values are set and halo-updated" ) {
          for( auto& [id, node] : tree.FullNodeList()[maximum_level] ) {
-            node.SetLevelsetBlock( std::make_unique<LevelsetBlock>( static_cast<double>( id ) ) );
+            node.SetInterfaceBlock( std::make_unique<InterfaceBlock>( static_cast<double>( id ) ) );
          }
          for( auto& level : tree.FullNodeList() ) {
             for( auto& [id, node] : level ) {
@@ -180,11 +181,11 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          }
          CommunicationManager communication = CommunicationManager( simple_jump_topo, maximum_level );
          InternalHaloManager internal_halos = InternalHaloManager( tree, simple_jump_topo, communication, 1 );
-         internal_halos.FluidHaloUpdateOnLevel( 0, FluidFieldType::Conservatives, false );
-         internal_halos.FluidHaloUpdateOnLevel( maximum_level, FluidFieldType::Conservatives, false );
+         internal_halos.MaterialHaloUpdateOnLevel( 0, MaterialFieldType::Conservatives, false );
+         internal_halos.MaterialHaloUpdateOnLevel( maximum_level, MaterialFieldType::Conservatives, false );
          internal_halos.InterfaceTagHaloUpdateOnLevel( 0 );
          internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level );
-         internal_halos.LevelsetHaloUpdateOnLevel( maximum_level, LevelsetBlockBufferType::PhiRightHandSide );
+         internal_halos.InterfaceHaloUpdateOnLevel( maximum_level, InterfaceBlockBufferType::LevelsetRightHandSide );
 
          THEN( "The values in the jump halos are correct" )  {
             std::unordered_map<int, BoundaryLocation> side_to_check_for_id( { { 0, BoundaryLocation::East }, { 1, BoundaryLocation::West }, // On level 0 [and 1] (standard)
@@ -194,19 +195,19 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
                auto const& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
                auto const& interface_tags = node.GetInterfaceTags();
-               auto const& levelset = node.GetLevelsetBlock().GetPhiRightHandSide();
+               auto const& levelset = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
                auto const& side = side_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) );
                auto const recv_indices = communication.GetStartIndicesHaloRecv( side );
                auto const size = communication.GetHaloSize( side );
                bool const is_jump = simple_jump_topo.FaceIsJump( id, side );
-               double const fluid_target_value = static_cast<double>( is_jump ? GetNeighborId( ParentIdOfNode( id ), side ) : GetNeighborId( id, side ) );
+               double const material_target_value = static_cast<double>( is_jump ? GetNeighborId( ParentIdOfNode( id ), side ) : GetNeighborId( id, side ) );
                std::uint8_t const tag_target_value = is_jump ? PositionOfNodeAmongSiblings( id ) : PositionOfNodeAmongSiblings( GetNeighborId( id, side ) );
                double const levelset_target_value = static_cast<double>( is_jump ? id : GetNeighborId( id, side ) );
                for( int i = recv_indices[0]; i < size[0] + recv_indices[0]; ++i ) {
                   for( int j = recv_indices[1]; j < size[1] + recv_indices[1]; ++j ) {
                      for( int k = recv_indices[2]; k < size[2] + recv_indices[2]; ++k ) {
                         // Approx function required since some integer IDs cannot be converted exactly to double
-                        REQUIRE( cells[i][j][k] == Approx( fluid_target_value ) );
+                        REQUIRE( cells[i][j][k] == Approx( material_target_value ) );
                         REQUIRE( interface_tags[i][j][k] == tag_target_value );
                         REQUIRE( levelset[i][j][k] == levelset_target_value );
                      }

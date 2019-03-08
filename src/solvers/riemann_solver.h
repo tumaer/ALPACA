@@ -81,7 +81,7 @@ namespace {
     * @return The created index sequence.
     */
    template<std::size_t... RemainingIndices>
-   constexpr std::array<std::array<unsigned int, FF::ANOE()>, DTI(CC::DIM())> MakeConservativeEquationSummationSequence(std::index_sequence<RemainingIndices...> const) {
+   constexpr std::array<std::array<unsigned int, MF::ANOE()>, DTI(CC::DIM())> MakeConservativeEquationSummationSequence(std::index_sequence<RemainingIndices...> const) {
 #if DIMENSION == 1
       return {{ {ETI(Equation::Mass), ETI(Equation::MomentumX), ETI(Equation::Energy), (RemainingIndices+DTI(CC::DIM())+2)...} }};
 #elif DIMENSION == 2
@@ -100,7 +100,7 @@ namespace {
     * @return The created index sequence.
     */
    template<std::size_t... RemainingIndices>
-   constexpr std::array<std::array<unsigned int, FF::ANOE()-2>, DTI(CC::DIM())> MakeCharacteristicFieldSummationSequence(std::index_sequence<RemainingIndices...> const) {
+   constexpr std::array<std::array<unsigned int, MF::ANOE()-2>, DTI(CC::DIM())> MakeCharacteristicFieldSummationSequence(std::index_sequence<RemainingIndices...> const) {
 #if DIMENSION == 1
       return {{ {1, (RemainingIndices+DTI(CC::DIM())+1)...} }};
 #elif DIMENSION == 2
@@ -121,8 +121,8 @@ class RiemannSolver {
 
    friend DerivedRiemannSolver;
 
-   static constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence(std::make_index_sequence<FF::ANOE() - DTI(CC::DIM()) - 2>{});
-   static constexpr auto  characteristic_field_summation_sequence_ =  MakeCharacteristicFieldSummationSequence(std::make_index_sequence<FF::ANOE() - DTI(CC::DIM()) - 2>{});
+   static constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence(std::make_index_sequence<MF::ANOE() - DTI(CC::DIM()) - 2>{});
+   static constexpr auto  characteristic_field_summation_sequence_ =  MakeCharacteristicFieldSummationSequence(std::make_index_sequence<MF::ANOE() - DTI(CC::DIM()) - 2>{});
 
    const EigenDecomposition& eigendecomposition_calculator_;
    const MaterialManager& material_manager_;
@@ -149,11 +149,11 @@ public:
     * @param fluxes_x, fluxes_y, fluxes_z The fluxes over the cell faces as computed by this Riemann solver.
     * Indirect return parameter.
     */
-   void Update( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-      double (&fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const {
-      static_cast<DerivedRiemannSolver const&>(*this).UpdateImplementation( mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z );
+   void Update(const std::pair<MaterialName const, Block>& mat_block, double const cell_size,
+      double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const {
+      static_cast<DerivedRiemannSolver const&>(*this).UpdateImplementation(mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z);
    }
 };
 

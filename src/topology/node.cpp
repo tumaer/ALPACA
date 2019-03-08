@@ -98,13 +98,13 @@ Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::ve
  * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$
  * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
  * @param initial_interface_tags Buffer containing the full field of interface tags for this node
- * @param levelset_block Levelset block that is added to the node
+ * @param interface_block Interface block that is added to the node
  */
 Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
-   std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<LevelsetBlock> levelset_block) :
+   std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block) :
    node_size_(DomainSizeOfId(id,node_size_on_level_zero)),
    node_x_coordinate_(DomainCoordinatesOfId(id,node_size_)[0]),
-   levelset_block_(std::move(levelset_block))
+   interface_block_(std::move(interface_block))
 {
    for(MaterialName const& material : materials) {
       phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
@@ -144,8 +144,8 @@ double Node::GetCellSize() const {
 }
 
 /**
- * @brief Returns the fluid data in a single-phase node.
- * @return The fluid data bundled in a Block object.
+ * @brief Returns the material data in a single-phase node.
+ * @return The material data bundled in a Block object.
  */
 Block& Node::GetSinglePhase() {
 #ifndef PERFORMANCE
@@ -210,9 +210,9 @@ std::unordered_map<MaterialName, Block> const& Node::GetPhases() const {
 }
 
 /**
- * @brief Returns the fluid data of the respective material.
+ * @brief Returns the material data of the respective material.
  * @param material Name of the material for which the block should be returned
- * @return The fluid data as bundled in a Block object.
+ * @return The material data as bundled in a Block object.
  */
 Block& Node::GetPhaseByMaterial(MaterialName const material) {
    return phases_.at(material);
@@ -256,42 +256,42 @@ bool Node::ContainsMaterial(MaterialName const material) const {
 }
 
 /**
- * @brief Returns the LevelsetBlock of the node if it exists. Errors otherwise.
- * @return LevelsetBlock of the Node.
+ * @brief Returns the InterfaceBlock of the node if it exists. Errors otherwise.
+ * @return InterfaceBlock of the Node.
  */
-LevelsetBlock& Node::GetLevelsetBlock() {
+InterfaceBlock& Node::GetInterfaceBlock() {
 #ifndef PERFORMANCE
-   if(levelset_block_ == nullptr) {
-      throw std::logic_error("Do not request a LevelsetBlock on a Node that does not have one");
+   if(interface_block_ == nullptr) {
+      throw std::logic_error("Do not request a InterfaceBlock on a Node that does not have one");
    } else {
-      return *levelset_block_;
+      return *interface_block_;
    }
 #else
-   return *levelset_block_;
+   return *interface_block_;
 #endif
 }
 
 /**
- * @brief Const overload of GetLevelsetBlock. See there for details.
+ * @brief Const overload of GetInterfaceBlock. See there for details.
  */
-LevelsetBlock const& Node::GetLevelsetBlock() const {
+InterfaceBlock const& Node::GetInterfaceBlock() const {
 #ifndef PERFORMANCE
-   if(levelset_block_ == nullptr) {
-      throw std::logic_error("Do not request a LevelsetBlock on a Node that does not have one");
+   if(interface_block_ == nullptr) {
+      throw std::logic_error("Do not request a InterfaceBlock on a Node that does not have one");
    } else {
-      return *levelset_block_;
+      return *interface_block_;
    }
 #else
-   return *levelset_block_;
+   return *interface_block_;
 #endif
 }
 
 /**
  * @brief Sets the levelset block of this node. If nullptr is given (default) the current levelset block is released.
- * @param levelset_block The new levelset block for this node or empty.
+ * @param interface_block The new levelset block for this node or empty.
  */
-void Node::SetLevelsetBlock(std::unique_ptr<LevelsetBlock> levelset_block) {
-   levelset_block_ = std::move(levelset_block);
+void Node::SetInterfaceBlock(std::unique_ptr<InterfaceBlock> interface_block) {
+   interface_block_ = std::move(interface_block);
 }
 
 /**
@@ -322,10 +322,10 @@ auto Node::GetInterfaceTags() const -> std::int8_t const (&)[CC::TCX()][CC::TCY(
 }
 
 /**
- * @brief Indicates whether or not the node has a LevelsetBlock.
- * @return True if the node has a LevelsetBlock, false otherwise.
+ * @brief Indicates whether or not the node has a InterfaceBlock.
+ * @return True if the node has a InterfaceBlock, false otherwise.
  */
 bool Node::HasLevelset() const {
-   return levelset_block_ == nullptr ? false : true;
+   return interface_block_ == nullptr ? false : true;
 }
 

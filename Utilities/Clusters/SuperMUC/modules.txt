@@ -1,8 +1,0 @@
-export ALPACA_ENVIRONMENT=LRZ
-module unload mkl mpi.intel intel
-module load slurm_setup
-module load gcc/8
-module load intel/19.0
-module load mpi.intel/2019
-module load cmake
-module load hdf5/1.8.20-intel-impi-frt-threadsafe

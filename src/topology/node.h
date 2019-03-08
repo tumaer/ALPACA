@@ -73,13 +73,13 @@
 #include <memory>
 
 #include "boundary_condition/boundary_specifications.h"
-#include "materials/material_names.h"
+#include "materials/material_definitions.h"
 #include "block.h"
-#include "levelset_block.h"
+#include "interface_block.h"
 #include "enums/interface_tag_definition.h"
 
 /**
- * @brief Nodes are the members in the tree. A node holds a block for every phase it contains; the Block then holds the fluid data.
+ * @brief Nodes are the members in the tree. A node holds a block for every phase it contains; the Block then holds the material data.
  *        Node is a container that gathers information common for all phases at a given position, as e.g. Boundary Condition types. Every node
  *        has a unique index for identification, in particular with respect to MPI.
  */
@@ -92,14 +92,14 @@ class Node {
    //type std::int8_t due to definition of enum InterfaceTag. Needs to be changed in case the enum type changes.
    std::int8_t interface_tags_[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   std::unique_ptr<LevelsetBlock> levelset_block_;
+   std::unique_ptr<InterfaceBlock> interface_block_;
 
 public:
    Node() = delete;
    explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
                   std::int8_t const initial_interface_tag = ITTI( IT::OldCutCell ) );
    explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
-                  std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<LevelsetBlock> levelset_block = nullptr );
+                  std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block = nullptr );
    Node( const Node& ) = delete;
    Node& operator=( const Node& ) = delete;
    Node( Node&& ) = delete;
@@ -125,10 +125,9 @@ public:
    void RemovePhase(const MaterialName material);
    bool ContainsMaterial(const MaterialName material) const;
 
-   // Functions to get levelset data of the node 
-   LevelsetBlock& GetLevelsetBlock();
-   LevelsetBlock const& GetLevelsetBlock() const;
-   void SetLevelsetBlock( std::unique_ptr<LevelsetBlock> levelset_block = nullptr );
+   InterfaceBlock& GetInterfaceBlock();
+   InterfaceBlock const& GetInterfaceBlock() const;
+   void SetInterfaceBlock( std::unique_ptr<InterfaceBlock> interface_block = nullptr );
    bool HasLevelset() const;
 
    std::int8_t GetUniformInterfaceTag() const;

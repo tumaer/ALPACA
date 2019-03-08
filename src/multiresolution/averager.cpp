@@ -101,7 +101,7 @@ Averager::Averager( TopologyManager const& topology, CommunicationManager& commu
  * @brief Fill parents of nodes on the given level via conservative average operations.
  * @param child_levels_descending The levels of the children holding the data to be averaged.
  */
-void Averager::AverageFluid( std::vector<unsigned int> const& child_levels_descending ) {
+void Averager::AverageMaterial( std::vector<unsigned int> const& child_levels_descending ) const {
 
    for( unsigned int const child_level : DescendingVectorWithoutZero( child_levels_descending ) ) {
 
@@ -120,7 +120,7 @@ void Averager::AverageFluid( std::vector<unsigned int> const& child_levels_desce
          } else if( rank_of_child == communicator_.MyRankId() || rank_of_parent == communicator_.MyRankId()) {
             child_parent_rank_relations.push_back( std::make_tuple( child_id, rank_of_child, rank_of_parent ));
             if( rank_of_child == communicator_.MyRankId()) {
-               send_counter += topology_.GetFluidsOfNode( child_id ).size(); // needed for buffer size
+               send_counter += topology_.GetMaterialsOfNode( child_id ).size(); // needed for buffer size
             }
          }
       }
@@ -133,10 +133,9 @@ void Averager::AverageFluid( std::vector<unsigned int> const& child_levels_desce
          if( rank_of_child == communicator_.MyRankId() && rank_of_parent != communicator_.MyRankId()) {
             Node const& child = tree_.GetNodeWithId( child_id );
             unsigned int const pos = PositionOfNodeAmongSiblings( child_id );
-            for( auto const material : topology_.GetFluidsOfNode( child_id )) {
+            for( auto const material : topology_.GetMaterialsOfNode( child_id )) {
                Multiresolution::Average( child.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), send_buffer_parent.at( send_counter ), child_id );
-               communicator_.Send( &send_buffer_parent.at( send_counter ), FF::ANOE(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ),
-                                   rank_of_parent, requests );
+               communicator_.Send( &send_buffer_parent.at( send_counter ), MF::ANOE(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_parent, requests );
                send_counter++;
                if constexpr( DP::Profile() ) {
                   CommunicationStatistics::average_level_send_++;
@@ -146,9 +145,8 @@ void Averager::AverageFluid( std::vector<unsigned int> const& child_levels_desce
             std::uint64_t const parent_id = ParentIdOfNode( child_id );
             Node& parent = tree_.GetNodeWithId( parent_id );
             unsigned int const pos = PositionOfNodeAmongSiblings( child_id );
-            for( auto const material : topology_.GetFluidsOfNode( child_id ) ) {
-               communicator_.Recv( &parent.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), FF::ANOE(),
-                                   communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_child, requests );
+            for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
+               communicator_.Recv( &parent.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), MF::ANOE(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_child,requests );
                if constexpr( DP::Profile() ) {
                   CommunicationStatistics::average_level_recv_++;
                }
@@ -160,7 +158,7 @@ void Averager::AverageFluid( std::vector<unsigned int> const& child_levels_desce
          std::uint64_t const parent_id = ParentIdOfNode( child_id );
          Node& parent = tree_.GetNodeWithId( parent_id );
          Node const& child = tree_.GetNodeWithId( child_id );
-         for( auto const material : topology_.GetFluidsOfNode( child_id ) ) {
+         for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
             Multiresolution::Average( child.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), parent.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), child_id );
          }
       }
@@ -237,7 +235,7 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
       for( auto child_id : no_mpi_uniform_child ) {
          std::uint64_t const parent_id = ParentIdOfNode( child_id );
          Node& parent = tree_.GetNodeWithId( parent_id );
-         std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetFluidsOfNode( child_id ).back()) * ITTI( IT::BulkPhase );
+         std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( child_id ).back()) * ITTI( IT::BulkPhase );
          Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags(), child_id );
       }
 
@@ -249,7 +247,7 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
             Node const& child = tree_.GetNodeWithId( child_id );
             Multiresolution::PropagateCutCellTagsFromChildIntoParent( child.GetInterfaceTags(), parent.GetInterfaceTags(), child_id );
          } else {
-            std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetFluidsOfNode( child_id ).back()) * ITTI( IT::BulkPhase );
+            std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( child_id ).back()) * ITTI( IT::BulkPhase );
             Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags(), child_id );
          }
 

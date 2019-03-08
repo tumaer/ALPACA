@@ -68,7 +68,7 @@
 #include "two_phase_scale_separator.h"
 
 #include "enums/interface_tag_definition.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 #include "user_specifications/two_phase_constants.h"
 
 /**
@@ -76,7 +76,7 @@
  * @param material_manager Instance of a MaterialManager, which already has been initialized according to the user input.
  * @param halo_manager Instance of a HaloManager which provides MPI-related methods.
  */
-TwoPhaseScaleSeparator::TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager ) :
+TwoPhaseScaleSeparator::TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager & halo_manager ) :
    ScaleSeparator( material_manager, halo_manager )
 {
    // Empty Constructor, besides call of base class constructor.
@@ -178,24 +178,24 @@ double GetResolvedValue(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()
  */
 void ScaleSeparationProcedure(Node& node){
 
-   double (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
+   double (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
    std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
    std::int8_t interface_tags_positive_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
    std::int8_t interface_tags_negative_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   double phi_positive_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
-   double phi_negative_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
+   double levelset_positive_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
+   double levelset_negative_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    //compute shifted level-set fields
    for(unsigned int i = 0; i < CC::TCX(); ++i) {
       for(unsigned int j = 0; j < CC::TCY(); ++j) {
          for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-            phi_positive_shift[i][j][k] = phi_reinitialized[i][j][k] + stimulus_response_constant;
-            phi_negative_shift[i][j][k] = phi_reinitialized[i][j][k] - stimulus_response_constant;
-            interface_tags_positive_shift[i][j][k] = Signum(phi_positive_shift[i][j][k]) * ITTI(IT::BulkPhase);
-            interface_tags_negative_shift[i][j][k] = Signum(phi_negative_shift[i][j][k]) * ITTI(IT::BulkPhase);
+            levelset_positive_shift[i][j][k] = levelset_reinitialized[i][j][k] + stimulus_response_constant;
+            levelset_negative_shift[i][j][k] = levelset_reinitialized[i][j][k] - stimulus_response_constant;
+            interface_tags_positive_shift[i][j][k] = Signum(levelset_positive_shift[i][j][k]) * ITTI(IT::BulkPhase);
+            interface_tags_negative_shift[i][j][k] = Signum(levelset_negative_shift[i][j][k]) * ITTI(IT::BulkPhase);
          } //k
       } //j
    } //i
@@ -208,8 +208,8 @@ void ScaleSeparationProcedure(Node& node){
    for(unsigned int i = i_lower; i < i_upper; ++i) {
       for(unsigned int j = j_lower; j < j_upper; ++j) {
          for(unsigned int k = k_lower; k < k_upper; ++k) {
-            if(IsCutCell<GeometryCalculationSettings::CutCellCriteria>(phi_positive_shift,i,j,k)) interface_tags_positive_shift[i][j][k] = ITTI(IT::OldCutCell);
-            if(IsCutCell<GeometryCalculationSettings::CutCellCriteria>(phi_negative_shift,i,j,k)) interface_tags_negative_shift[i][j][k] = ITTI(IT::OldCutCell);
+            if(IsCutCell<GeometryCalculationSettings::CutCellCriteria>(levelset_positive_shift,i,j,k)) interface_tags_positive_shift[i][j][k] = ITTI(IT::OldCutCell);
+            if(IsCutCell<GeometryCalculationSettings::CutCellCriteria>(levelset_negative_shift,i,j,k)) interface_tags_negative_shift[i][j][k] = ITTI(IT::OldCutCell);
          }
       }
    }
@@ -224,11 +224,11 @@ void ScaleSeparationProcedure(Node& node){
             std::int8_t flag_sign_change = 0;
 
             //check for cells with level-set value smaller than scale separation cut-off and neighbor with different sign
-            if(std::abs(phi_reinitialized[i][j][k]) < stimulus_response_constant){
+            if(std::abs(levelset_reinitialized[i][j][k]) < stimulus_response_constant){
                for(unsigned int r = 0; r < BSX; r++) {
                   for(unsigned int s = 0; s < BSY; s++) {
                      for(unsigned int t = 0; t < BSZ; t++) {
-                        if(phi_reinitialized[i][j][k] * phi_reinitialized[i + r - i_offset][j + s - j_offset][k + t - k_offset] < 0.0){
+                        if(levelset_reinitialized[i][j][k] * levelset_reinitialized[i + r - i_offset][j + s - j_offset][k + t - k_offset] < 0.0){
                            flag_sign_change += 1;
                         }
                      } //k neighbourhood
@@ -276,17 +276,17 @@ void ScaleSeparationProcedure(Node& node){
 
                flag = 0;
 
-               phi_reinitialized[i][j][k] = CC::LSCOF();
+               levelset_reinitialized[i][j][k] = CC::LSCOF();
                for(int l = -stencil_width_i; l < stencil_width_i+1; l++) {
                   for(int m = -stencil_width_j; m < stencil_width_j+1; m++) {
                      for(int n = -stencil_width_k; n < stencil_width_k+1; n++) {
 
                         //compute re-constructed level-set. Cells with missing negative-shifted interface as neighbor are reconstructed from the closest negatively shifted interface, and analogously for the positive shift.
                         if(interface_tags[i][j][k] == +ITTI(IT::ScaleSeparatedCell) && interface_tags_positive_shift[i + l][j + m][k + n] == ITTI(IT::OldCutCell)){
-                           phi_reinitialized[i][j][k] = std::min(phi_reinitialized[i][j][k], GetResolvedValue(phi_positive_shift, i, j, k, l, m, n));
+                           levelset_reinitialized[i][j][k] = std::min(levelset_reinitialized[i][j][k], GetResolvedValue(levelset_positive_shift, i, j, k, l, m, n));
                            flag = 1;
                         } else if(interface_tags[i][j][k] == -ITTI(IT::ScaleSeparatedCell) && interface_tags_negative_shift[i + l][j + m][k + n] == ITTI(IT::OldCutCell)){
-                           phi_reinitialized[i][j][k] = std::min(phi_reinitialized[i][j][k], GetResolvedValue(phi_negative_shift, i, j, k, l, m, n));
+                           levelset_reinitialized[i][j][k] = std::min(levelset_reinitialized[i][j][k], GetResolvedValue(levelset_negative_shift, i, j, k, l, m, n));
                            flag = 1;
                         }
                      } //k neighbourhood
@@ -295,12 +295,12 @@ void ScaleSeparationProcedure(Node& node){
 
                if(flag == 0) {
                   if(interface_tags[i][j][k] == -ITTI(IT::ScaleSeparatedCell)) {
-                     phi_reinitialized[i][j][k] = -CC::LSCOF() + stimulus_response_constant;
+                     levelset_reinitialized[i][j][k] = -CC::LSCOF() + stimulus_response_constant;
                   } else {
-                     phi_reinitialized[i][j][k] = CC::LSCOF() - stimulus_response_constant;
+                     levelset_reinitialized[i][j][k] = CC::LSCOF() - stimulus_response_constant;
                   }
                } else {
-                  phi_reinitialized[i][j][k] = double( Signum(interface_tags[i][j][k]) ) * (phi_reinitialized[i][j][k] - stimulus_response_constant);
+                  levelset_reinitialized[i][j][k] = double( Signum(interface_tags[i][j][k]) ) * (levelset_reinitialized[i][j][k] - stimulus_response_constant);
                }
             }
          } //k
@@ -322,5 +322,5 @@ void TwoPhaseScaleSeparator::SeparateScalesImplementation(std::vector<std::refer
    for(Node& node : nodes) {
       ScaleSeparationProcedure(node);
    }
-   halo_manager_.LevelsetHaloUpdateOnLmax( LevelsetBlockBufferType::PhiReinitialized );
+   halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetReinitialized );
 }

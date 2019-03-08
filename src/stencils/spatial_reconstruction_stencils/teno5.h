@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute TENO5 fluxes according to \cite Fu2016a.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to \cite Fu2016a.
  */
 class TENO5 : public Stencil<TENO5> {
 
@@ -121,10 +121,11 @@ class TENO5 : public Stencil<TENO5> {
 
    static constexpr double multiplyer_stencils_ = 1.0/6.0;
 
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 6;
    static constexpr unsigned int downstream_stencil_size_ = 2;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit TENO5() = default;

@@ -97,21 +97,21 @@ std::array<double, 3> HllcInterfaceRiemannSolver::SolveInterfaceRiemannProblemIm
   // Hllc is not applicable for surface tension calculations
   (void) delta_p;
 
-  // obtain parameters of the left (negative) fluid
-  double const one_rho_left      = 1.0 / std::max( rho_left, std::numeric_limits<double>::epsilon() );
-  double const c_left            = material_manager_.GetSpeedOfSound( material_left, rho_left, p_left );
-  double const gruneisen_left    = material_manager_.GetGruneisen( material_left, rho_left );
-  double const psi_left          = material_manager_.GetPsi( material_left, p_left, one_rho_left );
-  double const gamma_left        = material_manager_.GetGamma( material_left );
-  double const b_left            = material_manager_.GetB( material_left );
+  // obtain parameters of the left (negative) material
+  double const one_rho_left      = 1.0 / std::max(rho_left, std::numeric_limits<double>::epsilon());
+  double const c_left            = material_manager_.GetMaterial(material_left).GetEquationOfState().GetSpeedOfSound(rho_left, p_left);
+  double const gruneisen_left    = material_manager_.GetMaterial(material_left).GetEquationOfState().GetGruneisen(rho_left);
+  double const psi_left          = material_manager_.GetMaterial(material_left).GetEquationOfState().GetPsi(p_left, one_rho_left);
+  double const gamma_left        = material_manager_.GetMaterial(material_left).GetEquationOfState().GetGamma();
+  double const b_left            = material_manager_.GetMaterial(material_left).GetEquationOfState().GetB();
 
-  // obtain parameters of the right (positive) fluid
+  // obtain parameters of the right (positive) material
   double const one_rho_right     = 1.0 / std::max(rho_right, std::numeric_limits<double>::epsilon());
-  double const c_right           = material_manager_.GetSpeedOfSound( material_right, rho_right, p_right );
-  double const gruneisen_right   = material_manager_.GetGruneisen( material_right, rho_right );
-  double const psi_right         = material_manager_.GetPsi( material_right, p_right, one_rho_right );
-  double const gamma_right       = material_manager_.GetGamma( material_right );
-  double const b_right           = material_manager_.GetB( material_right );
+  double const c_right           = material_manager_.GetMaterial(material_right).GetEquationOfState().GetSpeedOfSound(rho_right, p_right);
+  double const gruneisen_right   = material_manager_.GetMaterial(material_right).GetEquationOfState().GetGruneisen(rho_right);
+  double const psi_right         = material_manager_.GetMaterial(material_right).GetEquationOfState().GetPsi(p_right, one_rho_right);
+  double const gamma_right       = material_manager_.GetMaterial(material_right).GetEquationOfState().GetGamma();
+  double const b_right           = material_manager_.GetMaterial(material_right).GetEquationOfState().GetB();
 
   // compute expensive and frequently used temporaries
   double const sqrt_rho_left     = std::sqrt( std::max( rho_left, std::numeric_limits<double>::epsilon() ) );
@@ -141,15 +141,15 @@ std::array<double, 3> HllcInterfaceRiemannSolver::SolveInterfaceRiemannProblemIm
        rho_left  * ( velocity_normal_left - signal_speed_left ) );
 
   // compute interface pressure
-  double const alpha = ( interface_velocity - signal_speed_left )  / ( signal_speed_right - signal_speed_left );
-  double const beta  = ( signal_speed_right - interface_velocity ) / ( signal_speed_right - signal_speed_left );
-  double const rho_left_star  = rho_left  * (signal_speed_left  - velocity_normal_left )  / ( signal_speed_left  - interface_velocity ); //incorrect in paper
-  double const rho_right_star = rho_right * (signal_speed_right - velocity_normal_right ) / ( signal_speed_right - interface_velocity ); //incorrect in paper
-  double const energy_left  = material_manager_.GetEnergy( material_left , rho_left , rho_left  * velocity_normal_left , 0.0, 0.0, p_left );
-  double const energy_right = material_manager_.GetEnergy( material_right, rho_right, rho_right * velocity_normal_right, 0.0, 0.0, p_right );
+  double const alpha = (interface_velocity - signal_speed_left)  / (signal_speed_right - signal_speed_left);
+  double const beta  = (signal_speed_right - interface_velocity) / (signal_speed_right - signal_speed_left);
+  double const rho_left_star  = rho_left  * (signal_speed_left  - velocity_normal_left)  / (signal_speed_left  - interface_velocity); //incorrect in paper
+  double const rho_right_star = rho_right * (signal_speed_right - velocity_normal_right) / (signal_speed_right - interface_velocity); //incorrect in paper
+  double const energy_left  = material_manager_.GetMaterial(material_left).GetEquationOfState().GetEnergy(rho_left , rho_left  * velocity_normal_left , 0.0, 0.0, p_left);
+  double const energy_right = material_manager_.GetMaterial(material_right).GetEquationOfState().GetEnergy(rho_right, rho_right * velocity_normal_right, 0.0, 0.0, p_right);
   double const energy_star = 1.0 / (signal_speed_right - signal_speed_left) *
-     ( ( energy_right * signal_speed_right - energy_left * signal_speed_left ) +
-     ( ( energy_left + p_left) * velocity_normal_left - ( energy_right + p_right ) * velocity_normal_right ) ) -
+     ( (energy_right * signal_speed_right - energy_left * signal_speed_left) +
+        ((energy_left + p_left) * velocity_normal_left - (energy_right + p_right) * velocity_normal_right)) -
      0.5 * (alpha * rho_left_star + beta * rho_right_star) * (interface_velocity * interface_velocity);
   double const f_l = -gamma_left  * b_left;  // only valid for stiffened EOS
   double const f_r = -gamma_right * b_right; // only valid for stiffened EOS

@@ -81,8 +81,8 @@ class InternalHaloManager {
 private:
    Tree& tree_;
    TopologyManager& topology_;
-   CommunicationManager& communication_manager_; // Cannot be const (for now NH TODO-19) because of new tagging system.
-   unsigned int const number_of_fluids_;
+   CommunicationManager & communication_manager_; // Cannot be const (for now NH TODO-19) because of new tagging system.
+   unsigned int const number_of_materials_;
 
    // Helper function for the local halo filling of special buffers
    template<class T>
@@ -90,62 +90,66 @@ private:
                                   T const (& partner_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const;
 
    template<class T>
-   inline void ExtendClosestInternalValue( T (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const;
+   inline void ExtendClosestInternalValue( T (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], const BoundaryLocation loc ) const;
 
-   // Fluid specific functions 
-   unsigned int UpdateFluidJumpMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, std::uint64_t const remote_child_id,
-                                        void *send_buffer, BoundaryLocation const loc, FluidFieldType const filed_type );
-   void UpdateFluidJumpMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
-                                FluidFieldType const field_type );
-   void UpdateFluidJumpNoMpi( std::uint64_t id, BoundaryLocation const loc, FluidFieldType const field_type );
-   void UpdateFluidHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
-                                     FluidFieldType const field_type );
-   void UpdateFluidHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
-                                     FluidFieldType const field_type );
-   void UpdateFluidHaloCellsNoMpi( std::uint64_t id, BoundaryLocation const loc, FluidFieldType const field_type );
-   void MpiFluidHaloUpdateNoJump( std::vector<MPI_Request>& requests,
-                                  std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& no_jump_boundaries,
-                                  FluidFieldType const field_type );
-   void NoMpiFluidHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
-                              FluidFieldType const field_type );
-   void MpiFluidHaloUpdateJump( std::vector<MPI_Request>& requests,
-                                std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& no_jump_boundaries,
+   unsigned int UpdateMaterialJumpMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const std::uint64_t remote_child_id,
+                                        void *send_buffer, const BoundaryLocation loc, const MaterialFieldType filed_type );
+   void UpdateMaterialJumpMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc,
+                                const MaterialFieldType field_type );
+   void UpdateMaterialJumpNoMpi( std::uint64_t id, const BoundaryLocation loc, const MaterialFieldType field_type );
+   void UpdateMaterialHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc,
+                                     const MaterialFieldType field_type );
+   void UpdateMaterialHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc,
+                                     const MaterialFieldType field_type );
+   void UpdateMaterialHaloCellsNoMpi( std::uint64_t id, const BoundaryLocation loc, const MaterialFieldType field_type );
+
+   void UpdateInterfaceHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const InterfaceBlockBufferType buffer_type,
+                                        const BoundaryLocation loc );
+   void UpdateInterfaceHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const InterfaceBlockBufferType buffer_type,
+                                        const BoundaryLocation loc );
+   void UpdateInterfaceHaloCellsNoMpi( std::uint64_t id, const InterfaceBlockBufferType buffer_type, const BoundaryLocation loc );
+
+   void UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc );
+   void UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc );
+   void UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t id, const BoundaryLocation loc );
+
+   void MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>& requests,
+                                  const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& no_jump_boundaries,
+                                  const MaterialFieldType field_type );
+   void NoMpiMaterialHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
+                              const MaterialFieldType field_type );
+   void MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& requests,
+                                const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& no_jump_boundaries,
                                 std::vector<ExchangePlane>& jump_buffer_plane, std::vector<ExchangeStick>& jump_buffer_stick,
                                 std::vector<ExchangeCube>& jump_buffer_cube,
-                                FluidFieldType const field_type );
+                                const MaterialFieldType field_type );
 
-   // Levelset specific functions
-   void UpdateLevelsetHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, LevelsetBlockBufferType const buffer_type,
-                                        BoundaryLocation const loc );
-   void UpdateLevelsetHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, LevelsetBlockBufferType const buffer_type,
-                                        BoundaryLocation const loc );
-   void UpdateLevelsetHaloCellsNoMpi( std::uint64_t id, LevelsetBlockBufferType const buffer_type, BoundaryLocation const loc );
-   void NoMpiLevelsetHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
-                                 LevelsetBlockBufferType const buffer_type );
-   void MpiLevelsetHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
-                               LevelsetBlockBufferType const buffer_type, std::vector<MPI_Request>& requests );
 
-   // Interface tag specific functions
-   void UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc );
-   void UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc );
-   void UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t id, BoundaryLocation const loc );
-   void NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries );
-   void MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+   void NoMpiInterfaceTagHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries );
+   void MpiInterfaceTagHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
                                    std::vector<MPI_Request>& requests );
+
+   void NoMpiInterfaceHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
+                                 const InterfaceBlockBufferType buffer_type );
+   void MpiInterfaceHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
+                               const InterfaceBlockBufferType buffer_type, std::vector<MPI_Request>& requests );
 
 public:
    InternalHaloManager() = delete;
-   explicit InternalHaloManager( Tree& tree, TopologyManager& topology, CommunicationManager& communication_manager, unsigned int const number_of__fluids );
+   explicit InternalHaloManager( Tree& tree, TopologyManager& topology, CommunicationManager& communication_manager, unsigned int const number_of_materials );
    ~InternalHaloManager() = default;
    InternalHaloManager( InternalHaloManager const&) = delete;
    InternalHaloManager& operator=( InternalHaloManager const& ) = delete;
    InternalHaloManager( InternalHaloManager&& ) = delete;
    InternalHaloManager& operator=( InternalHaloManager&& ) = delete;
 
-   // Function to trigger halo update of specific types
-   void FluidHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps );
+   void MaterialHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps );
+
+   void MaterialHaloUpdateOnMultis( MaterialFieldType const field_type );
+
    void InterfaceTagHaloUpdateOnLevel( unsigned int const level );
-   void LevelsetHaloUpdateOnLevel( unsigned int const level, LevelsetBlockBufferType const type );
+
+   void InterfaceHaloUpdateOnLevel( unsigned int const level, InterfaceBlockBufferType const type );
 };
 
 #endif // INTERNAL_BOUNDARY_MANAGER_H

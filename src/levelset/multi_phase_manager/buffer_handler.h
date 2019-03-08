@@ -82,13 +82,13 @@ class BufferHandler {
 
    friend DerivedBufferHandler;
 
-   const MaterialManager& material_manager_;
+   MaterialManager const& material_manager_;
 
    /**
     * @brief Constructor for the buffer handler for level-set simulations.
     * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
     */
-   explicit BufferHandler(const MaterialManager& material_manager) : material_manager_(material_manager) { }
+   explicit BufferHandler( MaterialManager const& material_manager) : material_manager_(material_manager) { }
 
 public:
    BufferHandler() = delete;
@@ -102,25 +102,25 @@ public:
     * @brief Transform given volume averaged conservatives to conservatives. This is done by a multiplication with the volume fraction.
     * @param node The node for which conservatives are calculated.
     */
-   void TransformToConservatives(Node& node) const {
-      static_cast<DerivedBufferHandler const&>(*this).TransformToConservativesImplementation(node);
+   void TransformToConservatives( Node& node ) const {
+      static_cast<DerivedBufferHandler const&>( *this ).TransformToConservativesImplementation( node );
    }
 
    /**
     * @brief Transform given conservatives to volume averaged conservatives. This is done by a division with the volume fraction.
     * @param node The node for which volume averaged conservatives are calculated.
     */
-   void TransformToVolumeAveragedConservatives(Node& node) const {
-      static_cast<DerivedBufferHandler const&>(*this).TransformToVolumeAveragedConservativesImplementation(node);
+   void TransformToVolumeAveragedConservatives( Node& node ) const {
+      static_cast<DerivedBufferHandler const&>( *this ).TransformToVolumeAveragedConservativesImplementation( node );
    }
 
    /**
-    * @brief During the scale-separation procedure small flow structures at the interface get dissolved. Thus, in the fluid which is not dissolved,
-    * real-fluid cells can be generated. Those cells have to be filled with prime-state values from the last RK stage.
+    * @brief During the scale-separation procedure small flow structures at the interface get dissolved. Thus, in the material which is not dissolved,
+    * real-material cells can be generated. Those cells have to be filled with prime-state values from the last RK stage.
     * @param node The node, for which the conservatives have to be corrected.
     */
-   void AdaptConservativesToWellResolvedDistanceFunction(Node& node) const {
-      static_cast<DerivedBufferHandler const&>(*this).AdaptConservativesToWellResolvedDistanceFunctionImplementation(node);
+   void AdaptConservativesToWellResolvedDistanceFunction( Node& node ) const {
+      static_cast<DerivedBufferHandler const&>( *this ).AdaptConservativesToWellResolvedDistanceFunctionImplementation( node );
    }
 
    /**
@@ -128,8 +128,8 @@ public:
     * for the integrated conservatives. This is done in this function.
     * @param node The node for which we calculate the prime states.
     */
-   void CalculatePrimesFromIntegratedConservatives(Node& node) const {
-      static_cast<DerivedBufferHandler const&>(*this).CalculatePrimesFromIntegratedConservativesImplementation(node);
+   void CalculatePrimesFromIntegratedConservatives( Node& node ) const {
+      static_cast<DerivedBufferHandler const&>( *this ).CalculatePrimesFromIntegratedConservativesImplementation( node) ;
    }
 
    /**
@@ -137,8 +137,8 @@ public:
     * prime state buffer.
     * @param node The node for which conservatives are calculated.
     */
-   void CalculateConservativesFromExtendedPrimes(Node& node) const {
-      static_cast<DerivedBufferHandler const&>(*this).CalculateConservativesFromExtendedPrimesImplementation(node);
+   void CalculateConservativesFromExtendedPrimes( Node& node ) const {
+      static_cast<DerivedBufferHandler const&>( *this ).CalculateConservativesFromExtendedPrimesImplementation( node );
    }
 };
 

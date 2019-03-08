@@ -68,11 +68,9 @@
 #ifndef CENTRAL_DIFFERENCE_H
 #define CENTRAL_DIFFERENCE_H
 
+
 #include "stencils/stencil.h"
 
-/**
- * @brief The CentralDifference class implements a standard second-order finite difference stencil.
- */
 class CentralDifference : public Stencil<CentralDifference> {
 
    friend Stencil;
@@ -82,15 +80,13 @@ class CentralDifference : public Stencil<CentralDifference> {
    static constexpr unsigned int stencil_size_ = 3;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit CentralDifference() = default;
    ~CentralDifference() = default;
-   CentralDifference( CentralDifference const& ) = delete;
-   CentralDifference& operator=( CentralDifference const& ) = delete;
-   CentralDifference( CentralDifference&& ) = delete;
-   CentralDifference& operator=( CentralDifference&& ) = delete;
+
 };
+
 
 #endif //CENTRAL_DIFFERENCE_H

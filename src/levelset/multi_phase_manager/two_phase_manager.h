@@ -81,20 +81,20 @@ class TwoPhaseManager : public MultiPhaseManager<TwoPhaseManager> {
 
 private:
 
-   void SetVolumeFractionBuffer(Node& node) const;
-   void UpdateInterfaceTagsOnFinestLevel(std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void SetVolumeFractionBuffer( Node& node ) const;
+   void UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
 
-   void MixImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, const bool is_last_stage = false) const;
-   void ExtendImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void ExtendInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
-   void PropagateLevelsetImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void InitializeVolumeFractionBufferImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
-   void ObtainInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, const bool reset_interface_states = false) const;
+   void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const;
+   void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, bool const is_last_stage = false ) const;
+   void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const;
+   void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const;
 
 public:
    TwoPhaseManager() = delete;
-   explicit TwoPhaseManager( SimulationSetup const& setup, MaterialManager const& material_manager, HaloManager& halo_manager );
+   explicit TwoPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager );
    ~TwoPhaseManager() = default;
    TwoPhaseManager( TwoPhaseManager const& ) = delete;
    TwoPhaseManager& operator=( TwoPhaseManager const& ) = delete;

@@ -65,302 +65,148 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "material_manager.h"
+#include "materials/material_manager.h"
 
-#include "materials/stiffened_gas.h"
-#include "materials/stiffened_gas_safe.h"
-#include "materials/stiffened_gas_complete_safe.h"
-#include "materials/waterlike_fluid.h"
-#include "materials/noble_abel_stiffened_gas.h"
 #include <stdexcept>
+#include "utilities/string_operations.h"
+#include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
- * @brief Sets up a MaterialManager handling all requests to all materials provided here as input.
- *        Creates the material objects directly in place.
- * @param material_data The raw data of the materials to be created.
- * @param surface_tension_coefficients The surface tension coefficients between two materials. %Currently only implemented for two-material simulations%.
+ * @brief Sets up a MaterialManager for the given pure materials and material pairings.
+ * @param materials All already initialized materials
+ * @param material_pairing_data All already initialized material pairings
  */
-MaterialManager::MaterialManager( std::vector<std::tuple<MaterialName, MaterialName, std::unordered_map<std::string, double>>> const material_data,
-   std::vector<double> surface_tension_coefficients ) :
-   surface_tension_coefficients_(surface_tension_coefficients) {
-#ifdef PERFORMANCE
-   material_names_.reserve(material_data.size());
-  equations_of_state_.reserve(material_data.size());
-#endif
-   for(const auto& material : material_data) {
-      AddMaterial(material);
+MaterialManager::MaterialManager( std::vector<Material> materials, 
+                                  std::vector<MaterialPairing> material_pairings ) : 
+   // Start initializer list 
+   materials_( std::move( materials ) ), 
+   material_pairings_( std::move( material_pairings ) ), 
+   pairing_offset_( GenerateMaterialPairingOffset( materials_.size() ) ) {
+
+   // Instantiation of material sign capsule for two-material computations
+   // AB 20-03-30: This concept could be used everywhere if material manager is present in class and must be implemented in case of 
+   //              multi-material implementation
+   MaterialSignCapsule( ITM( 0 ), ITM( materials_.size() - 1 ) );
+} 
+
+/**
+ * @brief Maps the pairing of two materials to the correct position of the vector using the material enum class index and a pairing offset
+ * @param first_material, second_material materials for which the pairing should be obtained 
+ * @note This mapping ensures that the same result is ensured regardless of the order of both materials in the function call 
+ */ 
+unsigned int MaterialManager::MapPairingToIndex( MaterialName const first_material, MaterialName const second_material ) const {
+
+#ifndef PERFORMANCE
+   if( first_material == second_material ) {
+      throw std::runtime_error( "Error! Material pairing can only be obtained for two distinct materials!" );
    }
+#endif   
+   
+   // Obtain the indices of the two materials in the materials vector ( implicitly done due to the underlying index of MaterialName enum )
+   auto material_A = MTI( first_material );
+   auto material_B = MTI( second_material );
+
+   // return the mapping index ( conversion to unsigned int is safe, since the max function always returns at least index 1 )
+   return material_A + material_B + pairing_offset_[std::max( material_A, material_B ) - 1];
+}
+
+/**
+ * @brief Returns the total number of materials contained in the simulation 
+ * @return Number of materials 
+ */
+std::size_t MaterialManager::GetNumberOfMaterials() const {
+   return materials_.size();
+}
+
+/**
+ * @brief Returns all materials contained in the simulation 
+ * @return Vector with all material names  
+ */
+std::vector<MaterialName> MaterialManager::GetMaterialNames() const {
+   // Declare vector that is returned
+   std::vector<MaterialName> material_names;
+   // fill vector with all names 
+   material_names.reserve( materials_.size() );
+   for( unsigned int material_index = 0; material_index < materials_.size(); material_index++ ) {
+      material_names.push_back( ITM( material_index ) );
+   }
+   
+   return material_names;
+}
+
+/**
+ * @brief Gives an instance to the material with the given index.
+ * @param index Index of the material that should be returned 
+ * @return Instance of the material
+ * @note No sanity check is done here that the index really exists. Safety is ensured if the indices are 
+ *       obtained with the GetNumberOfMaterials() function. 
+ */
+Material const& MaterialManager::GetMaterial( std::size_t const index ) const {
+   
+   return materials_[index];
 }
 
 /**
  * @brief Gives an instance of the material with the given identifier.
- * @param material .
- * @return The Material object (equation of state).
+ * @param material The material identifier 
+ * @return Instance of the material
+ * @note No sanity check is done here, since in general all present material names that are created should be 
+ *       checked by the MaterialName enum class itself. 
  */
-Material const& MaterialManager::GetEquationOfState( MaterialName const material ) const {
-#ifndef PERFORMANCE
-   return *materials_.at(material);
-#else
-   std::size_t index = 0;
-   for(std::size_t i = 0; i< material_names_.size(); ++i) {
-      if(material_names_[i] == material) {
-         index = i;
+Material const& MaterialManager::GetMaterial( MaterialName const material ) const {
+   
+   return materials_[MTI( material )];
+}
+
+/**
+ * @brief Gives an instance of a material pairing for two different materials
+ * @param first_material, second_material Unique identifiers of the materials of interest. 
+ * @return Instance of the material pairing
+ */
+MaterialPairing const& MaterialManager::GetMaterialPairing( MaterialName const first_material, MaterialName const second_material ) const {
+      return material_pairings_[MapPairingToIndex( first_material, second_material )];
+}
+
+/**
+ * @brief Generates the offset values for each material to provide proper mapping of the material indices towards material pairing indices 
+ * @param number_of_materials Number of materials to be considered
+ * @return Vector with the appropriate offset values for the given number of materials
+ */
+std::vector<int> MaterialManager::GenerateMaterialPairingOffset( size_t const number_of_materials ) const {
+   // declare vector 
+   std::vector<int> pairing_offset;
+   // Definition and Initialization of the materialPairing vector depending on Single or Multiphase ( for later correct access )
+   // NOTE: This if else can be removed if the general multimaterial approach is incorporated in the framework.
+   // Single material
+   // AB TODO: Remove when capillary pressure calculator is changed 
+   if( number_of_materials == 1 ) {
+      pairing_offset.reserve( 1 );
+      pairing_offset.push_back( 0 );
+   }
+   // Multimaterial
+   else {
+      // Define the pairing offset for later mapping of the pairing to the appropriate positions in vector 
+      pairing_offset.reserve( number_of_materials - 1 ); 
+
+      // The offset represents the increases of the index to access material_pairings_ vector resulting from an increase in material numbers 
+      // compared to the previous number of materials. The pairing_offset is then used together with the index of the materials enum class to access the
+      // correct position in the material_pairings vector.
+      // 2-materials: -1, 3-materials: -1, 4-materials: 0, 5-materials: 2; 6-fludis: 5, 7-materials: 9, ...
+      int offset = -1; 
+      pairing_offset.push_back( offset );
+      for ( size_t n = 3; n <= number_of_materials; n++ )
+      {
+         // increment offset 
+         offset += n - 3;
+         // add offset at correct position for number of materials 
+         pairing_offset.push_back( offset );
       }
    }
-   return *equations_of_state_[index];
-#endif
+
+   // return the vector 
+   return pairing_offset;
 }
 
-/**
- * @brief Proxy function to obtain the pressure for the provided material and inputs.
- * @param material .
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
- * @return pressure.
- */
-double MaterialManager::GetPressure( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetPressure(density, momentum_x, momentum_y, momentum_z, energy);
-}
-
-/**
- * @brief Proxy function to obtain the enthalpy for the provided material and inputs.
- * @param material .
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
- * @return enthalpy.
- */
-double MaterialManager::GetEnthalpy( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetEnthalpy(density, momentum_x, momentum_y, momentum_z, energy);
-}
-
-/**
- * @brief Proxy function to obtain the energy for the provided material and inputs.
- * @param material .
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param pressure .
- * @return energy .
- */
-double MaterialManager::GetEnergy( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetEnergy(density, momentum_x, momentum_y, momentum_z, pressure);
-}
-
-/**
- * @brief Proxy function to obtain the temperature for the provided material and inputs.
- * @param material .
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
- * @return temperature.
- */
-double MaterialManager::GetTemperature( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetTemperature(density, momentum_x, momentum_y, momentum_z, energy);
-}
-
-/**
- * @brief Proxy function to obtain the Grueneisen coefficient for a given material according to the generalized equation of state.
- * @param material .
- * @return Grueneisen coefficient .
- */
-double MaterialManager::GetGruneisen( MaterialName const material ) const {
-#ifndef PERFORMANCE
-   if constexpr( CC::GruneisenDensityDependent() ) {
-      throw std::runtime_error( "CC::GruneisenDensityDependent is true, you should call MaterialManager::GetGruneisen(material, density) instead" );
-   }
-#endif
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetGruneisen();
-}
-
-/**
- * @brief Proxy function to obtain the Grueneisen coefficient for a given material according to the generalized equation of state.
- * @param material .
- * @param density .
- * @return Grueneisen coefficient .
- */
-double MaterialManager::GetGruneisen( MaterialName const material, double const density ) const {
-   Material const& equation_of_state = GetEquationOfState( material );
-   return equation_of_state.GetGruneisen( density );
-}
-
-/**
- * @brief Proxy function to obtain the specific material parameter psi for a given material according to the generalized equation of state.
- * @param material .
- * @param pressure .
- * @param one over density (saves the expensive division operation) .
- * @return Psi for given inputs.
- */
-double MaterialManager::GetPsi( MaterialName const material, double const pressure, double const one_density ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetPsi(pressure, one_density);
-}
-
-/**
- * @brief Proxy function to obtain the Grueneisen coefficient for a given material according to the generalized equation of state.
- * @param material .
- * @return Grueneisen coefficient .
- */
-double MaterialManager::GetGamma( MaterialName const material ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetGamma();
-}
-
-/**
- * @brief Proxy function to obtain B for a given material.
- * @param material .
- * @return B .
- */
-double MaterialManager::GetB( MaterialName const material ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetB();
-}
-
-/**
- * @brief Proxy function to obtain the speed of sound for a given material, density and pressure.
- * @param material .
- * @param density .
- * @param pressure .
- * @return speed of sound for given inputs.
- */
-double MaterialManager::GetSpeedOfSound( MaterialName const material, double const density, double const pressure ) const{
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetSpeedOfSound(density, pressure);
-}
-
-/**
- * @brief Proxy function to obtain the viscosity of the specified material.
- * @param material .
- * @return Viscosity parameters (multiple parameters, e.g. shear and bulk) according to material. %Constant per Material, may change in future versions%.
- */
-std::vector<double> MaterialManager::GetViscosity( MaterialName const material ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetViscosity();
-}
-
-/**
- * @brief Proxy function to obtain the surface tension coefficients between two materials.
- * @param first_material, second_material Unique identifiers of the materials of interest. Should give the same result independent of the order.
- * @return Surface tension coefficient between two materials.
- */
-double MaterialManager::GetSurfaceTensionCoefficient( MaterialName const, MaterialName const ) const {
-   unsigned int index = 0;
-   return surface_tension_coefficients_[index];
-}
-
-/**
- * @brief Proxy function to obtain the thermal conductivity of the specified material.
- * @param material .
- * @return Thermal conductivity %Constant per Material, may change in future versions%.
- */
-double MaterialManager::GetThermalConductivity( MaterialName const material ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetThermalConductivity();
-}
-
-/**
- * @brief Proxy function to obtain the specific heat of the specified material.
- * @param material .
- * @return Specific heat %Constant per Material, may change in future versions%.
- */
-double MaterialManager::GetSpecificHeat( MaterialName const material ) const {
-   Material const& equation_of_state = GetEquationOfState(material);
-   return equation_of_state.GetSpecificHeat();
-}
-
-/**
- * @brief Creates in place and registers a further material to this instance of the MaterialManager.
- * @param data Material data consisting of two material identifiers. The first naming the generic type e.g. "StiffenedGas",
- *        the second the unique identifier e.g. "StiffenedGasOne".
- *        The tuple also holds a variable (depending on material type) number of parameters to be set for the material to be created.
- */
-void MaterialManager::AddMaterial( std::tuple<MaterialName, MaterialName, std::unordered_map<std::string, double>> const data ) {
-
-   auto const& map = std::get<2>(data);
-   switch (std::get<0>(data)) {
-      case MaterialName::StiffenedGas :
-#ifndef PERFORMANCE
-         materials_.emplace(std::get<1>(data),
-            std::make_unique<StiffenedGas const>( map.at("gamma"), map.at("B"), map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#else
-         material_names_.push_back(std::get<1>(data));
-         equations_of_state_.push_back(
-            std::make_unique<StiffenedGas const >( map.at("gamma"), map.at("B"), map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#endif
-         break;
-      case MaterialName::StiffenedGasSafe :
-#ifndef PERFORMANCE
-         materials_.emplace(std::get<1>(data),
-            std::make_unique<StiffenedGasSafe const>( map.at("gamma"), map.at("B"), map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#else
-         material_names_.push_back(std::get<1>(data));
-         equations_of_state_.push_back(
-            std::make_unique<StiffenedGasSafe const>( map.at("gamma"), map.at("B"), map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#endif
-         break;
-      case MaterialName::StiffenedGasCompleteSafe :
-#ifndef PERFORMANCE
-         materials_.emplace(std::get<1>(data),
-            std::make_unique<StiffenedGasCompleteSafe const>( map.at("gamma"), map.at("A"), map.at("B"), map.at("C"),
-                                                              map.at("specificGasConstant"), map.at("thermalConductivity"),
-                                                              map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#else
-         material_names_.push_back(std::get<1>(data));
-         equations_of_state_.push_back(
-            std::make_unique<StiffenedGasCompleteSafe const>( map.at("gamma"), map.at("A"), map.at("B"), map.at("C"),
-                                                              map.at("specificGasConstant"), map.at("thermalConductivity"),
-                                                              map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#endif
-         break;
-      case MaterialName::WaterlikeFluid :
-#ifndef PERFORMANCE
-         materials_.emplace(std::get<1>(data),
-            std::make_unique<WaterlikeFluid const>( map.at("gamma"), map.at("A"), map.at("B"), map.at("rho0"), map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#else
-         material_names_.push_back(std::get<1>(data));
-         equations_of_state_.push_back(
-            std::make_unique<WaterlikeFluid const>( map.at("gamma"), map.at("A"), map.at("B"), map.at("rho0"), map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#endif
-         break;
-      case MaterialName::NobleAbelStiffenedGas :
-#ifndef PERFORMANCE
-         materials_.emplace(std::get<1>(data),
-            std::make_unique<NobleAbelStiffenedGas const>( map.at("gamma"), map.at("covolume"), map.at("pressureConstant"), map.at("energyConstant"),
-                                                           map.at("specificHeatCapacity"), map.at("thermalConductivity"),
-                                                           map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#else
-         material_names_.push_back(std::get<1>(data));
-         equations_of_state_.push_back(
-            std::make_unique<NobleAbelStiffenedGas const>( map.at("gamma"), map.at("covolume"), map.at("pressureConstant"), map.at("energyConstant"),
-                                                           map.at("specificHeatCapacity"), map.at("thermalConductivity"),
-                                                           map.at("dynamicShear"), map.at("dynamicBulk"))
-         );
-#endif
-         break;
-      default:
-         throw std::logic_error("This material has not yet been implemented");
-         break;
-   }
-}
+// MaterialSignCapsule does not have a cpp file for definition
+MaterialName MaterialSignCapsule::positive_material_;
+MaterialName MaterialSignCapsule::negative_material_;

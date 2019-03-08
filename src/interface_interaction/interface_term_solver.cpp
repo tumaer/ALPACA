@@ -65,21 +65,22 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "stencils/differentiation_utilities.h"
+#include "stencils/stencil_utilities.h"
 #include "interface_term_solver.h"
 #include "enums/interface_tag_definition.h"
 #include "levelset/multi_phase_manager/two_phase_manager.h"
 
 /**
  * @brief Constructor.
- * @param material_manager Contains information about the fluids involved in the simulation.
+ * @param material_manager Contains information about the materials involved in the simulation.
  */
 InterfaceTermSolver::InterfaceTermSolver( MaterialManager const& material_manager) :
    material_manager_( material_manager ),
    geometry_calculator_(),
-   interface_stress_tensor_fluxes_( MaterialSignCapsule::PositiveFluidMaterial(), material_manager_.GetViscosity( MaterialSignCapsule::PositiveFluidMaterial() ),
-      MaterialSignCapsule::NegativeFluidMaterial(), material_manager_.GetViscosity( MaterialSignCapsule::NegativeFluidMaterial() ) ),
-   heat_exchange_fluxes_( material_manager_.GetThermalConductivity( MaterialSignCapsule::PositiveFluidMaterial() ), material_manager_.GetThermalConductivity( MaterialSignCapsule::NegativeFluidMaterial() ) )
+   interface_stress_tensor_fluxes_(MaterialSignCapsule::PositiveMaterial(), material_manager_.GetMaterial(MaterialSignCapsule::PositiveMaterial()).GetShearAndBulkViscosity(),
+      MaterialSignCapsule::NegativeMaterial(), material_manager_.GetMaterial(MaterialSignCapsule::NegativeMaterial()).GetShearAndBulkViscosity()),
+   heat_exchange_fluxes_(material_manager_.GetMaterial(MaterialSignCapsule::PositiveMaterial()).GetThermalConductivity(),
+                         material_manager_.GetMaterial(MaterialSignCapsule::NegativeMaterial()).GetThermalConductivity())
 {
    /* Empty besides initializer list*/
 }
@@ -124,16 +125,16 @@ void InterfaceTermSolver::SolveInterfaceInteraction( Node& node ) const {
  */
 void InterfaceTermSolver::FillInterfaceNormalVelocityBuffer( Node const& node
                                                                  , double (&u_interface_normal_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]) const {
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
-   double const (&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetInterfaceQuantityBuffer( InterfaceQuantity::Velocity );
+   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const(&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   double const(&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::Velocity);
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
       for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
          for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
             if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) ) {
 
-               std::array<double, 3> const normal = GetNormal( levelset, i, j, k );
+               std::array<double, 3> const normal = GetNormal(levelset_reinitialized, i, j, k);
 
                // determine interface velocity vector based on absolute value of interface velocity
                std::array<double, 3> const u_interface_normal = {interface_velocity[i][j][k] * normal[0],
@@ -165,7 +166,7 @@ void InterfaceTermSolver::FillDeltaApertureBuffer( Node const& node
                                                    , double (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const {
 
    std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
       for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
@@ -173,8 +174,8 @@ void InterfaceTermSolver::FillDeltaApertureBuffer( Node const& node
             if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) ) {
 
                // get cell face apertures for cell i j k
-               std::array<double, 6> const cell_face_apertures = geometry_calculator_.ComputeCellFaceAperture( levelset,i,j,k );
-               //compute changes in aperture over cell, which is the relevant length scale for interface interaction in each direction
+               std::array<double, 6> const cell_face_apertures = geometry_calculator_.ComputeCellFaceAperture(levelset_reinitialized,i,j,k);
+               //compute changes in aperture over cell, which is the relevant lenght scale for interface interaction in each direction
                std::array<double, 3> const delta_aperture = {cell_face_apertures[1] - cell_face_apertures[0],
                                                              CC::DIM() != Dimension::One ? cell_face_apertures[3] - cell_face_apertures[2] : 0.0,
                                                              CC::DIM() == Dimension::Three ? cell_face_apertures[5] - cell_face_apertures[4] : 0.0};
@@ -203,14 +204,14 @@ void InterfaceTermSolver::FillDeltaApertureBuffer( Node const& node
  * @param face_fluxes_y The fluxes over the cell phases in y-direction.
  * @param face_fluxes_z The fluxes over the cell phases in z-direction.
  */
-void InterfaceTermSolver::WeightFaceFluxes( Node const& node, MaterialName const material,
-   double (&face_fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&face_fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&face_fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const {
+void InterfaceTermSolver::WeightFaceFluxes(Node const& node, MaterialName const material,
+   double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const {
 
-   std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial( material );
+   std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);
    std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
    unsigned int const i_start = 0;
    unsigned int const j_start = CC::DIM() != Dimension ::One ? 0 : 1;
@@ -224,15 +225,15 @@ void InterfaceTermSolver::WeightFaceFluxes( Node const& node, MaterialName const
             unsigned int const j_index = CC::DIM() != Dimension::One   ? j + CC::FICY() - 1 : 0;
             unsigned int const k_index = CC::DIM() == Dimension::Three ? k + CC::FICZ() - 1 : 0;
 
-            if( std::abs( interface_tags[i_index][j_index][k_index] ) <= ITTI( IT::CutCellNeighbor ) ) { //Fluxes for interface cells have to be weighted by the cell-face aperture.
-               std::array<double, 6> const cell_face_apertures = geometry_calculator_.ComputeCellFaceAperture( levelset, i_index, j_index, k_index, material_sign );
-               for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
+            if(std::abs(interface_tags[i_index][j_index][k_index]) <= ITTI(IT::CutCellNeighbor)) { //Fluxes for interface cells have to be weighted by the cell-face aperture.
+               std::array<double, 6> const cell_face_apertures = geometry_calculator_.ComputeCellFaceAperture(levelset_reinitialized, i_index, j_index, k_index, material_sign);
+               for(unsigned int e = 0; e < MF::ANOE(); ++e) {
                   face_fluxes_x[e][i][j][k] *= cell_face_apertures[1];
                   if constexpr( CC::DIM() != Dimension::One ) face_fluxes_y[e][i][j][k] *= cell_face_apertures[3];
                   if constexpr( CC::DIM() == Dimension::Three ) face_fluxes_z[e][i][j][k] *= cell_face_apertures[5];
                } //equation
-            } else if( material_sign * levelset[i_index][j_index][k_index] < 0.0 ) { //Set fluxes for ghost-fluid cells to zero.
-               for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
+            } else if(material_sign * levelset_reinitialized[i_index][j_index][k_index] < 0.0) { //Set fluxes for ghost-material cells to zero.
+               for(unsigned int e = 0; e < MF::ANOE(); ++e) {
                   face_fluxes_x[e][i][j][k] = 0.0;
                   if constexpr(CC::DIM() != Dimension::One) face_fluxes_y[e][i][j][k] = 0.0;
                   if constexpr(CC::DIM() == Dimension::Three) face_fluxes_z[e][i][j][k] = 0.0;
@@ -250,19 +251,19 @@ void InterfaceTermSolver::WeightFaceFluxes( Node const& node, MaterialName const
  * @param volume_forces The volume forces acting on cells.
  * @param material The material specifying the phase.
  */
-void InterfaceTermSolver::WeightVolumeForces( Node const& node, MaterialName const material,
-   double (&volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
+void InterfaceTermSolver::WeightVolumeForces(const Node& node, const MaterialName material,
+   double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const {
 
-   std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial( material );
-   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetVolumeFraction();
+   std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);
+   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
    double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
    double const material_sign_double = double( material_sign );
 
-   for( unsigned int e = 0; e < FF::ANOE(); ++e ) {
-      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-         for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
-            for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+   for(unsigned int e = 0; e < MF::ANOE(); ++e) {
+      for(unsigned int i = CC::FICX(); i <= CC::LICX(); ++i) {
+         for(unsigned int j = CC::FICY(); j <= CC::LICY(); ++j) {
+            for(unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
                volume_forces[e][i - CC::FICX()][j - CC::FICY()][k - CC::FICZ()] *= reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
             } //k
          } //j

@@ -91,7 +91,7 @@ public:
    Averager( Averager&& ) = delete;
    Averager& operator=( Averager&& ) = delete;
 
-   void AverageFluid( std::vector<unsigned int> const& child_levels_descending );
+   void AverageMaterial( std::vector<unsigned int> const& child_levels_descending ) const;
 
    void AverageInterfaceTags( std::vector<unsigned int> const& levels_with_updated_parents_descending ) const;
 };

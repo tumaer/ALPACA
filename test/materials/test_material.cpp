@@ -67,422 +67,76 @@
 *****************************************************************************************/
 #include <catch.hpp>
 #include "materials/material.h"
-#include "materials/stiffened_gas.h"
-#include "materials/stiffened_gas_complete_safe.h"
-#include "materials/stiffened_gas_safe.h"
-#include "materials/waterlike_fluid.h"
+#include "materials/material_definitions.h"
 
-SCENARIO( "Materials are constructed and their properties are queried", "[1rank]" ) {
+#include "materials/equations_of_state/stiffened_gas.h"
+#include "materials/material_property_models/shear_viscosity_models/constant_shear_viscosity_model.h"
+#include "materials/material_property_models/thermal_conductivity_models/constant_thermal_conductivity_model.h"
 
-   GIVEN( "A stiffened gas" ) {
+SCENARIO( "Material is constructed and its properties are queried", "[1rank]" ) {
 
-      WHEN( "All parameters are set to zero" ) {
+   // Initialize the unit handler class
+   UnitHandler const unit_handler( 1.0, 1.0, 1.0, 1.0 );
 
-         StiffenedGas const material = StiffenedGas( 0.0, 0.0, 0.0, 0.0 );
+   GIVEN( "A material with non-zero properties" ) {
 
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 0.0, 0.0, 0.0, 0.0, 0.0 ) == -1 );
-         }
+      WHEN( "All parameters are set to non-zero values" ) {
 
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == -1 );
-         }
+         // Define material properties and initialize material
+         double const shear_viscosity = 1.0;
+         double const bulk_viscosity = 2.0;
+         double const specific_heat_capacity = 3.0;
+         double const thermal_heat_conductivity = 4.0;
 
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 0.0, 0.0 ) == 0 );
-         }
+         // Instantiate a random eos and parameter model to check if the pointer movement works properly
+         std::unordered_map<std::string, double> map_data = { { "gamma", 0.0 }, { "B", 0.0 } };
+         std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( map_data, unit_handler ) );
+         map_data = { { "muConstant", 0.0 } };
+         std::unique_ptr<MaterialParameterModel const> shear_model( std::make_unique<ConstantShearViscosityModel const>( map_data, unit_handler ) );
+         map_data = { { "lambdaConstant", 0.0 } };
+         std::unique_ptr<MaterialParameterModel const> conductivity_model( std::make_unique<ConstantThermalConductivityModel const>( map_data, unit_handler ) );
 
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == 0 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == 0 );
-         }
+         // Instantiate material
+         Material const material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
+                                  std::move( shear_model ), std::move( conductivity_model ), unit_handler );
 
          THEN( "The viscosity is" ) {
-            std::vector<double> const expected( 2, 0.0 );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0 );
+            std::vector<double> expected( { 1.0, 2.0 } );
+            REQUIRE( material.GetShearAndBulkViscosity() == expected );
+            REQUIRE( material.GetShearViscosity() == expected.front() );
+            REQUIRE( material.GetBulkViscosity() == expected.back() );
          }
 
          THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == -1 );
-         }
-      }
-
-      WHEN( "The parameters are reasonable values" ) {
-
-         StiffenedGas const material = StiffenedGas( 6.1, 4.3, 2.0, 3.0 );
-
-         THEN( "The pressure is" ) {
-            REQUIRE( material.GetPressure( 1.0, 2.0, 3.0, 4.0, 5.0 ) == Approx( -74.68 ));
-         }
-
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 6.0, 7.0, 8.0, 9.0, 10.0 ) == Approx( -7.9466666667 ));
-         }
-
-         THEN( "The energy is" ) {
-            REQUIRE( material.GetEnergy( 11.0, 12.0, 13.0, 14.0, 15.0 ) == Approx( 31.2206773619 ));
-         }
-
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 16.0, 17.0, 18.0, 19.0, 20.0 ) == -1 );
-         }
-
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == 5.1 );
-         }
-
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 21.0, 22.0 ) == 1039.06 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == 6.1 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == 4.3 );
-         }
-
-         THEN( "The speed of sound is" ) {
-            REQUIRE( material.GetSpeedOfSound( 23.0, 24.0 ) == Approx( 2.7396445342 ));
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( { 2.0, 3.0 } );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0 );
-         }
-
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == -1 );
-         }
-      }
-   }
-
-   GIVEN( "A stiffened gas complete safe" ) {
-
-      WHEN( "All parameters are set to zero" ) {
-
-         StiffenedGasCompleteSafe const material = StiffenedGasCompleteSafe( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 );
-
-         THEN( "The pressure is" ) {
-            REQUIRE( material.GetPressure( 0.0, 0.0, 0.0, 0.0, 0.0 ) == Approx( 0.0 ).margin( 0.000001 ));
-         }
-
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 0.0, 0.0, 0.0, 0.0, 0.0 ) == 1.0 );
-         }
-
-         THEN( "The energy is" ) {
-            REQUIRE( material.GetEnergy( 0.0, 0.0, 0.0, 0.0, 0.0 ) == 0.0 );
-         }
-
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == -1 );
-         }
-
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 0.0, 0.0 ) == 0 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == 0 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == 0 );
-         }
-
-         THEN( "The speed of sound is" ) {
-            REQUIRE( material.GetSpeedOfSound( 0.0, 0.0 ) == Approx( 0.0000000149 ).epsilon( 0.1 ));
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( 2, 0.0 );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0 );
-         }
-
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == 0.0 );
-         }
-      }
-
-      WHEN( "The parameters contain reasonable values" ) {
-
-         StiffenedGasCompleteSafe const material = StiffenedGasCompleteSafe( 6.1, 1.0, 4.3, 2.0, 3.0, 4.0, 2.0, 3.0 );
-
-         THEN( "The pressure is" ) {
-            REQUIRE( material.GetPressure( 1.0, 2.0, 3.0, 4.0, 5.0 ) == -4.3 );
-         }
-
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 6.0, 7.0, 8.0, 9.0, 10.0 ) == Approx( 0.95 ));
-         }
-
-         THEN( "The energy is" ) {
-            REQUIRE( material.GetEnergy( 11.0, 12.0, 13.0, 14.0, 15.0 ) == Approx( 42.2206773619 ));
-         }
-
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 16.0, 17.0, 18.0, 19.0, 20.0 ) == Approx(  4704254.7119584298 ));
-         }
-
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == 5.1 );
-         }
-
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 21.0, 22.0 ) == 1039.06 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == 6.1 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == 4.3 );
-         }
-
-         THEN( "The speed of sound is" ) {
-            REQUIRE( material.GetSpeedOfSound( 23.0, 24.0 ) == Approx( 2.7396445342 ));
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( { 2.0, 3.0 } );
-            REQUIRE( material.GetViscosity() == expected );
+            REQUIRE( material.GetSpecificHeatCapacity() == 3.0 );
          }
 
          THEN( "The thermal conductivity is" ) {
             REQUIRE( material.GetThermalConductivity() == 4.0 );
          }
 
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == Approx( 0.5882352941 ));
-         }
-      }
-   }
-
-   GIVEN( "A stiffened gas safe" ) {
-
-      WHEN( "All parameters are set to zero" ) {
-
-         StiffenedGasSafe const material = StiffenedGasSafe( 0.0, 0.0, 0.0, 0.0 );
-
-         THEN( "The pressure is" ) {
-            REQUIRE( material.GetPressure( 0.0, 0.0, 0.0, 0.0, 0.0 ) == Approx( 0.0 ).margin( 0.000001 ));
+         THEN( "The original equation of state is" ) {
+            REQUIRE( equation_of_state == nullptr );
          }
 
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 0.0, 0.0, 0.0, 0.0, 0.0 ) == 1.0 );
+         THEN( "The material equation of state is" ) {
+            REQUIRE( &material.GetEquationOfState() != nullptr );
          }
 
-         THEN( "The energy is" ) {
-            REQUIRE( material.GetEnergy( 0.0, 0.0, 0.0, 0.0, 0.0 ) == 0.0 );
+         THEN( "The material shear viscosity model is" ) {
+            REQUIRE( shear_model == nullptr );
          }
 
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 0.0, 0.0, 0.0, 0.0, 0.0 ) == -1.0 );
+         THEN( "The material shear viscosity model is" ) {
+            REQUIRE( &material.GetShearViscosityModel() != nullptr );
          }
 
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == -1 );
+         THEN( "The material thermal conductivity model is" ) {
+            REQUIRE( conductivity_model == nullptr );
          }
 
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 0.0, 0.0 ) == 0 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == 0 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == 0 );
-         }
-
-         THEN( "The speed of sound is" ) {
-            REQUIRE( material.GetSpeedOfSound( 0.0, 0.0 ) == Approx( 0.0000000149 ).epsilon( 0.1 ));
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( 2, 0.0 );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0 );
-         }
-
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == -1.0 );
-         }
-      }
-
-      WHEN( "The parameters contain reasonable values" ) {
-
-         StiffenedGasSafe const material = StiffenedGasSafe( 6.1, 4.3, 2.0, 3.0 );
-
-         THEN( "The pressure is" ) {
-            REQUIRE( material.GetPressure( 1.0, 2.0, 3.0, 4.0, 5.0 ) == -4.3 );
-         }
-
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 6.0, 7.0, 8.0, 9.0, 10.0 ) == Approx( 0.95 ));
-         }
-
-         THEN( "The energy is" ) {
-            REQUIRE( material.GetEnergy( 11.0, 12.0, 13.0, 14.0, 15.0 ) == Approx( 31.2206773619 ));
-         }
-
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 16.0, 17.0, 18.0, 19.0, 20.0 ) == -1.0 );
-         }
-
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == 5.1 );
-         }
-
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 21.0, 22.0 ) == 1039.06 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == 6.1 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == 4.3 );
-         }
-
-         THEN( "The speed of sound is" ) {
-            REQUIRE( material.GetSpeedOfSound( 23.0, 24.0 ) == Approx( 2.7396445342 ));
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( { 2.0, 3.0 } );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0.0 );
-         }
-
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == -1.0 );
-         }
-      }
-   }
-
-
-   GIVEN( "A waterlike fluid" ) {
-
-      WHEN( "All parameters are set to zero" ) {
-
-         WaterlikeFluid const material = WaterlikeFluid( 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 );
-
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 0.0, 0.0, 0.0, 0.0, 0.0 ) == 0.0 );
-         }
-
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 0.0, 0.0, 0.0, 0.0, 0.0 ) == -1.0 );
-         }
-
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == 0.0 );
-         }
-
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 0.0, 0.0 ) == 0 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == -1.0 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == -1.0 );
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( 2, 0.0 );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0 );
-         }
-
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == -1.0 );
-         }
-      }
-
-      WHEN( "The parameters contain reasonable values" ) {
-
-         WaterlikeFluid const material = WaterlikeFluid( 6.1, 1.0, 4.3, 1.0, 2.0, 3.0 );
-
-         THEN( "The pressure is" ) {
-            REQUIRE( material.GetPressure( 1.0, 2.0, 3.0, 4.0, 5.0 ) == 1.0 );
-         }
-
-         THEN( "The enthalpy is" ) {
-            REQUIRE( material.GetEnthalpy( 6.0, 7.0, 8.0, 9.0, 10.0 ) == 0.0 );
-         }
-
-         THEN( "The energy is" ) {
-            REQUIRE( material.GetEnergy( 11.0, 12.0, 13.0, 14.0, 15.0 ) == Approx( 22.8481283422 ));
-         }
-
-         THEN( "The temperature is" ) {
-            REQUIRE( material.GetTemperature( 16.0, 17.0, 18.0, 19.0, 20.0 ) == -1.0 );
-         }
-
-         THEN( "The gruneisen is" ) {
-            REQUIRE( material.GetGruneisen() == 0.0 );
-         }
-
-         THEN( "The psi is" ) {
-            REQUIRE( material.GetPsi( 21.0, 22.0 ) == 3261.06 );
-         }
-
-         THEN( "The gamma is" ) {
-            REQUIRE( material.GetGamma() == -1.0 );
-         }
-
-         THEN( "The background pressure is" ) {
-            REQUIRE( material.GetB() == -1.0 );
-         }
-
-         THEN( "The speed of sound is" ) {
-            REQUIRE( material.GetSpeedOfSound( 23.0, 24.0 ) == Approx( 2.690805601 ));
-         }
-
-         THEN( "The viscosity is" ) {
-            std::vector<double> const expected( { 2.0, 3.0 } );
-            REQUIRE( material.GetViscosity() == expected );
-         }
-
-         THEN( "The thermal conductivity is" ) {
-            REQUIRE( material.GetThermalConductivity() == 0.0 );
-         }
-
-         THEN( "The specific heat is" ) {
-            REQUIRE( material.GetSpecificHeat() == -1.0 );
+         THEN( "The material thermal conductivity model is" ) {
+            REQUIRE( &material.GetThermalConductivityModel() != nullptr );
          }
       }
    }

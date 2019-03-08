@@ -89,9 +89,9 @@ public:
    HeatFluxes& operator=( HeatFluxes&& ) = delete;
 
    void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-      double (&heat_fluxes_x)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&heat_fluxes_y)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&heat_fluxes_z)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double (&heat_fluxes_x)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double (&heat_fluxes_y)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double (&heat_fluxes_z)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
       double const cell_size ) const;
 };
 

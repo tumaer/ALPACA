@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute WENOAO53 fluxes according to \cite Balsara2016.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to \cite Balsara2016.
  */
 class WENOAO53 : public Stencil<WENOAO53> {
 
@@ -151,7 +151,7 @@ class WENOAO53 : public Stencil<WENOAO53> {
    static constexpr unsigned int stencil_size_            = 6;
    static constexpr unsigned int downstream_stencil_size_ = 2;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit WENOAO53() = default;

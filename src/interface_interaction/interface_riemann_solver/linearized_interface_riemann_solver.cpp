@@ -94,10 +94,10 @@ std::array<double, 3> LinearizedInterfaceRiemannSolver::SolveInterfaceRiemannPro
    double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
    double const delta_p ) const {
 
-  double const c_left  = material_manager_.GetSpeedOfSound( material_left, rho_left, p_left );
+  double const c_left  = material_manager_.GetMaterial(material_left).GetEquationOfState().GetSpeedOfSound(rho_left, p_left);
   double const impedance_left = rho_left * c_left;
 
-  double const c_right  = material_manager_.GetSpeedOfSound( material_right, rho_right, p_right );
+  double const c_right  = material_manager_.GetMaterial(material_right).GetEquationOfState().GetSpeedOfSound(rho_right, p_right);
   double const impedance_right = rho_right * c_right;
 
   double const inverse_impedance_sum = 1.0 / std::max( ( impedance_left + impedance_right ), std::numeric_limits<double>::epsilon() );

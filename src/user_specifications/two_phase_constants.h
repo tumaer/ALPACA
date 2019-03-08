@@ -92,6 +92,11 @@ namespace GeometryCalculationSettings {
  * Indicates which criteria is used to determine cut cells
  */
 constexpr CutCellCriteria CutCellCriteria = CutCellCriteria::ValueBased;
+
+/**
+ * Indicates whether a derivative or reconstruction stencil should be used inside the geometry calculator.
+ */
+constexpr GeometryStencilType GeometryStencilType = GeometryStencilType::Reconstruction;
 }
 
 namespace ReinitializationConstants {
@@ -99,13 +104,12 @@ namespace ReinitializationConstants {
  * The pseudo-timestep size to iteratively solve the reinitialization equation.
  * NOTE: It is given as a portion of the cell_size! E.g.: 0.5 results in a pseudo-timestep size of 0.5 * cell_size.
  */
-constexpr double Dtau = 0.2;
+constexpr double Dtau = 0.125;
 
 /**
  * The maximum number of iterations used to solve the reinitialization equation.
  */
-constexpr unsigned int MaximumNumberOfIterations = 100;
-
+constexpr unsigned int MaximumNumberOfIterations = 30; // 30
 /**
  * The indicator whether a convergence criteria is applied (true) or a fixed number of iterations (false) is used.
  */
@@ -114,7 +118,17 @@ constexpr bool TrackConvergence = true;
 /**
  * The maximum residuum allowed if a convergence criteria is applied.
  */
-constexpr double MaximumResiduum = 1.0e-2;
+constexpr double MaximumResiduum = 1.0e-3;
+
+/**
+ * Decision whether also cut cells are reinitialized.
+ */
+static constexpr bool ReinitializeCutCells = true;
+
+/**
+ * Decision whether only in last RK stage is reinitialized.
+ */
+static constexpr bool ReinitializeOnlyInLastRkStage = true;
 }
 
 namespace ExtensionConstants {
@@ -127,7 +141,7 @@ constexpr double Dtau = 0.3;
 /**
  * The maximum number of iterations used to solve the extension equation.
  */
-constexpr unsigned int MaximumNumberOfIterations = 100;
+constexpr unsigned int MaximumNumberOfIterations = 35;
 
 /**
  * The indicator whether a convergence criteria is applied (true) or a fixed number of iterations (false) is used.
@@ -137,10 +151,17 @@ constexpr bool TrackConvergence = true;
 /**
  * The maximum residuum allowed if a convergence criteria is applied.
  */
-constexpr double MaximumResiduum = 1.0e-2;
+constexpr double MaximumResiduum = 1.0e-3;
 }
 
-namespace InterfaceQuantityExtensionConstants {
+namespace InterfaceStateTreatmentConstants {
+/**
+ * The indicator whether we extend the interface quantities or not.
+ */
+constexpr bool ExtendInterfaceQuantities = true;
+}
+
+namespace InterfaceStateExtensionConstants {
 /**
  * The pseudo-timestep size to iteratively solve the extension equation.
  * NOTE: It is given as a portion of the cell_size! E.g.: 0.5 results in a pseudo-timestep size of 0.5 * cell_size.
@@ -150,7 +171,7 @@ constexpr double Dtau = 0.3;
 /**
  * The maximum number of iterations used to solve the extension equation.
  */
-constexpr unsigned int MaximumNumberOfIterations = 100;
+constexpr unsigned int MaximumNumberOfIterations = 35;
 
 /**
  * The indicator whether a convergence criteria is applied (true) or a fixed number of iterations (false) is used.
@@ -160,7 +181,7 @@ constexpr bool TrackConvergence = true;
 /**
  * The maximum residuum allowed if a convergence criteria is applied.
  */
-constexpr double MaximumResiduum = 1.0e-2;
+constexpr double MaximumResiduum = 1.0e-3;
 }
 
 namespace IterativeInterfaceRiemannSolverConstants {

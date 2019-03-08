@@ -69,7 +69,7 @@
 #define PRIME_STATE_HANDLER_H
 
 #include "block.h"
-#include "fluid_fields_definitions.h"
+#include "field_material_definitions.h"
 #include "materials/material_manager.h"
 
 /**
@@ -94,7 +94,7 @@ public:
 
    /**
     * @brief Converts prime state to conservative values for every cell in the given buffers.
-    * @param material Material identifier of the fluid under consideration.
+    * @param material Material identifier of the material under consideration.
     * @param prime_states The input PrimeStates buffer.
     * @param conservatives The output Conservatives buffer.
     */
@@ -110,7 +110,7 @@ public:
 
    /**
     * @brief Converts prime state to conservative values for a specific cell in the given buffers.
-    * @param material Material identifier of the fluid under consideration.
+    * @param material Material identifier of the material under consideration.
     * @param prime_states The input PrimeStates buffer.
     * @param conservatives The output Conservatives buffer.
     * @param i,j,k Indices of the cell.
@@ -122,7 +122,7 @@ public:
 
    /**
     * @brief Converts prime state to conservative values.
-    * @param material Material identifier of the fluid under consideration.
+    * @param material Material identifier of the material under consideration.
     * @param prime_states_container Container of the input prime states.
     * @param conservatives_container Container of the output conservatives.
     * @tparam PrimeStatesContainerType Type of the conservative container, has to provide an [index]-operator.
@@ -136,7 +136,7 @@ public:
 
    /**
     * @brief Converts conservative to prime state values for every cell in the given buffers.
-    * @param material Material identifier of the fluid under consideration.
+    * @param material Material identifier of the material under consideration.
     * @param conservatives The input Conservatives buffer.
     * @param prime_states The output PrimeStates buffer.
     */
@@ -152,7 +152,7 @@ public:
 
    /**
     * @brief Converts conservative to prime state values for a specific cell in the given buffers.
-    * @param material Material identifier of the fluid under consideration.
+    * @param material Material identifier of the material under consideration.
     * @param conservatives The input Conservatives buffer.
     * @param prime_states The output PrimeStates buffer.
     * @param i,j,k Indices of the cell.
@@ -164,7 +164,7 @@ public:
 
    /**
     * @brief Converts conservative to prime state values.
-    * @param material Material identifier of the fluid under consideration.
+    * @param material Material identifier of the material under consideration.
     * @param conservatives_container Container of the input conservatives.
     * @param prime_states_container Container of the output prime states.
     * @tparam ConservativesContainerType Type of the prime state container, has to provide an [index]-operator.

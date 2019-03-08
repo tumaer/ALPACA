@@ -67,13 +67,21 @@
 *****************************************************************************************/
 #include "user_expression.h"
 
+#include <string>
+#include <vector>
+
+
 /**
  * @brief Creates a new UserExpression object from an expression and several input and output variables.
  * @param expression_string The expression to be compiled.
  * @param variables_in The input variable names and references to their values.
  * @param variables_out The out variable names.
  */
-UserExpression::UserExpression( const std::string expression_string, const std::vector<std::tuple<std::string,double&>> variables_in, const std::vector<std::string> variables_out ) {
+UserExpression::UserExpression( const std::string expression_string, const std::vector<std::tuple<std::string,double&>> variables_in, const std::vector<std::string> variables_out ) :
+   random_number_expression_()
+{
+   symbol_table_.add_function("rand", random_number_expression_);
+
    for( auto& var : variables_in ) {
       symbol_table_.add_variable( std::get<0>(var), std::get<1>(var) );
    }

@@ -74,71 +74,72 @@
  * @brief Computes the flux at one cell face according to used WENO-CU6 scheme. Also See base class.
  * @note Hotpath function.
  */
-double WENOCU6::ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const {
+double WENOCU6::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
+   //output error in case something went wrong with the stencil size
    if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size for the WENOCU6 evaluation is longer than the provided array");
+      throw std::logic_error("Stencil size in WENOCU65 is longer than provided Array");
    }
 #endif
 
-   double const epsilon_weno_cu6 = 1.0e-8 * cell_size * cell_size;
+   const double epsilon_weno_cu6 = 1.0e-8 * cell_size * cell_size;
 
-   // Assign values to v_i to enhance readability
-   double const v1 = array[downstream_stencil_size_ + stencil_offset - 2 * stencil_sign];
-   double const v2 = array[downstream_stencil_size_ + stencil_offset - 1 * stencil_sign];
-   double const v3 = array[downstream_stencil_size_ + stencil_offset];
-   double const v4 = array[downstream_stencil_size_ + stencil_offset + 1 * stencil_sign];
-   double const v5 = array[downstream_stencil_size_ + stencil_offset + 2 * stencil_sign];
-   double const v6 = array[downstream_stencil_size_ + stencil_offset + 3 * stencil_sign];
+   // Assign values to v_i to make it easier to read
+   const double v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 2 * evaluation_properties[1]];
+   const double v2 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+   const double v3 = array[downstream_stencil_size_ + evaluation_properties[0]];
+   const double v4 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+   const double v5 = array[downstream_stencil_size_ + evaluation_properties[0] + 2 * evaluation_properties[1]];
+   const double v6 = array[downstream_stencil_size_ + evaluation_properties[0] + 3 * evaluation_properties[1]];
 
    // Compute smoothness indicators s_i
-   double const s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2 + coef_smoothness_13_ * v3;
-   double const s12 = coef_smoothness_14_ * v1 + coef_smoothness_15_ * v2 + coef_smoothness_16_ * v3;
+   const double s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2 + coef_smoothness_13_ * v3;
+   const double s12 = coef_smoothness_14_ * v1 + coef_smoothness_15_ * v2 + coef_smoothness_16_ * v3;
 
-   double const s1 = coef_smoothness_1_ * s11 * s11 + coef_smoothness_2_ * s12 * s12;
+   const double s1 = coef_smoothness_1_ * s11 * s11 + coef_smoothness_2_ * s12 * s12;
 
-   double const s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3 + coef_smoothness_23_ * v4;
-   double const s22 = coef_smoothness_24_ * v2 + coef_smoothness_25_ * v4;
+   const double s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3 + coef_smoothness_23_ * v4;
+   const double s22 = coef_smoothness_24_ * v2 + coef_smoothness_25_ * v4;
 
-   double const s2 = coef_smoothness_1_ * s21 * s21 + coef_smoothness_2_ * s22 * s22;
+   const double s2 = coef_smoothness_1_ * s21 * s21 + coef_smoothness_2_ * s22 * s22;
 
-   double const s31 = coef_smoothness_31_ * v3 + coef_smoothness_32_ * v4 + coef_smoothness_33_ * v5;
-   double const s32 = coef_smoothness_34_ * v3 + coef_smoothness_35_ * v4 + coef_smoothness_36_ * v5;
+   const double s31 = coef_smoothness_31_ * v3 + coef_smoothness_32_ * v4 + coef_smoothness_33_ * v5;
+   const double s32 = coef_smoothness_34_ * v3 + coef_smoothness_35_ * v4 + coef_smoothness_36_ * v5;
 
-   double const s3 = coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
+   const double s3 = coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
 
-   double const s41 = coef_smoothness_416_*v6 + coef_smoothness_415_*v5 + coef_smoothness_414_*v4 + coef_smoothness_413_*v3 + coef_smoothness_412_*v2 + coef_smoothness_411_*v1;
-   double const s42 = coef_smoothness_425_*v5 + coef_smoothness_424_*v4 + coef_smoothness_423_*v3 + coef_smoothness_422_*v2 + coef_smoothness_421_*v1;
-   double const s43 = coef_smoothness_436_*v6 + coef_smoothness_435_*v5 + coef_smoothness_434_*v4 + coef_smoothness_433_*v3 + coef_smoothness_432_*v2 + coef_smoothness_431_*v1;
-   double const s44 = coef_smoothness_445_*v5 + coef_smoothness_444_*v4 + coef_smoothness_443_*v3 + coef_smoothness_442_*v2 + coef_smoothness_441_*v1;
-   double const s45 = coef_smoothness_466_*v6 + coef_smoothness_465_*v5 + coef_smoothness_464_*v4 + coef_smoothness_463_*v3 + coef_smoothness_462_*v2 + coef_smoothness_461_*v1;
+   const double s41 = coef_smoothness_416_*v6 + coef_smoothness_415_*v5 + coef_smoothness_414_*v4 + coef_smoothness_413_*v3 + coef_smoothness_412_*v2 + coef_smoothness_411_*v1;
+   const double s42 = coef_smoothness_425_*v5 + coef_smoothness_424_*v4 + coef_smoothness_423_*v3 + coef_smoothness_422_*v2 + coef_smoothness_421_*v1;
+   const double s43 = coef_smoothness_436_*v6 + coef_smoothness_435_*v5 + coef_smoothness_434_*v4 + coef_smoothness_433_*v3 + coef_smoothness_432_*v2 + coef_smoothness_431_*v1;
+   const double s44 = coef_smoothness_445_*v5 + coef_smoothness_444_*v4 + coef_smoothness_443_*v3 + coef_smoothness_442_*v2 + coef_smoothness_441_*v1;
+   const double s45 = coef_smoothness_466_*v6 + coef_smoothness_465_*v5 + coef_smoothness_464_*v4 + coef_smoothness_463_*v3 + coef_smoothness_462_*v2 + coef_smoothness_461_*v1;
 
-   double const s4 = s41*s41*coef_smoothness_41_ + s42*s42*coef_smoothness_42_ + s41*s43*coef_smoothness_43_ + s43*s43*coef_smoothness_44_
+   const double s4 = s41*s41*coef_smoothness_41_ + s42*s42*coef_smoothness_42_ + s41*s43*coef_smoothness_43_ + s43*s43*coef_smoothness_44_
       + s42*s44*coef_smoothness_45_ + s41*s45*coef_smoothness_46_ + s44*s44*coef_smoothness_47_ + s43*s45*coef_smoothness_48_
       + s45*s45*coef_smoothness_49_;
 
-   double const s51 = coef_smoothness_511_*s1 + coef_smoothness_512_*s2 + coef_smoothness_513_*s3;
+   const double s51 = coef_smoothness_511_*s1 + coef_smoothness_512_*s2 + coef_smoothness_513_*s3;
 
-   double const s5 = std::abs(s4-s51);
+   const double s5 = std::abs(s4-s51);
 
    // Compute weights
-   double const r1 = weight_const_ + s5 / (s1 + epsilon_weno_cu6);
-   double const r2 = weight_const_ + s5 / (s2 + epsilon_weno_cu6);
-   double const r3 = weight_const_ + s5 / (s3 + epsilon_weno_cu6);
-   double const r4 = weight_const_ + s5 / (s4 + epsilon_weno_cu6);
+   const double r1 = weight_const_ + s5 / (s1 + epsilon_weno_cu6);
+   const double r2 = weight_const_ + s5 / (s2 + epsilon_weno_cu6);
+   const double r3 = weight_const_ + s5 / (s3 + epsilon_weno_cu6);
+   const double r4 = weight_const_ + s5 / (s4 + epsilon_weno_cu6);
 
-   double const a1 = coef_weights_1_ * r1;
-   double const a2 = coef_weights_2_ * r2;
-   double const a3 = coef_weights_3_ * r3;
-   double const a4 = coef_weights_4_ * r4;
+   const double a1 = coef_weights_1_ * r1;
+   const double a2 = coef_weights_2_ * r2;
+   const double a3 = coef_weights_3_ * r3;
+   const double a4 = coef_weights_4_ * r4;
 
-   double const one_a_sum = 1.0 / (a1 + a2 + a3 + a4);
+   const double one_a_sum = 1.0 / (a1 + a2 + a3 + a4);
 
-   double const w1 = a1 * one_a_sum;
-   double const w2 = a2 * one_a_sum;
-   double const w3 = a3 * one_a_sum;
-   double const w4 = a4 * one_a_sum;
+   const double w1 = a1 * one_a_sum;
+   const double w2 = a2 * one_a_sum;
+   const double w3 = a3 * one_a_sum;
+   const double w4 = a4 * one_a_sum;
 
    // Return weighted average
    return  w1 * (coef_stencils_01_ * v1 + coef_stencils_02_ * v2 + coef_stencils_03_ * v3)

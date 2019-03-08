@@ -68,11 +68,9 @@
 #ifndef FOURTH_ORDER_CENTRAL_DIFFERENCE_H
 #define FOURTH_ORDER_CENTRAL_DIFFERENCE_H
 
+
 #include "stencils/stencil.h"
 
-/**
- * @brief The FourthOrderCellFace class implements a standard fourth-order finite difference stencil.
- */
 class FourthOrderCentralDifference : public Stencil<FourthOrderCentralDifference> {
 
    friend Stencil;
@@ -82,15 +80,13 @@ class FourthOrderCentralDifference : public Stencil<FourthOrderCentralDifference
    static constexpr unsigned int stencil_size_ = 5;
    static constexpr unsigned int downstream_stencil_size_ = 2;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
 
 public:
    explicit FourthOrderCentralDifference() = default;
    ~FourthOrderCentralDifference() = default;
-   FourthOrderCentralDifference( FourthOrderCentralDifference const& ) = delete;
-   FourthOrderCentralDifference& operator=( FourthOrderCentralDifference const& ) = delete;
-   FourthOrderCentralDifference( FourthOrderCentralDifference&& ) = delete;
-   FourthOrderCentralDifference& operator=( FourthOrderCentralDifference&& ) = delete;
+
 };
+
 
 #endif //FOURTH_ORDER_CENTRAL_DIFFERENCE_H

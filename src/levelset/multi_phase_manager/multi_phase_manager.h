@@ -72,8 +72,7 @@
 #include "user_specifications/numerical_setup.h"
 #include "communication/communication_manager.h"
 #include "materials/material_manager.h"
-#include "simulation_setup.h"
-#include "interface_interaction/interface_quantity_calculator.h"
+#include "interface_interaction/interface_state_calculator.h"
 
 #include "levelset/geometry/geometry_calculator_setup.h"
 #include "buffer_handler_setup.h"
@@ -83,13 +82,13 @@
 #include "ghost_fluid_extender/ghost_fluid_extender_setup.h"
 #include "interface_extender/interface_extender_setup.h"
 
-using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geometry_calculator>::type;
-using BufferHandlerConcretization = BufferHandlerSetup::Concretize<buffer_handler>::type;
-using CutCellMixerConcretization = CutCellMixerSetup::Concretize<cut_cell_mixer>::type;
-using LevelsetReinitializerConcretization = LevelsetReinitializerSetup::Concretize<levelset_reinitializer>::type;
-using ScaleSeparatorConcretization = ScaleSeparatorSetup::Concretize<scale_separator>::type;
-using GhostFluidExtenderConcretization = GhostFluidExtenderSetup::Concretize<extender>::type;
-using InterfaceExtenderConcretization = InterfaceExtenderSetup::Concretize<interface_extender>::type;
+using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize< geometry_calculator >::type;
+using BufferHandlerConcretization = BufferHandlerSetup::Concretize< buffer_handler >::type;
+using CutCellMixerConcretization = CutCellMixerSetup::Concretize< cut_cell_mixer >::type;
+using LevelsetReinitializerConcretization = LevelsetReinitializerSetup::Concretize< levelset_reinitializer >::type;
+using ScaleSeparatorConcretization = ScaleSeparatorSetup::Concretize< scale_separator >::type;
+using GhostFluidExtenderConcretization = GhostFluidExtenderSetup::Concretize< extender >::type_primestates;
+using InterfaceExtenderConcretization = InterfaceExtenderSetup::Concretize< interface_extender >::type_states;
 
 /**
  * @brief The MultiPhaseManager provides functionality to simulate multi-phase flows. It allows to propagate a level-set field in time, to perform cut-cell mixing
@@ -100,38 +99,36 @@ template<typename DerivedMultiPhaseManager>
 class MultiPhaseManager {
 
    friend DerivedMultiPhaseManager;
-
-   const MaterialManager& material_manager_;
-   HaloManager& halo_manager_;
-
-   const GeometryCalculatorConcretization geometry_calculator_;
-
-   const BufferHandlerConcretization buffer_handler_;
-   const InterfaceQuantityCalculator interface_quantity_calculator_;
-   const CutCellMixerConcretization cut_cell_mixer_;
-   const LevelsetReinitializerConcretization levelset_reinitializer_;
-   const ScaleSeparatorConcretization scale_separator_;
-   const GhostFluidExtenderConcretization ghost_fluid_extender_;
-   const InterfaceExtenderConcretization interface_extender_;
+   // general classes without concretization
+   MaterialManager const& material_manager_;
+   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   // class concretization use
+   GeometryCalculatorConcretization const geometry_calculator_;
+   BufferHandlerConcretization const buffer_handler_;
+   InterfaceStateCalculator const interface_state_calculator_;
+   CutCellMixerConcretization const cut_cell_mixer_;
+   LevelsetReinitializerConcretization const levelset_reinitializer_;
+   ScaleSeparatorConcretization const scale_separator_;
+   GhostFluidExtenderConcretization const ghost_fluid_extender_;
+   InterfaceExtenderConcretization const interface_extender_;
 
    /**
     * @brief Default constructor for a MultiPhaseManager.
     * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit MultiPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager ) :
+   explicit MultiPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager ) :
       material_manager_( material_manager ),
       halo_manager_( halo_manager ),
       geometry_calculator_(),
       buffer_handler_( material_manager_ ),
-      interface_quantity_calculator_( material_manager_ ),
-      cut_cell_mixer_( halo_manager_ ),
-      levelset_reinitializer_( halo_manager_ ),
-      scale_separator_( material_manager_,halo_manager_ ),
-      ghost_fluid_extender_( material_manager_,halo_manager_ ),
-      interface_extender_( halo_manager_ )
-   {
-      // Empty Constructor, besides initializer list.
+      interface_state_calculator_( material_manager_ ),
+      cut_cell_mixer_( halo_manager ),
+      levelset_reinitializer_( halo_manager ),
+      scale_separator_( material_manager_, halo_manager ),
+      ghost_fluid_extender_( material_manager_, halo_manager ),
+      interface_extender_( halo_manager ) {
+      /** Empty Constructor, besides initializer list. */
    }
 
 public:
@@ -147,8 +144,8 @@ public:
     * @param nodes The nodes which has to be mixed.
     * @param stage The current stage of the Runge-Kutta method.
     */
-   void Mix(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).MixImplementation(nodes, stage);
+   void Mix( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).MixImplementation( nodes, stage );
    }
 
    /**
@@ -157,25 +154,25 @@ public:
     * @param stage The current stage of the Runge-Kutta method.
     * @param is_last_stage Indicates whether scale separation has to be done or not (default = false).
     */
-   void EnforceWellResolvedDistanceFunction(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, const bool is_last_stage = false) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).EnforceWellResolvedDistanceFunctionImplementation(nodes, stage, is_last_stage);
+   void EnforceWellResolvedDistanceFunction( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, bool const is_last_stage = false ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).EnforceWellResolvedDistanceFunctionImplementation( nodes, stage, is_last_stage );
    }
 
    /**
-    * @brief Extend fluid states to ghost fluid.
+    * @brief Extend material states to ghost material.
     * @param nodes The nodes for which extension has to be done.
     * @param stage The current stage of the Runge-Kutta method.
     */
-   void Extend(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).ExtendImplementation(nodes, stage);
+   void Extend( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).ExtendPrimeStatesImplementation( nodes );
    }
 
    /**
     * @brief Extend interface quantities into narrow band.
     * @param nodes The nodes for which extension has to be done.
     */
-   void ExtendInterfaceQuantities(std::vector<std::reference_wrapper<Node>> const& nodes) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).ExtendInterfaceQuantitiesImplementation(nodes);
+   void ExtendInterfaceStates( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).ExtendInterfaceStatesImplementation( nodes );
    }
 
    /**
@@ -184,8 +181,8 @@ public:
     * @param nodes The nodes on the finest level for which interface-tags and volume fractions have to be adjusted.
     * @param stage The current stage of the Runge-Kutta method.
     */
-   void PropagateLevelset(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).PropagateLevelsetImplementation(nodes, stage);
+   void PropagateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).PropagateLevelsetImplementation( nodes, stage );
    }
 
    /**
@@ -194,8 +191,8 @@ public:
     * @param reset_interface_states Indicates whether interface quantities are set to zero before calculating an extending them.
     * @note Default value is false.
     */
-   void ObtainInterfaceQuantities(std::vector<std::reference_wrapper<Node>> const& nodes, const bool reset_interface_states = false) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).ObtainInterfaceQuantitiesImplementation(nodes, reset_interface_states);
+   void ObtainInterfaceStates( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).ObtainInterfaceStatesImplementation( nodes, reset_interface_states );
    }
 
    /**
@@ -203,59 +200,16 @@ public:
     * ATTENTION: This method should only be called during the initialization of the simulation.
     * @param nodes The nodes for which the volume fractions should be calculated.
     */
-   void InitializeVolumeFractionBuffer(std::vector<std::reference_wrapper<Node>> const& nodes) const {
-      static_cast<DerivedMultiPhaseManager const&>(*this).InitializeVolumeFractionBufferImplementation(nodes);
+   void InitializeVolumeFractionBuffer( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).InitializeVolumeFractionBufferImplementation( nodes );
    }
 
    /**
     * @brief Transform given volume averaged conservatives to conservatives. This is done by a multiplication with the volume fraction.
     * @param node The node for which conservatives are calculated.
     */
-   void TransformToConservatives(Node &node) const {
-      buffer_handler_.TransformToConservatives(node);
-   }
-
-   /**
-    * @brief This function copies the level-set values in the right-hand side buffer to the reinitialized buffer for a given vector of nodes.
-    * @param nodes The nodes for which the level-set buffers are copied.
-    */
-   void CopyRightHandSideLevelsetToReinitializedLevelset(std::vector<std::reference_wrapper<Node>> const& nodes) const {
-
-      for(Node& node : nodes){
-         LevelsetBlock& levelset_block = node.GetLevelsetBlock();
-         double const (&phi_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiRightHandSide();
-         double (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiReinitialized();
-
-         for(unsigned int i = 0; i < CC::TCX(); ++i) {
-            for(unsigned int j = 0; j < CC::TCY(); ++j) {
-               for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-                  phi_reinitialized[i][j][k] = phi_rhs[i][j][k];
-               } //k
-            } //j
-         } //i
-      } //nodes
-   }
-
-
-   /**
-    * @brief This function copies the level-set values in the reinitialized buffer to the right-hand side buffer for a given vector of nodes.
-    * @param nodes The nodes for which the level-set buffers are copied.
-    */
-   void CopyReinitializedLevelsetToRightHandSideLevelset(std::vector<std::reference_wrapper<Node>> const& nodes) const {
-
-      for(Node& node : nodes){
-         LevelsetBlock& levelset_block = node.GetLevelsetBlock();
-         double (&phi_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiRightHandSide();
-         double const (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiReinitialized();
-
-         for(unsigned int i = 0; i < CC::TCX(); ++i) {
-            for(unsigned int j = 0; j < CC::TCY(); ++j) {
-               for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-                  phi_rhs[i][j][k] = phi_reinitialized[i][j][k];
-               } //k
-            } //j
-         } //i
-      } //nodes
+   void TransformToConservatives( Node &node ) const {
+      buffer_handler_.TransformToConservatives( node );
    }
 };
 

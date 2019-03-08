@@ -80,7 +80,7 @@ namespace {
  * @brief The default constructor of the ApertureCutCellMixer class. Calls the default constructor of the base class.
  * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
  */
-ApertureCutCellMixer::ApertureCutCellMixer( HaloManager& halo_manager ) : TwoPhaseCutCellMixer( halo_manager, aperture_mixer_number_of_mixing_contributions )
+ApertureCutCellMixer::ApertureCutCellMixer( HaloManager & halo_manager ) : TwoPhaseCutCellMixer( halo_manager, aperture_mixer_number_of_mixing_contributions )
 {
    // Empty Constructor, besides call of base class constructor
 }
@@ -96,8 +96,8 @@ ApertureCutCellMixer::ApertureCutCellMixer( HaloManager& halo_manager ) : TwoPha
 void ApertureCutCellMixer::CalculateMixingContributionsImplementation(Node const& node, const MaterialName material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const {
 
    std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
-   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetVolumeFraction();
+   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
    std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);
 
    double const reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;

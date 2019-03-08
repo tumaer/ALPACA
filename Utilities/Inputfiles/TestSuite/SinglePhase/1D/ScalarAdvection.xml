@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
     <domain>
-        <!-- size of a single block on level 0 -->
-        <blockSize> 0.2  </blockSize>
+        <!-- size of a single node on level 0 -->
+        <nodeSize> 0.2  </nodeSize>
 
-        <!-- number of blocks per dimension-->
-        <blockRatio>
+        <!-- number of nodes per dimension-->
+        <nodeRatio>
             <x> 10 </x>
             <y> 1 </y>
             <z> 1 </z>
-        </blockRatio>
+        </nodeRatio>
 
         <!--For proper comparison must set:
         internal_cells_per_block_and_dimension_ = 100;
@@ -19,8 +19,8 @@
         -->
 
         <boundaryConditions>
-            <fluid>
-                <!--types of fluid boundary conditions:
+            <material>
+                <!--types of material boundary conditions:
                 zeroGradient,
                 symmetry,
                 Wall
@@ -31,7 +31,7 @@
                 <north>  Wall </north>
                 <bottom> Symmetry </bottom>
                 <top>    Symmetry </top>
-            </fluid>
+            </material>
 
             <!-- TO BE IMPLEMENTED -->
             <levelSet>
@@ -51,52 +51,52 @@
 
         <initialConditions>
 
-            <fluid1>
+            <material1>
             if ((x &gt;= 0.2) &amp; (x &lt;= 0.4))
             {
-                DENSITY : = (1 / 6) * ( exp(-334.477 * (x - 0.3 - 0.005) * (x - 0.3 - 0.005)) +
+                density : = (1 / 6) * ( exp(-334.477 * (x - 0.3 - 0.005) * (x - 0.3 - 0.005)) +
                                         exp(-334.477 * (x - 0.3 + 0.005) * (x - 0.3 + 0.005)) +
                                         4 * exp(-334.477 * (x - 0.3) * (x - 0.3)) );
-                VELOCITY_X := 1.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
+                velocityX := 1.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
             }
             else if ((x &gt;= 0.6) &amp; (x &lt;= 0.8))
             {
-                DENSITY := 1.0;
-                VELOCITY_X := 1.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
+                density := 1.0;
+                velocityX := 1.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
             }
             else if ((x &gt;= 1.0) &amp; (x &lt;= 1.2))
             {
-                DENSITY := 1 - abs(10 * (x - 1.1));
-                VELOCITY_X := 1.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
+                density := 1 - abs(10 * (x - 1.1));
+                velocityX := 1.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
             }
             else if ((x &gt;= 1.4) &amp; (x &lt;= 1.6))
             {
-                DENSITY := (1 / 6) * ( sqrt(max( 1 - 100 * (x - 1.5 - 0.005) * (x - 1.5 - 0.005), 0)) +
+                density := (1 / 6) * ( sqrt(max( 1 - 100 * (x - 1.5 - 0.005) * (x - 1.5 - 0.005), 0)) +
                                        sqrt(max( 1 - 100 * (x - 1.5 + 0.005) * (x - 1.5 + 0.005), 0)) +
                                        4 * sqrt(max( 1 - 100 * (x - 1.5) * (x - 1.5), 0)) );
-                VELOCITY_X := 1.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
+                velocityX := 1.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
             }
             else
             {
-                DENSITY := 0.01;
-                VELOCITY_X := 1.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
+                density := 0.01;
+                velocityX := 1.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
             }
-            </fluid1>
+            </material1>
 
             <levelSet1>
                 phi := 1;
@@ -105,35 +105,28 @@
         </initialConditions>
     </domain>
 
-    <!-- Fluids -->
+    <!-- Materials -->
     <!--Material Types: StiffenedGas, Waterlike (Tait)-->
-    <fluids>
-        <numberOfFluids>              1   </numberOfFluids>
-        <fluid1>
-            <type>StiffenedGas</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      0.0   </rho0>
-            <specificGasConstant>       0.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid1>
-
-        <surfaceTensionCoefficients> 0.0 </surfaceTensionCoefficients> 
-    </fluids>
-
-    <sourceTerms>
-        <gravity>
-            <x> 0 </x>
-            <y> 0 </y>
-            <z> 0 </z>
-        </gravity>
-    </sourceTerms>
+    <materials>
+        <numberOfMaterials>              1   </numberOfMaterials>
+        <material1>
+            <equationOfState>
+                <type>StiffenedGas</type>
+                <gamma>                     1.4   </gamma>
+                <A>                         0.0   </A>
+                <B>                         0.0   </B>
+                <C>                         0.0   </C>
+                <rho0>                      0.0   </rho0>
+                <specificGasConstant>       0.0   </specificGasConstant>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 0.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material1>   
+    </materials>
 
    <multiResolution>
        <maximumLevel> 1 </maximumLevel>
@@ -144,54 +137,46 @@
        </refinementCriterion>
    </multiResolution>
 
-   <calculation>
-        <timeControl>
-            <startTime>            0.0           </startTime>
-            <endTime>              20.0           </endTime>
-        </timeControl>
+   <timeControl>
+       <startTime> 0.0 </startTime>
+       <endTime>   20.0 </endTime>
+       <CFLNumber> 0.6 </CFLNumber>
+   </timeControl>
 
-        <CFLNumber> 0.6 </CFLNumber>
+   <dimensionalization>
+       <lengthReference>         1  </lengthReference>
+       <velocityReference>       1  </velocityReference>
+       <densityReference>        1  </densityReference>
+       <temperatureReference>    1  </temperatureReference>
+   </dimensionalization>
 
-        <referenceParameter>
-            <lengthReference>       1  </lengthReference>
-            <velocityReference>     1  </velocityReference>
-            <densityReference>      1  </densityReference>
-            <temperatureReference>  1  </temperatureReference>
-        </referenceParameter>
-    </calculation>
+   <restart>
+      <restore>
+         <mode> Off </mode> <!-- Off, Soft OR Forced -->
+         <fileName> ScalarAdvection/restart/restart_***.h5 </fileName>
+      </restore>
+      <snapshots>
+         <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep> 
+      </snapshots>
+   </restart>
 
-    <restart>
-        <restoreMode>      0 </restoreMode> <!-- 0: disabled, 1: restore if file exists, 2: force restore -->
-        <restoreFileName>  inputfile/restart/restart_***.h5 </restoreFileName>
-        <snapshotInterval> 3600 </snapshotInterval> <!-- in wall seconds, use 0 to disable interval-based snapshots -->
-        <snapshotsToKeep>  2 </snapshotsToKeep> <!-- timestamp-based snapshots are always kept -->
-        <snapshotTimestamps>
-            <!-- <ts1> 0.1 </ts1> -->
-            <!-- <ts2> 0.2 </ts2> -->
-        </snapshotTimestamps>
-    </restart>
-
-  <output>
-        <!-- TO BE IMPLEMENTED -->
-        <enableOutput>         1               </enableOutput>
-        <!-- END - TO BE IMPLEMENTED -->
-        <outputFileType>XDMF</outputFileType> <!--XDMF-->
-        <outputTimesType>Interval</outputTimesType> <!--Interval OR Timestamps-->
-        <outputPeriod>         2.0            </outputPeriod>
-        <timestamps>
+   <output>
+      <timeNamingFactor> 1.e-3 </timeNamingFactor>
+      <standardOutput> <!-- for general or debug output -->
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  2.0 </interval>
+	      <stamps>
             <ts1> 0.0004 </ts1>
-            <ts2> 0.0006 </ts2>
-            <ts3> 0.0008 </ts3>
-            <ts4> 0.0010 </ts4>
-            <ts5> 0.0012 </ts5>
-            <ts6> 0.0014 </ts6>
-            <ts7> 0.0016 </ts7>
-            <ts8> 0.0018 </ts8>
-            <ts9> 0.05   </ts9>
-            <ts10>0.15    </ts10>
-            <ts11>0.2    </ts11>
-            <ts12>0.4    </ts12>
-        </timestamps>
-        <timeNamingFactor>1.e-2</timeNamingFactor>
-    </output>
+         </stamps>
+      </standardOutput>
+      <interfaceOutput> 
+         <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e3 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+         </stamps>
+      </interfaceOutput>
+   </output>
 </configuration>

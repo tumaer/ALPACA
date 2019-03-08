@@ -85,11 +85,11 @@ class MinIterativeLevelsetReinitializer : public IterativeLevelsetReinitializerB
 
 protected:
 
-   double ReinitializeSingleNodeImplementation(Node& node) const;
+   double ReinitializeSingleNodeImplementation(Node& node, bool const ) const;
 
 public:
    MinIterativeLevelsetReinitializer() = delete;
-   explicit MinIterativeLevelsetReinitializer( HaloManager& halo_manager );
+   explicit MinIterativeLevelsetReinitializer( HaloManager & halo_manager );
    ~MinIterativeLevelsetReinitializer() = default;
    MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer const& ) = delete;
    MinIterativeLevelsetReinitializer& operator=( MinIterativeLevelsetReinitializer const& ) = delete;

@@ -82,7 +82,7 @@ class ApertureCutCellMixer : public TwoPhaseCutCellMixer<ApertureCutCellMixer> {
 
 public:
    ApertureCutCellMixer() = delete;
-   explicit ApertureCutCellMixer( HaloManager& halo_manager );
+   explicit ApertureCutCellMixer( HaloManager & halo_manager );
    ~ApertureCutCellMixer() = default;
    ApertureCutCellMixer( ApertureCutCellMixer const& ) = delete;
    ApertureCutCellMixer& operator=( ApertureCutCellMixer const& ) = delete;

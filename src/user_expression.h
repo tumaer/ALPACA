@@ -70,15 +70,34 @@
 
 #include <string>
 #include <vector>
+#include <random>
 
 #include <exprtk.hpp>
+#include "utilities/random_number_generator.h"
 
+template<typename T>
+struct random_number_expression : public exprtk::ifunction<T>
+{
+
+    RandomNumberGenerator& generator_;
+
+public:
+
+    random_number_expression() : exprtk::ifunction<T>(0), generator_(RandomNumberGenerator::Instance()) {}
+    virtual ~random_number_expression() {}
+
+    inline T operator()()
+    {
+        return generator_.GiveRandomNumber();
+    }
+};
 
 /**
  * @brief The UserExpression class represents a user defined mathematical expression with several input and output variables.
  *        It wraps the basic functionality of the powerful expression toolkit (http://www.partow.net/programming/exprtk/index.html).
  */
 class UserExpression {
+   random_number_expression<double> random_number_expression_;
    exprtk::symbol_table<double> symbol_table_;
    exprtk::expression<double> expression_;
 

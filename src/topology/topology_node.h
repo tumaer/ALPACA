@@ -71,12 +71,12 @@
 #include <vector>
 #include <tuple>
 #include <cstdint>
-#include "materials/material_names.h"
+#include "materials/material_definitions.h"
 
-#include "space_filling_curves.h"
+#include "utilities/space_filling_curves.h"
 
 /**
- * @brief The TopologyNode class organizes the light weight global (over MPI ranks) node information in a tree structure. Allowing the TopologyManager efficient searches.
+ * @brief The TopologyNode class organizes the light weight global ( over MPI ranks ) node information in a tree structure. Allowing the TopologyManager efficient searches.
  */
 class TopologyNode {
 
@@ -89,61 +89,66 @@ class TopologyNode {
 
    void Refine();
 
-   void AddFluid(MaterialName const material);
-   void RemoveFluid(MaterialName const material);
-   std::vector<MaterialName> GetFluids() const;
-   MaterialName GetSingleFluid() const;
+   void AddMaterial( const MaterialName material );
+   void RemoveMaterial( const MaterialName material );
+   std::vector<MaterialName> GetMaterials() const;
+   MaterialName GetSingleMaterial() const;
 
-   TopologyNode& GetChildWithId(std::uint64_t const id);
-   const TopologyNode& GetChildWithId(std::uint64_t const id) const;
+   TopologyNode& GetChildWithId( std::uint64_t const id );
+   TopologyNode const& GetChildWithId( std::uint64_t const id ) const;
 
    unsigned int Weight() const;
 
 public:
    TopologyNode() = delete;
-   explicit TopologyNode(std::uint64_t const id, int const rank = -1);
+   explicit TopologyNode( std::uint64_t const id, int const rank = -1 );
    ~TopologyNode() = default;
    TopologyNode( TopologyNode const& ) = delete;
    TopologyNode& operator=( TopologyNode const& ) = delete;
    TopologyNode( TopologyNode&& ) = default; //Needed for usage in vector.
    TopologyNode& operator=( TopologyNode&& ) = delete;
 
-   void Refine(std::uint64_t const id);
-   void Coarse(std::uint64_t const id);
+   void Refine( std::uint64_t const id );
+   void Coarse( std::uint64_t const id );
 
-   int GetRank(std::uint64_t const id) const;
-   void NodeLeafCount(std::pair<unsigned int, unsigned int>& nodes_and_leaves) const;
-   void RankWiseNodeLeafCount(std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank) const;
-   void NodeBlockCount(std::pair<unsigned int, unsigned int>& nodes_and_leaves) const;
+   int GetRank( std::uint64_t const id ) const;
+   void NodeLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
+   void NodeInterfaceLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
+   void RankWiseNodeLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const;
+   void RankWiseNodeInterfaceLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const;
+   void NodeBlockCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
    unsigned int MultiPhaseNodeCount() const;
-   void RankWiseNodeBlockCount(std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank) const;
+   void RankWiseNodeBlockCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank ) const;
    unsigned int GetDepth() const;
 
-   void IdsOnLevel(unsigned int const level,std::vector<std::uint64_t>& ids) const;
-   void LocalIdsOnLevel(unsigned int const level,std::vector<std::uint64_t>& ids, int const local_rank) const;
+   void IdsOnLevel( unsigned int const level,std::vector<std::uint64_t>& ids ) const;
+   void LocalIdsOnLevel( unsigned int const level,std::vector<std::uint64_t>& ids, int const local_rank ) const;
 
-   unsigned int LocalLeaves(std::vector<std::uint64_t>& local_leaves, int const rank) const;
-   unsigned int GetLeafIds(std::vector<std::uint64_t>& leaves) const;
-   unsigned int LocalLeavesOnLevel(std::vector<std::uint64_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level = 0) const;
-   unsigned int GetLeafIdsOnLevel(std::vector<std::uint64_t>& leaves, unsigned int const level, unsigned int const current_level = 0) const;
+   unsigned int LocalLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const;
+   unsigned int LocalInterfaceLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const;
+   unsigned int GetLeafIds( std::vector<std::uint64_t>& leaves ) const;
+   unsigned int LocalLeavesOnLevel( std::vector<std::uint64_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level = 0 ) const;
+   unsigned int GetLeafIdsOnLevel( std::vector<std::uint64_t>& leaves, unsigned int const level, unsigned int const current_level = 0 ) const;
 
-   void SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, unsigned int const level = 0);
-   void SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, const HilbertPosition position,unsigned int const level = 0);
+   void LocalNodes( std::vector<std::uint64_t>& local_nodes, int const rank ) const;
 
-   void ListUnbalancedNodes(std::vector<std::tuple<std::uint64_t const, int const, int const> >& ids_current_future_rank_map);
+   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, unsigned int const level = 0 );
+   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, const HilbertPosition position,unsigned int const level = 0 );
+
+   void ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const, int const, int const> >& ids_current_future_rank_map );
 
    int BalanceTargetRanks();
-   void SetCurrentRankOfLeaf(std::uint64_t const id, int const rank);
+   void SetCurrentRankOfLeaf( std::uint64_t const id, int const rank );
 
-   bool NodeExists(std::uint64_t const id) const;
-   bool NodeIsLeaf(std::uint64_t const id) const;
+   bool NodeExists( std::uint64_t const id ) const;
+   bool NodeIsLeaf( std::uint64_t const id ) const;
 
-   void ChildWeight(std::vector<unsigned int>& weights_on_level, unsigned int const current_level = 0) const;
+   void ChildWeight( std::vector<unsigned int>& weights_on_level, unsigned int const current_level = 0 ) const;
 
-   void AddFluid(std::uint64_t const id, MaterialName const material);
-   void RemoveFluid(std::uint64_t const id, MaterialName const material);
-   std::vector<MaterialName> GetFluids(std::uint64_t const id) const;
-   MaterialName GetSingleFluid(std::uint64_t const id) const;
+   void AddMaterial( std::uint64_t const id, const MaterialName material );
+   void RemoveMaterial( std::uint64_t const id, const MaterialName material );
+   std::vector<MaterialName> GetMaterials( std::uint64_t const id ) const;
+   MaterialName GetSingleMaterial( std::uint64_t const id ) const;
 
    /**
     * @brief Gives the id of this topology node.
@@ -162,8 +167,8 @@ public:
     * @param rhs right hand side value of == operator
     * @return True if Ids of two nodes are equal, False otherwise 
     */
-   inline bool operator==(std::uint64_t const rhs) {return (rhs == unique_id_);}
-   inline bool operator==(const TopologyNode& rhs) {return (rhs.Id() == unique_id_);}
+   inline bool operator==( std::uint64_t const rhs ) {return ( rhs == unique_id_ );}
+   inline bool operator==( TopologyNode const& rhs ) {return ( rhs.Id() == unique_id_ );}
 };
 
 #endif // TOPOLOGY_NODE_H

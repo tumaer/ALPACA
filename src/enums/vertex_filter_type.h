@@ -65,7 +65,6 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-
 #ifndef VERTEX_FILTER_TYPE_H
 #define VERTEX_FILTER_TYPE_H
 

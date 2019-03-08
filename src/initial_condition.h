@@ -71,11 +71,12 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <memory>
 
+#include "unit_handler.h"
 #include "user_specifications/compile_time_constants.h"
-#include "fluid_fields_definitions.h"
-#include "materials/material_names.h"
-#include "input_output/inputfile_parser.h"
+#include "field_material_definitions.h"
+#include "materials/material_definitions.h"
 
 #include "user_expression.h"
 
@@ -84,30 +85,50 @@
  * @note Uses the C++ Mathematical Expression Toolkit Library by Arash Partow, see respective files for License and Copyright information.
  */
 class InitialCondition {
+   // Instance for dimensionalization and non-dimensionalization
+   UnitHandler const& unit_handler_;
 
-   const std::vector<std::string> phi_expression_;
-   const unsigned int number_of_fluids_;
-   const std::vector<std::string> fluid_initialisation_;
-   const std::vector<MaterialName> fluids_;
+   // Member variables providing the user expression of input data
+   std::vector<std::string> const material_initial_expressions_;
+   std::vector<std::string> const levelset_initial_expressions_;
 
-   static const std::string variable_name_phi_;
+   // Variables to define the name of parameters in the input expression
+   std::vector<MaterialName> const material_names_;
+   std::vector<std::string> const variable_names_prime_states_;
+   std::string const variable_name_levelset_;
+   std::string const variable_name_x_ = "x";
+   std::string const variable_name_y_ = "y";
+   std::string const variable_name_z_ = "z";
+   // Additional required variables
+   double const node_size_on_level_zero_;
+   unsigned int const maximum_level_;
 
-   UserExpression CreateInputExpression(std::string const expression, std::vector<std::string> const& variables_out, double &x, double &y, double &z) const;
+
+   // local function to create expression that can be evaluated
+   std::unique_ptr<UserExpression const> CreateInputExpression( std::string const& expression, std::vector<std::string> const& variables_out, double &x, double &y, double &z ) const;
 
 public:
    InitialCondition() = delete;
-   explicit InitialCondition(const InputFileParser& parser);
+   explicit InitialCondition( std::vector<std::string> const& material_initial_expressions,
+                              std::vector<std::string> const& levelset_initial_expressions,
+                              std::vector<MaterialName> const& material_names,
+                              std::vector<std::string> const& variable_names_prime_states,
+                              std::string const& variable_name_levelset,
+                              double const node_size_on_level_zero_,
+                              unsigned int const maximum_level,
+                              UnitHandler const& unit_handler );
    ~InitialCondition() = default;
    InitialCondition( InitialCondition const& ) = delete;
    InitialCondition& operator=( InitialCondition const& ) = delete;
    InitialCondition( InitialCondition&& ) = delete;
    InitialCondition& operator=( InitialCondition&& ) = delete;
 
-   void GetInitialPrimeStates( const std::array<double, 3> origin, const double cell_size, const MaterialName material,
-      double (&initial_values)[FF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()]) const;
-
-   void GetInitialLevelset(const std::array<double, 3> origin, const double cell_size, double (&initial_values)[CC::TCX()][CC::TCY()][CC::TCZ()]) const;
-   std::vector<bool> GetInitialMaterials(const std::array<double, 3> origin, const double smallest_cell_size, const unsigned int level_factor) const;
+   // Fills the prime state buffer with appropriate values of the input expression
+   void GetInitialPrimeStates( std::uint64_t const node_id, MaterialName const material, double (&initial_values)[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
+   // Fills the levelset buffer with appropriate value of the input expressions
+   void GetInitialLevelset( std::uint64_t const node_id, double (&initial_levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   // Gives the initial materials present
+   std::vector<MaterialName> GetInitialMaterials( std::uint64_t const node_id ) const;
 };
 
 #endif // INITIAL_CONDITION_H

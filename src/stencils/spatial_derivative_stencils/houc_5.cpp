@@ -66,33 +66,36 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "houc_5.h"
-#include <stdexcept>
 
 /**
 * @brief Implements the 5th order HOUC stencil of \cite Nourgaliev2007. Also See base class.
-* @note The input cell_size and stencil_offset is not required in all stencils, but for unified interface all derived classes inherit it.
 * @note Hotpath function.
 */
-double HOUC5::ApplyImplementation( std::vector<double> const& array, int const, int const stencil_sign, double const ) const {
+double HOUC5::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
 
 #ifndef PERFORMANCE
+   // Suppresses Compiler Warning "Wunused. The Input cell_size is not needed in all stencils, but for unified interface all derived inherite it.
+   (void)cell_size;
+
+   // Output error in case something went wrong with the stencil size
    if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size for the HOUC5 evaluation is longer than the provided array");
+      throw std::logic_error("Stencil size in HOUC is longer than provided Array");
    }
 #endif
 
-   // Assign values to v_i to enhance readability
-   double const v0 = array[downstream_stencil_size_ - 3 * stencil_sign];
-   double const v1 = array[downstream_stencil_size_ - 2 * stencil_sign];
-   double const v2 = array[downstream_stencil_size_ - 1 * stencil_sign];
-   double const v3 = array[downstream_stencil_size_];
-   double const v4 = array[downstream_stencil_size_ + 1 * stencil_sign];
-   double const v5 = array[downstream_stencil_size_ + 2 * stencil_sign];
+   // Assign values to v_i to make it easier to read
+   const double v0 = array[downstream_stencil_size_ - 3 * evaluation_properties[1]];
+   const double v1 = array[downstream_stencil_size_ - 2 * evaluation_properties[1]];
+   const double v2 = array[downstream_stencil_size_ - 1 * evaluation_properties[1]];
+   const double v3 = array[downstream_stencil_size_];
+   const double v4 = array[downstream_stencil_size_ + 1 * evaluation_properties[1]];
+   const double v5 = array[downstream_stencil_size_ + 2 * evaluation_properties[1]];
+
 
    double result = coefficient_0_ * v0 + coefficient_1_ * v1 + coefficient_2_ * v2
       + coefficient_3_ * v3 + coefficient_4_ * v4 + coefficient_5_ * v5;
    result *= one_sixtieth;
-   result *= stencil_sign;
+   result *= evaluation_properties[1];
 
    return result;
 }
