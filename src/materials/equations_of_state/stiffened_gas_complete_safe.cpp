@@ -81,11 +81,10 @@
  */
 StiffenedGasCompleteSafe::StiffenedGasCompleteSafe( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) :
    gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGasCompleteSafe"  ) ),
-   energy_translation_factor_(   unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "A", "StiffenedGasCompleteSafe" ),
+   energy_translation_factor_(   unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "energyTranslationFactor", "StiffenedGasCompleteSafe" ),
                                                                       { UnitType::Velocity, UnitType::Velocity }, {} ) ),
-   stiffened_pressure_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "B", "StiffenedGasCompleteSafe" ),
-                                                                      UnitType::Pressure ) ),
-   thermal_energy_factor_(       unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "C", "StiffenedGasCompleteSafe" ),
+   background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGasCompleteSafe" ), UnitType::Pressure ) ),
+   thermal_energy_factor_(       unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "thermalEnergyFactor", "StiffenedGasCompleteSafe" ),
                                                                       { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ),
    specific_gas_constant_(       unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "specificGasConstant", "StiffenedGasCompleteSafe" ),
                                                                       { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ) {
@@ -102,10 +101,10 @@ StiffenedGasCompleteSafe::StiffenedGasCompleteSafe( std::unordered_map<std::stri
  * @return Pressure according to complete stiffened-gas equation of state.
  */
 double StiffenedGasCompleteSafe::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   double pressure = -gamma_ * stiffened_pressure_constant_ + ( gamma_ -1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x,
+   double pressure = -gamma_ * background_pressure_ + ( gamma_ -1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x,
       momentum_y * momentum_y,
       momentum_z * momentum_z ) / std::max( density, epsilon_ ) - density * energy_translation_factor_ );
-   return std::max( pressure ,-stiffened_pressure_constant_ + epsilon_ );
+   return std::max( pressure ,-background_pressure_ + epsilon_ );
 }
 
 /**
@@ -131,7 +130,7 @@ double StiffenedGasCompleteSafe::DoGetEnthalpy( double const density, double con
  * @return Energy according to complete stiffened-gas equation of state.
  */
 double StiffenedGasCompleteSafe::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-   return density * energy_translation_factor_ + ( pressure + gamma_ * stiffened_pressure_constant_ ) / ( gamma_ -1.0 )
+   return density * energy_translation_factor_ + ( pressure + gamma_ * background_pressure_ ) / ( gamma_ -1.0 )
           + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
 }
 
@@ -145,7 +144,7 @@ double StiffenedGasCompleteSafe::DoGetEnergy( double const density, double const
  * @return Temperature according to complete stiffened-gas EOS.
  */
 double StiffenedGasCompleteSafe::DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return ( DoGetPressure( density, momentum_x, momentum_y, momentum_z, energy ) + stiffened_pressure_constant_ ) /
+   return ( DoGetPressure( density, momentum_x, momentum_y, momentum_z, energy ) + background_pressure_ ) /
       ( std::max( density, epsilon_ ) * specific_gas_constant_ ) + ( ( gamma_ - 1.0 ) * thermal_energy_factor_ * std::pow( density, gamma_ - 1.0 ) ) / specific_gas_constant_;
 }
 
@@ -164,7 +163,7 @@ double StiffenedGasCompleteSafe::DoGetGruneisen() const {
  * @return Psi according to complete stiffened-gas equation of state.
  */
 double StiffenedGasCompleteSafe::DoGetPsi( double const pressure, double const one_density ) const {
-   return ( pressure + gamma_ * stiffened_pressure_constant_ ) * one_density;
+   return ( pressure + gamma_ * background_pressure_ ) * one_density;
 }
 
 /**
@@ -180,7 +179,7 @@ double StiffenedGasCompleteSafe::DoGetGamma() const {
  * @return B.
  */
 double StiffenedGasCompleteSafe::DoGetB() const {
-   return stiffened_pressure_constant_;
+   return background_pressure_;
 }
 
 /**
@@ -190,7 +189,7 @@ double StiffenedGasCompleteSafe::DoGetB() const {
  * @return Speed of sound according to complete stiffened-gas equation of state.
  */
 double StiffenedGasCompleteSafe::DoGetSpeedOfSound( double const density, double const pressure ) const {
-   double speed_of_sound_squared = gamma_ * ( pressure + stiffened_pressure_constant_ ) / std::max( density, epsilon_ );
+   double speed_of_sound_squared = gamma_ * ( pressure + background_pressure_ ) / std::max( density, epsilon_ );
    return std::sqrt( std::max( speed_of_sound_squared, epsilon_ ) );
 }
 
@@ -213,7 +212,7 @@ std::string StiffenedGasCompleteSafe::GetLogData( unsigned int const indent, Uni
    log_string += StringOperations::Indent( indent ) + "Energy translation factor  : " + StringOperations::ToScientificNotationString(
                    unit_handler.DimensionalizeValue( energy_translation_factor_, { UnitType::Velocity, UnitType::Velocity }, {} ), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "Stiffened pressure constant: " + StringOperations::ToScientificNotationString(
-                   unit_handler.DimensionalizeValue( stiffened_pressure_constant_, UnitType::Pressure ), 9 ) + "\n";
+                   unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "Thermal energy factor      : " + StringOperations::ToScientificNotationString(
                    unit_handler.DimensionalizeValue( thermal_energy_factor_, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "Specific gas constant      : " + StringOperations::ToScientificNotationString(

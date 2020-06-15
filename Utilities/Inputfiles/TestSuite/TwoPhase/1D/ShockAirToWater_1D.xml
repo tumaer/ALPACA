@@ -80,13 +80,9 @@
         <numberOfMaterials>              2   </numberOfMaterials>
         <material1>
             <equationOfState>
-                <type>StiffenedGas</type>
-                <gamma>                     1.4   </gamma>
-                <A>                         0.0   </A>
-                <B>                         0.0   </B>
-                <C>                         0.0   </C>
-                <rho0>                      0.0   </rho0>
-                <specificGasConstant>       1.0   </specificGasConstant>
+                <type> StiffenedGas </type>
+                <gamma>               1.4   </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -98,13 +94,9 @@
 
         <material2>
             <equationOfState>
-                <type>StiffenedGas</type>
-                <gamma>                     5.5   </gamma>
-                <A>                         0.0   </A>
-                <B>                     4921.15   </B>
-                <C>                         0.0   </C>
-                <rho0>                      0.0   </rho0>
-                <specificGasConstant>       1.0   </specificGasConstant>
+                <type> StiffenedGas </type>
+                <gamma>               5.5   </gamma>
+                <backgroundPressure>  4921.15   </backgroundPressure>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -146,7 +138,7 @@
       <snapshots>
          <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
          <interval> 3600 </interval> <!-- in wall seconds -->
-         <intervalsToKeep> 2 </intervalsToKeep> 
+         <intervalsToKeep> 2 </intervalsToKeep>
       </snapshots>
    </restart>
 
@@ -159,7 +151,7 @@
             <ts1> 0.0004 </ts1>
          </stamps>
       </standardOutput>
-      <interfaceOutput> 
+      <interfaceOutput>
          <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
          <interval>  1e3 </interval>
 	      <stamps>

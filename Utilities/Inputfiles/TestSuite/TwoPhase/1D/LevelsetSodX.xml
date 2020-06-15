@@ -77,13 +77,9 @@
         <numberOfMaterials> 2 </numberOfMaterials>
         <material1>
             <equationOfState>
-                <type>StiffenedGas</type>
-                <gamma>                     1.4   </gamma>
-                <A>                         0.0   </A>
-                <B>                         0.0   </B>
-                <C>                         0.0   </C>
-                <rho0>                      1.2   </rho0>
-                <specificGasConstant>       1.0   </specificGasConstant>
+                <type> StiffenedGas </type>
+                <gamma>               1.4   </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -94,13 +90,9 @@
         </material1>
         <material2>
             <equationOfState>
-                <type>StiffenedGas</type>
-                <gamma>                     1.4   </gamma>
-                <A>                         0.0   </A>
-                <B>                         0.0   </B>
-                <C>                         0.0   </C>
-                <rho0>                      1.2   </rho0>
-                <specificGasConstant>       1.0   </specificGasConstant>
+                <type> StiffenedGas </type>
+                <gamma>               1.4   </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -108,7 +100,7 @@
                 <shearViscosity> 0.0 </shearViscosity>
                 <bulkViscosity> 0.0 </bulkViscosity>
             </properties>
-        </material2> 
+        </material2>
     </materials>
 
     <multiResolution>
@@ -141,7 +133,7 @@
       <snapshots>
          <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
          <interval> 3600 </interval> <!-- in wall seconds -->
-         <intervalsToKeep> 2 </intervalsToKeep> 
+         <intervalsToKeep> 2 </intervalsToKeep>
       </snapshots>
    </restart>
 
@@ -154,7 +146,7 @@
             <ts1> 0.0004 </ts1>
          </stamps>
       </standardOutput>
-      <interfaceOutput> 
+      <interfaceOutput>
          <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
          <interval>  1e3 </interval>
 	      <stamps>

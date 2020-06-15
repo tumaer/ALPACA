@@ -74,12 +74,10 @@ Sharp-Interface Method, Buhendwa, 2018: 3.3.1 Deformation of a drop in a shear f
         <material1>
             <equationOfState>
                 <type>WaterlikeFluid</type>
-                <gamma>                     7.15     </gamma>
-                <A>                         2e3      </A>
-                <B>                         2e4      </B>
-                <rho0>                      1.0   </rho0>
-                <C>                         0.0   </C>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <gamma> 7.15     </gamma>
+                <A>     2e3      </A>
+                <B>     2e4      </B>
+                <rho0>  1.0   </rho0>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -91,12 +89,10 @@ Sharp-Interface Method, Buhendwa, 2018: 3.3.1 Deformation of a drop in a shear f
         <material2>
             <equationOfState>
                 <type>WaterlikeFluid</type>
-                <gamma>                     7.15     </gamma>
-                <A>                         2e3      </A>
-                <B>                         2e4      </B>
-                <rho0>                      1.0   </rho0>
-                <C>                         0.0   </C>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <gamma> 7.15     </gamma>
+                <A>     2e3      </A>
+                <B>     2e4      </B>
+                <rho0>  1.0   </rho0>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -111,7 +107,7 @@ Sharp-Interface Method, Buhendwa, 2018: 3.3.1 Deformation of a drop in a shear f
         <material1_2>
            <surfaceTensionCoefficient> 50.0 </surfaceTensionCoefficient>
 	    </material1_2>
-	</materialPairings>	  
+	</materialPairings>
 
     <freeSurface>
         <pExternalReference>  0 </pExternalReference>
@@ -147,7 +143,7 @@ Sharp-Interface Method, Buhendwa, 2018: 3.3.1 Deformation of a drop in a shear f
       <snapshots>
          <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
          <interval> 3600 </interval> <!-- in wall seconds -->
-         <intervalsToKeep> 2 </intervalsToKeep> 
+         <intervalsToKeep> 2 </intervalsToKeep>
       </snapshots>
    </restart>
 
@@ -160,7 +156,7 @@ Sharp-Interface Method, Buhendwa, 2018: 3.3.1 Deformation of a drop in a shear f
             <ts1> 0.0004 </ts1>
          </stamps>
       </standardOutput>
-      <interfaceOutput> 
+      <interfaceOutput>
          <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
          <interval>  1e3 </interval>
 	      <stamps>

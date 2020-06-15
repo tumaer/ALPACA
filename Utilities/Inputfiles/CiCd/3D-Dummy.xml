@@ -55,35 +55,34 @@
         <numberOfMaterials>              2   </numberOfMaterials>
         <material1>
             <equationOfState>
-                <type>NobleAbelStiffenedGas</type>
-                <gamma>                     1.19   </gamma>
-                <covolume>                  6.61e-4   </covolume>
-                <pressureConstant>          7.028e8   </pressureConstant>
-                <energyConstant>           -1.177788e6   </energyConstant>
-                <entropyConstant>           0.0   </entropyConstant>
-                <specificHeatCapacity>      3.610e3   </specificHeatCapacity>
+                <type> NobleAbelStiffenedGas </type>
+                <gamma>             1.19   </gamma>
+                <covolume>          6.61e-4   </covolume>
+                <pressureConstant>  7.028e8   </pressureConstant>
+                <energyConstant>   -1.177788e6   </energyConstant>
+                <entropyConstant>   0.0   </entropyConstant>
             </equationOfState>
             <properties>
-                <specificHeatCapacity>       0.0   </specificHeatCapacity>
+                <specificHeatCapacity>       3.610e3   </specificHeatCapacity>
                 <thermalConductivity>       0.0   </thermalConductivity>
                 <shearViscosity>          0.0   </shearViscosity>
                 <bulkViscosity>           0.0   </bulkViscosity>
             </properties>
         </material1>
-        
+
         <material2>
             <equationOfState>
-                <type>StiffenedGasCompleteSafe</type>
-                <gamma>                     1.4   </gamma>
-                <A>                         0.0   </A>
-                <B>                         0.0   </B>
-                <C>                         0.0   </C>
-                <rho0>                      0.0   </rho0>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <type> StiffenedGasCompleteSafe </type>
+                <gamma>                   1.4   </gamma>
+                <energyTranslationFactor> 0.0   </energyTranslationFactor>
+                <backgroundPressure>      1.0   </backgroundPressure>
+                <thermalEnergyFactor>     0.0   </thermalEnergyFactor>
+                <rho0>                    1.0   </rho0>
+                <specificGasConstant>     1.0   </specificGasConstant>
             </equationOfState>
             <properties>
-                <specificHeatCapacity>       0.0   </specificHeatCapacity>
-                <thermalConductivity>       0.2   </thermalConductivity>
+                <specificHeatCapacity>    0.0   </specificHeatCapacity>
+                <thermalConductivity>     0.2   </thermalConductivity>
                 <shearViscosity>          0.0   </shearViscosity>
                 <bulkViscosity>           0.0   </bulkViscosity>
             </properties>

@@ -93,12 +93,10 @@ Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
         <material1>
             <equationOfState>
                 <type>WaterlikeFluid</type>
-                <gamma>                     7.15     </gamma>
-                <A>                         100      </A>
-                <B>                         2000      </B>
-                <rho0>                      1   </rho0>
-                <C>                         0.0   </C>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <gamma> 7.15     </gamma>
+                <A>     100      </A>
+                <B>     2000      </B>
+                <rho0>  1   </rho0>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -110,12 +108,10 @@ Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
         <material2>
             <equationOfState>
                 <type>WaterlikeFluid</type>
-                <gamma>                     7.15     </gamma>
-                <A>                         100      </A>
-                <B>                         2000      </B>
-                <rho0>                      1   </rho0>
-                <C>                         0.0   </C>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <gamma> 7.15     </gamma>
+                <A>     100      </A>
+                <B>     2000      </B>
+                <rho0>  1   </rho0>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -123,14 +119,14 @@ Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
                 <shearViscosity> 1.0 </shearViscosity>
                 <bulkViscosity> 0.0 </bulkViscosity>
             </properties>
-        </material2>  
+        </material2>
     </materials>
 
     <materialPairings>
         <material1_2>
            <surfaceTensionCoefficient> 0.0 </surfaceTensionCoefficient>
 	    </material1_2>
-	</materialPairings>	
+	</materialPairings>
 
     <freeSurface>
         <pExternalReference>  1e4 </pExternalReference>
@@ -166,7 +162,7 @@ Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
       <snapshots>
          <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
          <interval> 3600 </interval> <!-- in wall seconds -->
-         <intervalsToKeep> 2 </intervalsToKeep> 
+         <intervalsToKeep> 2 </intervalsToKeep>
       </snapshots>
    </restart>
 
@@ -179,7 +175,7 @@ Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
             <ts1> 0.0004 </ts1>
          </stamps>
       </standardOutput>
-      <interfaceOutput> 
+      <interfaceOutput>
          <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
          <interval>  1e3 </interval>
 	      <stamps>

@@ -89,7 +89,7 @@ SCENARIO( "Material is constructed and its properties are queried", "[1rank]" ) 
          double const thermal_heat_conductivity = 4.0;
 
          // Instantiate a random eos and parameter model to check if the pointer movement works properly
-         std::unordered_map<std::string, double> map_data = { { "gamma", 0.0 }, { "B", 0.0 } };
+         std::unordered_map<std::string, double> map_data = { { "gamma", 0.0 }, { "backgroundPressure", 0.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( map_data, unit_handler ) );
          map_data = { { "muConstant", 0.0 } };
          std::unique_ptr<MaterialParameterModel const> shear_model( std::make_unique<ConstantShearViscosityModel const>( map_data, unit_handler ) );
@@ -120,23 +120,23 @@ SCENARIO( "Material is constructed and its properties are queried", "[1rank]" ) 
          }
 
          THEN( "The material equation of state is" ) {
-            REQUIRE( &material.GetEquationOfState() != nullptr );
+            REQUIRE( &material.GetEquationOfState() );
          }
 
-         THEN( "The material shear viscosity model is" ) {
+         THEN( "The original shear viscosity model is" ) {
             REQUIRE( shear_model == nullptr );
          }
 
          THEN( "The material shear viscosity model is" ) {
-            REQUIRE( &material.GetShearViscosityModel() != nullptr );
+            REQUIRE( &material.GetShearViscosityModel() );
          }
 
-         THEN( "The material thermal conductivity model is" ) {
+         THEN( "The original thermal conductivity model is" ) {
             REQUIRE( conductivity_model == nullptr );
          }
 
          THEN( "The material thermal conductivity model is" ) {
-            REQUIRE( &material.GetThermalConductivityModel() != nullptr );
+            REQUIRE( &material.GetThermalConductivityModel() );
          }
       }
    }

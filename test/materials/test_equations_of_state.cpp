@@ -83,7 +83,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "All parameters are set to zero" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "B", 0.0 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "backgroundPressure", 0.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
 
          THEN( "The temperature is" ) {
@@ -110,7 +110,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "The parameters are reasonable values" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "B", 4.3 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "backgroundPressure", 4.3 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
 
          THEN( "The pressure is" ) {
@@ -157,7 +157,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "All parameters are set to zero" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "A", 0.0 }, { "B", 0.0 }, { "C", 0.0 }, { "specificGasConstant", 0.0 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "energyTranslationFactor", 0.0 }, { "backgroundPressure", 0.0 }, { "thermalEnergyFactor", 0.0 }, { "specificGasConstant", 0.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGasCompleteSafe const>( eos_data, unit_handler ) );
 
          THEN( "The pressure is" ) {
@@ -196,7 +196,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "The parameters contain reasonable values" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "A", 1.0 }, { "B", 4.3 }, { "C", 2.0 }, { "specificGasConstant", 3.0 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "energyTranslationFactor", 1.0 }, { "backgroundPressure", 4.3 }, { "thermalEnergyFactor", 2.0 }, { "specificGasConstant", 3.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGasCompleteSafe const>( eos_data, unit_handler ) );
 
          THEN( "The pressure is" ) {
@@ -242,7 +242,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "All parameters are set to zero" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "B", 0.0 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "backgroundPressure", 0.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGasSafe const>( eos_data, unit_handler ) );
 
          THEN( "The pressure is" ) {
@@ -285,7 +285,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "The parameters contain reasonable values" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "B", 4.3 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "backgroundPressure", 4.3 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGasSafe const>( eos_data, unit_handler ) );
 
          THEN( "The pressure is" ) {

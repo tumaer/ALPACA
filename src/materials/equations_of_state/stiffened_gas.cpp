@@ -83,7 +83,7 @@
  */
 StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) :
    gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
-   background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "B", "StiffenedGas" ), UnitType::Pressure ) ) {
+   background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
    /* Empty besides initializer list*/
 }
 

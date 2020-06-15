@@ -58,12 +58,10 @@
         <material1>
             <equationOfState>
                 <type>WaterlikeFluid</type>
-                <gamma>                     7.15     </gamma>
-                <A>                         10500      </A>
-                <B>                         1e5      </B>
-                <rho0>                      100.0   </rho0>
-                <C>                         0.0   </C>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <gamma> 7.15     </gamma>
+                <A>     10500      </A>
+                <B>     1e5      </B>
+                <rho0>  100.0   </rho0>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -74,13 +72,9 @@
         </material1>
         <material2>
             <equationOfState>
-                <type>StiffenedGasSafe</type>
-                <gamma>            1.4 </gamma>
-                <A>                0.0 </A>
-                <B>                0.0 </B>
-                <rho0>             0.0 </rho0>
-                <C>                         0.0   </C>
-                <specificGasConstant>       0.0   </specificGasConstant>
+                <type> StiffenedGasSafe </type>
+                <gamma>               1.4   </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
             </equationOfState>
             <properties>
                 <specificHeatCapacity> 0.0 </specificHeatCapacity>

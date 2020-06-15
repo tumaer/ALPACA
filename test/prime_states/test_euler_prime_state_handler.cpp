@@ -73,23 +73,23 @@
 
 SCENARIO( "Conservative quantities and prime state values can be converted into each other", "[1rank]" ) {
 
-   // Initialize the unit handler class 
+   // Initialize the unit handler class
    UnitHandler const unit_handler( 1.0, 1.0, 1.0, 1.0 );
 
    // Here the stiffened gas complete safe equation of state is used since it provides a temperature computatation and the unit test does not depend on the
    // activation of the temperature in the primestate struct
-   std::unordered_map<std::string, double> const eos_data = { { "gamma", 1.4 }, { "B", 1.0 } };
+   std::unordered_map<std::string, double> const eos_data = { { "gamma", 1.4 }, { "backgroundPressure", 1.0 } };
    std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
 
-   // Define material properties and initialize material 
+   // Define material properties and initialize material
    double const shear_viscosity = 1.0;
    double const bulk_viscosity = 2.0;
-   double const specific_heat_capacity = 3.0; 
+   double const specific_heat_capacity = 3.0;
    double const thermal_heat_conductivity = 4.0;
 
    // Instantiate material
    std::vector<Material> materials;
-   materials.emplace_back( Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity, 
+   materials.emplace_back( Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
                                      nullptr, nullptr, unit_handler ) );
 
    // Instantiate material pairing

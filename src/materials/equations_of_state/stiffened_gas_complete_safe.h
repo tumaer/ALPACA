@@ -78,11 +78,11 @@
  *        The equation of state is described in \cite Menikoff1989. Safe version, i.e. uses epsilons to avoid floating-point errors.
  */
 class StiffenedGasCompleteSafe : public EquationOfState {
-   // parameters required for the computataion
+   // parameters required for the computation
    double const epsilon_ = std::numeric_limits<double>::epsilon();
    double const gamma_;
    double const energy_translation_factor_;
-   double const stiffened_pressure_constant_;
+   double const background_pressure_;
    double const thermal_energy_factor_;
    double const specific_gas_constant_;
 
