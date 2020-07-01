@@ -88,6 +88,7 @@ CommunicationManager::CommunicationManager(TopologyManager & topology, unsigned 
    maximum_level_( maximum_level ),
    my_rank_id_( MpiUtilities::MyRankId() ),
    mpi_tag_ub_( MpiUtilities::MpiTagUb() ),
+   partner_tag_map_( MpiUtilities::NumberOfRanks(), 0 ),
    internal_boundaries_( maximum_level_ + 1 ),
    internal_boundaries_mpi_( maximum_level_ + 1 ),
    internal_multi_boundaries_(),
