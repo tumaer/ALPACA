@@ -83,7 +83,7 @@ constexpr PhaseManagers phase_manager = PhaseManagers::TwoPhase;
 
 // LEVELSET_ADVECTOR
 enum class LevelsetAdvectors {DerivativeStencil, ReconstructionStencil, HjReconstructionStencil, HjDerivativeStencil};
-constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::HjReconstructionStencil;
+constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::ReconstructionStencil;
 
 // LEVELSET_REINITIALIZER
 enum class LevelsetReinitializers {Min, Weno, Explicit};

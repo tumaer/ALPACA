@@ -23,9 +23,9 @@ def check_solution( resultsFolder, pythonScriptsFolder ) :
     for filename in files:
 
         with h5py.File(os.path.join(resultsPath, filename), "r") as data:
-            velocityX = np.array(data["simulation"]["velocityX"])
-            velocityY = np.array(data["simulation"]["velocityY"])
-            levelset = np.array(data["simulation"]["levelset"])
+            velocityX = np.array(data["cell_data"]["velocity"][:,0,0])
+            velocityY = np.array(data["cell_data"]["velocity"][:,1,0])
+            levelset = np.array(data["cell_data"]["levelset"][:,0,0])
 
         energy = (velocityX**2 + velocityY**2)
         indices = np.where(levelset > 0)[0]

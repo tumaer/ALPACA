@@ -126,7 +126,7 @@ bool OutputQuantity::IsActive( OutputType const output_type ) const {
 std::string OutputQuantity::GetXdmfAttributeString( std::string const& hdf5_filename, std::string const& group_name, hsize_t const number_of_global_cells, std::string const prefix ) const {
    // Get the data item 
    std::string const data_item( XdmfUtilities::DataItemString( hdf5_filename, group_name + "/" + prefix + quantity_name_, number_of_global_cells, dimensions_ ) );
-   if( dimensions_.back() > 1 || dimensions_.front() > DTI( CC::DIM() ) ) { // multidiemnsional (second component dimension larger than one or first larger than the current dimension)
+   if( dimensions_.back() > 1 || dimensions_.front() > DTI( CC::DIM() ) ) { // multidimensional (second component dimension larger than one or first larger than the current dimension)
       // Both components are equal (nxn) and smaller or equal the dimension -> Assumption that it is a tensor 
       // This is not relevant for the reading, but allows sometimes special computations in ParaView
       if( dimensions_.back() == dimensions_.front() && dimensions_.back() <= DTI( CC::DIM() ) ) {

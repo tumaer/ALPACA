@@ -144,8 +144,8 @@ def SodAnalysis( x_cell_center, density, velocity, volume, time ) :
 
 def ReadSimulationDataFromHdf( hdffile ) :
    h5file_data = h5py.File( hdffile, "r+" )
-   cell_vertices = h5file_data["domain"]["cell_vertices"][:,:]
-   vertex_coordinates = h5file_data["domain"]["vertex_coordinates"][:,:]
+   cell_vertices = h5file_data["mesh_topology"]["cell_vertex_IDs"][:,:]
+   vertex_coordinates = h5file_data["mesh_topology"]["cell_vertex_coordinates"][:,:]
    ordered_vertex_coordinates = vertex_coordinates[cell_vertices]
    cell_centers = np.mean( ordered_vertex_coordinates, axis = 1 )
    longest_axis = np.argmax( np.argmax( cell_centers, axis = 0 ) )
@@ -154,9 +154,9 @@ def ReadSimulationDataFromHdf( hdffile ) :
    max_cell_coordinates = np.max( ordered_vertex_coordinates, axis = 1 )
    delta_xyz = max_cell_coordinates - min_cell_coordinates
    volume = np.prod( delta_xyz, axis = 1 )
-   density = h5file_data["simulation"]["density"][:]
-   velocity = h5file_data["simulation"]["velocityX"][:]
-   # Currently not used: pressure = h5file_data["simulation"]["pressure"][:]
+   density = h5file_data["cell_data"]["density"][:,0,0]
+   velocity = h5file_data["cell_data"]["velocity"][:,0,0]
+   # Currently not used: pressure = h5file_data["cell_data"]["pressure"][:,0,0]
 
    return x_cell_center, density, velocity, volume,
 

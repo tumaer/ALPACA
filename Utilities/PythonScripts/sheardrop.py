@@ -30,9 +30,9 @@ def check_solution( resultsFolder, pythonScriptsFolder, viscosityRatio ):
     files = np.array(files)[indices]
 
     with h5py.File(os.path.join(resultsPath, files[-1]), "r") as data:
-        levelset = np.array(data["simulation"]["levelset"])
-        cell_vertices = np.array(data["domain"]["cell_vertices"])
-        vertex_coordinates = np.array(data["domain"]["vertex_coordinates"])
+        levelset = np.array(data["cell_data"]["levelset"][:,0,0])
+        cell_vertices = np.array(data["mesh_topology"]["cell_vertex_IDs"])
+        vertex_coordinates = np.array(data["mesh_topology"]["cell_vertex_coordinates"])
         coords = np.mean( vertex_coordinates[cell_vertices], axis = 1 )[:,:2]
     coordsX = coords[:,0]
     coordsY = coords[:,1]

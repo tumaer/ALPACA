@@ -8,9 +8,9 @@ from argparse import ArgumentParser as argparser
 def main( h5file ) :
 
    with h5py.File( h5file, "r") as data:
-      density = np.array(data["simulation"]["density"])
-      cell_vertices = np.array(data["domain"]["cell_vertices"])
-      vertex_coordinates = np.array(data["domain"]["vertex_coordinates"])
+      density = np.array(data["cell_data"]["density"][:,0,0])
+      cell_vertices = np.array(data["mesh_topology"]["cell_vertex_IDs"])
+      vertex_coordinates = np.array(data["mesh_topology"]["cell_vertex_coordinates"])
 
    # Number of cells per dimension:
    # Only meaningful for cubic setups, otherwise full symmetry cannot be expected

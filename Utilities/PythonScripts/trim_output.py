@@ -51,8 +51,10 @@ def TrimFiles( path_data, path_trimmed, cut_off_for_levelset, use_levelset_res, 
       if file.endswith( "h5" ):
          files_h5.append( file )
       if file.endswith( "xdmf" ):
-         if "data" in file:
+         if "data" in file and not "time_series" in file:
             files_xdmf.append( file )
+
+   print( files_h5, files_xdmf )
 
    # SORTING FILES
    sort_h5 = []
@@ -72,8 +74,8 @@ def TrimFiles( path_data, path_trimmed, cut_off_for_levelset, use_levelset_res, 
 
       print( "\nREADING DATA FROM ", os.path.join( path_data, filename_h5 ) )
       h5file_data = h5py.File( os.path.join( path_data, filename_h5 ), "r+" )
-      cell_vertices = h5file_data["domain"]["cell_vertices"][:,:]
-      vertex_coordinates = h5file_data["domain"]["vertex_coordinates"][:,:]
+      cell_vertices = h5file_data["mesh_topology"]["cell_vertex_IDs"][:,:]
+      vertex_coordinates = h5file_data["mesh_topology"]["cell_vertex_coordinates"][:,:]
       if np.array( use_geometric_res ).any():
          coords = np.mean( vertex_coordinates[cell_vertices], axis = 1 )
 
@@ -102,11 +104,11 @@ def TrimFiles( path_data, path_trimmed, cut_off_for_levelset, use_levelset_res, 
       # LEVELSET RESTRICTION
       if use_levelset_res :
          if np.array( use_geometric_res ).any() :
-            levelset = h5file_data["simulation"]["levelset"][:]
+            levelset = h5file_data["cell_data"]["levelset"][:,0,0]
             ITK_levelset = np.where( ( levelset[itk_geometric] >= cut_off_for_levelset[0] ) & ( levelset[itk_geometric] < cut_off_for_levelset[1] ) )[0]
             indices_to_keep = itk_geometric[ITK_levelset]
          else :
-            levelset = h5file_data["simulation"]["levelset"][:]
+            levelset = h5file_data["cell_data"]["levelset"][:,0,0]
             indices_to_keep = np.where( ( levelset >= cut_off_for_levelset[0] ) & ( levelset < cut_off_for_levelset[1] ) )[0]
       else :
          indices_to_keep = itk_geometric
@@ -126,21 +128,14 @@ def TrimFiles( path_data, path_trimmed, cut_off_for_levelset, use_levelset_res, 
       # WRITING NEW HDF5 FILE
       print( "WRITING TRIMMED HDF5 FILE ", os.path.join(path_trimmed, filename_h5 ) )
       h5file_trimmed = h5py.File( os.path.join(path_trimmed, filename_h5), "w" )
-      h5file_trimmed.create_group( "domain" )
-      h5file_trimmed.create_group( "simulation" )
-      h5file_trimmed["domain"].create_dataset( name = "cell_vertices", data = cell_vertices, dtype = precision[0] )
-      h5file_trimmed["domain"].create_dataset( name = "vertex_coordinates", data = vertex_coordinates, dtype = precision[1] )
-      for quantity in h5file_data["simulation"]:
+      h5file_trimmed.create_group( "mesh_topology" )
+      h5file_trimmed.create_group( "cell_data" )
+      h5file_trimmed["mesh_topology"].create_dataset( name = "cell_vertex_IDs", data = cell_vertices, dtype = precision[0] )
+      h5file_trimmed["mesh_topology"].create_dataset( name = "cell_vertex_coordinates", data = vertex_coordinates, dtype = precision[1] )
+      for quantity in h5file_data["cell_data"]:
          if quantity in quantities_to_keep:
-            h5file_trimmed["simulation"].create_dataset( name = quantity, data = h5file_data["simulation"][quantity][:][indices_to_keep],
+            h5file_trimmed["cell_data"].create_dataset( name = quantity, data = h5file_data["cell_data"][quantity][indices_to_keep,...],
                                               dtype = precision[2] )
-      if "velocity" in quantities_to_keep:
-         h5file_trimmed["simulation"].create_dataset( name = "velocityX", data = h5file_data["simulation"]["velocityX"][:][indices_to_keep],
-                                           dtype = precision[2] )
-         h5file_trimmed["simulation"].create_dataset( name = "velocityY", data = h5file_data["simulation"]["velocityY"][:][indices_to_keep],
-                                           dtype = precision[2] )
-         h5file_trimmed["simulation"].create_dataset( name = "velocityZ", data = h5file_data["simulation"]["velocityZ"][:][indices_to_keep],
-                                           dtype = precision[2] )
 
       h5file_data.close()
       h5file_trimmed.close()
@@ -161,21 +156,17 @@ def TrimFiles( path_data, path_trimmed, cut_off_for_levelset, use_levelset_res, 
          topology[0].set( "Dimensions", str( no_vertices ) + " 3" )
          topology[0].set( "Precision", str( precision[1] ) )
 
-      for quantity in root[0][0][1].findall( "Attribute" ) :
+      for quantity in root[0][0][0].findall( "Attribute" ) :
+         # get the dimensions of the original file and add the new number of cells
+         dimensions = quantity[0].attrib["Dimensions"].split(' ')
+         dimensions[0] = str( no_cells )
+         dimensions = ' '.join( dimensions )
+         # Remove quantity if not desired or change dimension to restricted data
          if quantity.attrib["Name"] not in quantities_to_keep :
-            root[0][0][1].remove( quantity )
+            root[0][0][0].remove( quantity )
          else:
-            if quantity.attrib["Name"] == "velocity" :
-               quantity[0].set( "Dimensions", str( no_cells ) + " 3" )
-               quantity[0][0].set( "Dimensions", str( no_cells ) )
-               quantity[0][1].set( "Dimensions", str( no_cells ) )
-               quantity[0][2].set( "Dimensions", str( no_cells ) )
-               quantity[0][0].set( "Precision", str( precision[2] ) )
-               quantity[0][1].set( "Precision", str( precision[2] ) )
-               quantity[0][2].set( "Precision", str( precision[2] ) )
-            else:
-               quantity[0].set( "Dimensions", str( no_cells ) )
-               quantity[0].set( "Precision", str( precision[2] ) )
+            quantity[0].set( "Dimensions", dimensions )
+            quantity[0].set( "Precision", str( precision[2] ) )
 
       tree.write( os.path.join( path_trimmed, filename_xdmf ) )
 
