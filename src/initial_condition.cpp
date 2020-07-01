@@ -71,15 +71,23 @@
 #include "topology/id_information.h"
 
 /**
- * @brief Default constructor requiring a parse-able inputfile %Currently only XML file%
- * @param parser An user inputfile parser instance.
+ * @brief Default constructor for class Converting the user-expressions for the initial conditions.
+ * @param material_initial_expressions Initial expressions for all materials contained in the simulation.
+ * @param levelset_initial_expressions Initial expressions for all levelset fields contained in the simulation
+ *        (All must be referenced from material-N to material-1).
+ * @param material_names List of all material names contained in the simulation.
+ * @param variable_names_prime_states List of all names for the prime states that are read for the initial conditions.
+ * @param variable_name_levelset Name of the variable used to specify levelset field.
+ * @param dimensionalized_node_size_on_level_zero Size of a node on level zero (dimensionalized form).
+ * @param maximum_level Maximum level contained in the simulation.
+ * @param unit_handler Instance to provide (non-)dimensionalization operations.
  */
 InitialCondition::InitialCondition( std::vector<std::string> const& material_initial_expressions,
                                     std::vector<std::string> const& levelset_initial_expressions,
                                     std::vector<MaterialName> const& material_names,
                                     std::vector<std::string> const& variable_names_prime_states,
                                     std::string const& variable_name_levelset,
-                                    double const node_size_on_level_zero,
+                                    double const dimensionalized_node_size_on_level_zero,
                                     unsigned int const maximum_level,
                                     UnitHandler const& unit_handler ) :
    // Start initializer list
@@ -89,7 +97,7 @@ InitialCondition::InitialCondition( std::vector<std::string> const& material_ini
    material_names_( material_names ),
    variable_names_prime_states_( variable_names_prime_states ),
    variable_name_levelset_( variable_name_levelset ),
-   node_size_on_level_zero_( node_size_on_level_zero ),
+   dimensionalized_node_size_on_level_zero_( dimensionalized_node_size_on_level_zero ),
    maximum_level_( maximum_level ) {
    /** Empty besides initializer list */
 }
@@ -125,10 +133,9 @@ void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
                                               double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    // get the origin of this node id
-   // AB tODO: Here the dimensionalized size is required
-   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, node_size_on_level_zero_ ) );
+   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // cell_size on level
-   double const cell_size = node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
+   double const cell_size = dimensionalized_node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
 
    // Obtain the correct initial condition string for the material
    std::string const initial_condition_input( material_initial_expressions_[MTI( material )]);
@@ -167,13 +174,12 @@ void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
  */
 void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
    // get the origin of this node id
-   // AB tODO: Here the dimensionalized size is required
-   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, node_size_on_level_zero_ ) );
+   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // cell_size on level zero divided by 2^level
-   double const cell_size = node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
+   double const cell_size = dimensionalized_node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
    double const one_cell_size = 1.0 / cell_size;
 
-   // AB TODO: THis must be changed for Multi-material approach (all initial levelset should be referenced to material1)
+   // NOTE: This must be changed for Multi-material approach (all initial levelset should be referenced to material1 as done in GetInitialMaterials)
    std::string initial_levelset_input = levelset_initial_expressions_[0];
 
    // TP here we need non-const variables as UserExpression stores references to them in order to reflect changes
@@ -204,11 +210,11 @@ void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double (
  */
 std::vector<MaterialName> InitialCondition::GetInitialMaterials( std::uint64_t const node_id ) const {
    // get the origin of this node id
-   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, node_size_on_level_zero_ ) );
+   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // bit shift is of type "( unsigned? ) int"
    unsigned int const level_factor = ( 1 << ( maximum_level_ - LevelOfNode( node_id ) ) );
    // cell size on maximum level
-   double const cell_size_on_maximum_level = node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << maximum_level_ );
+   double const cell_size_on_maximum_level = dimensionalized_node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << maximum_level_ );
 
    //************************************************************************************************************
    // Vector that is returned (yet not known which size it has)

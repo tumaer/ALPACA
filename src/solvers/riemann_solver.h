@@ -69,7 +69,7 @@
 #define RIEMANN_SOLVER_H
 #include <array>
 
-#include "block.h"
+#include "block_definitions/block.h"
 #include "eigendecomposition.h"
 #include "materials/material_manager.h"
 
@@ -149,7 +149,7 @@ public:
     * @param fluxes_x, fluxes_y, fluxes_z The fluxes over the cell faces as computed by this Riemann solver.
     * Indirect return parameter.
     */
-   void Update(const std::pair<MaterialName const, Block>& mat_block, double const cell_size,
+   void Update(std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
       double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const {

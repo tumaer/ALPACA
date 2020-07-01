@@ -68,8 +68,8 @@
 #ifndef PRIME_STATE_HANDLER_H
 #define PRIME_STATE_HANDLER_H
 
-#include "block.h"
-#include "field_material_definitions.h"
+#include "block_definitions/block.h"
+#include "block_definitions/field_material_definitions.h"
 #include "materials/material_manager.h"
 
 /**

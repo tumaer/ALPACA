@@ -78,7 +78,7 @@ class LauerCutCellMixer : public TwoPhaseCutCellMixer<LauerCutCellMixer> {
 
    friend TwoPhaseCutCellMixer;
 
-   void CalculateMixingContributionsImplementation(const Node& node, const MaterialName material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const;
+   void CalculateMixingContributionsImplementation(Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const;
 
 public:
    LauerCutCellMixer() = delete;

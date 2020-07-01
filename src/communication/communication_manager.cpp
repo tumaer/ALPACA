@@ -260,7 +260,7 @@ void CommunicationManager::NeighborsOfNode(std::uint64_t const global_id, std::v
 }
 
 /**
- * Tells the communication manager that there was a change in the topology and it needs to generate the material boundaries from scratch.
+ * @brief Tells the communication manager that there was a change in the topology and it needs to generate the material boundaries from scratch.
  */
 void CommunicationManager::InvalidateCache() {
    for(unsigned i = 0; i < boundaries_valid_.size(); i++) {
@@ -365,13 +365,19 @@ std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const&
    return internal_boundaries_[level];
 }
 
-const std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> &
-CommunicationManager::InternalMultiBoundariesMpi() const {
+/**
+ * @brief Gives a reference to the list of multi-material nodes holding all internal boundary relations that require mpi communication.
+ * @return List with relations for all internal mpi multi-material boundaries.
+ */
+std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalMultiBoundariesMpi() const {
    return internal_multi_boundaries_mpi_;
 }
 
-const std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> &
-CommunicationManager::InternalMultiBoundaries() const {
+/**
+ * @brief Gives a reference to the list of multi-material nodes holding all internal boundary relations that do not require mpi communication.
+ * @return List with relations for all internal no-mpi multi-material boundaries.
+ */
+std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalMultiBoundaries() const {
    return internal_multi_boundaries_;
 }
 
@@ -380,11 +386,15 @@ CommunicationManager::InternalMultiBoundaries() const {
  * @param level Level for which the list should be returned
  * @return List with relations for all external boundary nodes
  */
-const std::vector<std::tuple<uint64_t, BoundaryLocation>>& CommunicationManager::ExternalBoundaries( unsigned int const level ) const {
+std::vector<std::tuple<uint64_t, BoundaryLocation>> const& CommunicationManager::ExternalBoundaries( unsigned int const level ) const {
    return external_boundaries_[level];
 }
 
-const std::vector<std::tuple<uint64_t, BoundaryLocation>>& CommunicationManager::ExternalMultiBoundaries() const {
+/**
+ * @brief Gives a reference to the list of multi-material nodes on the maximum level holding all external boundary relations.
+ * @return List with relations for all external boundary nodes.
+ */
+std::vector<std::tuple<uint64_t, BoundaryLocation>> const& CommunicationManager::ExternalMultiBoundaries() const {
    return external_multi_boundaries_;
 }
 

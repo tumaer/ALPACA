@@ -238,7 +238,7 @@ void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::referenc
     * The interface tag update and the calculation of volume fractions are based on the level-set values in the reinitialized level-set buffer. Thus, after the advection of the level-set field,
     * the advected level-set values, which are currently in the right-hand side level-set buffer, have to be copied to the reinitialized level-set buffer.
     */
-   BufferOperationsInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Reinitialized>( nodes );
+   BOInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Reinitialized>( nodes );
    UpdateInterfaceTagsOnFinestLevel( nodes );
 
    // Set the volume fraction buffer according to the propagated level-set field.
@@ -284,12 +284,12 @@ void TwoPhaseManager::UpdateInterfaceTagsOnFinestLevel( std::vector<std::referen
 void TwoPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states) const {
    if( reset_interface_states ) {
       for( Node & node : nodes ) {
-         BufferOperations::SetFieldBuffer( node.GetInterfaceBlock().GetInterfaceStateBuffer(), 0.0 );
+         BO::SetFieldBuffer( node.GetInterfaceBlock().GetInterfaceStateBuffer(), 0.0 );
       }
    }
    for( auto const& node : nodes ) {
       // solve interface Riemann problem to obtain interface velocity and interface exchange terms
-      interface_state_calculator_.ObtainInterfaceQuantities( node );
+      interface_state_calculator_.ObtainInterfaceStates( node );
    }
 
    for( InterfaceState const is : IF::ASOS() ) {

@@ -403,7 +403,7 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& 
    double const one_number_of_cells = 1.0 / (CC::TCX()*CC::TCY()*CC::TCZ());
 
    for( Equation const eq : MF::EWA()) {
-      const double (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] =  child.GetRightHandSideBuffer(eq);
+      double const (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] =  child.GetRightHandSideBuffer(eq);
       Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
       error_norm = 0.0;
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -554,32 +554,4 @@ void Multiresolution::PropagateUniformTagsFromChildIntoParent( std::int8_t const
          }
       }
    }
-}
-
-/**
- * @brief Creates a Multiresolution instance and logs the used thresholds.
- * @param maximum_level The maximum level used in the simulation.
- * @param user_reference_level The reference level provided from user input.
- * @param user_reference_epsilon The reference epsilon provided from user input.
- * @return A multiresolution instance with thresholding conditions according to given input.
- */
-Multiresolution InstantiateMultiresolution( unsigned int const maximum_level, unsigned int const user_reference_level, double const user_reference_epsilon ) {
-
-   if( user_reference_epsilon <= 0 ) { throw std::invalid_argument( "Epsilon_Reference must be greater zero" ); }
-
-   Thresholder thresholder = Thresholder( maximum_level, user_reference_level, user_reference_epsilon );
-
-   LogWriter& logger = LogWriter::Instance();
-   logger.AddBreakLine( true );
-   if( maximum_level > 1 ) {
-      logger.LogMessage( "Epsilon Level 0 and Level 1  : " + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( 1 ) ) );
-      logger.LogMessage( "Epsilon Level " + std::to_string( maximum_level - 1 ) + " and Level " + std::to_string( maximum_level ) + "  : "
-                         + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( maximum_level ) ) );
-   } else if( maximum_level == 1 ) {
-      logger.LogMessage("Homogenous Mesh - Level 1 cannot be coarsed. Provided Epsilon is ignored");
-   } else {
-      logger.LogMessage("Homogenous Mesh - Provided Epsilon is ignored");
-   }
-
-   return Multiresolution( std::move( thresholder ) );
 }

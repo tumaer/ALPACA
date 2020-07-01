@@ -71,7 +71,7 @@
 #include <vector>
 
 #include "materials/material_manager.h"
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * @brief This class calculates the viscous contribution to axisymmetric forces as described in \cite Meng2016b.
@@ -97,7 +97,7 @@ public:
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces const& ) = delete;
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces&& ) = delete;
 
-   void ComputeForces( std::pair<const MaterialName, Block> const& mat_block, double (&axisymmetric_viscous_volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
+   void ComputeForces( std::pair<MaterialName const, Block> const& mat_block, double (&axisymmetric_viscous_volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
                        double const cell_size, double const node_origin_x ) const;
 
 };

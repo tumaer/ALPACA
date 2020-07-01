@@ -103,7 +103,7 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     */
    void CutOffSingleNode(Node& node) const {
 
-      //const std::int8_t  (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      //std::int8_t const  (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
       InterfaceBlock& interface_block = node.GetInterfaceBlock();
       double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
 
@@ -125,10 +125,10 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     * @param nodes See base class.
     * @param stage See base class.
     */
-   void ReinitializeImplementation(const std::vector<std::reference_wrapper<Node>>& nodes, bool const is_last_stage) const {
+   void ReinitializeImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
 
       // Store the original levelset field in the right-hand side buffer to have a reference during reinitialization
-      BufferOperationsInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
+      BOInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
 
       // Carry out the actual reinitialization procedure
       double residuum = 0.0;

@@ -122,7 +122,7 @@ RoeRiemannSolver::RoeRiemannSolver( MaterialManager const& material_manager, Eig
  * @note Hotpath function.
  */
 void RoeRiemannSolver::UpdateImplementation( 
-   std::pair<const MaterialName, Block> const& mat_block, double const cell_size,
+   std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
    double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const {
@@ -207,7 +207,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
    constexpr unsigned int y_varying = DIR == Direction::Y ? 1 : 0;
    constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
 
-   const unsigned int reconstruction_stencil_downstream_size = ReconstructionStencil::DownstreamStencilSize();
+   unsigned int const reconstruction_stencil_downstream_size = ReconstructionStencil::DownstreamStencilSize();
 
    //NH Compiler likes loops counters to be fixed - so we help him.
    constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX()-1 : CC::FICX();
@@ -282,7 +282,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
             for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
                double flux = 0.0;
                // n is index of conservative equation, l is index of characteristic field
-               for( const unsigned int n : characteristic_field_summation_sequence_[DTI(DIR)] ) {
+               for( unsigned int const n : characteristic_field_summation_sequence_[DTI(DIR)] ) {
                   // first sum contributions of eigenvalues u in prescribed order
                   flux += physical_flux[l][n];
                }

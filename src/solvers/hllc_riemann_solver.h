@@ -69,7 +69,7 @@
 #define HLLC_RIEMANN_SOLVER_H
 
 #include "riemann_solver.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "enums/direction_definition.h"
 #include "materials/equation_of_state.h"
 #include "materials/material_manager.h"
@@ -91,12 +91,12 @@ class HllcRiemannSolver : public RiemannSolver<HllcRiemannSolver> {
    }};
 
    template<Direction DIR>
-   void ComputeFluxes(const std::pair<MaterialName const, Block>& mat_block, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+   void ComputeFluxes(std::pair<MaterialName const, Block> const& mat_block, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double const (&Roe_eigenvectors_left) [CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
       double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
       double const cell_size) const;
 
-   void UpdateImplementation(const std::pair<const MaterialName, Block>& mat_block, double const cell_size,
+   void UpdateImplementation(std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
       double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const;

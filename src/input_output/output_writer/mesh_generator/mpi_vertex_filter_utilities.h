@@ -230,7 +230,7 @@ namespace MpiVertexFilter {
     * @param mpi_send_request_list All MPI request get appended to this list.
     * @param topology The topology to get information about the MPI status of the simulation.
     */
-   void SendFromNode(std::uint64_t const node_id, const std::vector<std::uint64_t>& send_id_list,
+   void SendFromNode(std::uint64_t const node_id, std::vector<std::uint64_t> const& send_id_list,
                      unsigned long long int const* send_buffer, Direction const direction,
                      std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> const& send_list_per_rank,
                      std::vector<MPI_Request>& mpi_send_request_list,

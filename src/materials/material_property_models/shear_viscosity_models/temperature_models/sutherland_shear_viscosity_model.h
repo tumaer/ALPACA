@@ -71,7 +71,7 @@
 #include <cmath>
 #include "unit_handler.h"
 #include "parameter/material_parameter_models/temperature_material_parameter_model.h"
-#include "field_material_definitions.h"
+#include "block_definitions/field_material_definitions.h"
 
 /**
  * @brief Class that provides the actual model implementation param = f(T) following Sutherlands viscosity law. for a temperature based material parameter model to compute

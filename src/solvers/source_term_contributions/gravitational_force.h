@@ -68,7 +68,7 @@
 #ifndef GRAVITATIONAL_FORCE_H
 #define GRAVITATIONAL_FORCE_H
 
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * This class calculates the gravitational forces and adds them to a buffer.

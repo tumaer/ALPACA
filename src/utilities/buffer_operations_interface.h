@@ -89,7 +89,7 @@ inline void CopyInterfaceDescriptionBufferForNode( Node& node ) {
    double const (&source_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<SourceBuffer>()[Type];
    double (&target_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<TargetBuffer>()[Type];
    // Copy the values
-   BufferOperations::CopySingleBuffer( source_description, target_description );
+   BO::CopySingleBuffer( source_description, target_description );
 }
 
 /**
@@ -120,7 +120,7 @@ template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferT
 inline void SwapInterfaceDescriptionBufferForNode( Node & node ) {
    double (&first_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<FirstBuffer>()[Type];
    double (&second_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<SecondBuffer>()[Type];
-   BufferOperations::SwapSingleBuffer( first_description_buffer, second_description_buffer );
+   BO::SwapSingleBuffer( first_description_buffer, second_description_buffer );
 }
 
 /**
@@ -138,11 +138,8 @@ inline void SwapInterfaceDescriptionBufferForNodeList( std::vector<std::referenc
    }
 }
 
-/**
- * @brief
- * @return
- */
-
 } // BufferOperationsInterface
+
+namespace BOInterface = BufferOperationsInterface;
 
 #endif // BUFFER_OPERATIONS_INTERFACE_H

@@ -73,7 +73,7 @@
  * @param volume_forces Reference to array of volume forces increments to be filled here (indirect return parameter).
  */
 void AxisymmetricFluxes::ComputeAxisymmetricContributions( Block const& block, double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
-   double const cell_size, double const x_block_coordinate ) const {
+   double const cell_size, double const node_origin_x ) const {
 
    double const (&velocity_x)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::VelocityX);
    double const   (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
@@ -83,7 +83,7 @@ void AxisymmetricFluxes::ComputeAxisymmetricContributions( Block const& block, d
    double const     (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
-      double const one_radius = 1.0 / (x_block_coordinate + ( (double(i) + 0.5) ) * cell_size);
+      double const one_radius = 1.0 / (node_origin_x + ( (double(i) + 0.5) ) * cell_size);
       unsigned int const index_i = i + CC::FICX();
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {
          unsigned int const index_j = j + CC::FICY();

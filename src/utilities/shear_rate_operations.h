@@ -164,7 +164,7 @@ inline void ComputeShearRate( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()]
    } //i
 
    // Calculate the gradient of the velocity vector
-   BufferOperationsStencils::ComputeVectorGradientAtCellCenter<DerivativeStencil>( u, v, w, cell_size, velocity_gradient );
+   BOStencils::ComputeVectorGradientAtCellCenter<DerivativeStencil>( u, v, w, cell_size, velocity_gradient );
    // compute tensor and squared tensor of the shear_rate
    ComputeShearRateTensor( velocity_gradient, shear_rate_tensor );
    TensorOperations::ComputeSquaredOfTensor( shear_rate_tensor, shear_rate_tensor_squared );
@@ -174,7 +174,7 @@ inline void ComputeShearRate( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()]
       for( unsigned int j = 0; j < CC::TCY(); ++j ) {
          for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
 
-            const double second_invariant_of_shear_rate_tensor = TensorOperations::ComputeSecondInvariant( shear_rate_tensor, shear_rate_tensor_squared, i, j, k );
+            double const second_invariant_of_shear_rate_tensor = TensorOperations::ComputeSecondInvariant( shear_rate_tensor, shear_rate_tensor_squared, i, j, k );
 
             // Formula: gamma_dot = 2*sqrt(I_2(S_ij))
             shear_rate[i][j][k] = 2.0*std::sqrt( std::abs( second_invariant_of_shear_rate_tensor ) );

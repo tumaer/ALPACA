@@ -72,7 +72,7 @@
 #include "user_specifications/compile_time_constants.h"
 #include "enums/norms.h"
 #include "enums/remesh_identifier.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "log_writer.h"
 #include "multiresolution/threshold_computer.h"
 
@@ -110,7 +110,7 @@ public:
 
    static void Average( Conservatives const& all_child_values, Conservatives& all_parent_values, std::uint64_t const child_id );
    static void AverageJumpBuffer( SurfaceBuffer const& child_values, SurfaceBuffer& parent_values,  std::uint64_t const child_id );
-   static void Prediction( double const (&U_parent)[CC::TCX()][CC::TCY()][CC::TCZ()], double (&U_child)[CC::TCX()][CC::TCY()][CC::TCZ()], const std::uint64_t child_id,
+   static void Prediction( double const (&U_parent)[CC::TCX()][CC::TCY()][CC::TCZ()], double (&U_child)[CC::TCX()][CC::TCY()][CC::TCZ()], std::uint64_t const child_id,
                            unsigned int const x_start = 0, unsigned int const x_count = CC::TCX(),
                            unsigned int const y_start = 0, unsigned int const y_count = CC::TCY(),
                            unsigned int const z_start = 0, unsigned int const z_count = CC::TCZ() );
@@ -119,7 +119,5 @@ public:
    static void PropagateUniformTagsFromChildIntoParent( std::int8_t const uniform_child_tag, std::int8_t (&parent_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
                                                         std::uint64_t const child_id );
 };
-
-Multiresolution InstantiateMultiresolution( unsigned int const maximum_level, unsigned int const user_reference_level, double const user_reference_epsilon );
 
 #endif // MULTIRESOLUTION_H

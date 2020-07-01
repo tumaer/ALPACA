@@ -68,7 +68,7 @@
 #include "communication_types.h"
 
 #include "boundary_condition/boundary_specifications.h"
-#include "field_material_definitions.h"
+#include "block_definitions/field_material_definitions.h"
 #include <stdexcept>
 
 /**

@@ -86,11 +86,11 @@ SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std
  * @brief Computes additions to the right hand side solution due to the present source terms.
  * @param mat_block The phase with its material identifier.
  * @param cell_size .
- * @param x_block_coordinate .
+ * @param node_origin_x .
  * @param face_fluxes_x, face_fluxes_y, face_fluxes_z Fluxes across the cell face.
  * @param volume_forces .
  */
-void SourceTermSolver::Sources(const std::pair<const MaterialName, Block>& mat_block, const double cell_size, const double x_block_coordinate,
+void SourceTermSolver::Sources(std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
    double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
@@ -108,11 +108,11 @@ void SourceTermSolver::Sources(const std::pair<const MaterialName, Block>& mat_b
 
    //compute terms for axisymmetric simulations
    if constexpr( CC::Axisymmetric() ){
-      axisymmetric_fluxes_.ComputeAxisymmetricContributions( mat_block.second, volume_forces, cell_size, x_block_coordinate );
+      axisymmetric_fluxes_.ComputeAxisymmetricContributions( mat_block.second, volume_forces, cell_size, node_origin_x );
    }
 
    if constexpr( CC::ViscosityIsActive() && CC::Axisymmetric() ) {
-      axisymmetric_viscous_volume_forces_.ComputeForces( mat_block, volume_forces, cell_size, x_block_coordinate );
+      axisymmetric_viscous_volume_forces_.ComputeForces( mat_block, volume_forces, cell_size, node_origin_x );
    }
 
    // Compute terms for heat exchange

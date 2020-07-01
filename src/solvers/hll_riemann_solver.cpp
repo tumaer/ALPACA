@@ -194,7 +194,7 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
                for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
                   u_characteristic[m] = 0.0;
                   // Compute characteristics for U
-                  for( const unsigned int l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
+                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
                      u_characteristic[m] += Roe_eigenvectors_left[i_index][j_index][k_index][n][l] *
                         block.GetAverageBuffer( MF::ASOE()[l] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
                                                                [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]

@@ -99,7 +99,7 @@ namespace {
 SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
 
    GIVEN( "An axisymmetric viscous volume forces calculator" ) {
-      std::pair<const MaterialName, Block> mat_block( std::piecewise_construct, std::make_tuple( MaterialName::MaterialOne ), std::make_tuple() );
+      std::pair<MaterialName const, Block> mat_block( std::piecewise_construct, std::make_tuple( MaterialName::MaterialOne ), std::make_tuple() );
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
@@ -111,7 +111,7 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
 
       constexpr double cell_size = 1.0;
       WHEN( "The shear and bulk viscosity are zero" ) {
-         constexpr double x_block_coordinate = 0.0;
+         constexpr double node_origin_x = 0.0;
          AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 0.0, 0.0 ) );
          double volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -124,7 +124,7 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
             } //i
          } //equation
 
-         forces_calculator.ComputeForces( mat_block, volume_forces, cell_size, x_block_coordinate );
+         forces_calculator.ComputeForces( mat_block, volume_forces, cell_size, node_origin_x );
 
          THEN( "The volume forces are zero" ) {
              for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -137,7 +137,7 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
          }
       }
       WHEN( "Viscosities are twice different" ) {
-         const double x_block_coordinate = 0.0;
+         double const node_origin_x = 0.0;
          double first_volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          double second_volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -151,9 +151,9 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
             } //i
          } //equation
          AxisymmetricViscousVolumeForces first_forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 3.4, 0.0 ) );
-         first_forces_calculator.ComputeForces(mat_block, first_volume_forces, cell_size, x_block_coordinate);
+         first_forces_calculator.ComputeForces(mat_block, first_volume_forces, cell_size, node_origin_x);
          AxisymmetricViscousVolumeForces second_forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 6.8, 0.0 ) );
-         second_forces_calculator.ComputeForces(mat_block, second_volume_forces, cell_size, x_block_coordinate);
+         second_forces_calculator.ComputeForces(mat_block, second_volume_forces, cell_size, node_origin_x);
          THEN( "Volume forces are twice different" ) {
              for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
                 for( unsigned int i = 0; i < CC::ICX(); ++i ) {
@@ -165,8 +165,8 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
          }
       }
       WHEN( "Cell-center coordinates are twice different due to the difference of the block position" ) {
-         constexpr double first_x_block_coordinate = 0.0;
-         constexpr double second_x_block_coordinate = 4.5;
+         constexpr double first_node_origin_x = 0.0;
+         constexpr double second_node_origin_x = 4.5;
          double first_volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          double second_volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -180,8 +180,8 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
             } //i
          } //equation
          AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 5.0, 0.0 ) );
-         forces_calculator.ComputeForces( mat_block, first_volume_forces, cell_size, first_x_block_coordinate );
-         forces_calculator.ComputeForces( mat_block, second_volume_forces, cell_size, second_x_block_coordinate );
+         forces_calculator.ComputeForces( mat_block, first_volume_forces, cell_size, first_node_origin_x );
+         forces_calculator.ComputeForces( mat_block, second_volume_forces, cell_size, second_node_origin_x );
 
          THEN( "r-momentum forces are twice different" ) {
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {

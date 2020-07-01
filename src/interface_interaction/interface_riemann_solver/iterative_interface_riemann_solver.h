@@ -284,8 +284,8 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
        */
       for( unsigned it = 0; it < IterativeInterfaceRiemannSolverConstants::MaximumNumberOfIterations; ++it ) {
 
-         const std::array<double, 2> relations_left = ObtainFunctionAndDerivative(initial_root, p_left, pressure_function_left, one_pressure_function_left, pressure_constant_left, A_left, B_left, C_left, D_left);
-         const std::array<double, 2> relations_right = ObtainFunctionAndDerivative(initial_root, p_right, pressure_function_right, one_pressure_function_right, pressure_constant_right, A_right, B_right, C_right, D_right);
+         std::array<double, 2> const relations_left = ObtainFunctionAndDerivative(initial_root, p_left, pressure_function_left, one_pressure_function_left, pressure_constant_left, A_left, B_left, C_left, D_left);
+         std::array<double, 2> const relations_right = ObtainFunctionAndDerivative(initial_root, p_right, pressure_function_right, one_pressure_function_right, pressure_constant_right, A_right, B_right, C_right, D_right);
 
          double const derivative_of_root_function = DerivativeOfRootFunction( relations_left[1], relations_right[1] );
 

@@ -102,7 +102,7 @@ namespace ApplyUtilities {
 
    template<typename S>
    inline void GetValueVectorFromBufferX( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k ) {
       for(unsigned int s = 0; s < S::StencilSize(); ++s) {
          array[s] = buffer[i + (-S::DownstreamStencilSize() + s)][j][k];
@@ -110,7 +110,7 @@ namespace ApplyUtilities {
    }
    template<typename S>
    inline void GetValueVectorFromBufferY( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k ) {
       for(unsigned int s = 0; s < S::StencilSize(); ++s) {
          array[s] = buffer[i][j + (-S::DownstreamStencilSize() + s)][k];
@@ -118,7 +118,7 @@ namespace ApplyUtilities {
    }
    template<typename S>
    inline void GetValueVectorFromBufferZ( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k ) {
       for(unsigned int s = 0; s < S::StencilSize(); ++s) {
          array[s] = buffer[i][j][k + (-S::DownstreamStencilSize() + s)];
@@ -126,9 +126,9 @@ namespace ApplyUtilities {
    }
    template<typename S>
    inline void GetDifferenceVectorFromBufferX( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k
-         , const double cell_size ) {
+         , double const cell_size ) {
       double const one_cell_size = 1.0 / cell_size;
       for(unsigned int s = 0; s < S::StencilSize(); ++s) {
          array[s] = ( buffer[i + (   - S::DownstreamStencilSize() + s)][j][k]
@@ -137,9 +137,9 @@ namespace ApplyUtilities {
    }
    template<typename S>
    inline void GetDifferenceVectorFromBufferY( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k
-         , const double cell_size ) {
+         , double const cell_size ) {
       double const one_cell_size = 1.0 / cell_size;
       for(unsigned int s = 0; s < S::StencilSize(); ++s) {
          array[s] = ( buffer[i][j + (   - S::DownstreamStencilSize() + s)][k]
@@ -148,9 +148,9 @@ namespace ApplyUtilities {
    }
    template<typename S>
    inline void GetDifferenceVectorFromBufferZ( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k
-         , const double cell_size ) {
+         , double const cell_size ) {
       double const one_cell_size = 1.0 / cell_size;
       for(unsigned int s = 0; s < S::StencilSize(); ++s) {
          array[s] = ( buffer[i][j][k + (   - S::DownstreamStencilSize() + s)]
@@ -171,7 +171,7 @@ namespace ApplyUtilities {
     */
    template<typename S, Direction D>
    inline void GetValueVectorFromBuffer( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k ) {
       switch (D) {
          case Direction::X: GetValueVectorFromBufferX<S>(array, buffer, i, j, k); break;
@@ -182,9 +182,9 @@ namespace ApplyUtilities {
 
    template<typename S, Direction D>
    inline void GetDifferenceVectorFromBuffer( std::array<double, S::StencilSize()> & array
-         , const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
+         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
          , unsigned int const i, unsigned int const j, unsigned int const k
-         , const double cell_size ) {
+         , double const cell_size ) {
       switch (D) {
          case Direction::X: GetDifferenceVectorFromBufferX<S>(array, buffer, i, j, k, cell_size); break;
          case Direction::Y: GetDifferenceVectorFromBufferY<S>(array, buffer, i, j, k, cell_size); break;
@@ -203,7 +203,7 @@ namespace ApplyUtilities {
     * @return The result of the stencil.
     */
    template<typename S, StencilProperty P, Direction D>
-   inline double Apply(const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, const double cell_size) {
+   inline double Apply(double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, double const cell_size) {
 
       const S&& stencil = S();
 
@@ -224,7 +224,7 @@ namespace ApplyUtilities {
     * @return The result of the stencil.
     */
    template<typename S, StencilProperty P, Direction D>
-   inline double ApplyHjWeno(const double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, const double cell_size) {
+   inline double ApplyHjWeno(double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, double const cell_size) {
 
       const S&& stencil = S();
 

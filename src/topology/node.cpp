@@ -188,7 +188,7 @@ MaterialName Node::GetSinglePhaseMaterial() const {
 std::vector<MaterialName> Node::GetMaterials() const {
    std::vector<MaterialName> materials;
    materials.reserve(phases_.size());
-   for(const auto& phase : phases_) {
+   for(auto const& phase : phases_) {
       materials.push_back(phase.first);
    }
    return materials;

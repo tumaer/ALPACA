@@ -91,7 +91,7 @@ public:
    InterfaceStateCalculator( InterfaceStateCalculator&& ) = delete;
    InterfaceStateCalculator& operator=( InterfaceStateCalculator&& ) = delete;
 
-   void ObtainInterfaceQuantities( Node& node ) const;
+   void ObtainInterfaceStates( Node& node ) const;
 };
 
 

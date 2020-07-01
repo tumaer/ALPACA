@@ -70,7 +70,7 @@
 
 #include <numeric>
 
-#include "block.h"
+#include "block_definitions/block.h"
 #include "boundary_condition/boundary_specifications.h"
 #include "enums/interface_tag_definition.h"
 #include "topology/node.h"
@@ -351,13 +351,13 @@ public:
                } //equations
             } //phases
 
-            double const       (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-            double     (&phi_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
+            double const(&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+            double (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
    
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                   for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                     phi_initial[i][j][k] = phi[i][j][k];
+                     levelset_initial[i][j][k] = levelset[i][j][k];
                   } //k
                } //j
             } //i
@@ -405,13 +405,13 @@ public:
          } //phases
    
          if( node.HasLevelset() ) {
-            double (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-            double const(&phi_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
+            double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+            double const(&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
    
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                   for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                     phi[i][j][k] = multipliers[0] * phi[i][j][k] + multipliers[1] * phi_initial[i][j][k];
+                     levelset[i][j][k] = multipliers[0] * levelset[i][j][k] + multipliers[1] * levelset_initial[i][j][k];
                   } //k
                } //j
             } //i
@@ -441,10 +441,10 @@ public:
      */
    void SwapBuffersForNextStage(Node& node) const {
       // swap the conservative buffers
-      BufferOperationsMaterial::SwapConservativeBuffersForNode<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( node );
+      BOMaterial::SwapConservativeBuffersForNode<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( node );
       // swap the levelset buffer properly if required
       if( node.HasLevelset() ) {
-         BufferOperationsInterface::SwapInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Base>( node );
+         BOInterface::SwapInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Base>( node );
       }
    }
 };

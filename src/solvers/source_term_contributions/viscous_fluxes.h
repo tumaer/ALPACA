@@ -71,7 +71,7 @@
 #include <vector>
 
 #include "materials/material_manager.h"
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * @brief This class calculates the viscous source terms and adds them to a flux buffer.
@@ -81,7 +81,7 @@ class ViscousFluxes {
 private:
    MaterialManager const& material_manager_;
 
-   void ComputeTauFluxes( const double (&velocity_gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())]
+   void ComputeTauFluxes( double const (&velocity_gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())]
                         , std::vector<double> const viscosity
                         , double (&tau)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())]) const;
 
@@ -99,7 +99,7 @@ public:
    ViscousFluxes& operator=( ViscousFluxes const& ) = delete;
    ViscousFluxes& operator=( ViscousFluxes&& ) = delete;
 
-   void ComputeFluxes( std::pair<const MaterialName, Block> const& mat_block
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block
                      , double (&dissipative_flux_x)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]
                      , double (&dissipative_flux_y)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]
                      , double (&dissipative_flux_z)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]

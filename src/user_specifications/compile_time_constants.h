@@ -177,18 +177,18 @@ class CompileTimeConstants {
    static constexpr std::array<BoundaryLocation, 6> natural_boundary_sides_ = {BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North,
                                                                                BoundaryLocation::South, BoundaryLocation::Top, BoundaryLocation::Bottom};
 #if DIMENSION == 1
-   static constexpr const std::array<BoundaryLocation, 2> halo_boundary_sides_={ {
+   static constexpr std::array<BoundaryLocation, 2> const halo_boundary_sides_={ {
        BoundaryLocation::East, BoundaryLocation::West
  } };
 #elif DIMENSION == 2
-   static constexpr const std::array<BoundaryLocation, 8> halo_boundary_sides_={ {
+   static constexpr std::array<BoundaryLocation, 8> const halo_boundary_sides_={ {
                                                                                    BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North, BoundaryLocation::South,
                                                                                    // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
                                                                                    BoundaryLocation::NorthEast, BoundaryLocation::NorthWest,
                                                                                    BoundaryLocation::SouthEast,  BoundaryLocation::SouthWest,
                                                                                 } };
 #else
-   static constexpr const std::array<BoundaryLocation, 26> halo_boundary_sides_ = {{ // #26
+   static constexpr std::array<BoundaryLocation, 26> const halo_boundary_sides_ = {{ // #26
                                                                                       BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North, BoundaryLocation::South, BoundaryLocation::Top, BoundaryLocation::Bottom,
                                                                                       // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
                                                                                       BoundaryLocation::BottomNorth, BoundaryLocation::BottomSouth, BoundaryLocation::TopNorth, BoundaryLocation::TopSouth, // x-Axis Sticks
@@ -200,7 +200,7 @@ class CompileTimeConstants {
                                                                                    }};
 #endif
 
-   static constexpr const std::array <BoundaryLocation, domain_sides_> active_natural_boundary_sides_ = {BoundaryLocation::East, BoundaryLocation::West
+   static constexpr std::array <BoundaryLocation, domain_sides_> const active_natural_boundary_sides_ = {BoundaryLocation::East, BoundaryLocation::West
 #if DIMENSION != 1
       , BoundaryLocation::North, BoundaryLocation::South
 #endif

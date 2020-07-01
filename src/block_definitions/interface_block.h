@@ -65,120 +65,94 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef INTERFACE_BLOCK_BUFFER_DEFINITIONS_H
-#define INTERFACE_BLOCK_BUFFER_DEFINITIONS_H
+#ifndef INTERFACE_BLOCK_H
+#define INTERFACE_BLOCK_H
 
-#include "field_buffer.h"
+#include "user_specifications/compile_time_constants.h"
+#include "interface_block_buffer_definitions.h"
+#include "block_definitions/field_buffer.h"
+#include "block_definitions/field_interface_definitions.h"
 
 /**
- * @brief Identifier of all buffers in an interface block (to allow single buffer access, e.g., in halo update or extension).
+ * @brief The InterfaceBlock class holds the interface data, such as the interface describing variables (levelset, volume fraction) and other interfaces
+ *        variables that are required for the computations (e.g., interface velocity) Does NOT manipulate the data itself,
+ *        but provides access to the data.
  */
-enum class InterfaceBlockBufferType : unsigned short {
-   // interface description buffers
-   LevelsetBase, LevelsetRightHandSide, LevelsetReinitialized,
-   VolumeFractionBase, VolumeFractionRightHandSide, VolumeFractionReinitialized,
-   // interface state buffers
-   InterfaceStateVelocity, InterfaceStatePressurePositive, InterfaceStatePressureNegative,
-   // interface parameter buffers
-   InterfaceParameterSurfaceTensionCoefficient
+class InterfaceBlock {
+
+   // buffers for the interface description (different buffer types required for the integration)
+   InterfaceDescriptions base_;
+   InterfaceDescriptions right_hand_side_;
+   InterfaceDescriptions reinitialized_;
+   InterfaceDescriptions initial_;
+
+   // buffers for the interface states (e.g. interface velocity, negative/positive pressure)
+   InterfaceStates states_;
+
+   // buffer to store field-dependent interface parameter (e.g., surface tension coefficient)
+   InterfaceParameters parameters_;
+
+public:
+   InterfaceBlock() = delete;
+   explicit InterfaceBlock( double const levelset_initial );
+   explicit InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   ~InterfaceBlock() = default;
+   InterfaceBlock( InterfaceBlock const& ) = delete;
+   InterfaceBlock& operator=( InterfaceBlock const& ) = delete;
+   InterfaceBlock( InterfaceBlock&& ) = delete;
+   InterfaceBlock& operator=( InterfaceBlock&& ) = delete;
+
+   // Returning general field buffer
+   auto GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   // Returning interface description buffers
+   auto GetBaseBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetBaseBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   auto GetRightHandSideBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetRightHandSideBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   auto GetReinitializedBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetReinitializedBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   auto GetInitialBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInitialBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   template<InterfaceDescriptionBufferType C>
+   InterfaceDescriptions& GetInterfaceDescriptionBuffer();
+
+   template<InterfaceDescriptionBufferType C>
+   InterfaceDescriptions const& GetInterfaceDescriptionBuffer() const;
+
+   InterfaceDescriptions& GetBaseBuffer();
+   InterfaceDescriptions const& GetBaseBuffer() const;
+   InterfaceDescriptions& GetRightHandSideBuffer();
+   InterfaceDescriptions const& GetRightHandSideBuffer() const;
+   InterfaceDescriptions& GetReinitializedBuffer();
+   InterfaceDescriptions const& GetReinitializedBuffer() const;
+   InterfaceDescriptions& GetInitialBuffer();
+   InterfaceDescriptions const& GetInitialBuffer() const;
+   InterfaceDescriptions& GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type );
+   InterfaceDescriptions const& GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type ) const;
+
+   // Returning state buffers
+   auto GetInterfaceStateBuffer( InterfaceState const state_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceStateBuffer( InterfaceState const state_type) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   InterfaceStates& GetInterfaceStateBuffer();
+   InterfaceStates const& GetInterfaceStateBuffer() const;
+
+   // returning parameter buffers
+   auto GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   InterfaceParameters& GetInterfaceParameterBuffer();
+   InterfaceParameters const& GetInterfaceParameterBuffer() const;
+
+   // returning general interface block buffer
+   auto GetBuffer( InterfaceBlockBufferType const buffer_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetBuffer( InterfaceBlockBufferType const buffer_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
 };
 
-/**
- * @brief Mapping function to map an interface description buffer to the given interface block buffer type
- * @param description_field The Identifier of the description field (Levelset or VolumeFraction)
- * @param buffer_type The corresponding interface description buffer type (Base, RightHandSide, Reinitialized)
- * @return Appropriate InterfaceBlockBufferType
- */
-static constexpr InterfaceBlockBufferType MapInterfaceDescritpionToInterfaceBlockBufferType( InterfaceDescription const description_field, InterfaceDescriptionBufferType const buffer_type ) {
-   switch( buffer_type ) {
-      case InterfaceDescriptionBufferType::Base : {
-         switch( description_field ) {
-            case InterfaceDescription::Levelset : {
-               return InterfaceBlockBufferType::LevelsetBase;
-            }
-            default : {
-               return InterfaceBlockBufferType::VolumeFractionBase;
-            }
-         }
-      }
-      break;
-      case InterfaceDescriptionBufferType::RightHandSide: {
-         switch( description_field ) {
-            case InterfaceDescription::Levelset : {
-               return InterfaceBlockBufferType::LevelsetRightHandSide;
-            }
-            default : {
-               return InterfaceBlockBufferType::VolumeFractionRightHandSide;
-            }
-         }
-      }
-      break;
-      // Last possibility (reinitialized)
-      default : {
-         switch( description_field ) {
-            case InterfaceDescription::Levelset : {
-               return InterfaceBlockBufferType::LevelsetReinitialized;
-            }
-            default : {
-               return InterfaceBlockBufferType::VolumeFractionReinitialized;
-            }
-         }
-      }
-      break;
-   }
-}
-
-/**
- * @brief Mapping function to map an interface state to the given interface block buffer type
- * @param state The Identifier of the interface state field (Velocity, PressurePositive or PressureNegative)
- * @return Appropriate InterfaceBlockBufferType
- */
-static constexpr InterfaceBlockBufferType MapInterfaceStateToInterfaceBlockBufferType( InterfaceState const state ) {
-   switch( state ) {
-      case InterfaceState::Velocity : {
-         return InterfaceBlockBufferType::InterfaceStateVelocity;
-      }
-      case InterfaceState::PressurePositive : {
-         return InterfaceBlockBufferType::InterfaceStatePressurePositive;
-      }
-      // Last possibility
-      default : {
-         return InterfaceBlockBufferType::InterfaceStatePressureNegative;
-      }
-   }
-}
-
-/**
- * @brief Mapping function to map an interface parameter to the given interface block buffer type
- * @param parameter The Identifier of the interface parameter field (SurfaceTensionCoefficient)
- */
-static constexpr InterfaceBlockBufferType MapInterfaceParameterToInterfaceBlockBufferType( InterfaceParameter const parameter ) {
-   switch( parameter ) {
-      default : {
-         return InterfaceBlockBufferType::InterfaceParameterSurfaceTensionCoefficient;
-      }
-   }
-}
-
-/**
- * @brief Mapping function to map an interface field and index to the given interface block buffer type
- * @param field_type The Identifier of the interface field (States, Parameters or Levelsets)
- * @param field_index Index of the given field
- * @param buffer_type The corresponding interface buffer type (Base, RightHandSide, Reinitialized)
- * @return Appropriate InterfaceBlockBufferType
- */
-static constexpr InterfaceBlockBufferType MapInterfaceFieldToInterfaceBlockBufferType( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::RightHandSide ) {
-   switch( field_type ) {
-      case InterfaceFieldType::Description : {
-         return MapInterfaceDescritpionToInterfaceBlockBufferType( IF::ITID( field_index ), buffer_type );
-      }
-      case InterfaceFieldType::Parameters : {
-         return MapInterfaceParameterToInterfaceBlockBufferType( IF::ITIP( field_index ) );
-      }
-      default : {
-         return MapInterfaceStateToInterfaceBlockBufferType( IF::ITIS( field_index ) );
-      }
-   }
-}
-
-#endif // INTERFACE_BLOCK_BUFFER_DEFINITIONS_H
+#endif // INTERFACE_BLOCK_H

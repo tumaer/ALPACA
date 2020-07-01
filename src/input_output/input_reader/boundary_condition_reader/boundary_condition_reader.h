@@ -71,7 +71,7 @@
 #include <array>
 
 #include "enums/direction_definition.h"
-#include "field_material_definitions.h"
+#include "block_definitions/field_material_definitions.h"
 #include "boundary_condition/boundary_specifications.h"
 
 /**

@@ -79,20 +79,20 @@ class LogWriter {
 
    std::string log_;
    std::string logfile_name_;
-   const int rank_;
-   const bool save_all_ranks_;
+   int const rank_;
+   bool const save_all_ranks_;
 
    std::string delayed_log_;
 
    //Singleton has only privat Constructor
-   explicit LogWriter(const bool save_all_ranks);
-   std::vector<std::string> FormatMessage(const std::string& message) const;
+   explicit LogWriter(bool const save_all_ranks);
+   std::vector<std::string> FormatMessage(std::string const& message) const;
 
    int ForwardRankId() const;
 
 public:
    //Singelton "Constructor":
-   static LogWriter& Instance(const bool save_all_ranks = false);
+   static LogWriter& Instance(bool const save_all_ranks = false);
 
    //Singeltons may never call these methods.
    LogWriter() = delete;
@@ -102,15 +102,15 @@ public:
    LogWriter( LogWriter&& ) = delete;
    LogWriter& operator=( LogWriter&& ) = delete;
 
-   void SetLogfileName(const std::string name);
+   void SetLogfileName(std::string const name);
    void LogMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
    void LogLinebreakMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
-   void AddBreakLine(const bool print_to_terminal = false);
+   void AddBreakLine(bool const print_to_terminal = false);
    void FlushWelcomeMessage();
    void Flush();
-   void FlushAlpaca(const double percentage, bool const fast_forward = false);
-   void AppendDelayedLog(const std::string delayed_log);
-   void DelayedLogMessage(const bool print_to_terminal = true, const bool save_in_logfile = true);
+   void FlushAlpaca(double const percentage, bool const fast_forward = false);
+   void AppendDelayedLog(std::string const delayed_log);
+   void DelayedLogMessage(bool const print_to_terminal = true, bool const save_in_logfile = true);
 };
 
 #endif // LOG_WRITER_H

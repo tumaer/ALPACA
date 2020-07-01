@@ -93,7 +93,7 @@ ApertureCutCellMixer::ApertureCutCellMixer( HaloManager & halo_manager ) : TwoPh
  * about the target cell indices (i_target, j_target and k_target - saved as unsigned int), the mixing fraction beta (saved as double) and a factor necessary to calculate the
  * mixing fluxes.
  */
-void ApertureCutCellMixer::CalculateMixingContributionsImplementation(Node const& node, const MaterialName material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const {
+void ApertureCutCellMixer::CalculateMixingContributionsImplementation(Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const {
 
    std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
    double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);

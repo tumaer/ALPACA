@@ -69,6 +69,7 @@
 #define STRING_OPERATIONS_H
 
 #include <string>
+#include <limits>
 
 /**
  * @brief Provide the functionality to manipulate given strings 

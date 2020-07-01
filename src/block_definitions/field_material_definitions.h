@@ -73,32 +73,17 @@
 #include <tuple>
 #include <type_traits>
 #include "user_specifications/compile_time_constants.h"
-#include "field_details.h"
+#include "block_definitions/field_details.h"
 
 /**
  * @brief Unique identifier for the conservative buffer type, i.e. the average, right-hand side, or initial buffer.
  */
-enum class ConservativeBufferType : unsigned short { Average = 0, RightHandSide = 1, Initial = 2 };
-
-/**
- * @brief Converts an conservative buffer identifier to a (C++11 standard compliant, i. e. positive) array index. "CTTI = Conservative buffer to index"
- * @param cb The conservative buffer identifier
- * @return The index.
- */
-constexpr std::underlying_type<ConservativeBufferType>::type CBTI( ConservativeBufferType const cb ) { return static_cast<typename std::underlying_type<ConservativeBufferType>::type>( cb ); }
+enum class ConservativeBufferType { Average, RightHandSide, Initial };
 
 /**
  * @brief Unique Identifier for the material Field type, i.e. a conservative, a prime-state or a parameter field.
  */
-enum class MaterialFieldType : unsigned short { Conservatives = 0, PrimeStates = 1, Parameters = 2 };
-
-/**
- * @brief Converts an material field identifier to a (C++11 standard compliant, i. e. positive) array index. "MFTI = Material Field to Index"
- * @param fft The material field type identifier
- * @return The index.
- */
-constexpr std::underlying_type<MaterialFieldType>::type MFTI( MaterialFieldType const fft ) { return static_cast<typename std::underlying_type<MaterialFieldType>::type>( fft ); }
-
+enum class MaterialFieldType { Conservatives, PrimeStates, Parameters };
 
 class MaterialFieldsDefinitions {
 
@@ -107,7 +92,7 @@ class MaterialFieldsDefinitions {
    static constexpr auto active_prime_states_ = IndexSequenceToEnumArray<PrimeState>( std::make_index_sequence<FieldDetails::ActivePrimeStates::Count>{} );
    static constexpr auto active_parameters_   = IndexSequenceToEnumArray<Parameter>( std::make_index_sequence<FieldDetails::ActiveParameters::Count>{} );
 
-   static constexpr const std::array<Equation,DTI( CC::DIM() )> active_momenta_ = { Equation::MomentumX
+   static constexpr std::array<Equation,DTI( CC::DIM() )> const active_momenta_ = { Equation::MomentumX
 #if DIMENSION!=1
       ,Equation::MomentumY
 #endif
@@ -116,7 +101,7 @@ class MaterialFieldsDefinitions {
 #endif
    };
 
-   static constexpr const std::array<PrimeState,DTI( CC::DIM() )> active_velocities_ = { PrimeState::VelocityX
+   static constexpr std::array<PrimeState,DTI( CC::DIM() )> const active_velocities_ = { PrimeState::VelocityX
 #if DIMENSION!=1
       ,PrimeState::VelocityY
 #endif

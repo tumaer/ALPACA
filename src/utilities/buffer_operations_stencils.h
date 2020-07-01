@@ -287,15 +287,18 @@ inline void ComputeVectorGradientAtCellFaces( double const (&v1)[CC::TCX()][CC::
                   // Explicit derivative calculation at cell face (all dv_i/dx derivatives)
                   else {
                      switch( r ) {
-                        case 0:
+                        case 0: {
                            gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v1, i, j, k, cell_size );
-                           break;
-                        case 1:
+                        }
+                        break;
+                        case 1: {
                            gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v2, i, j, k, cell_size );
-                           break;
-                        case 2:
+                        }
+                        break;
+                        case 2: {
                            gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v3, i, j, k, cell_size );
-                           break;
+                        }
+                        break;
                         default:
                            break;
                      }
@@ -326,15 +329,18 @@ inline void ComputeVectorGradientAtCellFaces( double const (&v1)[CC::TCX()][CC::
                      // Explicit derivative calculation at cell face (all dv_i/dy derivatives)
                      else {
                         switch( r ) {
-                           case 0:
+                           case 0: {
                               gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v1, i, j, k, cell_size );
-                              break;
-                           case 1:
+                           }
+                           break;
+                           case 1: {
                               gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v2, i, j, k, cell_size );
-                              break;
-                           case 2:
+                           }
+                           break;
+                           case 2: {
                               gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v3, i, j, k, cell_size );
-                              break;
+                           }
+                           break;
                            default:
                               break;
                         }
@@ -366,15 +372,18 @@ inline void ComputeVectorGradientAtCellFaces( double const (&v1)[CC::TCX()][CC::
                      // Explicit derivative calculation at cell face (all dv_i/dz derivatives)
                      else {
                         switch( r ) {
-                           case 0:
+                           case 0: {
                               gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v1, i, j, k, cell_size );
-                              break;
-                           case 1:
+                           }
+                           break;
+                           case 1: {
                               gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v2, i, j, k, cell_size );
-                              break;
-                           case 2:
+                           }
+                           break;
+                           case 2: {
                               gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v3, i, j, k, cell_size );
-                              break;
+                           }
+                           break;
                            default:
                               break;
                         }
@@ -389,5 +398,7 @@ inline void ComputeVectorGradientAtCellFaces( double const (&v1)[CC::TCX()][CC::
 }
 
 } // BufferOperationsStencils
+
+namespace BOStencils = BufferOperationsStencils;
 
 #endif // BUFFER_OPERATIONS_STENCILS_H

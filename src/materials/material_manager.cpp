@@ -178,7 +178,6 @@ std::vector<int> MaterialManager::GenerateMaterialPairingOffset( size_t const nu
    // Definition and Initialization of the materialPairing vector depending on Single or Multiphase ( for later correct access )
    // NOTE: This if else can be removed if the general multimaterial approach is incorporated in the framework.
    // Single material
-   // AB TODO: Remove when capillary pressure calculator is changed 
    if( number_of_materials == 1 ) {
       pairing_offset.reserve( 1 );
       pairing_offset.push_back( 0 );

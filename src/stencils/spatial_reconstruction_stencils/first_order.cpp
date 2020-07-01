@@ -72,7 +72,7 @@
 /**
  * @brief Computes the flux at one cell face according to a first order scheme. Also See base class.
  */
-double FirstOrder::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
+double FirstOrder::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
 
 #ifndef PERFORMANCE
    (void)cell_size;

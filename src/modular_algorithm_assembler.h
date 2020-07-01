@@ -160,7 +160,7 @@ class ModularAlgorithmAssembler {
    void DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<std::uint64_t>& remove_list,
                                  std::vector<std::uint64_t>& refine_list ) const;
 
-   void RefineNode( const std::uint64_t node_id );
+   void RefineNode( std::uint64_t const node_id );
 
    void UpdateTopology();
 

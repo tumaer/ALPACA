@@ -68,7 +68,7 @@
 #ifndef AXISYMMETRIC_FLUXES_H
 #define AXISYMMETRIC_FLUXES_H
 
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * This class calculates the additional terms for axisymmetric simulations and adds them to a buffer.
@@ -84,7 +84,7 @@ public:
    AxisymmetricFluxes& operator=( AxisymmetricFluxes&& ) = delete;
 
    void ComputeAxisymmetricContributions( Block const& block, double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
-      double const cell_size, double const x_block_coordinate) const;
+      double const cell_size, double const node_origin_x) const;
 };
 
 #endif //AXISYMMETRIC_FLUXES_H

@@ -75,7 +75,7 @@
 #include "solvers/source_term_contributions/axisymmetric_viscous_volume_forces.h"
 #include "solvers/source_term_contributions/gravitational_force.h"
 #include "solvers/source_term_contributions/heat_fluxes.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "materials/material_manager.h"
 #include "user_specifications/compile_time_constants.h"
 
@@ -99,7 +99,7 @@ public:
    SourceTermSolver( SourceTermSolver&& ) = delete;
    SourceTermSolver& operator=( SourceTermSolver&& ) = delete;
 
-   void Sources( std::pair<const MaterialName, Block> const& mat_block, double const cell_size, double const x_block_coordinate,
+   void Sources( std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
       double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],

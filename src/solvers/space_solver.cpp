@@ -98,7 +98,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
    double volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
 
    for( auto& phase : node.GetPhases() ) {
-      for( const Equation eq : MF::ASOE() ) {
+      for( Equation const eq : MF::ASOE() ) {
          double (&rhs_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetRightHandSideBuffer( eq );
          for( unsigned int i = 0; i < CC::TCX(); ++i ) {
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -169,7 +169,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
       }
 
       //update cells due to fluxes
-      for( const Equation eq : MF::ASOE() ) {
+      for( Equation const eq : MF::ASOE() ) {
          auto const e = ETI(eq);
          double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetRightHandSideBuffer( eq );
          for( unsigned int i = 0; i < CC::ICX(); ++i ) {
@@ -213,7 +213,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
  * @param block The block for which the eigenvalues are to be computed.
  * @param eigenvalues Indirect return parameter.
  */
-void SpaceSolver::ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const {
+void SpaceSolver::ComputeMaxEigenvaluesForPhase( std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const {
    eigendecomposition_calculator_.ComputeMaxEigenvaluesOnBlock( mat_block, eigenvalues );
 }
 

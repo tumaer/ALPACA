@@ -87,7 +87,7 @@ HeatFluxes::HeatFluxes(MaterialManager const& material_manager) :
  * @param heat_fluxes_z The heat fluxes in z-direction (indirect return parameter).
  * @param cell_size The cell size of the block.
  */
-void HeatFluxes::ComputeFluxes(const std::pair<const MaterialName, Block> &mat_block,
+void HeatFluxes::ComputeFluxes(std::pair<MaterialName const, Block> const& mat_block,
    double (&heat_fluxes_x)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
    double (&heat_fluxes_y)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
    double (&heat_fluxes_z)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
@@ -126,7 +126,7 @@ void HeatFluxes::ComputeFluxes(const std::pair<const MaterialName, Block> &mat_b
       }
 
       // Compute the conductivity properly
-      BufferOperationsStencils::ComputeScalarAtCellFaces<ReconstructionStencil>(conductivity, cell_size, conductivity_at_cell_faces);
+      BOStencils::ComputeScalarAtCellFaces<ReconstructionStencil>(conductivity, cell_size, conductivity_at_cell_faces);
    }
 
    //offset for flux-arrays

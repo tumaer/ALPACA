@@ -106,7 +106,7 @@ enum class BoundaryLocation : unsigned int {
  * @param l The location identifier.
  * @return Index to be used in Arrays.
  */
-static inline constexpr std::underlying_type<BoundaryLocation>::type LTI(const BoundaryLocation l) { return static_cast<typename std::underlying_type<BoundaryLocation>::type>( l ); }
+static inline constexpr std::underlying_type<BoundaryLocation>::type LTI(BoundaryLocation const l) { return static_cast<typename std::underlying_type<BoundaryLocation>::type>( l ); }
 
 /**
  * @brief Gives the inverse direction. Convenience function.

@@ -72,7 +72,7 @@
 #include <memory>
 #include <unordered_map>
 #include "topology_manager.h"
-#include "interface_block.h"
+#include "block_definitions/interface_block.h"
 #include "node.h"
 
 /**
@@ -101,7 +101,7 @@ public:
    Tree& operator=( Tree&& ) = delete;
 
    /**
-    * @brief Gives the node size on level zero
+    * @brief Gives the non-dimensionalized node size on level zero
     * @return Number of nodes
     */
    inline double GetNodeSizeOnLevelZero() const {

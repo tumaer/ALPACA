@@ -86,10 +86,10 @@ std::uint64_t IdSeed();
 std::uint64_t CutHeadBit(std::uint64_t id, unsigned int const level);
 std::uint64_t AddHeadBit(std::uint64_t const id, unsigned int const level);
 
-bool IsNaturalExternalBoundary( BoundaryLocation const location,std::uint64_t const id,
-                                std::array<unsigned int, 3> const level_zero_blocks_ordered_xyz );
+bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t const id,
+                                std::array<unsigned int, 3> const number_of_nodes_on_level_zero );
 bool IsExternalBoundary( BoundaryLocation const location, std::uint64_t const id,
-                         std::array<unsigned int, 3> const level_zero_blocks_xyz );
+                         std::array<unsigned int, 3> const number_of_nodes_on_level_zero );
 
 /**
  * @brief Gives the level that the given id is associated to. $NOT SAFE, WRONG INPUT RESULTS IN QUITE INCORRECT DATA$
@@ -112,12 +112,12 @@ constexpr unsigned int LevelOfNode(std::uint64_t const id) {
 /**
  * @brief Gives the length of the internal domain within the node of the given id.
  * @param id Id of the node whose size is to be evaluated.
- * @param block_size_on_level_zero The size (= size of internal cells) of a block on level zero.
+ * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
  * @return Length of the internal domain in the node.
  */
-constexpr double DomainSizeOfId(std::uint64_t const id, double const block_size_on_level_zero) {
+constexpr double DomainSizeOfId(std::uint64_t const id, double const node_size_on_level_zero) {
    std::uint64_t divisor = 1 << (LevelOfNode(id));
-   return block_size_on_level_zero / double(divisor);
+   return node_size_on_level_zero / double(divisor);
 }
 
 /**

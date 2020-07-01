@@ -68,7 +68,7 @@
 #ifndef MATERIAL_PARAMETER_MODEL_H
 #define MATERIAL_PARAMETER_MODEL_H 
 
-#include "block.h"
+#include "block_definitions/block.h"
 #include "materials/material_definitions.h"
 
 /**

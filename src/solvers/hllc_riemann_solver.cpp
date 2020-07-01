@@ -87,7 +87,7 @@ HllcRiemannSolver::HllcRiemannSolver( MaterialManager const& material_manager, E
  * in combination with spatial reconstruction of cell averaged values (finite volume approach) and flux determination by HLLC procedure.
  * See base class.
  */
-void HllcRiemannSolver::UpdateImplementation( std::pair<const MaterialName, Block> const& mat_block, double const cell_size,
+void HllcRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
    double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const {
@@ -186,9 +186,9 @@ void HllcRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> cons
       for( unsigned int j = y_start; j <= y_end; ++j ) {
          for( unsigned int k = z_start; k <= z_end; ++k ) {
             // Shifted indices to match block index system and roe-ev index system
-            const int i_index = i-total_to_internal_offset_x;
-            const int j_index = j-total_to_internal_offset_y;
-            const int k_index = k-total_to_internal_offset_z;
+            int const i_index = i-total_to_internal_offset_x;
+            int const j_index = j-total_to_internal_offset_y;
+            int const k_index = k-total_to_internal_offset_z;
 
             // Reconstruct conservative values at cell face using characteristic decomposition in combination with WENO stencil
             for( unsigned int n = 0; n < MF::ANOE(); ++n ) { // n is index of characteristic field (eigenvalue, eigenvector)
@@ -196,7 +196,7 @@ void HllcRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> cons
                for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
                   u_characteristic[m] = 0.0;
                   // Compute characteristics for U
-                  for( const unsigned int l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
+                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
                      u_characteristic[m] += Roe_eigenvectors_left[i_index][j_index][k_index][n][l] *
                         block.GetAverageBuffer( MF::ASOE()[l] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
                                                                [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
@@ -213,7 +213,7 @@ void HllcRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> cons
             for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
                state_face_left[l]  = 0.0;
                state_face_right[l] = 0.0;
-               for( const unsigned int n : characteristic_field_summation_sequence_[DTI(DIR)] ) {
+               for( unsigned int const n : characteristic_field_summation_sequence_[DTI(DIR)] ) {
                   state_face_left[l]  += characteristic_average_minus[n] * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
                   state_face_right[l] += characteristic_average_plus[n]  * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
                } // N-Loop

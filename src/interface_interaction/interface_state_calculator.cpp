@@ -85,7 +85,7 @@ InterfaceStateCalculator::InterfaceStateCalculator(MaterialManager const& materi
  * @note This function should only be called for multi-phase nodes
  * that have a level-set block. Sanity check whether the input is a multi-phase node is not done!
  */
-void InterfaceStateCalculator::ObtainInterfaceQuantities(Node& node) const {
+void InterfaceStateCalculator::ObtainInterfaceStates(Node& node) const {
 
   double pressure_difference[CC::TCX()][CC::TCY()][CC::TCZ()];
   for( unsigned int i = 0; i < CC::TCX(); ++i ){

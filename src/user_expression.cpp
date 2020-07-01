@@ -77,7 +77,7 @@
  * @param variables_in The input variable names and references to their values.
  * @param variables_out The out variable names.
  */
-UserExpression::UserExpression( const std::string expression_string, const std::vector<std::tuple<std::string,double&>> variables_in, const std::vector<std::string> variables_out ) :
+UserExpression::UserExpression( std::string const expression_string, std::vector<std::tuple<std::string,double&>> const variables_in, std::vector<std::string> const variables_out ) :
    random_number_expression_()
 {
    symbol_table_.add_function("rand", random_number_expression_);
@@ -107,7 +107,7 @@ UserExpression::UserExpression( const std::string expression_string, const std::
  * @param variable The name of the variable whose value should be returned.
  * @return The value of the specified variable.
  */
-double UserExpression::GetValue( const std::string variable ) const {
+double UserExpression::GetValue( std::string const variable ) const {
    expression_.value();
    return symbol_table_.get_variable( variable )->value();
 }

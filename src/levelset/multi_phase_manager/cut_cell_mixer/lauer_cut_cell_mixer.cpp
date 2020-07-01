@@ -93,15 +93,15 @@ LauerCutCellMixer::LauerCutCellMixer( HaloManager & halo_manager ) : TwoPhaseCut
  * about the target cell indices (i_target, j_target and k_target - saved as unsigned int), the mixing fraction beta (saved as double) and a factor necessary to calculate the
  * mixing fluxes.
  */
-void LauerCutCellMixer::CalculateMixingContributionsImplementation(const Node& node, const MaterialName material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const {
+void LauerCutCellMixer::CalculateMixingContributionsImplementation(Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const {
 
-   const std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   const double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
-   const double (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
-   const std::int8_t material_sign = MaterialSignCapsule::SignOfMaterial(material);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
+   std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);
 
-   const double reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;
-   const double material_sign_double = double(material_sign);
+   double const reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;
+   double const material_sign_double = double(material_sign);
 
    // quantities to specify a mixing operation
    double volume_fraction_self   = 0.0;
@@ -120,7 +120,7 @@ void LauerCutCellMixer::CalculateMixingContributionsImplementation(const Node& n
    // lambda function to create a single mixing contribution between two cells
    // JW to HoNi This lambda function might be a performance bottle-neck
    std::function<void(unsigned int,unsigned int,unsigned int)> create_mixing_contribution = [&] (unsigned int i,unsigned int j,unsigned int k) {
-      const double denominator = volume_fraction_self * mixing_fraction + volume_fraction_target;
+      double const denominator = volume_fraction_self * mixing_fraction + volume_fraction_target;
       if(mixing_fraction != 0.0 && denominator != 0.0) {
          mixing_for_cell_active = true;
          beta_sum += mixing_fraction;
@@ -143,7 +143,7 @@ void LauerCutCellMixer::CalculateMixingContributionsImplementation(const Node& n
             volume_fraction_self = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
             if(std::abs(interface_tags[i][j][k]) <= ITTI(IT::CutCellNeighbor) && (volume_fraction_self < CC::MITH() || levelset[i][j][k] * material_sign < 0)) {
 
-               const std::array<double, 3> normal = GetNormal(levelset,i,j,k,material_sign);
+               std::array<double, 3> const normal = GetNormal(levelset,i,j,k,material_sign);
 
                unsigned int mixing_target_i = i + ((normal[0] > 0.0) - (normal[0] < 0.0));
                unsigned int mixing_target_j = j + ((normal[1] > 0.0) - (normal[1] < 0.0));
@@ -225,7 +225,7 @@ void LauerCutCellMixer::CalculateMixingContributionsImplementation(const Node& n
 
                // normalization of the mixing fraction
                if(mixing_for_cell_active) {
-                  const double one_beta_sum = 1.0 / beta_sum;
+                  double const one_beta_sum = 1.0 / beta_sum;
                   for(unsigned int n = 0; n < mixing_flux_factors.size(); ++n) {
                      mixing_flux_factors[n][0] *= one_beta_sum;
                   }

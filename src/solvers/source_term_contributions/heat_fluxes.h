@@ -69,7 +69,7 @@
 #define HEAT_FLUXES_H
 
 #include "materials/material_manager.h"
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * @brief This class calculates the heat fluxes and adds them to a buffer.

@@ -71,7 +71,7 @@
 * @brief Implements the 5th order HOUC stencil of \cite Nourgaliev2007. Also See base class.
 * @note Hotpath function.
 */
-double HOUC5::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
+double HOUC5::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
 
 #ifndef PERFORMANCE
    // Suppresses Compiler Warning "Wunused. The Input cell_size is not needed in all stencils, but for unified interface all derived inherite it.
@@ -84,12 +84,12 @@ double HOUC5::ApplyImplementation( std::array<double, stencil_size_> const& arra
 #endif
 
    // Assign values to v_i to make it easier to read
-   const double v0 = array[downstream_stencil_size_ - 3 * evaluation_properties[1]];
-   const double v1 = array[downstream_stencil_size_ - 2 * evaluation_properties[1]];
-   const double v2 = array[downstream_stencil_size_ - 1 * evaluation_properties[1]];
-   const double v3 = array[downstream_stencil_size_];
-   const double v4 = array[downstream_stencil_size_ + 1 * evaluation_properties[1]];
-   const double v5 = array[downstream_stencil_size_ + 2 * evaluation_properties[1]];
+   double const v0 = array[downstream_stencil_size_ - 3 * evaluation_properties[1]];
+   double const v1 = array[downstream_stencil_size_ - 2 * evaluation_properties[1]];
+   double const v2 = array[downstream_stencil_size_ - 1 * evaluation_properties[1]];
+   double const v3 = array[downstream_stencil_size_];
+   double const v4 = array[downstream_stencil_size_ + 1 * evaluation_properties[1]];
+   double const v5 = array[downstream_stencil_size_ + 2 * evaluation_properties[1]];
 
 
    double result = coefficient_0_ * v0 + coefficient_1_ * v1 + coefficient_2_ * v2

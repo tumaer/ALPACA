@@ -89,8 +89,8 @@ class TopologyNode {
 
    void Refine();
 
-   void AddMaterial( const MaterialName material );
-   void RemoveMaterial( const MaterialName material );
+   void AddMaterial( MaterialName const material );
+   void RemoveMaterial( MaterialName const material );
    std::vector<MaterialName> GetMaterials() const;
    MaterialName GetSingleMaterial() const;
 
@@ -145,8 +145,8 @@ public:
 
    void ChildWeight( std::vector<unsigned int>& weights_on_level, unsigned int const current_level = 0 ) const;
 
-   void AddMaterial( std::uint64_t const id, const MaterialName material );
-   void RemoveMaterial( std::uint64_t const id, const MaterialName material );
+   void AddMaterial( std::uint64_t const id, MaterialName const material );
+   void RemoveMaterial( std::uint64_t const id, MaterialName const material );
    std::vector<MaterialName> GetMaterials( std::uint64_t const id ) const;
    MaterialName GetSingleMaterial( std::uint64_t const id ) const;
 

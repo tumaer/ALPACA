@@ -69,7 +69,7 @@
 
 #include <vector>
 
-#include "block.h"
+#include "block_definitions/block.h"
 #include "user_specifications/compile_time_constants.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "enums/interface_tag_definition.h"
@@ -247,7 +247,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
           */
          // for a single-phase node the interface tags are uniform
          std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( materials_of_node.front() ) * ITTI( IT::BulkPhase );
-         BufferOperations::SetSingleBuffer( interface_tags, uniform_tag );
+         BO::SetSingleBuffer( interface_tags, uniform_tag );
       }
 
       // Create the node with the material and interface data

@@ -120,7 +120,7 @@ public:
     * @note Hotpath function.
     */
    template<typename S>
-   double Apply(std::array<double, S::StencilSize()> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
+   double Apply(std::array<double, S::StencilSize()> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
       return static_cast<DerivedStencil const&>(*this).ApplyImplementation(array, evaluation_properties, cell_size);
    }
 

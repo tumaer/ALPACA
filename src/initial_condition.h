@@ -75,7 +75,7 @@
 
 #include "unit_handler.h"
 #include "user_specifications/compile_time_constants.h"
-#include "field_material_definitions.h"
+#include "block_definitions/field_material_definitions.h"
 #include "materials/material_definitions.h"
 
 #include "user_expression.h"
@@ -100,7 +100,7 @@ class InitialCondition {
    std::string const variable_name_y_ = "y";
    std::string const variable_name_z_ = "z";
    // Additional required variables
-   double const node_size_on_level_zero_;
+   double const dimensionalized_node_size_on_level_zero_;
    unsigned int const maximum_level_;
 
 

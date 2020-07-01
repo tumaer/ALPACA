@@ -100,8 +100,8 @@ class TopologyManager {
 
    int PositionOfNodeInZeroTopology( std::uint64_t const id ) const;
    void AssignBalancedLoad();
-   void ListNodeToBalance( std::vector<std::tuple<std::uint64_t const, const int, const int>>& ids_current_future_rank_map );
-   void AssignTargetRankToLeaves( const int number_of_ranks );
+   void ListNodeToBalance( std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map );
+   void AssignTargetRankToLeaves( int const number_of_ranks );
 
    std::vector<unsigned int> WeightsOnLevels() const;
 
@@ -143,7 +143,7 @@ public:
 
    void RefineNodeWithId( std::uint64_t const id );
    void CoarseNodeWithId( std::uint64_t const parent_id );
-   std::string LeafRankDistribution( const int number_of_ranks );
+   std::string LeafRankDistribution( int const number_of_ranks );
 
    std::vector<std::uint64_t> LocalLeafIds() const;
    std::vector<std::uint64_t> LocalInterfaceLeafIds() const;

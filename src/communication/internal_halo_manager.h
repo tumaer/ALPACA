@@ -90,49 +90,49 @@ private:
                                   T const (& partner_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const;
 
    template<class T>
-   inline void ExtendClosestInternalValue( T (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], const BoundaryLocation loc ) const;
+   inline void ExtendClosestInternalValue( T (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const;
 
-   unsigned int UpdateMaterialJumpMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const std::uint64_t remote_child_id,
-                                        void *send_buffer, const BoundaryLocation loc, const MaterialFieldType filed_type );
-   void UpdateMaterialJumpMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc,
-                                const MaterialFieldType field_type );
-   void UpdateMaterialJumpNoMpi( std::uint64_t id, const BoundaryLocation loc, const MaterialFieldType field_type );
-   void UpdateMaterialHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc,
-                                     const MaterialFieldType field_type );
-   void UpdateMaterialHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc,
-                                     const MaterialFieldType field_type );
-   void UpdateMaterialHaloCellsNoMpi( std::uint64_t id, const BoundaryLocation loc, const MaterialFieldType field_type );
+   unsigned int UpdateMaterialJumpMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, std::uint64_t const remote_child_id,
+                                           void *send_buffer, BoundaryLocation const loc, MaterialFieldType const filed_type );
+   void UpdateMaterialJumpMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
+                                MaterialFieldType const field_type );
+   void UpdateMaterialJumpNoMpi( std::uint64_t id, BoundaryLocation const loc, MaterialFieldType const field_type );
+   void UpdateMaterialHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
+                                     MaterialFieldType const field_type );
+   void UpdateMaterialHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
+                                     MaterialFieldType const field_type );
+   void UpdateMaterialHaloCellsNoMpi( std::uint64_t id, BoundaryLocation const loc, MaterialFieldType const field_type );
 
-   void UpdateInterfaceHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const InterfaceBlockBufferType buffer_type,
-                                        const BoundaryLocation loc );
-   void UpdateInterfaceHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const InterfaceBlockBufferType buffer_type,
-                                        const BoundaryLocation loc );
-   void UpdateInterfaceHaloCellsNoMpi( std::uint64_t id, const InterfaceBlockBufferType buffer_type, const BoundaryLocation loc );
+   void UpdateInterfaceHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, InterfaceBlockBufferType const buffer_type,
+                                        BoundaryLocation const loc );
+   void UpdateInterfaceHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, InterfaceBlockBufferType const buffer_type,
+                                        BoundaryLocation const loc );
+   void UpdateInterfaceHaloCellsNoMpi( std::uint64_t id, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc );
 
-   void UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc );
-   void UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, const BoundaryLocation loc );
-   void UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t id, const BoundaryLocation loc );
+   void UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc );
+   void UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t id, std::vector<MPI_Request>& requests, BoundaryLocation const loc );
+   void UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t id, BoundaryLocation const loc );
 
    void MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>& requests,
-                                  const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& no_jump_boundaries,
-                                  const MaterialFieldType field_type );
-   void NoMpiMaterialHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
-                              const MaterialFieldType field_type );
+                                  std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& no_jump_boundaries,
+                                  MaterialFieldType const field_type );
+   void NoMpiMaterialHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+                              MaterialFieldType const field_type );
    void MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& requests,
-                                const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& no_jump_boundaries,
+                                std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& no_jump_boundaries,
                                 std::vector<ExchangePlane>& jump_buffer_plane, std::vector<ExchangeStick>& jump_buffer_stick,
                                 std::vector<ExchangeCube>& jump_buffer_cube,
-                                const MaterialFieldType field_type );
+                                MaterialFieldType const field_type );
 
 
-   void NoMpiInterfaceTagHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries );
-   void MpiInterfaceTagHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
+   void NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries );
+   void MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                    std::vector<MPI_Request>& requests );
 
-   void NoMpiInterfaceHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
-                                 const InterfaceBlockBufferType buffer_type );
-   void MpiInterfaceHaloUpdate( const std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>& boundaries,
-                               const InterfaceBlockBufferType buffer_type, std::vector<MPI_Request>& requests );
+   void NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+                                 InterfaceBlockBufferType const buffer_type );
+   void MpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+                               InterfaceBlockBufferType const buffer_type, std::vector<MPI_Request>& requests );
 
 public:
    InternalHaloManager() = delete;

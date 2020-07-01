@@ -89,11 +89,7 @@ namespace Simulation {
 
    /**
     * @brief Run simulation of ALPACA.
-    * @param argc Argument count set by your operating system
-    * @param argv Input arguments, MPI settings, openMP settings, etc.
-    * @return Zero if program finished correctly.
-    * @note Please note, due to the usage of openMP #pragmas valgrind and such tools might produce inaccurate measurements.
-    * This passes valgrind tests with disabled openMP without errors
+    * @param input_reader Reader that is used to provide user-information from an input file.
     */
    void Run( InputReader const& input_reader ) {
       LogWriter& logger = LogWriter::Instance();

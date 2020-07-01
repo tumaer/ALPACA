@@ -134,7 +134,7 @@ private:
       double mixing_fluxes[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()];
 
       for(auto const& phase : node.GetPhases()) {
-         const MaterialName material = phase.first;
+         MaterialName const material = phase.first;
          //reset mixing fluxes and mixing contributions for the respective phase
          for(unsigned int e = 0; e < MF::ANOE(); ++e) {
             for(unsigned int i = 0; i < CC::TCX(); ++i) {
@@ -161,12 +161,12 @@ private:
     * @param material The material which specifies the phase that has to be mixed.
     * @param mixing_fluxes The mixing fluxes which are added to the right-hand side buffer.
     */
-   void AddMixingFluxesToConservatives(Node& node, const MaterialName material, double const (&mixing_fluxes)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()]) const {
+   void AddMixingFluxesToConservatives(Node& node, MaterialName const material, double const (&mixing_fluxes)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()]) const {
 
       Block& phase = node.GetPhaseByMaterial(material);
       std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
-      for(const Equation eq : MF::ASOE()) {
+      for(Equation const eq : MF::ASOE()) {
          double (&conservatives)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.GetRightHandSideBuffer(eq);
          for(unsigned int i = FICMOX; i <= LICPOX; ++i) {
             for(unsigned int j = FICMOY; j <= LICPOY; ++j) {
@@ -217,7 +217,7 @@ private:
             double const volume_fraction_target = reference_volume_fraction + material_sign_double * volume_fraction[i_target][j_target][k_target];
             double const volume_fraction_self   = reference_volume_fraction + material_sign_double * volume_fraction[i       ][j       ][k       ];
 
-            for(const Equation eq : MF::ASOE()) {
+            for(Equation const eq : MF::ASOE()) {
                double const conservative_target = phase.GetRightHandSideBuffer(eq)[i_target][j_target][k_target];
                double const conservative_self   = phase.GetRightHandSideBuffer(eq)[i       ][j       ][k       ];
                double const M                   = factor*(conservative_target*volume_fraction_self-conservative_self*volume_fraction_target);

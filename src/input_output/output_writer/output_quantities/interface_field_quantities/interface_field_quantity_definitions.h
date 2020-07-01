@@ -68,8 +68,8 @@
 #ifndef INTERFACE_FIELD_QUANTITIES_H
 #define INTERFACE_FIELD_QUANTITIES_H
 
-#include "field_interface_definitions.h"
-#include "field_details.h"
+#include "block_definitions/field_interface_definitions.h"
+#include "block_definitions/field_details.h"
 #include <iostream>
 
 /**

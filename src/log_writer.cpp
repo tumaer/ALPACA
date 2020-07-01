@@ -109,7 +109,7 @@
  * @brief Default constructor, allows to set if all or just the root rank are to be logged.
  * @param save_all_ranks Decider if all ranks are to be logged. If false only root is logged.
  */
-LogWriter::LogWriter(const bool save_all_ranks) :
+LogWriter::LogWriter(bool const save_all_ranks) :
    logfile_name_("Unnamed_Simulation.log"),
    rank_(ForwardRankId()),
    save_all_ranks_(save_all_ranks)
@@ -191,7 +191,7 @@ LogWriter::LogWriter(const bool save_all_ranks) :
    AddBreakLine(true);
 
 
-   std::function<std::string (const std::string)> RemoveLeadingNumber = []( const std::string type_name ) {
+   std::function<std::string (std::string const)> RemoveLeadingNumber = []( std::string const type_name ) {
       std::string name_without_leading_number = type_name;
       return name_without_leading_number.erase(0, std::min(type_name.find_first_not_of("0123456789"), type_name.size()-1));
    };
@@ -241,8 +241,8 @@ void LogWriter::FlushWelcomeMessage() {
 
    int number_of_ranks;
    MPI_Comm_size(MPI_COMM_WORLD,&number_of_ranks);
-   const std::string filename = logfile_name_;
-   const std::string rank_filename = filename + "_" + std::to_string(rank_);
+   std::string const filename = logfile_name_;
+   std::string const rank_filename = filename + "_" + std::to_string(rank_);
    auto rank_messages(FormatMessage("Data from Rank " + std::to_string(rank_) + ":"));
    auto rank_message = rank_messages[0] + "\n"; // Dirty Hack, we know the line is to short.
 
@@ -300,8 +300,8 @@ void LogWriter::Flush() {
 
    int number_of_ranks;
    MPI_Comm_size(MPI_COMM_WORLD,&number_of_ranks);
-   const std::string filename = logfile_name_;
-   const std::string rank_filename = filename + "_" + std::to_string(rank_);
+   std::string const filename = logfile_name_;
+   std::string const rank_filename = filename + "_" + std::to_string(rank_);
 
    if(rank_ == 0) {
       std::cout << "|******************************************************************************|"  << std::endl;
@@ -330,11 +330,11 @@ void LogWriter::Flush() {
  *                         Alpaca is deternined.
  * @param[in]  fast_forward  Whether the Alpaca should rush to its current position to indicate that the simulation was restarted.
  */
-void LogWriter::FlushAlpaca(const double percentage, bool const fast_forward) {
+void LogWriter::FlushAlpaca(double const percentage, bool const fast_forward) {
 
    double cut_percentage = std::max(0.0, percentage);
    cut_percentage = std::min(cut_percentage, 1.0);
-   const unsigned int plot_percentage = (unsigned int)std::floor(cut_percentage * 64 + 9);
+   unsigned int const plot_percentage = (unsigned int)std::floor(cut_percentage * 64 + 9);
 
    std::stringstream line_stream;
    AddBreakLine(true);
@@ -379,7 +379,7 @@ void LogWriter::FlushAlpaca(const double percentage, bool const fast_forward) {
  *
  * @param[in]  delayed_log  The string that should be appended.
  */
-void LogWriter::AppendDelayedLog(const std::string delayed_log) {
+void LogWriter::AppendDelayedLog(std::string const delayed_log) {
    delayed_log_ += delayed_log;
 }
 
@@ -398,7 +398,7 @@ int LogWriter::ForwardRankId() const {
  * @param message An arbitrary string message $MUST NOT CONTAIN TABS '\t' or NEWLINES '\n'$
  * @return Gives a string in homogeneous ASCII-Layout.
  */
-std::vector<std::string> LogWriter::FormatMessage(const std::string &message) const {
+std::vector<std::string> LogWriter::FormatMessage(std::string const &message) const {
    unsigned int message_size = message.size();
    unsigned int number_of_lines = std::ceil( double(message_size) / double(76.0));
 
@@ -439,20 +439,20 @@ void LogWriter::LogMessage( std::string const& message, bool const print_to_term
 
    if(print_to_terminal) {
       if(rank_ == 0) {
-         for(const auto& line : formatted) {
+         for(auto const& line : formatted) {
             std::cout << std::scientific << std::setprecision(5) << line << std::endl;
          }
       }
    }
    if(save_in_logfile) {
       if(save_all_ranks_) {
-         for(const auto& line : formatted) {
+         for(auto const& line : formatted) {
             log_.append(line);
             log_.append("\n");
          }
       } else {
          if(rank_ == 0) {
-            for(const auto& line : formatted) {
+            for(auto const& line : formatted) {
                log_.append(line);
                log_.append("\n");
             }
@@ -488,7 +488,7 @@ void LogWriter::LogLinebreakMessage( std::string const& message, bool const prin
  * @param print_to_terminal Decider if message is to be printed to std::cout.
  * @param save_in_logfile Decider if message is to be saved in the log file.
  */
-void LogWriter::DelayedLogMessage(const bool print_to_terminal, const bool save_in_logfile) {
+void LogWriter::DelayedLogMessage(bool const print_to_terminal, bool const save_in_logfile) {
    LogMessage(delayed_log_, print_to_terminal, save_in_logfile);
    delayed_log_.clear();
 }
@@ -497,7 +497,7 @@ void LogWriter::DelayedLogMessage(const bool print_to_terminal, const bool save_
  * @brief Introduces a breaking line to the log message to enhance clearness of the logging output.
  * @param print_to_terminal Decision wether break line is also written to the terminal cout. Default: false
  */
-void LogWriter::AddBreakLine(const bool print_to_terminal) {
+void LogWriter::AddBreakLine(bool const print_to_terminal) {
    LogMessage("**************************************************************************", print_to_terminal);
 }
 
@@ -505,7 +505,7 @@ void LogWriter::AddBreakLine(const bool print_to_terminal) {
  * @brief Sets the name of the log file.
  * @param name Log file name.
  */
-void LogWriter::SetLogfileName(const std::string name) {
+void LogWriter::SetLogfileName(std::string const name) {
    logfile_name_ = name;
 }
 

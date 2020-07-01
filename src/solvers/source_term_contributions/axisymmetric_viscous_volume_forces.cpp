@@ -89,7 +89,7 @@ AxisymmetricViscousVolumeForces::AxisymmetricViscousVolumeForces( MaterialManage
  * @param cell_size The cell size.
  * @param node_origin_x Coordinate of the origin of the node (most south-west-bottom) in x-direction.
  */
-void AxisymmetricViscousVolumeForces::ComputeForces( std::pair<const MaterialName, Block> const& mat_block,
+void AxisymmetricViscousVolumeForces::ComputeForces( std::pair<MaterialName const, Block> const& mat_block,
                                                      double (&axisymmetric_viscous_volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
                                                      double const cell_size, double const node_origin_x ) const {
 

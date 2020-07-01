@@ -420,7 +420,7 @@ std::pair<std::uint64_t const, Node>& Tree::NodeIdPair( std::uint64_t const id )
 /**
  * @brief const overload.
  */
-const std::pair<std::uint64_t const, Node>& Tree::NodeIdPair( std::uint64_t const id ) const {
+std::pair<std::uint64_t const, Node> const& Tree::NodeIdPair( std::uint64_t const id ) const {
    unsigned int const level = LevelOfNode( id );
    return *nodes_[level].find( id );
 }

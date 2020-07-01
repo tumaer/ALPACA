@@ -258,7 +258,7 @@ namespace FieldDetails {
       static constexpr auto Definition = MakeArray(
          //           interface description                               unit                  input_name
          // mandatory description (DO NOT CHANGE):
-           FieldInfo{ InterfaceDescriptionPool::Levelset,                 UnitType::Unitless,     "phi" }
+           FieldInfo{ InterfaceDescriptionPool::Levelset,            UnitType::Unitless,     "phi" }
          , FieldInfo{ InterfaceDescriptionPool::VolumeFraction,      UnitType::Unitless,         "" }
       // , FieldInfo{ InterfaceDescriptionPool::Example,             UnitType::Example,      "example" }
       );

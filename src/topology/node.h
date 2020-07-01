@@ -74,8 +74,8 @@
 
 #include "boundary_condition/boundary_specifications.h"
 #include "materials/material_definitions.h"
-#include "block.h"
-#include "interface_block.h"
+#include "block_definitions/block.h"
+#include "block_definitions/interface_block.h"
 #include "enums/interface_tag_definition.h"
 
 /**
@@ -100,8 +100,8 @@ public:
                   std::int8_t const initial_interface_tag = ITTI( IT::OldCutCell ) );
    explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
                   std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block = nullptr );
-   Node( const Node& ) = delete;
-   Node& operator=( const Node& ) = delete;
+   Node( Node const& ) = delete;
+   Node& operator=( Node const& ) = delete;
    Node( Node&& ) = delete;
    Node& operator=( Node&& ) = delete;
    ~Node() = default;
@@ -114,16 +114,16 @@ public:
    // Functions to get material data of the node 
    Block& GetSinglePhase();
    Block const& GetSinglePhase() const;
-   Block& GetPhaseByMaterial(const MaterialName material);
-   Block const& GetPhaseByMaterial(const MaterialName material) const;
+   Block& GetPhaseByMaterial(MaterialName const material);
+   Block const& GetPhaseByMaterial(MaterialName const material) const;
    MaterialName GetSinglePhaseMaterial() const;
    std::vector<MaterialName> GetMaterials() const;
    std::unordered_map<MaterialName, Block>& GetPhases();
    std::unordered_map<MaterialName, Block> const& GetPhases() const;
 
-   void AddPhase(const MaterialName material);
-   void RemovePhase(const MaterialName material);
-   bool ContainsMaterial(const MaterialName material) const;
+   void AddPhase(MaterialName const material);
+   void RemovePhase(MaterialName const material);
+   bool ContainsMaterial(MaterialName const material) const;
 
    InterfaceBlock& GetInterfaceBlock();
    InterfaceBlock const& GetInterfaceBlock() const;

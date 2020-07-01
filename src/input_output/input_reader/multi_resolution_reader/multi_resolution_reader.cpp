@@ -141,12 +141,5 @@ unsigned int MultiResolutionReader::ReadEpsilonLevelReference() const {
    if( reference_level < 0 ) {
       throw std::invalid_argument( "Level of epsilon reference must NOT be below zero!" );
    }
-   // Cast to avoid comparison of unsigned int and int 
-   unsigned int const reference_level_cast = static_cast<unsigned int>( reference_level );
-   // AB TODO: Why is this allowed?
-   // if( reference_level_cast > ReadMaximumLevel() ) {
-   //    throw std::invalid_argument( "Level of epsilon reference must be smaller or equal than the maximum level!" );
-   // }
-
-   return reference_level_cast; 
+   return static_cast<unsigned int>( reference_level ); 
 }

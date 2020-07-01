@@ -65,7 +65,7 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "block.h"
+#include "block_definitions/block.h"
 #include <stdexcept>
 #include "utilities/buffer_operations.h"
 
@@ -76,14 +76,14 @@
 Block::Block() {
 
    // We initialize a Block with zero in all its buffers
-   BufferOperations::SetFieldBuffer( GetAverageBuffer(), 0.0 );
-   BufferOperations::SetFieldBuffer( GetRightHandSideBuffer(), 0.0 );
-   BufferOperations::SetFieldBuffer( GetInitialBuffer(), 0.0 );
-   BufferOperations::SetFieldBuffer( GetPrimeStateBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetAverageBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetRightHandSideBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetInitialBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetPrimeStateBuffer(), 0.0 );
 
    // Only reset buffer of parameter if they are present
    if constexpr(CC::ParameterModelActive()) {
-      BufferOperations::SetFieldBuffer( GetParameterBuffer(), 0.0 );
+      BO::SetFieldBuffer( GetParameterBuffer(), 0.0 );
    }
 
    for( BoundaryLocation const location : CC::NBS() ) {

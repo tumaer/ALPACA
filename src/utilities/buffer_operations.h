@@ -68,7 +68,7 @@
 #ifndef BUFFER_OPERATIONS_H
 #define BUFFER_OPERATIONS_H
 
-#include "field_buffer.h"
+#include "block_definitions/field_buffer.h"
 #include <algorithm>
 
 namespace BufferOperations {
@@ -180,5 +180,7 @@ inline void SetFieldBuffer( BufferType & buffer, std::array<T, BufferType::GetNu
 }
 
 } // BufferOperations
+
+namespace BO = BufferOperations;
 
 #endif // BUFFER_OPERATIONS

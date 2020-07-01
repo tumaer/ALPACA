@@ -103,14 +103,14 @@ class UserExpression {
 
 public:
    UserExpression() = delete;
-   explicit UserExpression( const std::string expression_string, const std::vector<std::tuple<std::string,double&>> variables_in, const std::vector<std::string> variables_out );
+   explicit UserExpression( std::string const expression_string, std::vector<std::tuple<std::string,double&>> const variables_in, std::vector<std::string> const variables_out );
    ~UserExpression() = default;
    UserExpression( UserExpression const& ) = delete;
    UserExpression& operator=( UserExpression const& ) = delete;
    UserExpression( UserExpression&& ) = delete;
    UserExpression& operator=( UserExpression&& ) = delete;
 
-   double GetValue( const std::string variable ) const;
+   double GetValue( std::string const variable ) const;
 };
 
 #endif // USER_EXPRESSION_H

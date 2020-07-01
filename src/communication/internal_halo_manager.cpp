@@ -181,7 +181,7 @@ void InternalHaloManager::UpdateMaterialJumpMpiRecv( std::uint64_t const id, std
                                                   MaterialFieldType const field_type ) {
    Node& node = tree_.GetNodeWithId( id );
    //parent always contains material of child
-   for( const auto material: topology_.GetMaterialsOfNode( id )) {
+   for( auto const material: topology_.GetMaterialsOfNode( id )) {
       Block& host_block = node.GetPhaseByMaterial( material );
 
       std::uint64_t const parent_id = ParentIdOfNode( id );
@@ -198,12 +198,17 @@ void InternalHaloManager::UpdateMaterialJumpMpiRecv( std::uint64_t const id, std
             communication_manager_.Recv( &host_block.GetPrimeStateBuffer(), MF::ANOP(), recv_type, sender_rank, requests );
          }
          break;
-         case MaterialFieldType::Parameters : {
+#ifndef PERFORMANCE 
+         case MaterialFieldType::Parameters: {
             communication_manager_.Recv( &host_block.GetParameterBuffer(), MF::ANOPA(), recv_type, sender_rank, requests );
          }
          break;
          default: 
             throw std::logic_error( "Material field type not known!" );
+#else 
+         default: /* MaterialFieldType::Parameters: */ 
+            communication_manager_.Recv( &host_block.GetParameterBuffer(), MF::ANOPA(), recv_type, sender_rank, requests );
+#endif 
       }
    }
 }
@@ -217,7 +222,7 @@ void InternalHaloManager::UpdateMaterialJumpMpiRecv( std::uint64_t const id, std
 void InternalHaloManager::UpdateMaterialJumpNoMpi( std::uint64_t const id, BoundaryLocation const loc, MaterialFieldType const field_type ) {
    Node& node = tree_.GetNodeWithId( id );
    //parent always contains material of child
-   for( const auto material : topology_.GetMaterialsOfNode( id )) {
+   for( auto const material : topology_.GetMaterialsOfNode( id )) {
       Block& host_block = node.GetPhaseByMaterial( material );
 
       std::uint64_t const parent_id = ParentIdOfNode( id );
@@ -228,25 +233,33 @@ void InternalHaloManager::UpdateMaterialJumpNoMpi( std::uint64_t const id, Bound
 
       switch( field_type ) {
          case MaterialFieldType::Conservatives: {
-            for( const Equation e : MF::ASOE()) {
+            for( Equation const e : MF::ASOE()) {
                Multiresolution::Prediction( parent_block.GetRightHandSideBuffer( e ), host_block.GetRightHandSideBuffer( e ), id, start_indices[0], halo_size[0], start_indices[1], halo_size[1], start_indices[2], halo_size[2] );
             }
          }
          break;
          case MaterialFieldType::PrimeStates: {
-            for( const PrimeState ps : MF::ASOP()) {
+            for( PrimeState const ps : MF::ASOP()) {
                Multiresolution::Prediction( parent_block.GetPrimeStateBuffer( ps ), host_block.GetPrimeStateBuffer( ps ), id, start_indices[0], halo_size[0], start_indices[1], halo_size[1], start_indices[2], halo_size[2] );
             }
          }
          break;
+#ifndef PERFORMANCE
          case MaterialFieldType::Parameters: {
-            for( const Parameter pa : MF::ASOPA()) {
+            for( Parameter const pa : MF::ASOPA()) {
                Multiresolution::Prediction( parent_block.GetParameterBuffer( pa ), host_block.GetParameterBuffer( pa ), id, start_indices[0], halo_size[0], start_indices[1], halo_size[1], start_indices[2], halo_size[2] );
             }
          }
          break;
          default: 
             throw std::logic_error( "Material field type not known!" );
+#else 
+         default: /* MaterialFieldType::Parameters: */ {
+            for( Parameter const pa : MF::ASOPA()) {
+               Multiresolution::Prediction( parent_block.GetParameterBuffer( pa ), host_block.GetParameterBuffer( pa ), id, start_indices[0], halo_size[0], start_indices[1], halo_size[1], start_indices[2], halo_size[2] );
+            }         
+         }
+#endif 
       }
    }
 }
@@ -259,9 +272,9 @@ void InternalHaloManager::UpdateMaterialJumpNoMpi( std::uint64_t const id, Bound
  */
 void InternalHaloManager::UpdateMaterialHaloCellsNoMpi( std::uint64_t const id, BoundaryLocation const loc, MaterialFieldType const field_type ) {
    Node& node = tree_.GetNodeWithId( id );
-   const unsigned int number_of_fields = MF::ANOF( field_type );
-   for( const auto material : topology_.GetMaterialsOfNode( id )) {
-      const std::uint64_t neighbor_id = topology_.GetTopologyNeighborId( id, loc );
+   unsigned int const number_of_fields = MF::ANOF( field_type );
+   for( auto const material : topology_.GetMaterialsOfNode( id )) {
+      std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
       if( topology_.NodeContainsMaterial( neighbor_id, material )) {
          Block& host_block = node.GetPhaseByMaterial( material );
 
@@ -289,9 +302,9 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( std::uint64_t const id
    std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
    int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
 
-   for( const auto material : topology_.GetMaterialsOfNode( id ) ) {
+   for( auto const material : topology_.GetMaterialsOfNode( id ) ) {
       if( topology_.NodeContainsMaterial( neighbor_id, material ) ) {
-         const Block& host_block = node.GetPhaseByMaterial( material );
+         Block const& host_block = node.GetPhaseByMaterial( material );
          switch( field_type ) {
             case MaterialFieldType::Conservatives: {
                MPI_Datatype send_type = communication_manager_.SendDatatype( loc, DatatypeForMpi::Double );
@@ -303,6 +316,7 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( std::uint64_t const id
                communication_manager_.Send( &host_block.GetPrimeStateBuffer(), MF::ANOP(), send_type, rank_of_neighbor, requests );
             }
             break;
+#ifndef PERFORMANCE
             case MaterialFieldType::Parameters: {
                MPI_Datatype send_type = communication_manager_.SendDatatype( loc, DatatypeForMpi::Double );
                communication_manager_.Send( &host_block.GetParameterBuffer(), MF::ANOPA(), send_type, rank_of_neighbor, requests );
@@ -310,6 +324,12 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( std::uint64_t const id
             break;
             default: 
                throw std::logic_error( "Material field type not known!" );
+#else 
+            default: /* MaterialFieldType::Parameters: */ {
+               MPI_Datatype send_type = communication_manager_.SendDatatype( loc, DatatypeForMpi::Double );
+               communication_manager_.Send( &host_block.GetParameterBuffer(), MF::ANOPA(), send_type, rank_of_neighbor, requests );
+            }
+#endif 
          }
       }
    }
@@ -328,7 +348,7 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiRecv( std::uint64_t const id
    std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
    int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
 
-   for( const auto material : topology_.GetMaterialsOfNode( id )) {
+   for( auto const material : topology_.GetMaterialsOfNode( id )) {
       if( topology_.NodeContainsMaterial( neighbor_id, material )) {
          Block& host_block = node.GetPhaseByMaterial( material );
          MPI_Datatype recv_type = communication_manager_.RecvDatatype( loc, DatatypeForMpi::Double );
@@ -415,8 +435,8 @@ void InternalHaloManager::UpdateInterfaceHaloCellsMpiSend( std::uint64_t const i
     *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
     */
    if( topology_.IsNodeMultiPhase( neighbor_id ) && node.HasLevelset()) {
-      const int rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
-      const double (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
+      int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
+      double const (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
       MPI_Datatype send_type = communication_manager_.SendDatatype( loc, DatatypeForMpi::Double );
       communication_manager_.Send( host_buffer, 1, send_type, rank_of_neighbor, requests );
    }
@@ -439,7 +459,7 @@ void InternalHaloManager::UpdateInterfaceHaloCellsMpiRecv( std::uint64_t const i
     */
    if( node.HasLevelset()) {
       if( topology_.IsNodeMultiPhase( neighbor_id )) {
-         const int rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
+         int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
          double (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
          MPI_Datatype recv_type = communication_manager_.RecvDatatype( loc, DatatypeForMpi::Double );
          communication_manager_.Recv( host_buffer, 1, recv_type, rank_of_neighbor, requests );
@@ -469,7 +489,7 @@ void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( std::uint64_t const id,
          double (& host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
          Node const& neighbor = tree_.GetNodeWithId( neighbor_id );
          if( neighbor.HasLevelset()) {
-            const double (& partner_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = neighbor.GetInterfaceBlock().GetBuffer( buffer_type );
+            double const (& partner_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = neighbor.GetInterfaceBlock().GetBuffer( buffer_type );
             UpdateNoJumpLocal( host_buffer, partner_buffer, loc );
          } else {
             ExtendClosestInternalValue( host_buffer, loc );
@@ -548,19 +568,19 @@ unsigned int InternalHaloManager::UpdateMaterialJumpMpiSend( std::uint64_t const
    Node& node = tree_.GetNodeWithId( id );
 
    //NH ints needed here as a rat's tail of MPI, where uint is not allowed.
-   const auto start_indices = communication_manager_.GetStartIndicesHaloRecv(loc);
-   const auto halo_size = communication_manager_.GetHaloSize(loc);
-   const unsigned int number_of_fields = MF::ANOF( field_type );
-   const int single_block_size = halo_size[0] * halo_size[1] * halo_size[2];
-   const int whole_block_size = number_of_fields * single_block_size;
+   auto const start_indices = communication_manager_.GetStartIndicesHaloRecv(loc);
+   auto const halo_size = communication_manager_.GetHaloSize(loc);
+   unsigned int const number_of_fields = MF::ANOF( field_type );
+   int const single_block_size = halo_size[0] * halo_size[1] * halo_size[2];
+   int const whole_block_size = number_of_fields * single_block_size;
 
    int material_number = 0;
    int const child_rank = topology_.GetRankOfNode(remote_child_id);
 
-   for( const MaterialName material : topology_.GetMaterialsOfNode( id ) ) {
+   for( MaterialName const material : topology_.GetMaterialsOfNode( id ) ) {
 
       if( topology_.NodeContainsMaterial( remote_child_id, material ) ) {
-         const Block& parent_block = node.GetPhaseByMaterial( material );
+         Block const& parent_block = node.GetPhaseByMaterial( material );
 
          double* send_buffer_double = ( double* ) send_buffer;
 
@@ -647,13 +667,13 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
             // buffer size is dependent on jump location
             if( LTI( location ) <= LTI( BoundaryLocation::Bottom )) {
                //Plane
-               jump_send_counter_plane += UpdateFluidJumpMpiSend( parent_id, requests, id, &jump_buffer_plane[jump_send_counter_plane], location, field_type );
+               jump_send_counter_plane += UpdateMaterialJumpMpiSend( parent_id, requests, id, &jump_buffer_plane[jump_send_counter_plane], location, field_type );
             } else if( LTI( location ) <= LTI( BoundaryLocation::SouthWest )) {
                //Stick
-               jump_send_counter_stick += UpdateFluidJumpMpiSend( parent_id, requests, id, &jump_buffer_stick[jump_send_counter_stick], location, field_type );
+               jump_send_counter_stick += UpdateMaterialJumpMpiSend( parent_id, requests, id, &jump_buffer_stick[jump_send_counter_stick], location, field_type );
             } else {
                //Cube
-               jump_send_counter_cube += UpdateFluidJumpMpiSend( parent_id, requests, id, &jump_buffer_cube[jump_send_counter_cube], location, field_type );
+               jump_send_counter_cube += UpdateMaterialJumpMpiSend( parent_id, requests, id, &jump_buffer_cube[jump_send_counter_cube], location, field_type );
             }
          }
 #endif 
@@ -679,7 +699,7 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
 void InternalHaloManager::MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>& requests,
                                                     std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                     MaterialFieldType const field_type ) {
-   for( const auto& boundary : boundaries ) {
+   for( auto const& boundary : boundaries ) {
       std::uint64_t id = std::get<0>( boundary );
       BoundaryLocation location = std::get<1>( boundary );
 
@@ -700,7 +720,7 @@ void InternalHaloManager::MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>&
 #else
          default: /* InternalBoundaryType::NoJumpBoundaryMpiRecv */ {
             CommunicationStatistics::no_jump_halos_recv_++;
-            UpdateFluidHaloCellsMpiRecv( id, requests, location, field_type );
+            UpdateMaterialHaloCellsMpiRecv( id, requests, location, field_type );
          }
 #endif 
       }
@@ -715,20 +735,27 @@ void InternalHaloManager::MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>&
 void
 InternalHaloManager::NoMpiMaterialHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                            MaterialFieldType const field_type ) {
-   for( const auto& boundary : boundaries ) {
+   for( auto const& boundary : boundaries ) {
       InternalBoundaryType const type = std::get<2>( boundary );
       std::uint64_t const id = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
 
       switch( type ) {
-         case InternalBoundaryType::JumpBoundaryLocal:
+         case InternalBoundaryType::JumpBoundaryLocal: {
             UpdateMaterialJumpNoMpi( id, location, field_type );
-            break;
-         case InternalBoundaryType::NoJumpBoundaryLocal:
+         }
+         break;
+#ifndef PERFORMANCE 
+         case InternalBoundaryType::NoJumpBoundaryLocal: {
             UpdateMaterialHaloCellsNoMpi( id, location, field_type );
-            break;
+         }
+         break;
          default:
             throw std::logic_error( " Material halo update: unknown boundary type" );
+#else 
+         default: /* InternalBoundaryType::NoJumpBoundaryLocal */ 
+            UpdateMaterialHaloCellsNoMpi( id, location, field_type );
+#endif 
       }
    }
 }
@@ -786,7 +813,7 @@ void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std:
  */
 void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                    InterfaceBlockBufferType const buffer_type ) {
-   for( const auto& boundary : boundaries ) {
+   for( auto const& boundary : boundaries ) {
       std::uint64_t const id = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
       InternalBoundaryType const type = std::get<2>( boundary );
@@ -805,21 +832,27 @@ void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::
  */
 void InternalHaloManager::MpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                  InterfaceBlockBufferType const buffer_type, std::vector<MPI_Request>& requests ) {
-   for( const auto& boundary : boundaries ) {
-      const BoundaryLocation location = std::get<1>( boundary );
-      const std::uint64_t id = std::get<0>( boundary );
+   for( auto const& boundary : boundaries ) {
+      BoundaryLocation const location = std::get<1>( boundary );
+      std::uint64_t const id = std::get<0>( boundary );
 
       switch( std::get<2>( boundary )) {
-         case InternalBoundaryType::NoJumpBoundaryMpiSend:
+         case InternalBoundaryType::NoJumpBoundaryMpiSend: {
             UpdateInterfaceHaloCellsMpiSend( id, requests, buffer_type, location );
-            break;
+         }
+         break;
 
-         case InternalBoundaryType::NoJumpBoundaryMpiRecv:
+#ifndef PERFORMANCE 
+         case InternalBoundaryType::NoJumpBoundaryMpiRecv: {
             UpdateInterfaceHaloCellsMpiRecv( id, requests, buffer_type, location );
-            break;
-
+         }
+         break;
          default:
             throw std::logic_error( "BoundaryManager::MpiInterfaceHaloUpdate: BoundaryType not supported" );
+#else 
+         default: /* InternalBoundaryType::NoJumpBoundaryLocal */ 
+            UpdateInterfaceHaloCellsMpiRecv( id, requests, buffer_type, location );
+#endif 
       }
    }
 }

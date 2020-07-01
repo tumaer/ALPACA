@@ -73,32 +73,17 @@
 #include <tuple>
 #include <type_traits>
 #include "user_specifications/compile_time_constants.h"
-#include "field_details.h"
+#include "block_definitions/field_details.h"
 
 /**
  * @brief Unique identifier for the interface description buffer type, i.e. the base, right-hand side, reinitialized or initial buffer.
  */
-enum class InterfaceDescriptionBufferType : unsigned short { Base = 0, RightHandSide = 1, Reinitialized = 2, Initial = 3 };
-
-/**
- * @brief Converts an interface description buffer identifier to a (C++11 standard compliant, i. e. positive) array index. "IDBTI = Interface Description Buffer To Index"
- * @param idb The interface description buffer identifier.
- * @return The index.
- */
-constexpr std::underlying_type<InterfaceDescriptionBufferType>::type IDBTI( InterfaceDescriptionBufferType const idb ) { return static_cast<typename std::underlying_type<InterfaceDescriptionBufferType>::type>( idb ); }
+enum class InterfaceDescriptionBufferType { Base, RightHandSide, Reinitialized, Initial };
 
 /**
  * @brief Unique Identifier for the interface field type, i.e. a interface description, a interface state or a interface parameter field.
  */
-enum class InterfaceFieldType : unsigned short { Description = 0, States = 1, Parameters = 2 };
-
-/**
- * @brief Converts an interface field identifier to a (C++11 standard compliant, i. e. positive) array index. "IFTI = Interface field to Index"
- * @param ift The interface field type identifier
- * @return The index.
- */
-constexpr std::underlying_type<InterfaceFieldType>::type IFTI( InterfaceFieldType const ift ) { return static_cast<typename std::underlying_type<InterfaceFieldType>::type>( ift ); }
-
+enum class InterfaceFieldType { Description, States, Parameters };
 
 class InterfaceFieldsDefinitions {
 

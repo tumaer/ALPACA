@@ -81,7 +81,7 @@
  * @param node See base class.
  * @param stage See base class.
  */
-void HjReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& node, const unsigned int stage) const {
+void HjReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& node, unsigned int const stage) const {
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<levelset_reconstruction_stencil>::type;
 
@@ -90,14 +90,14 @@ void HjReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& n
 #endif
 
    InterfaceBlock& interface_block = node.GetInterfaceBlock();
-   const double cell_size = node.GetCellSize();
-   const double one_cell_size = 1.0 / cell_size;
+   double const cell_size = node.GetCellSize();
+   double const one_cell_size = 1.0 / cell_size;
 
-   const std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   const double (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
    double (&levelset_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetRightHandSideBuffer(InterfaceDescription::Levelset);
 
-   const double (&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceStateBuffer(InterfaceState::Velocity);
+   double const (&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceStateBuffer(InterfaceState::Velocity);
 
    double derivatives[DTI(CC::DIM())][2];
    for(unsigned int d = 0; d < DTI(CC::DIM()); ++d) {
@@ -115,7 +115,7 @@ void HjReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& n
              */
             if(std::abs(interface_tags[i][j][k]) <= ITTI(IT::ExtensionBand)) {
 
-               const double u_interface = interface_velocity[i][j][k] * one_cell_size;
+               double const u_interface = interface_velocity[i][j][k] * one_cell_size;
 
                derivatives[0][0] = SU::Derivative<ReconstructionStencil, SP::UpwindLeft, Direction::X>(levelset_reinitialized, i, j, k, 1.0);
                derivatives[0][1] = SU::Derivative<ReconstructionStencil, SP::UpwindRight, Direction::X>(levelset_reinitialized, i, j, k, 1.0);

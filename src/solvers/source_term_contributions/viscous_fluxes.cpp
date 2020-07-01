@@ -87,7 +87,7 @@ ViscousFluxes::ViscousFluxes(MaterialManager const& material_manager) :
  * @param dissipative_flux_x, dissipative_flux_y, dissipative_flux_z Reference to the face fluxes (indirect return parameter).
  * @param cell_size The cell size.
  */
-void ViscousFluxes::ComputeFluxes( std::pair<const MaterialName, Block> const& mat_block
+void ViscousFluxes::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block
                                  , double (&dissipative_flux_x)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]
                                  , double (&dissipative_flux_y)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]
                                  , double (&dissipative_flux_z)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]
@@ -156,11 +156,11 @@ void ViscousFluxes::ComputeFluxes( std::pair<const MaterialName, Block> const& m
       }
    }
    // Compute tHe contributions for the dissipative fluxes
-   BufferOperationsStencils::ComputeVectorGradientAtCellFaces<DerivativeStencilCenter,DerivativeStencilFace,ReconstructionStencil>(u,v,w,cell_size,velocity_gradient_at_cell_faces);
-   BufferOperationsStencils::ComputeVectorAtCellFaces<ReconstructionStencil>(u,v,w,cell_size,velocity_at_cell_faces);
+   BOStencils::ComputeVectorGradientAtCellFaces<DerivativeStencilCenter,DerivativeStencilFace,ReconstructionStencil>(u,v,w,cell_size,velocity_gradient_at_cell_faces);
+   BOStencils::ComputeVectorAtCellFaces<ReconstructionStencil>(u,v,w,cell_size,velocity_at_cell_faces);
    // Depending if viscosity models are active, shear viscosity must be reconstructed at cell face as well
    if constexpr( CC::ShearViscosityModelActive() ) {
-      BufferOperationsStencils::ComputeScalarAtCellFaces<ReconstructionStencil>(shear_viscosity, cell_size, shear_viscosity_at_cell_faces);
+      BOStencils::ComputeScalarAtCellFaces<ReconstructionStencil>(shear_viscosity, cell_size, shear_viscosity_at_cell_faces);
       ComputeTauFluxes(velocity_gradient_at_cell_faces, shear_viscosity_at_cell_faces, material_manager_.GetMaterial(mat_block.first).GetBulkViscosity(), tau_flux);
    }
    else {

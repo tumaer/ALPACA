@@ -174,7 +174,7 @@ void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node
                double const delta_gamma = std::sqrt( ConsistencyManagedSum( delta_aperture_field[i][j][k][0] * delta_aperture_field[i][j][k][0]
                , delta_aperture_field[i][j][k][1] * delta_aperture_field[i][j][k][1]
                , delta_aperture_field[i][j][k][2] * delta_aperture_field[i][j][k][2] ) );
-               const std::array<double, 3> normal = GetNormal(levelset, indices[0], indices[1], indices[2]);
+               std::array<double, 3> const normal = GetNormal(levelset, indices[0], indices[1], indices[2]);
 
                std::array<double, DTI(CC::DIM())> momentum_fluxes_positive_material;
                std::array<double, DTI(CC::DIM())> momentum_fluxes_negative_material;
@@ -384,8 +384,8 @@ void InterfaceStressTensorFluxes::CalculateViscousStressTensor( Node const& node
 void InterfaceStressTensorFluxes::AddAxisymmetricPartToViscousStressTensor( Node const& node
                                                                           , double (&tau)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]) const {
 
-   const std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   const double    (&volume_fractions)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const    (&volume_fractions)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
    double const cell_size = node.GetCellSize();
 

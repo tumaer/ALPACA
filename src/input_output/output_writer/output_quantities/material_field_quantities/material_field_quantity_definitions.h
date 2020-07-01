@@ -70,8 +70,8 @@
 
 #include  <iostream>
 
-#include "field_material_definitions.h"
-#include "field_details.h"
+#include "block_definitions/field_material_definitions.h"
+#include "block_definitions/field_details.h"
 
 /**
  * @brief The MaterialFieldOutputName enum gives all possible choices for which an output can be written (conservatives, primes states and paramteres)

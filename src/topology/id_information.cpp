@@ -311,11 +311,11 @@ std::uint64_t GetNeighborId(std::uint64_t const id, BoundaryLocation const locat
  * @brief Determines whether a node face is also an external or domain edge.
  * @param location The direction of the edge under consideration.
  * @param id The id of the node under investigation.
- * @param level_zero_nodes_xyz Number of nodes on level zero in the three Cartesian directions
+ * @param number_of_nodes_on_level_zero Number of nodes on level zero in the three Cartesian directions.
  * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
  * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations (e. g. NOT Top in 1D).
  */
-bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const level_zero_nodes_xyz ) {
+bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
 
    std::bitset<64> input(CutHeadBit(id, LevelOfNode(id)));
 
@@ -351,7 +351,7 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
          std::bitset<1> indicator(1);
          std::uint32_t tows_exponent = 1;
          tows_exponent <<= LevelOfNode(id);
-         std::bitset<20> east_mask( ( level_zero_nodes_xyz[0] * tows_exponent ) - 1 );
+         std::bitset<20> east_mask( ( number_of_nodes_on_level_zero[0] * tows_exponent ) - 1 );
          for(unsigned int i = 0; i < 20; ++i) {
             indicator[0] = ( ~(input[i*3] ^ east_mask[i]) & indicator[0] );
          }
@@ -364,7 +364,7 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
          std::bitset<1> indicator(1);
          std::uint32_t tows_exponent = 1;
          tows_exponent <<= LevelOfNode(id);;
-         std::bitset<20> north_mask( ( level_zero_nodes_xyz[1] * tows_exponent ) - 1 );
+         std::bitset<20> north_mask( ( number_of_nodes_on_level_zero[1] * tows_exponent ) - 1 );
          for(unsigned int i = 0; i < 20; ++i) {
             indicator[0] = ( ~(input[(i*3)+1] ^ north_mask[i]) & indicator[0] );
          }
@@ -378,7 +378,7 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
          std::bitset<1> indicator(1);
          std::uint32_t tows_exponent = 1;
          tows_exponent <<= LevelOfNode(id);;
-         std::bitset<20> top_mask( ( level_zero_nodes_xyz[2] * tows_exponent ) - 1 );
+         std::bitset<20> top_mask( ( number_of_nodes_on_level_zero[2] * tows_exponent ) - 1 );
          for(unsigned int i = 0; i < 20; ++i) {
             indicator[0] = ( ~(input[(i*3)+2] ^ top_mask[i]) & indicator[0] );
          }
@@ -395,7 +395,7 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
          std::bitset<1> indicator(1);
          std::uint32_t tows_exponent = 1;
          tows_exponent <<= LevelOfNode(id);;
-         std::bitset<20> top_mask( ( level_zero_nodes_xyz[2] * tows_exponent ) - 1 );
+         std::bitset<20> top_mask( ( number_of_nodes_on_level_zero[2] * tows_exponent ) - 1 );
          for(unsigned int i = 0; i < 20; ++i) {
             indicator[0] = ( ~(input[(i*3)+2] ^ top_mask[i]) & indicator[0] );
          }
@@ -413,99 +413,99 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
  * @brief Determines whether a location (including edges and corners) of a block is at the edge of the computational domain.
  * @param location The  direction of the edge under consideration.
  * @param id The id of the node under investigation.
- * @param setup The simulation settings as provided by the user.
+ * @param number_of_nodes_on_level_zero Number of nodes on level zero in the three Cartesian directions.
  * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
  * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations (e. g. NOT Top in 1D).
  */
-bool IsExternalBoundary(BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const level_zero_nodes_xyz ) {
+bool IsExternalBoundary(BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
    //natural | NH Such comparison are okay by (enforced) definiton of BoundaryLocation
    if(LTI(location) <= LTI(BoundaryLocation::Bottom)){
-      return IsNaturalExternalBoundary(location, id, level_zero_nodes_xyz);
+      return IsNaturalExternalBoundary(location, id, number_of_nodes_on_level_zero);
    }
 
    switch (location) {
       // Sticks
       case BoundaryLocation::BottomNorth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::BottomSouth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::TopNorth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,   id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::North, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::TopSouth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,   id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) );
 
       case BoundaryLocation::BottomEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::East,   id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::East,   id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::BottomWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::West,   id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::West,   id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::TopEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::East, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::East, id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::TopWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::West, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::West, id, number_of_nodes_on_level_zero) );
 
       case BoundaryLocation::NorthEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::North, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::East,  id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::NorthWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::North, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::West,  id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::SouthEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::South, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::East,  id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::SouthWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::South, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::West,  id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) );
 
       // Cubes
       case BoundaryLocation::EastNorthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::North, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::EastNorthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::EastSouthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::EastSouthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
 
       case BoundaryLocation::WestNorthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::North, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::WestNorthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
       case BoundaryLocation::WestSouthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South, id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
 #ifndef PERFORMANCE
       case BoundaryLocation::WestSouthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,   id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) );
+         return ( IsNaturalExternalBoundary(BoundaryLocation::West,   id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
       default:
          throw std::invalid_argument("Boundary Location not Found in GetNeighborId() - Impossible Error");
 #else 
       default: /* BoundaryLocation::WestSouthBottom */
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,   id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, level_zero_nodes_xyz) || 
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, level_zero_nodes_xyz) );      
+         return ( IsNaturalExternalBoundary(BoundaryLocation::West,   id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) || 
+                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );      
 #endif
    }
 }

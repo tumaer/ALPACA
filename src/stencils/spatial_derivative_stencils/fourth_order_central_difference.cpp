@@ -72,7 +72,7 @@
 * @brief Implements a fourth order central difference stencil. Also See base class.
 * @note Hotpath function.
 */
-double FourthOrderCentralDifference::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
+double FourthOrderCentralDifference::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
 
 #ifndef PERFORMANCE
    // Suppresses Compiler Warning "Wunused. The Input cell_size is not needed in all stencils, but for unified interface all derived inherite it.

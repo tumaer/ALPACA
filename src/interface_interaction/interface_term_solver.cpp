@@ -251,7 +251,7 @@ void InterfaceTermSolver::WeightFaceFluxes(Node const& node, MaterialName const 
  * @param volume_forces The volume forces acting on cells.
  * @param material The material specifying the phase.
  */
-void InterfaceTermSolver::WeightVolumeForces(const Node& node, const MaterialName material,
+void InterfaceTermSolver::WeightVolumeForces(Node const& node, MaterialName const material,
    double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const {
 
    std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);

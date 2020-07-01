@@ -128,9 +128,9 @@ private:
                      if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && std::abs( interface_tags[i][j][k] ) > ITTI( IT::NewCutCell ) ) {
 
                         // compute normal
-                        const std::array<double, 3> normal = GetNormal( levelset_reinitialized, i, j, k );
+                        std::array<double, 3> const normal = GetNormal( levelset_reinitialized, i, j, k );
 
-                        const double ls_sign = Signum( levelset_reinitialized[i][j][k] );
+                        double const ls_sign = Signum( levelset_reinitialized[i][j][k] );
 
                         // compute extension terms and store in vector
                         // i-direction

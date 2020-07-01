@@ -111,7 +111,7 @@ public:
      * @brief Constructor.
      * @param start_time Time when the simulation should start.
      */
-   explicit RungeKutta3TVD( const double start_time = 0.0 ) : TimeIntegrator(start_time) {}
+   explicit RungeKutta3TVD( double const start_time = 0.0 ) : TimeIntegrator(start_time) {}
 
 };
 

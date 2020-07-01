@@ -161,7 +161,7 @@ constexpr double ConsistencyManagedSum( double const a, double const b, double c
 /**
  * @brief Returns the value given in the array. Auxiliary function.
  */
-constexpr double ConsistencyManagedSum( const std::array<double, 1> values ) {
+constexpr double ConsistencyManagedSum( std::array<double, 1> const values ) {
    return values[0];
 }
 
@@ -169,7 +169,7 @@ constexpr double ConsistencyManagedSum( const std::array<double, 1> values ) {
  * @brief Computes the floating point consistent sum of two double values in an array. The sum might be not the correctly rounded analytical one,
  *        however, the same result is guaranteed when a and b are rearranged.
  */
-constexpr double ConsistencyManagedSum( const std::array<double, 2> values ) {
+constexpr double ConsistencyManagedSum( std::array<double, 2> const values ) {
    return values[0] + values[1];
 }
 

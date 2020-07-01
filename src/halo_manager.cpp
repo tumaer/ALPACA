@@ -151,9 +151,13 @@ void HaloManager::MaterialHaloUpdateOnLmax( MaterialFieldType const field_type, 
    MaterialHaloUpdateOnLevel( maximum_level_, field_type, cut_jumps );
 }
 
+/**
+ * @brief Adjusts the material values in the halo cells on the finest level for multi-materials only, according to their type.
+ * @param field_type The decider whether a halo update for conservatives or for prime states is done.
+ */
 void HaloManager::MaterialHaloUpdateOnLmaxMultis( MaterialFieldType const field_type ) const {
    internal_halo_manager_.MaterialHaloUpdateOnMultis( field_type );
-   for( std::tuple<std::uint64_t, BoundaryLocation> const boundary : communication_manager_.ExternalMultiBoundaries() ) {
+   for( std::tuple<std::uint64_t, BoundaryLocation> const& boundary : communication_manager_.ExternalMultiBoundaries() ) {
       external_halo_manager_.UpdateMaterialExternal( tree_.GetNodeWithId( std::get<0>( boundary ) ), field_type, std::get<1>( boundary ) );
    }
 }
@@ -179,7 +183,7 @@ void HaloManager::InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType const type
  * @param updated_levels The levels on which halos of nodes will be modified.
  */
 void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> const& updated_levels ) const {
-   for( unsigned int const &level : updated_levels ) {
+   for( unsigned int const& level : updated_levels ) {
       internal_halo_manager_.InterfaceTagHaloUpdateOnLevel( level );
       // Update of domain boundaries
       for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {

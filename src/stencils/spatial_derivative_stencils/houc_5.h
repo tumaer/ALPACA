@@ -89,7 +89,7 @@ class HOUC5 : public Stencil<HOUC5> {
    static constexpr double coefficient_4_ = +30.0;
    static constexpr double coefficient_5_ = -3.0;
 
-   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const;
+   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const;
 
 public:
    explicit HOUC5() = default;

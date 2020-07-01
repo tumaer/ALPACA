@@ -89,7 +89,7 @@ inline void CopyConservativeBuffersForNode( Node& node ) {
       Conservatives const& source_conservatives = mat_block.second.GetConservativeBuffer<SourceBuffer>();
       Conservatives & target_conservatives = mat_block.second.GetConservativeBuffer<TargetBuffer>();
       // Copy the buffer
-      BufferOperations::CopyFieldBuffer( source_conservatives, target_conservatives );
+      BO::CopyFieldBuffer( source_conservatives, target_conservatives );
    }
 }
 
@@ -120,7 +120,7 @@ inline void SwapConservativeBuffersForNode( Node & node ) {
    for( auto& mat_block : node.GetPhases() ) {
       Conservatives & first_conservatives  = mat_block.second.GetConservativeBuffer<FirstBuffer>();
       Conservatives & second_conservatives = mat_block.second.GetConservativeBuffer<SecondBuffer>();
-      BufferOperations::SwapFieldBuffer( first_conservatives, second_conservatives );
+      BO::SwapFieldBuffer( first_conservatives, second_conservatives );
    }
 }
 
@@ -139,5 +139,7 @@ inline void SwapConservativeBuffersForNodeList( std::vector<std::reference_wrapp
 }
 
 } // BufferOperationsMaterial
+
+namespace BOMaterial = BufferOperationsMaterial;
 
 #endif // BUFFER_OPERATIONS_MATERIAL_H

@@ -141,7 +141,7 @@ constexpr double stimulus_response_constant = 0.9; // Must be larger than sqrt(3
  * @param n The relative index shift in z-direction where the cut cell is located.
  * @return The reinitialized value.
  */
-double GetResolvedValue(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()], const int i, const int j, const int k, const int l, const int m, const int n){
+double GetResolvedValue(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()], int const i, int const j, int const k, int const l, int const m, int const n){
 
    std::array<double, 3> const normal = GetNormal(levelset, i + l, j + m, k + n);
 

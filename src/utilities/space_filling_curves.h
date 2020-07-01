@@ -73,7 +73,7 @@
 /* Nomenclature according to \cite Bader 2013
  * _x implies "x bar"
  */
-enum class HilbertPosition : unsigned short {xyz, x_y_z, yzx, y_z_x, zxy, z_x_y, _xy_z, _x_yz, _yz_x, _y_zx, _zx_y,  _z_xy};
+enum class HilbertPosition {xyz, x_y_z, yzx, y_z_x, zxy, z_x_y, _xy_z, _x_yz, _yz_x, _y_zx, _zx_y,  _z_xy};
 
 /**
  * @brief The SpaceFillingCurves namespace provides space filling curve Information %Currently only for Hilbert Curve% for the Load Balancing.

@@ -69,7 +69,7 @@
 #define HLL_RIEMANN_SOLVER_H
 
 #include "riemann_solver.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "enums/direction_definition.h"
 #include "materials/material.h"
 #include "materials/material_manager.h"

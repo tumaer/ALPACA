@@ -69,6 +69,7 @@
 #define MATERIAL_PROPERTY_DEFINITIONS_H
 
 #include <string>
+#include <stdexcept>
 
 #include "utilities/string_operations.h"
 

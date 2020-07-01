@@ -69,7 +69,7 @@
 #define SPACE_SOLVER_H
 
 #include "user_specifications/numerical_setup.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "topology/node.h"
 #include "materials/material_manager.h"
 #include "source_term_solver.h"
@@ -103,7 +103,7 @@ public:
    SpaceSolver& operator=( SpaceSolver&& ) = delete;
 
    void UpdateFluxes( Node& node ) const;
-   void ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
+   void ComputeMaxEigenvaluesForPhase( std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
    void SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
 };
 

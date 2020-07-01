@@ -137,5 +137,5 @@ void NumerousPhaseManager::InitializeVolumeFractionBufferImplementation( std::ve
  * @param nodes See base class.
  */
 void NumerousPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& , bool const ) const {
-   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::ObtainInterfaceQuantities" );
+   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::ObtainInterfaceStates" );
 }

@@ -68,7 +68,7 @@
 #ifndef LEVELSET_BOUNDARY_CONDITION_H
 #define LEVELSET_BOUNDARY_CONDITION_H
 
-#include "interface_block.h"
+#include "block_definitions/interface_block.h"
 #include "topology/node.h"
 
 /**

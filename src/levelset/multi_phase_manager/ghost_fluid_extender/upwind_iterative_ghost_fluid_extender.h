@@ -147,14 +147,14 @@ protected:
             for( unsigned int i = CC::FICX()-i_offset_; i <= CC::LICX()+i_offset_; ++i ) {
                for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
                   for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
-                     const double cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
+                     double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
                      /**
                       * JW: We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
                       * conditions at the end of the narrow band). The convergence criteria is only checked for the extension band.
                       */
                      if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( material_sign * levelset[i][j][k] < 0.0 || cell_volume_fraction < CC::MITH() ) ) {
 
-                        const std::array<double, 3> normal = GetNormal( levelset, i, j, k, material_sign );
+                        std::array<double, 3> const normal = GetNormal( levelset, i, j, k, material_sign );
 
                         if( normal[0] > 0.0 ) {
                            derivative_indices[0][0] = i + 1;

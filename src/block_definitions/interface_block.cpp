@@ -65,7 +65,7 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "interface_block.h"
+#include "block_definitions/interface_block.h"
 #include <stdexcept>
 #include "utilities/buffer_operations.h"
 
@@ -76,20 +76,20 @@
 InterfaceBlock::InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
 
    // In the base buffer all values are set to zero
-   BufferOperations::SetFieldBuffer( GetBaseBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetBaseBuffer(), 0.0 );
    // In the right-hand and reinitialized buffer the levelset is copied and volume fraction is set to zero
-   BufferOperations::CopySingleBuffer( levelset_initial, GetRightHandSideBuffer( InterfaceDescription::Levelset ) );
-   BufferOperations::CopySingleBuffer( levelset_initial, GetReinitializedBuffer( InterfaceDescription::Levelset ) );
-   BufferOperations::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
-   BufferOperations::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
+   BO::CopySingleBuffer( levelset_initial, GetRightHandSideBuffer( InterfaceDescription::Levelset ) );
+   BO::CopySingleBuffer( levelset_initial, GetReinitializedBuffer( InterfaceDescription::Levelset ) );
+   BO::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
+   BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
    // In the initial buffer all values are set to zero
-   BufferOperations::SetFieldBuffer( GetInitialBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetInitialBuffer(), 0.0 );
    // In the interface state buffer all values are set to zero
-   BufferOperations::SetFieldBuffer( GetInterfaceStateBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetInterfaceStateBuffer(), 0.0 );
 
    // Only set buffer of parameter to zero if they are present
    if constexpr(CC::InterfaceParameterModelActive()) {
-      BufferOperations::SetFieldBuffer( GetInterfaceParameterBuffer(), 0.0 );
+      BO::SetFieldBuffer( GetInterfaceParameterBuffer(), 0.0 );
    }
 }
 
@@ -100,21 +100,21 @@ InterfaceBlock::InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::
 InterfaceBlock::InterfaceBlock( double const levelset_initial ) {
 
    // In the base buffer only the volume fraction is set to uniform values, the levelset is set to zero
-   BufferOperations::SetSingleBuffer( GetBaseBuffer( InterfaceDescription::Levelset ), 0.0 );
-   BufferOperations::SetSingleBuffer( GetBaseBuffer( InterfaceDescription::VolumeFraction ), levelset_initial > 0 ? 1.0 : 0.0 );
+   BO::SetSingleBuffer( GetBaseBuffer( InterfaceDescription::Levelset ), 0.0 );
+   BO::SetSingleBuffer( GetBaseBuffer( InterfaceDescription::VolumeFraction ), levelset_initial > 0 ? 1.0 : 0.0 );
    // In the right-hand and reinitialized buffer the levelset is set to uniform given value and volume fraction is set to zero
-   BufferOperations::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::Levelset ), levelset_initial );
-   BufferOperations::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::Levelset ), levelset_initial );
-   BufferOperations::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
-   BufferOperations::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
+   BO::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::Levelset ), levelset_initial );
+   BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::Levelset ), levelset_initial );
+   BO::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
+   BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
    // In the initial buffer all values are set to zero
-   BufferOperations::SetFieldBuffer( GetInitialBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetInitialBuffer(), 0.0 );
    // In the interface state buffer all values are set to zero
-   BufferOperations::SetFieldBuffer( GetInterfaceStateBuffer(), 0.0 );
+   BO::SetFieldBuffer( GetInterfaceStateBuffer(), 0.0 );
 
    // Only set buffer of parameter to zero if they are present
    if constexpr(CC::InterfaceParameterModelActive()) {
-      BufferOperations::SetFieldBuffer( GetInterfaceParameterBuffer(), 0.0 );
+      BO::SetFieldBuffer( GetInterfaceParameterBuffer(), 0.0 );
    }
 }
 

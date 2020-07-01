@@ -349,8 +349,8 @@ void InputOutputManager::WriteOutput( OutputType const output_type,
    output_writer_.WriteOutput( output_type, output_time, filename_without_extension, time_series_filename_without_extension );
 
    // Final logging
-   logger_.LogMessage(  OutputTypeToString( output_type ) + " output file written at t = "
-                      + StringOperations::ToScientificNotationString( output_time, 9 ), true, true );
+   logger_.LogMessage(  OutputTypeToString( output_type ) + " output file written at t = " 
+                        + StringOperations::ToScientificNotationString( output_time, 9 ), true, true );
 
    // Debug loggin information for full writing process
    if( DP::Profile() ) {

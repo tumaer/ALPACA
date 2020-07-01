@@ -69,7 +69,7 @@
 #define ROE_RIEMANN_SOLVER_H
 
 #include "riemann_solver.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "enums/direction_definition.h"
 #include "utilities/helper_functions.h"
 #include "materials/equation_of_state.h"

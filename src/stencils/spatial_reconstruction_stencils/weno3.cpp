@@ -72,7 +72,7 @@
 /**
  * @brief Computes the flux at one cell face according to used WENO-3 scheme. Also See base class.
  */
-double WENO3::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, const double cell_size) const {
+double WENO3::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
 
 #ifndef PERFORMANCE
    (void)cell_size;
@@ -84,25 +84,25 @@ double WENO3::ApplyImplementation( std::array<double, stencil_size_> const& arra
 #endif
 
    // Assign values to v_i to make it easier to read
-   const double v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
-   const double v2 = array[downstream_stencil_size_ + evaluation_properties[0]];
-   const double v3 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+   double const v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+   double const v2 = array[downstream_stencil_size_ + evaluation_properties[0]];
+   double const v3 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
 
    // Compute smoothness indicators s_i
-   const double s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2;
-   const double s1  = s11 * s11 + epsilon_;
+   double const s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2;
+   double const s1  = s11 * s11 + epsilon_;
 
-   const double s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3;
-   const double s2  = s21 * s21 + epsilon_;
+   double const s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3;
+   double const s2  = s21 * s21 + epsilon_;
 
    // Compute weights
-   const double a1 = coef_weights_1_ / (s1 * s1);
-   const double a2 = coef_weights_2_ / (s2 * s2);
+   double const a1 = coef_weights_1_ / (s1 * s1);
+   double const a2 = coef_weights_2_ / (s2 * s2);
 
-   const double one_a_sum = 1.0 / (a1 + a2);
+   double const one_a_sum = 1.0 / (a1 + a2);
 
-   const double w1 = a1 * one_a_sum;
-   const double w2 = a2 * one_a_sum;
+   double const w1 = a1 * one_a_sum;
+   double const w2 = a2 * one_a_sum;
 
    // Return weighted average
    return  w1 * (coef_stencils_1_ * v1 + coef_stencils_2_ * v2)

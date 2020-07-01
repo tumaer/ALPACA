@@ -74,7 +74,7 @@
 #include "enums/dimension_definition.h"
 #include "enums/datatype_for_mpi_definition.h"
 
-#include "field_material_definitions.h"
+#include "block_definitions/field_material_definitions.h"
 
 class CommunicationTypes{
 
@@ -213,7 +213,7 @@ public:
    MPI_Datatype JumpPlaneSendDatatype(BoundaryLocation const location) const;
    MPI_Datatype ConservativesDatatype() const;
    MPI_Datatype JumpSurfaceDatatype() const;
-   MPI_Datatype AveragingSendDatatype(const unsigned int child_position, DatatypeForMpi const datatype) const;
+   MPI_Datatype AveragingSendDatatype(unsigned int const child_position, DatatypeForMpi const datatype) const;
 
    static constexpr std::array<int, 3> GetStartIndicesHaloSend(BoundaryLocation const location) {
       return start_indices_halo_send_[LTI(location)];
