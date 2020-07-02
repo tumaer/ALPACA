@@ -59,7 +59,7 @@
          <equationOfState>
             <type> StiffenedGas </type>
             <gamma>               1.4   </gamma>
-            <B>                   0.0   </B>
+            <backgroundPressure>  0.0   </backgroundPressure>
 	      </equationOfState>
          <properties>
             <specificHeatCapacity> 0.0 </specificHeatCapacity>
@@ -72,7 +72,7 @@
          <equationOfState>
             <type> StiffenedGas </type>
             <gamma>               1.4   </gamma>
-            <B>                   0.0   </B>
+            <backgroundPressure>  0.0   </backgroundPressure>
 	      </equationOfState>
          <properties>
             <specificHeatCapacity> 0.0 </specificHeatCapacity>

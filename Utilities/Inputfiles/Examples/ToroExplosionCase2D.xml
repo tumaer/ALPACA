@@ -64,8 +64,8 @@
       <material1>
          <equationOfState>
             <type> StiffenedGas </type>
-            <gamma>               1.4   </gamma>
-            <B>                   0.0   </B>
+             <gamma>               1.4   </gamma>
+             <backgroundPressure>  0.0   </backgroundPressure>
 	      </equationOfState>
          <properties>
             <specificHeatCapacity> 0.0 </specificHeatCapacity>
