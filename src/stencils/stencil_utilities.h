@@ -179,8 +179,8 @@ namespace StencilUtilities {
                                           unsigned int const i, unsigned int const j, unsigned int const k,
                                           double const cell_size) {
       return {                           Derivative<S, Direction::X, T, DIM>(buffer, i, j, k, cell_size)
-             , DIM != Dimension::One ?   Derivative<S, SP::Central, Direction::Y, T, DIM>(buffer, i, j, k, cell_size) : 0.0
-             , DIM == Dimension::Three ? Derivative<S, SP::Central, Direction::Z, T, DIM>(buffer, i, j, k, cell_size) : 0.0 };
+             , DIM != Dimension::One ?   Derivative<S, Direction::Y, T, DIM>(buffer, i, j, k, cell_size) : 0.0
+             , DIM == Dimension::Three ? Derivative<S, Direction::Z, T, DIM>(buffer, i, j, k, cell_size) : 0.0 };
    }
 
    template<typename S, typename T = double, Dimension DIM = CC::DIM()>
