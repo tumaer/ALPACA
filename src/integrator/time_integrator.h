@@ -351,16 +351,8 @@ public:
                } //equations
             } //phases
 
-            double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-            double (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
-   
-            for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-               for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-                  for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                     levelset_initial[i][j][k] = levelset[i][j][k];
-                  } //k
-               } //j
-            } //i
+            BOInterface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Base, InterfaceDescriptionBufferType::Initial>( node );
+
          } else { //nodes without levelset
             for( auto& mat_block : node.GetPhases() ) {
                for( Equation const eq : MF::ASOE() ) {
