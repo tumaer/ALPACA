@@ -128,14 +128,14 @@ public:
    void GenerateNeighborRelationForHaloUpdate( unsigned int const level );
 
    // return functions for the relation lists
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJumpMpi( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJump( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesMpi( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundaries( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundariesMpi() const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundaries() const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation>> const& ExternalBoundaries( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation>> const& ExternalMultiBoundaries() const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJumpMpi( unsigned level ) const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJump( unsigned level ) const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesMpi( unsigned level ) const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundariesMpi() const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundaries() const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& ExternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& ExternalMultiBoundaries() const;
 
    // Functions to get the status of the list creations and to empty the flags to regenerate the lists
    bool AreBoundariesValid( unsigned level ) const;
