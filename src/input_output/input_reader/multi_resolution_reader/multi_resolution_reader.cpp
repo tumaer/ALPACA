@@ -108,7 +108,7 @@ double MultiResolutionReader::ReadNodeSizeOnLevelZero() const {
  */
 unsigned int MultiResolutionReader::ReadMaximumLevel() const {
    // Read the value and check on consistency
-   int const maximum_level( DoReadMaximumLevel() );
+   unsigned int const maximum_level( DoReadMaximumLevel() );
    if( maximum_level > CC::AMNL() ) {
       throw std::invalid_argument( "Maximum level must NOT be larger than " + std::to_string( CC::AMNL() )  + "!" );
    }
