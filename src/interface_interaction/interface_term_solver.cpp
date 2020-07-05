@@ -125,9 +125,9 @@ void InterfaceTermSolver::SolveInterfaceInteraction( Node& node ) const {
  */
 void InterfaceTermSolver::FillInterfaceNormalVelocityBuffer( Node const& node
                                                                  , double (&u_interface_normal_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]) const {
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const(&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
-   double const(&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::Velocity);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   double const (&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::Velocity);
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
       for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {

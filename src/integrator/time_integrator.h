@@ -177,9 +177,9 @@ class TimeIntegrator {
      */
    void IntegrateLevelset(Node& node, double const timestep) const {
       double (&levelset_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
-      double const(&levelset_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::Levelset);
-      std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const(&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+      double const (&levelset_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::Levelset);
+      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
       for(unsigned int i = 0; i < CC::TCX(); ++i) {
          for(unsigned int j = 0; j < CC::TCY(); ++j) {
@@ -351,7 +351,7 @@ public:
                } //equations
             } //phases
 
-            double const(&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+            double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
             double (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
    
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -406,7 +406,7 @@ public:
    
          if( node.HasLevelset() ) {
             double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-            double const(&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
+            double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
    
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {

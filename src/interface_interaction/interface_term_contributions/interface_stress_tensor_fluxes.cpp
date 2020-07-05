@@ -149,15 +149,15 @@ void InterfaceStressTensorFluxes::ComputeInterfaceFluxes( Node& node
  * @param[in]  interface_stress_tensor_negative_material  The interface stress tensor of the negative material
  */
 void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node
-                                                          , double const(&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
-                                                          , double const(&u_interface_normal_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
-                                                          , double const(&interface_stress_tensor_positive_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
-                                                          , double const(&interface_stress_tensor_negative_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const {
+                                                          , double const (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
+                                                          , double const (&u_interface_normal_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
+                                                          , double const (&interface_stress_tensor_positive_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
+                                                          , double const (&interface_stress_tensor_negative_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const {
 
    double const one_cell_size = 1.0 / node.GetCellSize();
 
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const(&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
    Conservatives& right_hand_side_positive_material = node.GetPhaseByMaterial(positive_material_properties_.material_).GetRightHandSideBuffer();
    Conservatives& right_hand_side_negative_material = node.GetPhaseByMaterial(negative_material_properties_.material_).GetRightHandSideBuffer();
@@ -223,9 +223,9 @@ void InterfaceStressTensorFluxes::AddInviscidPartToInterfaceStressTensor( Node c
                                                                           , double (&interface_stress_tensor_positive_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
                                                                           , double (&interface_stress_tensor_negative_material)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]) const {
 
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const(&interface_pressure_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::PressurePositive);
-   double const(&interface_pressure_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = CC::CapillaryForcesActive() ?
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&interface_pressure_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::PressurePositive);
+   double const (&interface_pressure_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = CC::CapillaryForcesActive() ?
                                                                                   node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::PressureNegative) :
                                                                                   node.GetInterfaceBlock().GetInterfaceStateBuffer(InterfaceState::PressurePositive);
 
@@ -346,8 +346,8 @@ void InterfaceStressTensorFluxes::CalculateViscousStressTensor( Node const& node
                                                               , double const (&velocity_gradient)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]
                                                               , double (&tau)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const {
 
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const(&volume_fractions)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&volume_fractions)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {

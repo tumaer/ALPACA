@@ -178,7 +178,7 @@ double GetSubcellFixNegative(double const (&levelset)[CC::TCX()][CC::TCY()][CC::
  */
 double MinIterativeLevelsetReinitializer::ReinitializeSingleNodeImplementation(Node& node, bool const ) const {
 
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
    InterfaceBlock& interface_block = node.GetInterfaceBlock();
    double         (&levelset_orig)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
    double const (&levelset_0_orig)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetRightHandSideBuffer(InterfaceDescription::Levelset);

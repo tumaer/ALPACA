@@ -97,8 +97,8 @@ void HeatExchangeFluxes::ComputeInterfaceFluxes( Node& node
    double const cell_size = node.GetCellSize();
    double const one_cell_size = 1.0 / cell_size;
 
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const(&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
    double real_material_temperature[CC::TCX()][CC::TCY()][CC::TCZ()];
    ComputeRealMaterialTemperature(node, real_material_temperature);
@@ -141,10 +141,10 @@ void HeatExchangeFluxes::ComputeInterfaceFluxes( Node& node
 void HeatExchangeFluxes::ComputeRealMaterialTemperature( Node const& node
                                                       , double (&real_material_temperature)[CC::TCX()][CC::TCY()][CC::TCZ()]) const {
 
-   double const(&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
 
-   double const(&temperature_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer(PrimeState::Temperature);
-   double const(&temperature_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer(PrimeState::Temperature);
+   double const (&temperature_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer(PrimeState::Temperature);
+   double const (&temperature_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer(PrimeState::Temperature);
 
    for(unsigned int i = 0; i < CC::TCX(); ++i) {
       for(unsigned int j = 0; j < CC::TCY(); ++j) {

@@ -201,7 +201,7 @@ void ViscousFluxes::ComputeFluxes( std::pair<MaterialName const, Block> const& m
  * @param viscosity A vector containing the shear and bulk viscosity.
  * @param tau The viscous part of the stress tensor.
  */
-void ViscousFluxes::ComputeTauFluxes( double const(&velocity_gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())]
+void ViscousFluxes::ComputeTauFluxes( double const (&velocity_gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())]
                                      ,std::vector<double> const viscosity
                                      ,double (&tau)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())]) const {
 

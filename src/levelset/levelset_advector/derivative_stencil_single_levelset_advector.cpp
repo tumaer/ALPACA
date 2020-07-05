@@ -88,12 +88,12 @@ void DerivativeStencilSingleLevelsetAdvector::AdvectImplementation(Node& node, u
    double const cell_size = node.GetCellSize();
    double const one_cell_size = 1.0 / cell_size;
 
-   std::int8_t const(&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const(&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer(InterfaceDescription::Levelset);
-   double const(&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer(InterfaceDescription::Levelset);
+   double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
    double (&levelset_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetRightHandSideBuffer(InterfaceDescription::Levelset);
 
-   double const(&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceStateBuffer(InterfaceState::Velocity);
+   double const (&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceStateBuffer(InterfaceState::Velocity);
 
    std::array<double, DTI(CC::DIM())> interface_velocity_projection;
    std::array<double, DTI(CC::DIM())> levelset_derivative;

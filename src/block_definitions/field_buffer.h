@@ -92,7 +92,7 @@ struct FieldBuffer {
    /**
     * @brief Access the buffer corresponding to field f. Const overload.
     */
-   auto operator[]( FieldEnum const f ) const -> double const(&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   auto operator[]( FieldEnum const f ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
       return Fields[FieldToIndex(f)];
    }
 
@@ -106,7 +106,7 @@ struct FieldBuffer {
    /**
     * @brief Access the buffer at the given index. Const overload.
     */
-   auto operator[]( unsigned short const index ) const -> double const(&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   auto operator[]( unsigned short const index ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
       return Fields[index];
    }
 

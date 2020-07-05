@@ -197,7 +197,7 @@ private:
 
       Block const& phase = node.GetPhaseByMaterial(material);
       std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(material);
-      double const(&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
+      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
       double const reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;
       double const material_sign_double = double(material_sign);

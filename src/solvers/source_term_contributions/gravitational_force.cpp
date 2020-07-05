@@ -88,7 +88,7 @@ GravitationalForce::GravitationalForce( std::array<double, 3> const gravity ) :
 void GravitationalForce::ComputeForces( Block const& block, double (&gravity_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    Conservatives const& conservatives = block.GetAverageBuffer();
-   double const(&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
+   double const (&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {
