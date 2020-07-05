@@ -164,7 +164,7 @@ inline void ComputeShearRate( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()]
    } //i
 
    // Calculate the gradient of the velocity vector
-   BOStencils::ComputeVectorGradientAtCellCenter<DerivativeStencil>( u, v, w, cell_size, velocity_gradient );
+   BO::Stencils::ComputeVectorGradientAtCellCenter<DerivativeStencil>( u, v, w, cell_size, velocity_gradient );
    // compute tensor and squared tensor of the shear_rate
    ComputeShearRateTensor( velocity_gradient, shear_rate_tensor );
    TensorOperations::ComputeSquaredOfTensor( shear_rate_tensor, shear_rate_tensor_squared );

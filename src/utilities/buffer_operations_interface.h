@@ -72,74 +72,76 @@
 #include "utilities/buffer_operations.h"
 #include <algorithm>
 
-namespace BufferOperationsInterface {
+namespace BufferOperations {
 
-/**
- * @brief This function copies the values in the InterfaceDescription buffer from the Source to the Target buffer.
- *        Source and Target InterfaceDescriptionBufferType are given as templates. It is done for one node.
- * @tparam SourceBuffer The source InterfaceDescriptionBufferType.
- * @tparam TargetBuffer The target InterfaceDescriptionBufferType
- * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
- * @param node The node for which the buffers are copied.
- */
-template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
-inline void CopyInterfaceDescriptionBufferForNode( Node& node ) {
-   // Get the source and target buffers
-   InterfaceBlock& interface_block = node.GetInterfaceBlock();
-   double const (&source_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<SourceBuffer>()[Type];
-   double (&target_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<TargetBuffer>()[Type];
-   // Copy the values
-   BO::CopySingleBuffer( source_description, target_description );
-}
+   namespace Interface {
 
-/**
- * @brief This function copies the values in the InterfaceDescription buffer from the Source to the Target buffer.
- *        Source and Target InterfaceDescriptionBufferType are given as templates. It is done for a vector of nodes. Calls a copy
- *        function for each node in the vector.
- * @tparam SourceBuffer The source InterfaceDescriptionBufferType.
- * @tparam TargetBuffer The target InterfaceDescriptionBufferType
- * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
- * @param nodes The nodes for which the buffers are copied.
- */
-template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
-inline void CopyInterfaceDescriptionBufferForNodeList( std::vector<std::reference_wrapper<Node>> const& nodes ) {
-   for( Node& node : nodes ) {
-      CopyInterfaceDescriptionBufferForNode<SourceBuffer, TargetBuffer, Type>( node );
-   }
-}
+      /**
+       * @brief This function copies the values in the InterfaceDescription buffer from the Source to the Target buffer.
+       *        Source and Target InterfaceDescriptionBufferType are given as templates. It is done for one node.
+       * @tparam SourceBuffer The source InterfaceDescriptionBufferType.
+       * @tparam TargetBuffer The target InterfaceDescriptionBufferType
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @param node The node for which the buffers are copied.
+       */
+      template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
+      inline void CopyInterfaceDescriptionBufferForNode( Node& node ) {
+         // Get the source and target buffers
+         InterfaceBlock& interface_block = node.GetInterfaceBlock();
+         double const (&source_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<SourceBuffer>()[Type];
+         double (&target_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<TargetBuffer>()[Type];
+         // Copy the values
+         BO::CopySingleBuffer( source_description, target_description );
+      }
 
-/**
- * @brief Swaps the InterfaceDescription buffer of the FirstBuffer and SecondBuffer InterfaceDescriptionBufferType.
- *        This is done for a single node.
- * @tparam FirstBuffer The first InterfaceDescriptionBufferType.
- * @tparam SecondBuffer The second InterfaceDescriptionBufferType.
- * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
- * @param node The node for which the buffers are swapped.
- */
-template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
-inline void SwapInterfaceDescriptionBufferForNode( Node & node ) {
-   double (&first_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<FirstBuffer>()[Type];
-   double (&second_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<SecondBuffer>()[Type];
-   BO::SwapSingleBuffer( first_description_buffer, second_description_buffer );
-}
+      /**
+       * @brief This function copies the values in the InterfaceDescription buffer from the Source to the Target buffer.
+       *        Source and Target InterfaceDescriptionBufferType are given as templates. It is done for a vector of nodes. Calls a copy
+       *        function for each node in the vector.
+       * @tparam SourceBuffer The source InterfaceDescriptionBufferType.
+       * @tparam TargetBuffer The target InterfaceDescriptionBufferType
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @param nodes The nodes for which the buffers are copied.
+       */
+      template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
+      inline void CopyInterfaceDescriptionBufferForNodeList( std::vector<std::reference_wrapper<Node>> const& nodes ) {
+         for( Node& node : nodes ) {
+            CopyInterfaceDescriptionBufferForNode<SourceBuffer, TargetBuffer, Type>( node );
+         }
+      }
 
-/**
- * @brief Swaps the InterfaceDescription buffer of the FirstBuffer and SecondBuffer InterfaceDescriptionBufferType.
- *        This is done for a node vector. Calls the a swap function on each node in the vector.
- * @tparam FirstBuffer The first InterfaceDescriptionBufferType.
- * @tparam SecondBuffer The second InterfaceDescriptionBufferType.
- * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
- * @param node The nodes for which the buffers are swapped.
- */
-template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
-inline void SwapInterfaceDescriptionBufferForNodeList( std::vector<std::reference_wrapper<Node>> const& nodes ) {
-   for( Node & node : nodes ) {
-      SwapInterfaceDescriptionBufferForNode<FirstBuffer, SecondBuffer, Type>( node );
-   }
-}
+      /**
+       * @brief Swaps the InterfaceDescription buffer of the FirstBuffer and SecondBuffer InterfaceDescriptionBufferType.
+       *        This is done for a single node.
+       * @tparam FirstBuffer The first InterfaceDescriptionBufferType.
+       * @tparam SecondBuffer The second InterfaceDescriptionBufferType.
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @param node The node for which the buffers are swapped.
+       */
+      template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
+      inline void SwapInterfaceDescriptionBufferForNode( Node & node ) {
+         double (&first_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<FirstBuffer>()[Type];
+         double (&second_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<SecondBuffer>()[Type];
+         BO::SwapSingleBuffer( first_description_buffer, second_description_buffer );
+      }
 
-} // BufferOperationsInterface
+      /**
+       * @brief Swaps the InterfaceDescription buffer of the FirstBuffer and SecondBuffer InterfaceDescriptionBufferType.
+       *        This is done for a node vector. Calls the a swap function on each node in the vector.
+       * @tparam FirstBuffer The first InterfaceDescriptionBufferType.
+       * @tparam SecondBuffer The second InterfaceDescriptionBufferType.
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @param node The nodes for which the buffers are swapped.
+       */
+      template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
+      inline void SwapInterfaceDescriptionBufferForNodeList( std::vector<std::reference_wrapper<Node>> const& nodes ) {
+         for( Node & node : nodes ) {
+            SwapInterfaceDescriptionBufferForNode<FirstBuffer, SecondBuffer, Type>( node );
+         }
+      }
 
-namespace BOInterface = BufferOperationsInterface;
+   } // namespace Interface
+
+} // namespace BufferOperations
 
 #endif // BUFFER_OPERATIONS_INTERFACE_H

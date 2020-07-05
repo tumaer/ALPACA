@@ -156,11 +156,11 @@ void ViscousFluxes::ComputeFluxes( std::pair<MaterialName const, Block> const& m
       }
    }
    // Compute tHe contributions for the dissipative fluxes
-   BOStencils::ComputeVectorGradientAtCellFaces<DerivativeStencilCenter,DerivativeStencilFace,ReconstructionStencil>(u,v,w,cell_size,velocity_gradient_at_cell_faces);
-   BOStencils::ComputeVectorAtCellFaces<ReconstructionStencil>(u,v,w,cell_size,velocity_at_cell_faces);
+   BO::Stencils::ComputeVectorGradientAtCellFaces<DerivativeStencilCenter,DerivativeStencilFace,ReconstructionStencil>(u,v,w,cell_size,velocity_gradient_at_cell_faces);
+   BO::Stencils::ComputeVectorAtCellFaces<ReconstructionStencil>(u,v,w,cell_size,velocity_at_cell_faces);
    // Depending if viscosity models are active, shear viscosity must be reconstructed at cell face as well
    if constexpr( CC::ShearViscosityModelActive() ) {
-      BOStencils::ComputeScalarAtCellFaces<ReconstructionStencil>(shear_viscosity, cell_size, shear_viscosity_at_cell_faces);
+      BO::Stencils::ComputeScalarAtCellFaces<ReconstructionStencil>(shear_viscosity, cell_size, shear_viscosity_at_cell_faces);
       ComputeTauFluxes(velocity_gradient_at_cell_faces, shear_viscosity_at_cell_faces, material_manager_.GetMaterial(mat_block.first).GetBulkViscosity(), tau_flux);
    }
    else {

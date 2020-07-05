@@ -238,7 +238,7 @@ void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::referenc
     * The interface tag update and the calculation of volume fractions are based on the level-set values in the reinitialized level-set buffer. Thus, after the advection of the level-set field,
     * the advected level-set values, which are currently in the right-hand side level-set buffer, have to be copied to the reinitialized level-set buffer.
     */
-   BOInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Reinitialized>( nodes );
+   BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Reinitialized>( nodes );
    UpdateInterfaceTagsOnFinestLevel( nodes );
 
    // Set the volume fraction buffer according to the propagated level-set field.

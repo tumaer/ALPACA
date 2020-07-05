@@ -392,19 +392,19 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
        * In the following, prime states have to be calculated based on the initialized conservatives. Prime state calculation requires
        * conservative values in the conservative_avg buffer. Thus, a swap between the conservative_rhs and the conservative_avg buffer is necessary.
        */
-      BOMaterial::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
+      BO::Material::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
 
       ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( {all_levels_.back()} );
       multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, 0, true );
       multi_phase_manager_.InitializeVolumeFractionBuffer( nodes_needing_multiphase_treatment );
       UpdateInterfaceTags( child_levels_descending );
 
-      BOInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes_needing_multiphase_treatment );
+      BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes_needing_multiphase_treatment );
 
       ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( {all_levels_.back()} );
 
       // Swap buffers again to be conform for consecutive operations
-      BOMaterial::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
+      BO::Material::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
 
       // Extend all quantities in the reinitialization band
       multi_phase_manager_.Extend( nodes_needing_multiphase_treatment );
@@ -752,7 +752,7 @@ void ModularAlgorithmAssembler::SwapBuffers( std::vector<unsigned int> const upd
    for( auto const& level : updated_levels ) {
       for( Node& node : tree_.NodesOnLevel( level ) ) {
          if( time_integrator_.IsLastStage( stage ) && node.HasLevelset() ) {
-            BOInterface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( node );
+            BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( node );
          } //node with level set and final stage
 
          time_integrator_.SwapBuffersForNextStage( node );

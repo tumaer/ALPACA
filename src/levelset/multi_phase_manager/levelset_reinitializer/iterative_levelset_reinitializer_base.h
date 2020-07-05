@@ -103,11 +103,10 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     */
    void CutOffSingleNode(Node& node) const {
 
-      //std::int8_t const  (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
       InterfaceBlock& interface_block = node.GetInterfaceBlock();
       double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
 
-      //cells which are outside the reinitialization band are set to cut-off value
+      // Cells which have a levelset value greater than the cutoff value are set to cutoff.
       double const cutoff = CC::LSCOF();
       for(unsigned int i = 0; i < CC::TCX(); ++i){
          for(unsigned int j = 0; j < CC::TCY(); ++j){
@@ -128,7 +127,7 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
    void ReinitializeImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
 
       // Store the original levelset field in the right-hand side buffer to have a reference during reinitialization
-      BOInterface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
+      BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
 
       // Carry out the actual reinitialization procedure
       double residuum = 0.0;

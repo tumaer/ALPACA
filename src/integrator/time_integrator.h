@@ -351,7 +351,7 @@ public:
                } //equations
             } //phases
 
-            BOInterface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Base, InterfaceDescriptionBufferType::Initial>( node );
+            BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Base, InterfaceDescriptionBufferType::Initial>( node );
 
          } else { //nodes without levelset
             for( auto& mat_block : node.GetPhases() ) {
@@ -433,10 +433,10 @@ public:
      */
    void SwapBuffersForNextStage(Node& node) const {
       // swap the conservative buffers
-      BOMaterial::SwapConservativeBuffersForNode<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( node );
+      BO::Material::SwapConservativeBuffersForNode<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( node );
       // swap the levelset buffer properly if required
       if( node.HasLevelset() ) {
-         BOInterface::SwapInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Base>( node );
+         BO::Interface::SwapInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Base>( node );
       }
    }
 };

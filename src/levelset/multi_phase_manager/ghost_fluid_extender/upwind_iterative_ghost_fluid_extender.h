@@ -149,7 +149,7 @@ protected:
                   for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
                      double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
                      /**
-                      * JW: We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
+                      * We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
                       * conditions at the end of the narrow band). The convergence criteria is only checked for the extension band.
                       */
                      if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( material_sign * levelset[i][j][k] < 0.0 || cell_volume_fraction < CC::MITH() ) ) {

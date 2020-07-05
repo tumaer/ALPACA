@@ -126,7 +126,7 @@ void HeatFluxes::ComputeFluxes(std::pair<MaterialName const, Block> const& mat_b
       }
 
       // Compute the conductivity properly
-      BOStencils::ComputeScalarAtCellFaces<ReconstructionStencil>(conductivity, cell_size, conductivity_at_cell_faces);
+      BO::Stencils::ComputeScalarAtCellFaces<ReconstructionStencil>(conductivity, cell_size, conductivity_at_cell_faces);
    }
 
    //offset for flux-arrays
