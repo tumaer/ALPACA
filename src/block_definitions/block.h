@@ -89,7 +89,7 @@ static_assert( sizeof(SurfaceBuffer) == 6 * MF::ANOE() * CC::ICY() * CC::ICZ() *
 
 /**
  * @brief The Block class holds the data on which the simulation is running. They do NOT manipulate the data themselves, but provide data access
- *        to the solvers and integrators. One Block only contains material data for one material. >>A block is always single-phase<<.
+ *        to the different field buffers. One Block only contains material data for one material. >>A block is always single-phase<<.
  */
 class Block {
    // buffers for the conservatives (different buffer types required for the integration)

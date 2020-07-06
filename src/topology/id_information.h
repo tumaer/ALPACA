@@ -92,7 +92,7 @@ bool IsExternalBoundary( BoundaryLocation const location, std::uint64_t const id
                          std::array<unsigned int, 3> const number_of_nodes_on_level_zero );
 
 /**
- * @brief Gives the level that the given id is associated to. $NOT SAFE, WRONG INPUT RESULTS IN QUITE INCORRECT DATA$
+ * @brief Gives the level that the given id is associated to. $NOT SAFE, WRONG INPUT RESULTS IN QUITE INCORRECT DATA$.
  * @param id Id of node to be evaluated.
  * @return Level of the id.
  */
@@ -121,7 +121,7 @@ constexpr double DomainSizeOfId(std::uint64_t const id, double const node_size_o
 }
 
 /**
- * @brief Gives the coordinates of the coordinate system origin of a nodes internal cells, i.e. cell [CC::FICX()][CC::FICY()][CC::FICZ()]
+ * @brief Gives the coordinates of the coordinate system origin of a nodes internal cells, i.e. cell [CC::FICX()][CC::FICY()][CC::FICZ()].
  * @param id The id of a node for which the coordinates are calculated.
  * @param block_size The size (= size of internal cells) of a block.
  * @return The coordinates of the coordinate origin in the block, i.e. coordinates of corner of first internal cells.
@@ -152,24 +152,24 @@ constexpr std::array<double, 3> DomainCoordinatesOfId(std::uint64_t const id, do
 }
 
 /**
- * @brief Gives the unique identifer of the parent node. $NO INPUT CHECKS, CALLER MUST ENSURE CORRECT INPUT$
- * @param id Id of the Child
- * @return Id of the Parent
+ * @brief Gives the unique identifer of the parent node. $NO INPUT CHECKS, CALLER MUST ENSURE CORRECT INPUT$.
+ * @param id Id of the Child.
+ * @return Id of the Parent.
  */
 constexpr std::uint64_t ParentIdOfNode(std::uint64_t const id) {return (id >> 3);}
 
 /**
  * @brief Indicates the position of the Node among its siblings. The position is encoded as integer value with 0 = bottom-south-west to 7 = top-north-east.
  * @param id The id of the node, whose position is to be determined.
- * @return The position among its siblings
+ * @return The position among its siblings.
  */
 constexpr unsigned int PositionOfNodeAmongSiblings(std::uint64_t const id) {return (id & 0x7);}
 
 /**
  * @brief Functions to indicate whether or not a node is (one of the) east (other locations respectively) most among its siblings.
- *        I.e. has (at least one) a sibling to its west (other locations respectively)
- * @param id The id ot the node
- * @return True if it is most east (other locations respectively), False otherwise
+ *        I.e. has (at least one) a sibling to its west (other locations respectively).
+ * @param id The id ot the node.
+ * @return True if it is most east (other locations respectively), False otherwise.
  */
 constexpr bool EastInSiblingPack(std::uint64_t const id) {return (id & 0x1) == 1;}
 constexpr bool WestInSiblingPack(std::uint64_t const id) {return (id & 0x1) == 0;}

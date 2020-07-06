@@ -65,7 +65,7 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "roe_riemann_solver.h"
+#include "solvers/riemann_solvers/roe_riemann_solver.h"
 #include "stencils/stencil_utilities.h"
 
 
@@ -118,10 +118,10 @@ RoeRiemannSolver::RoeRiemannSolver( MaterialManager const& material_manager, Eig
 
 /**
  * @brief Solving the right hand side of the Euler Equations. Using Roe transformation and flux splitting
- * with the set stencil. Also See base class.
+ *        with the set stencil. Also See base class.
  * @note Hotpath function.
  */
-void RoeRiemannSolver::UpdateImplementation( 
+void RoeRiemannSolver::UpdateImplementation(
    std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
    double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
    double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],

@@ -98,8 +98,8 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
    }
 
    /**
-    * @brief Sets the cut-off in the levelset field of a node .
-    * @param node The node which has to be reinitialized.
+    * @brief Sets the cut-off in the levelset field of a node.
+    * @param node The node with levelset block which has to be reinitialized.
     */
    void CutOffSingleNode(Node& node) const {
 
@@ -121,8 +121,8 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
 
    /**
     * @brief Reinitializes a single-level set field as described in \cite Sussman1994.
-    * @param nodes See base class.
-    * @param stage See base class.
+    * @param nodes Vector holding all nodes that have to be updated.
+    * @param Return whether it's the last RK stage or not.
     */
    void ReinitializeImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
 

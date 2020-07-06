@@ -67,47 +67,47 @@
 *****************************************************************************************/
 
 /**
- * @brief Utility functions for generating the mesh of the current simulation
+ * @brief Utility functions for generating the mesh of the current simulation.
  */
 namespace MeshGeneratorUtilities {
 
    /**
-    * @brief Gives the total number of internal vertices of one single block
-    * @return Number of vertices 
-    */ 
-   constexpr unsigned int NumberOfInternalVerticesPerBlock() { 
-      return ( CC::ICX() + 1 ) * ( CC::ICY() + 1 ) * ( CC::ICZ() + 1 ); 
-   }   
-
-   /**
-    * @brief Gives the total number of cells of one single block
-    * @return Number of vertices 
-    */ 
-   constexpr unsigned int NumberOfTotalVerticesPerBlock() { 
-      return ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * ( CC::TCZ() + 1 ); 
-   }  
-
-   /**
-    * @brief Gives the total number of internal cells of one single block
-    * @return Number of cells 
-    */ 
-   constexpr unsigned int NumberOfInternalCellsPerBlock() { 
-      return CC::ICX() * CC::ICY() * CC::ICZ(); 
+    * @brief Gives the total number of internal vertices of one single block.
+    * @return Number of vertices.
+    */
+   constexpr unsigned int NumberOfInternalVerticesPerBlock() {
+      return ( CC::ICX() + 1 ) * ( CC::ICY() + 1 ) * ( CC::ICZ() + 1 );
    }
 
    /**
-    * @brief Gives the total number of cells of one single block
-    * @return Number of cells 
-    */ 
-   constexpr unsigned int NumberOfTotalCellsPerBlock() { 
-      return CC::TCX() * CC::TCY() * CC::TCZ(); 
+    * @brief Gives the total number of cells of one single block.
+    * @return Number of vertices.
+    */
+   constexpr unsigned int NumberOfTotalVerticesPerBlock() {
+      return ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * ( CC::TCZ() + 1 );
    }
 
    /**
-    * @brief Gives the cell size for a given block size
-    * @param block_size Size of the block 
-    * @return cell_size of the block
-    * 
+    * @brief Gives the total number of internal cells of one single block.
+    * @return Number of cells.
+    */
+   constexpr unsigned int NumberOfInternalCellsPerBlock() {
+      return CC::ICX() * CC::ICY() * CC::ICZ();
+   }
+
+   /**
+    * @brief Gives the total number of cells of one single block.
+    * @return Number of cells.
+    */
+   constexpr unsigned int NumberOfTotalCellsPerBlock() {
+      return CC::TCX() * CC::TCY() * CC::TCZ();
+   }
+
+   /**
+    * @brief Gives the cell size for a given block size.
+    * @param block_size Size of the block.
+    * @return cell_size of the block.
+    *
     * @note since only cubic blocks are used, only one direction is required to determine the size. ICX is used since this value is always filled.
     */
    constexpr double CellSizeForBlockSize( double const block_size ) {

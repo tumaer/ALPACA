@@ -78,10 +78,10 @@ template<BoundaryLocation LOC>
 class WallBoundaryCondition : public MaterialBoundaryCondition {
 
    /**
-    * @brief Gives the wall sign for a specific fluid field and index
-    * @param field_type Fluid field identifier (conservatives, prime states)
-    * @param field_index Index of the fluid field type 
-    * @return Wall sign  
+    * @brief Gives the wall sign for a specific fluid field and index.
+    * @param field_type Fluid field identifier (conservatives, prime states, parameters).
+    * @param field_index Index of the fluid field type.
+    * @return Wall sign for the field and index.
     */
    static constexpr double WallSign( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
@@ -95,9 +95,9 @@ class WallBoundaryCondition : public MaterialBoundaryCondition {
    }
 
    /**
-    * @brief Gives the wall sign for a conservative field
-    * @param equation Conservative buffer identifier
-    * @return Wall sign  
+    * @brief Gives the wall sign for a conservative field.
+    * @param equation Conservative buffer identifier.
+    * @return Wall sign.
     */
    static constexpr double WallSign( Equation const equation ) {
       switch( equation ) {
@@ -111,9 +111,9 @@ class WallBoundaryCondition : public MaterialBoundaryCondition {
    }
 
    /**
-    * @brief Gives the wall sign for a prime state field
-    * @param prime_state Primestate buffer identifier
-    * @return Wall sign  
+    * @brief Gives the wall sign for a prime state field.
+    * @param prime_state Primestate buffer identifier.
+    * @return Wall sign.
     */
    static constexpr double WallSign( PrimeState const prime_state ) {
       switch( prime_state ) {
@@ -126,11 +126,17 @@ class WallBoundaryCondition : public MaterialBoundaryCondition {
       }
    }
 
-   static constexpr double WallSign( Parameter const parameter ) {
+   /**
+    * @brief Gives the wall sign for a parameter field.
+    * @param parameter Parameter buffer identifier.
+    * @return Wall sign.
+    *
+    * @note Currently not implemented.
+    */
+   static constexpr double WallSign( Parameter const ) {
       // currently not needed (throw + return) due to compiler error
-      (void) parameter;
       throw std::runtime_error( "For the material field parameters wall value boundary conditions are not implemented yet!" );
-      
+
       return 0.0;
    }
 

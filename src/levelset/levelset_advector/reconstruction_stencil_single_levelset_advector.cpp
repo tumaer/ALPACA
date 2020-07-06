@@ -74,20 +74,15 @@
 #include "stencils/stencil_utilities.h"
 
 /**
- * Calculates the right-hand side to solve the level-set advection equation.
- * The advection equation corresponds to equation 12 in \cite Hu2006
- * Note: the implemented version differs from \cite Fedkiw2000 since the stencil average is
- * perfomed only once on the gradient instead of twice on the levelset values.
+ * @brief Calculates the right-hand side to solve the level-set advection equation.
+ *        The advection equation corresponds to equation 12 in \cite Hu2006
+ * @note The implemented version differs from \cite Fedkiw2000 since the stencil average is
+ *       performed only once on the gradient instead of twice on the levelset values.
  * @param node See base class.
- * @param stage See base class.
  */
-void ReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& node, unsigned int const stage) const {
+void ReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& node ) const {
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<levelset_reconstruction_stencil>::type;
-
-#ifndef PERFORMANCE
-   (void) stage; // Avoid compiler warning
-#endif
 
    InterfaceBlock& interface_block = node.GetInterfaceBlock();
    double const cell_size = node.GetCellSize();

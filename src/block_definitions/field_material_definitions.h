@@ -120,11 +120,11 @@ public:
    MaterialFieldsDefinitions& operator=( MaterialFieldsDefinitions&& ) = delete;
 
    /**
-    * @brief Gives whether the given field name and index is active
-    * @param field_type Identifier for the material field type (Conservatives, PrimeStates or Parameters)
-    * @param field_index Index of the given field 
-    * @return True if active, otherwise False
-    */ 
+    * @brief Gives whether the given field name and index is active.
+    * @param field_type Identifier for the material field type (Conservatives, PrimeStates or Parameters).
+    * @param field_index Index of the given field.
+    * @return True if active, otherwise False.
+    */
    static constexpr bool IsFieldActive( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
          case MaterialFieldType::Conservatives : {
@@ -167,11 +167,11 @@ public:
    }
 
    /**
-    * @brief Gives the name used for the reading of input files for the given field and index 
-    * @param field_type Identifier for the material field type (Conservatives, PrimeStates or Parameters)
-    * @param field_index Index of the given field 
-    * @return Input name for the given field and index (empty if not specified)
-    */ 
+    * @brief Gives the name used for the reading of input files for the given field and index .
+    * @param field_type Identifier for the material field type (Conservatives, PrimeStates or Parameters).
+    * @param field_index Index of the given field.
+    * @return Input name for the given field and index (empty if not specified).
+    */
    static constexpr auto InputName( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
          case MaterialFieldType::Conservatives : {
@@ -189,36 +189,36 @@ public:
    /**
     * @brief Gives the name used in the output for the given equation.
     * @param eq Equation identifier.
-    * @return Input name for the given equation (empty if not specified)
+    * @return Input name for the given equation (empty if not specified).
     */
    static constexpr auto InputName( Equation const eq ) {
       return FieldDetails::ActiveEquations::GetInputName( ETI( eq ) );
    }
 
    /**
-    * @brief Gives the name used in the output for the given prime state .
+    * @brief Gives the name used in the output for the given prime state.
     * @param ps PrimeState identifier.
-    * @return Input name for the given primestate (empty if not specified)
+    * @return Input name for the given primestate (empty if not specified).
     */
    static constexpr auto InputName( PrimeState const ps ) {
       return FieldDetails::ActivePrimeStates::GetInputName( PTI( ps ) );
    }
 
    /**
-    * @brief Gives the name used in the output for the given parameter .
+    * @brief Gives the name used in the output for the given parameter.
     * @param pa Parameter identifier.
-    * @return Input name for the given parameter (empty if not specified)
+    * @return Input name for the given parameter (empty if not specified).
     */
    static constexpr auto InputName( Parameter const pa ) {
       return FieldDetails::ActiveParameters::GetInputName( PTI( pa ) );
    }
 
    /**
-    * @brief Gives the dimension/unit for the given field and index 
-    * @param field_type Identifier for the material field type (Conservatives, PrimeStates or Parameters)
-    * @param field_index Index of the given field 
-    * @return Unit for the given field and index
-    */ 
+    * @brief Gives the dimension/unit for the given field and index.
+    * @param field_type Identifier for the material field type (Conservatives, PrimeStates or Parameters).
+    * @param field_index Index of the given field.
+    * @return Unit for the given field and index.
+    */
    static constexpr auto FieldUnit( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
          case MaterialFieldType::Conservatives : {
@@ -236,7 +236,7 @@ public:
    /**
     * @brief Gives the dimension/unit for the given equation.
     * @param eq Equation identifier.
-    * @return Unit for the given equation 
+    * @return Unit for the given equation.
     */
    static constexpr auto FieldUnit( Equation const eq ) {
       return FieldDetails::ActiveEquations::GetUnit( ETI( eq ) );
@@ -245,7 +245,7 @@ public:
    /**
     * @brief Gives the dimension/unit for the given prime state.
     * @param ps PrimeState identifier.
-    * @return Unit for the given prime state 
+    * @return Unit for the given prime state.
     */
    static constexpr auto FieldUnit( PrimeState const ps ) {
       return FieldDetails::ActivePrimeStates::GetUnit( PTI( ps ) );
@@ -254,7 +254,7 @@ public:
    /**
     * @brief Gives the dimension/unit for the given parameter.
     * @param pa Parameter identifier.
-    * @return Unit for the given parameter 
+    * @return Unit for the given parameter.
     */
    static constexpr auto FieldUnit( Parameter const pa ) {
       return FieldDetails::ActiveParameters::GetUnit( PTI( pa ) );
@@ -262,23 +262,29 @@ public:
 
    /**
     * @brief Gives the number of equations considered in the simulation, i.e. Euler Equations.
-    * @return Number of Equations = 5 (mass, energy, X-,Y-,Z-momentum) for 3D
-    * @return Number of Equations = 4 (mass, energy, X-,Y-momentum) for 2D
-    * @return Number of Equations = 3 (mass, energy, X-momentum) for 1D
+    * @return Number of Equations = 5 (mass, energy, X-,Y-,Z-momentum) for 3D.
+    * @return Number of Equations = 4 (mass, energy, X-,Y-momentum) for 2D.
+    * @return Number of Equations = 3 (mass, energy, X-momentum) for 1D.
+    *
+    * @note Depending on the configuration of active conservatives, the number can change.
     */
    static constexpr unsigned int ANOE() { return FieldDetails::ActiveEquations::Count; }
 
    /**
     * @brief Gives the number of prime states considered in the simulation.
-    * @return Number of prime states = 6 (density, pressure, temperature, X-, Y-, Z-velocity) for 3D
-    * @return Number of prime states = 5 (density, pressure, temperature, X-, Y-velocity) for 2D
-    * @return Number of prime states = 4 (density, pressure, temperature, X-velocity) for 1D
+    * @return Number of prime states = 6 (density, pressure, X-, Y-, Z-velocity) for 3D.
+    * @return Number of prime states = 5 (density, pressure, X-, Y-velocity) for 2D.
+    * @return Number of prime states = 4 (density, pressure, X-velocity) for 1D.
+    *
+    * @note Depending on the configuration of active prime states, the number can change (e.g., temperature activated).
     */
    static constexpr unsigned int ANOP() { return FieldDetails::ActivePrimeStates::Count; }
 
    /**
     * @brief Gives the number of parameters considered in the simulation.
     * @return Number of active parameters
+    *
+    * @note Depending on the configuration of active parameters, the number can change.
     */
    static constexpr unsigned int ANOPA() { return FieldDetails::ActiveParameters::Count; }
 
@@ -303,7 +309,7 @@ public:
 
    /**
     * @brief Gives the set of equations which are worked on in this simulation. I. e. varies with dimension of the simulation.
-    * "ASOE = Active Set of Equations".
+    *        "ASOE = Active Set of Equations".
     * @return Set of equations. E.g. Rho, Energy, X-Momentum for a 1D pure material simulation.
     */
    static constexpr auto ASOE() { return active_equations_; }
@@ -316,7 +322,7 @@ public:
 
    /**
     * @brief Gives the set of prime states which are worked on in this simulation. I. e. varies with dimension of the simulation.
-    * "ASOP = Active Set of Prime states".
+    *        "ASOP = Active Set of Prime states".
     * @return Set of prime states. E.g. Rho, Pressure, X-Velocity for a 1D pure material simulation.
     */
    static constexpr auto ASOP() { return active_prime_states_; }
@@ -334,7 +340,7 @@ public:
    static constexpr auto EWA() { return wavelet_analysis_equations_; }
 
    /**
-    * @brief Gives the set of parameters which are used in thi simulation "ASOPA = Active Set of PArameters".
+    * @brief Gives the set of parameters which are used in this simulation "ASOPA = Active Set of PArameters".
     * @return Set of parameters.
     */
    static constexpr auto ASOPA() { return active_parameters_; }

@@ -73,11 +73,11 @@
 #include "unit_handler.h"
 
 /**
- * @brief Defines all initialization functions required for the tree
+ * @brief Defines all initialization functions required for the tree.
  */
 namespace Initialization {
 
-   // Initialization function of the tree 
+   // Initialization function of the tree
    Tree InitializeTree( InputReader const& input_reader, TopologyManager & topology_manager, UnitHandler const& unit_handler );
 }
 

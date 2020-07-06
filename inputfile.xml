@@ -62,7 +62,7 @@
          <!-- Levelset boundary conditions. -->
          <levelSet>
             <!--types of level-set boundary conditions:
-               zeroGradient, 
+               zeroGradient,
                symmetry -->
             <west>   symmetry </west>
             <east>   symmetry </east>
@@ -130,7 +130,7 @@
                <model>
                   <name> Constant </name>
                   <parameter>
-                     <lambda0> 10.0 </lambda0>
+                     <lambdaConstant> 10.0 </lambdaConstant>
                   </parameter>
                </model>
             </thermalConductivity>
@@ -139,8 +139,8 @@
                <model>
                   <name> PowerLaw </name>
                   <parameter>
-                     <mu0> 1.0 </mu0>
-                     <exponent> 0.0 </exponent>
+                     <consistencyFactor> 1.0 </consistencyFactor>
+                     <powerLawExponent> 0.0 </powerLawExponent>
                   </parameter>
                </model>
             </shearViscosity>
@@ -163,7 +163,7 @@
                <model>
                   <name> Constant </name>
                   <parameter>
-                     <lambda0> 0.0 </lambda0>
+                     <lambdaConstant> 0.0 </lambdaConstant>
                   </parameter>
                </model>
             </thermalConductivity>
@@ -172,8 +172,8 @@
                <model>
                   <name> PowerLaw </name>
                   <parameter>
-                     <mu0> 1.0 </mu0>
-                     <exponent> 0.0 </exponent>
+                     <consistencyFactor> 1.0 </consistencyFactor>
+                     <powerLawExponent> 0.0 </powerLawExponent>
                   </parameter>
                </model>
             </shearViscosity>
@@ -189,7 +189,7 @@
             <model>
                <name> Constant </name>
                <parameter>
-                  <mu0> 0.0 </mu0>
+                  <sigmaConstant> 0.0 </sigmaConstant>
                </parameter>
             </model>
          </surfaceTensionCoefficient>
@@ -241,16 +241,16 @@
       <!-- xml node to restore the simulation from a snapshot  -->
       <restore>
          <!-- Mode: Off, Soft (if file exists) OR Forced -->
-         <mode> Off </mode> 
+         <mode> Off </mode>
          <!-- The path to the .h5 file that has to be used to restore the simulation. Only used if restore is active -->
          <fileName> inputfile/restart/restart_***.h5 </fileName>
       </restore>
       <!-- xml node to specify details about the snapshots writing-->
       <snapshots>
          <!-- Type how the snapshots are written: Off, Stamps, Interval OR IntervalStamps -->
-         <type> Stamps </type> 
+         <type> Stamps </type>
          <!-- in wall seconds. Only used if type Interval or IntervalStamps is active. -->
-         <interval> 3600 </interval> 
+         <interval> 3600 </interval>
          <!-- Number of interval snapshots that are kept. Timestamp-based snapshots are always kept -->
          <intervalsToKeep> 2 </intervalsToKeep>
          <!-- Time stamps for specific snapshots. Only used if type Stamps or IntervalStamps is active. -->
@@ -266,9 +266,9 @@
       <!-- Factor to manipulate the naming of the output files. TimeInName = physical time * timeNamingFactor-->
       <timeNamingFactor> 1.e0 </timeNamingFactor>
       <!-- Output settings used for the general output of the full domain (also in Debug mode (adjustable in code: debug_profile_settings.h)) -->
-      <standardOutput> 
-         <!-- Specify whether output should be written with a fixed interval (Interval), specific timestamps (Timestamps) or both (IntervalStamps). 
-              To disable aoutput use Off. --> 
+      <standardOutput>
+         <!-- Specify whether output should be written with a fixed interval (Interval), specific timestamps (Timestamps) or both (IntervalStamps).
+              To disable aoutput use Off. -->
          <type> Interval </type>
          <!-- The interval with which output is written in case interval output is active. Neglected otherwise. -->
          <interval>  1e-6 </interval>

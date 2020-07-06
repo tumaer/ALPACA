@@ -183,9 +183,9 @@ auto Block::GetInitialBuffer( Equation const equation ) const -> double const (&
 
 /**
  * @brief Wrapper function that returns a conservative buffer (average, right-hand side or initial). The decision is
- * made based on the template parameter.
- * Implementation for the average buffer.
- * @return
+ *        made based on the template parameter.
+ *        Implementation for the average buffer.
+ * @return The average conservative field buffer.
  */
 template<>
 Conservatives& Block::GetConservativeBuffer<ConservativeBufferType::Average>() {
@@ -194,9 +194,9 @@ Conservatives& Block::GetConservativeBuffer<ConservativeBufferType::Average>() {
 
 /**
  * @brief Wrapper function that returns a conservative buffer (average, right-hand side or initial). The decision is
- * made based on the template parameter.
- * Implementation for the right-hand side buffer.
- * @return
+ *        made based on the template parameter.
+ *        Implementation for the right-hand side buffer.
+ * @return The right-hand side conservative field buffer.
  */
 template<>
 Conservatives& Block::GetConservativeBuffer<ConservativeBufferType::RightHandSide>() {
@@ -205,9 +205,9 @@ Conservatives& Block::GetConservativeBuffer<ConservativeBufferType::RightHandSid
 
 /**
  * @brief Wrapper function that returns a conservative buffer (average, right-hand side or initial). The decision is
- * made based on the template parameter.
- * Implementation for the initial buffer.
- * @return
+ *        made based on the template parameter.
+ *        Implementation for the initial buffer.
+ * @return The initial conservative field buffer.
  */
 template<>
 Conservatives& Block::GetConservativeBuffer<ConservativeBufferType::Initial>() {
@@ -255,7 +255,7 @@ Conservatives const& Block::GetAverageBuffer() const {
 
 /**
  * @brief Gives access to the right hand side buffer.
- * @return Right hand side buffer struct.
+ * @return Right-hand side buffer struct.
  */
 Conservatives& Block::GetRightHandSideBuffer() {
    return right_hand_sides_;
@@ -277,7 +277,7 @@ Conservatives& Block::GetInitialBuffer() {
 }
 
 /**
- * @brief Const overload
+ * @brief Const overload.
  */
 Conservatives const& Block::GetInitialBuffer() const {
    return initials_;
@@ -303,7 +303,7 @@ Conservatives& Block::GetConservativeBuffer( ConservativeBufferType const conser
 }
 
 /**
- * @brief Const overload
+ * @brief Const overload.
  */
 Conservatives const& Block::GetConservativeBuffer( ConservativeBufferType const conservative_type ) const {
    switch( conservative_type ) {
@@ -415,7 +415,7 @@ auto Block::GetBoundaryJumpConservatives( BoundaryLocation const location ) cons
 
 /**
  * @brief Gives access to the jump flux buffer.
- * @return .
+ * @return The jump flux buffer struct.
  */
 SurfaceBuffer& Block::GetBoundaryJumpFluxes() {
    return jump_fluxes_;
@@ -430,7 +430,7 @@ SurfaceBuffer const& Block::GetBoundaryJumpFluxes() const {
 
 /**
  * @brief Gives access to the jump conservatives buffer.
- * @return .
+ * @return The jump conservative buffer struct.
  */
 SurfaceBuffer& Block::GetBoundaryJumpConservatives() {
    return jump_conservatives_;

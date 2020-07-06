@@ -177,27 +177,27 @@ class CompileTimeConstants {
    static constexpr std::array<BoundaryLocation, 6> natural_boundary_sides_ = {BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North,
                                                                                BoundaryLocation::South, BoundaryLocation::Top, BoundaryLocation::Bottom};
 #if DIMENSION == 1
-   static constexpr std::array<BoundaryLocation, 2> halo_boundary_sides_={ {
-       BoundaryLocation::East, BoundaryLocation::West
- } };
+   static constexpr std::array<BoundaryLocation, 2> halo_boundary_sides_= { {
+                                                                             BoundaryLocation::East, BoundaryLocation::West
+                                                                          } };
 #elif DIMENSION == 2
-   static constexpr std::array<BoundaryLocation, 8> halo_boundary_sides_={ {
-                                                                                   BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North, BoundaryLocation::South,
-                                                                                   // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
-                                                                                   BoundaryLocation::NorthEast, BoundaryLocation::NorthWest,
-                                                                                   BoundaryLocation::SouthEast,  BoundaryLocation::SouthWest,
-                                                                                } };
+   static constexpr std::array<BoundaryLocation, 8> halo_boundary_sides_= { {
+                                                                             BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North, BoundaryLocation::South,
+                                                                             // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
+                                                                             BoundaryLocation::NorthEast, BoundaryLocation::NorthWest,
+                                                                             BoundaryLocation::SouthEast,  BoundaryLocation::SouthWest,
+                                                                          } };
 #else
-   static constexpr std::array<BoundaryLocation, 26> halo_boundary_sides_ = {{ // #26
-                                                                                      BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North, BoundaryLocation::South, BoundaryLocation::Top, BoundaryLocation::Bottom,
-                                                                                      // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
-                                                                                      BoundaryLocation::BottomNorth, BoundaryLocation::BottomSouth, BoundaryLocation::TopNorth, BoundaryLocation::TopSouth, // x-Axis Sticks
-                                                                                      BoundaryLocation::BottomEast, BoundaryLocation::BottomWest, BoundaryLocation::TopEast, BoundaryLocation::TopWest,  // y-Axis Sticks
-                                                                                      BoundaryLocation::NorthEast, BoundaryLocation::NorthWest, BoundaryLocation::SouthEast, BoundaryLocation::SouthWest,// z-Axis Sticks
-                                                                                      // Diagonals in 3 Dimensions for cubes in 3D
-                                                                                      BoundaryLocation::EastNorthTop, BoundaryLocation::EastNorthBottom, BoundaryLocation::EastSouthTop, BoundaryLocation::EastSouthBottom, //East-Side
-                                                                                      BoundaryLocation::WestNorthTop, BoundaryLocation::WestNorthBottom, BoundaryLocation::WestSouthTop, BoundaryLocation::WestSouthBottom, //West-Side
-                                                                                   }};
+   static constexpr std::array<BoundaryLocation, 26> halo_boundary_sides_ = { { // #26
+                                                                               BoundaryLocation::East, BoundaryLocation::West, BoundaryLocation::North, BoundaryLocation::South, BoundaryLocation::Top, BoundaryLocation::Bottom,
+                                                                               // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
+                                                                               BoundaryLocation::BottomNorth, BoundaryLocation::BottomSouth, BoundaryLocation::TopNorth, BoundaryLocation::TopSouth, // x-Axis Sticks
+                                                                               BoundaryLocation::BottomEast, BoundaryLocation::BottomWest, BoundaryLocation::TopEast, BoundaryLocation::TopWest,  // y-Axis Sticks
+                                                                               BoundaryLocation::NorthEast, BoundaryLocation::NorthWest, BoundaryLocation::SouthEast, BoundaryLocation::SouthWest,// z-Axis Sticks
+                                                                               // Diagonals in 3 Dimensions for cubes in 3D
+                                                                               BoundaryLocation::EastNorthTop, BoundaryLocation::EastNorthBottom, BoundaryLocation::EastSouthTop, BoundaryLocation::EastSouthBottom, //East-Side
+                                                                               BoundaryLocation::WestNorthTop, BoundaryLocation::WestNorthBottom, BoundaryLocation::WestSouthTop, BoundaryLocation::WestSouthBottom, //West-Side
+                                                                            } };
 #endif
 
    static constexpr std::array <BoundaryLocation, domain_sides_> active_natural_boundary_sides_ = {BoundaryLocation::East, BoundaryLocation::West
@@ -357,31 +357,31 @@ public:
 
    /**
     * @brief Indicates whether the viscosity is calculated by a model or not.
-    * @return True if a model is used. 
+    * @return True if a model is used.
     */
    static constexpr bool ShearViscosityModelActive() { return viscosity_model_active_; }
 
    /**
     * @brief Indicates whether the thermal conductivity is calculated by a model or not.
-    * @return True if a model is used. 
+    * @return True if a model is used.
     */
    static constexpr bool ThermalConductivityModelActive() { return thermal_conductivity_model_active_; }
 
    /**
     * @brief Indicates whether the thermal conductivity is calculated by a model or not.
-    * @return True if a model is used. 
+    * @return True if a model is used.
     */
    static constexpr bool SurfaceTensionCoefficientModelActive() { return surface_tension_coefficient_model_active_; }
 
    /**
     * @brief Indicates whether the thermal conductivity is calculated by a model or not.
-    * @return True if a model is used. 
+    * @return True if a model is used.
     */
    static constexpr bool ParameterModelActive() { return viscosity_model_active_ || thermal_conductivity_model_active_; }
 
    /**
     * @brief Indicates whether the thermal conductivity is calculated by a model or not.
-    * @return True if a model is used. 
+    * @return True if a model is used.
     */
    static constexpr bool InterfaceParameterModelActive() { return surface_tension_coefficient_model_active_; }
 

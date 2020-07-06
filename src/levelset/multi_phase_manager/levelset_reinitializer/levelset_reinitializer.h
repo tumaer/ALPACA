@@ -110,7 +110,7 @@ public:
    /**
     * @brief The method to reinitialize a level-set field.
     * @param nodes The nodes for which the level-set field is reinitialized.
-    * @param stage The current stage of the Runge-Kutta method.
+    * @param is_last_stage Flag if the method is called for the last stage of the applied Runge-Kutta method.
     */
    void Reinitialize(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
       static_cast<DerivedLevelsetReinitializer const&>(*this).ReinitializeImplementation(nodes, is_last_stage);

@@ -76,15 +76,15 @@
 
 /**
  * @brief Class that implements the actual reading procedure of initial condition data from input files of xml-type.
- *        Here, no consistency checks of the read parameter are done. Only the validity of the correct variable type 
- *        (double, int, string) is done.  
+ *        Here, no consistency checks of the read parameter are done. Only the validity of the correct variable type
+ *        (double, int, string) is done.
  */
 class XmlInitialConditionReader : public InitialConditionReader {
 
    // The already openend xml input file (must be shared pointer to distribute input file on different readers)
    std::shared_ptr<tinyxml2::XMLDocument const> const xml_input_file_;
 
-   // Functions that are required from base class 
+   // Functions that are required from base class
    std::string DoReadMaterialInitialConditions( unsigned int const material_index ) const override;
    std::string DoReadLevelsetInitialConditions( unsigned int const levelset_index ) const override;
 

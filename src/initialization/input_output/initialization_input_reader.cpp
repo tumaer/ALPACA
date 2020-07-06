@@ -87,25 +87,30 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the full input reader class with the given input file
-    * @param input_filename Name of the file use for input 
-    * @return The fully initialized InputReader class 
+    * @brief Initializes the full input reader class with the given input file.
+    * @param input_filename Name of the file use for input.
+    * @return The fully initialized InputReader class.
     */
    InputReader InitializeInputReader( std::string const& input_filename ) {
-      // Determine the input type 
+      // Check whether the file exists
+      if( !FileOperations::CheckIfPathExists( input_filename ) ) {
+         throw std::logic_error( "Input file " + input_filename + " does not exist!" );
+      }
+
+      // Determine the input type
       InputType const input_type( StringToInputType( FileOperations::GetFileExtension( input_filename) ) );
-      // Instantiate correct reader 
+      // Instantiate correct reader
       switch( input_type ) {
          case InputType::Xml : {
             // Open the file (here std::make_shared not possible)
-            // shared pinter required to distribute the open input file on different reader 
+            // shared pinter required to distribute the open input file on different reader
             std::shared_ptr<tinyxml2::XMLDocument> input_file( new tinyxml2::XMLDocument );
             tinyxml2::XMLError error = input_file->LoadFile( input_filename.c_str() );
-            // Check if eversthing worked properly 
+            // Check if eversthing worked properly
             if( error != tinyxml2::XML_SUCCESS ) {
-               throw std::logic_error( "Error parsing the XML inputfile file!" );
+               throw std::logic_error( "Syntax error parsing the XML inputfile file, check opening and closing tags!" );
             }
-            // Create the input reader properly 
+            // Create the input reader properly
             return InputReader( input_filename, input_type,
                                 std::make_unique<XmlMaterialReader const>( input_file ),
                                 std::make_unique<XmlBoundaryConditionReader const>( input_file ),

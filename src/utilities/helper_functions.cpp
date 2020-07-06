@@ -73,16 +73,16 @@
 #include <algorithm>
 
 /**
- * @brief Returns a requested parameter if it is present in map, otherwise error is thrown 
- * @param parameter Parameter, which is requested from the map 
- * @param parameter_map unordered_map storing all parameters 
- * @return Returns the requested parameter if present  
+ * @brief Returns a requested parameter if it is present in map, otherwise error is thrown.
+ * @param parameter Parameter, which is requested from the map.
+ * @param parameter_map unordered_map storing all parameters.
+ * @return Returns the requested parameter if present.
  */
 double GetCheckedParameter( std::unordered_map<std::string, double> const& parameter_map, std::string const& parameter, std::string const& map_name ) {
-   // checks whether the given parameter is defined 
+   // checks whether the given parameter is defined
    if( parameter_map.find( parameter ) == parameter_map.end() ) {
       throw std::logic_error( "Variable " + parameter + " not found in map for " + map_name + "!" );
    }
-   // returns the parameter if it is present 
+   // returns the parameter if it is present
    return parameter_map.at( parameter );
 }

@@ -71,19 +71,19 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the complete unit handler class with the given input reader
-    * @param input_reader Reader that provides access to the full data of the input file
-    * @return The fully initialized UnitHandler class 
+    * @brief Initializes the complete unit handler class with the given input reader.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @return The fully initialized UnitHandler class.
     */
    UnitHandler InitializeUnitHandler( InputReader const& input_reader ) {
 
-      // read data 
-      double const reference_density     = input_reader.GetDimensionalizationReader().ReadReferenceDensity(); 
+      // read data
+      double const reference_density     = input_reader.GetDimensionalizationReader().ReadReferenceDensity();
       double const reference_velocity    = input_reader.GetDimensionalizationReader().ReadReferenceVelocity();
-      double const reference_length      = input_reader.GetDimensionalizationReader().ReadReferenceLength(); 
+      double const reference_length      = input_reader.GetDimensionalizationReader().ReadReferenceLength();
       double const reference_temperature = input_reader.GetDimensionalizationReader().ReadReferenceTemperature();
 
-      // Log data 
+      // Log data
       LogWriter & logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Dimensionalization parameter:" );
@@ -93,7 +93,7 @@ namespace Initialization {
       logger.LogMessage( StringOperations::Indent( 2 ) + "Temperature reference: " + StringOperations::ToScientificNotationString( reference_temperature, 9 ) );
       logger.LogMessage( " " );
 
-      // Initialize the unit handler 
+      // Initialize the unit handler
       return UnitHandler( reference_density, reference_velocity, reference_length, reference_temperature );
    }
 }

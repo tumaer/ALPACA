@@ -88,9 +88,12 @@
 
 #include "input_output/output_writer/output_quantities/custom_material_quantities/example/matrix_tensor_material_output.h"
 
-// Helper function for better readability in the code below
 namespace {
-   // Checks whether any flag of an array is activated
+   /**
+    * @brief Checks whether any of the given array flags is active.
+    * @param setting Array holding all setting flags.
+    * @return True if any is active, False otherwise.
+    */
    inline bool IsAnyActive( std::array<bool,3> const& setting ) {
       return std::any_of( setting.begin(), setting.end(), [] ( bool const output ) { return output; } );
    }
@@ -99,10 +102,10 @@ namespace {
 namespace Initialization {
 
    /**
-    * @brief Gives pointers of all material output quantities
-    * @param unit_handler Instance for dimensionalization of quantities
-    * @param material_manager Instance for handling material properties and pairing properties
-    * @return Vector of pointer to all material output quantities
+    * @brief Gives pointers of all material output quantities.
+    * @param unit_handler Instance for dimensionalization of quantities.
+    * @param material_manager Instance for handling material properties and pairing properties.
+    * @return Vector of pointer to all material output quantities.
     */
    std::vector<std::unique_ptr<OutputQuantity const>> GetMaterialOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager ) {
       // short name using
@@ -253,10 +256,10 @@ namespace Initialization {
    }
 
    /**
-    * @brief Gives pointers of all interface output quantities
-    * @param unit_handler Instance for dimensionalization of quantities
-    * @param material_manager Instance for handling material properties and pairing properties
-    * @return Vector of pointer to all interface output quantities
+    * @brief Gives pointers of all interface output quantities.
+    * @param unit_handler Instance for dimensionalization of quantities.
+    * @param material_manager Instance for handling material properties and pairing properties.
+    * @return Vector of pointer to all interface output quantities.
     */
    std::vector<std::unique_ptr<OutputQuantity const>> GetInterfaceOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager ) {
       // short name using
@@ -353,11 +356,11 @@ namespace Initialization {
    }
 
    /**
-    * @brief Gives the standard mesh generator depending on the Vertex filter
-    * @param topology_manager Class providing global (on all ranks) node information
-    * @param tree Tree class providing local (on current rank) node information
-    * @param node_size_on_level_zero Size of one block on level zero
-    * @return Pointer to the base class of all mesh generators
+    * @brief Gives the standard mesh generator depending on the Vertex filter.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param node_size_on_level_zero Size of one block on level zero.
+    * @return Pointer to the base class of all mesh generators.
     */
    std::unique_ptr<MeshGenerator const> GetStandardMeshGenerator( TopologyManager const& topology_manager,
                                                                   Tree const& tree,
@@ -372,12 +375,12 @@ namespace Initialization {
    }
 
    /**
-    * @brief Initializes the complete output writer class with the given input classes
-    * @param topology_manager Class providing global (on all ranks) node information
-    * @param tree Tree class providing local (on current rank) node information
-    * @param material_manager Instance providing initialized material data
-    * @param unit_handler Instance to provide (non-)dimensionalization of values
-    * @return The fully initialized OutputWriter class as pointer (allows movements of it)
+    * @brief Initializes the complete output writer class with the given input classes.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param material_manager Instance providing initialized material data.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized OutputWriter class as pointer (allows movements of it).
     */
    OutputWriter InitializeOutputWriter( TopologyManager & topology_manager,
                                                                Tree & tree,

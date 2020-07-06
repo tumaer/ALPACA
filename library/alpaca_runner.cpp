@@ -77,6 +77,10 @@
 
 namespace Alpaca {
 
+   /**
+    * @brief Runs the ALPACA simulation routine based on a given input file.
+    * @param inputfile File name to provide user information for the simulation.
+    */
    void Run( std::string const inputfile ) {
 
       MPI_Init( NULL, NULL );
@@ -102,12 +106,9 @@ namespace Alpaca {
          InputReader const input_reader( Initialization::InitializeInputReader( inputfile ) );
 
          Simulation::Run( input_reader );
-
       }
 
       MPI_Finalize();
-
    }
-
 }
 

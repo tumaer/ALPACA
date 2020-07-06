@@ -73,29 +73,35 @@
 #include "utilities/shear_rate_operations.h"
 
 /**
- * @brief The ShearRateMaterialParameterModel class implements the specific computation for a material parameter model that acts on the shear rate. 
- *        It provides the loop structure to compute the parameter for a single given block. The actual implementation of the model param = f(gamma_dot) is done 
- *        in the derived class. 
- * 
- * @tparam DerivedShearRateMaterialParameterModel derived shear rate model class that provides the model computation
+ * @brief The ShearRateMaterialParameterModel class implements the specific computation for a material parameter model that acts on the shear rate.
+ *        It provides the loop structure to compute the parameter for a single given block. The actual implementation of the model param = f(gamma_dot) is done
+ *        in the derived class.
+ *
+ * @tparam DerivedShearRateMaterialParameterModel derived shear rate model class that provides the model computation.
  */
 template<typename DerivedShearRateMaterialParameterModel>
-class ShearRateMaterialParameterModel : public MaterialParameterModel { 
+class ShearRateMaterialParameterModel : public MaterialParameterModel {
 
    // friend model, which effectively implements the computation of the parameter
    friend DerivedShearRateMaterialParameterModel;
 
    /**
+<<<<<<< Updated upstream
+    * @brief Executes the actual parameter calculation on the complete block.
+    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
+    * @param cell_size Cell_size of the given block.
+=======
     * @brief Executes the actual parameter calculation on the complete block
     * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return)
-    * @param cell_size Cell_size of the given block 
-    */ 
+    * @param cell_size Cell_size of the given block
+>>>>>>> Stashed changes
+    */
    void DoUpdateParameter( Block & block, double const cell_size ) const override {
 
       // Define the correct type of the stencil
       using DerivativeStencil = typename DerivativeStencilSetup::Concretize< DerivedShearRateMaterialParameterModel::derivative_stencil_ >::type;
 
-      // extract the velocities from the block 
+      // extract the velocities from the block
       // y and z velocity buffers may not be available
       // as workaround use the x velocity buffer in these cases
       // this is legal since the respective gradients are not computed/used anyway
@@ -103,7 +109,7 @@ class ShearRateMaterialParameterModel : public MaterialParameterModel {
       double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::VelocityY );
       double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::VelocityZ );
 
-      // extract the shear viscosity from the block, which should be computed 
+      // extract the shear viscosity from the block, which should be computed
       double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedShearRateMaterialParameterModel::parameter_buffer_type_ );
 
       /**
@@ -123,57 +129,50 @@ class ShearRateMaterialParameterModel : public MaterialParameterModel {
          }
       }
 
-      // Compute the shear rate from the velocities 
+      // Compute the shear rate from the velocities
       ShearRateOperations::ComputeShearRate<DerivativeStencil>( u, v, w, cell_size, shear_rate);
 
-      // Compute the parameter based on the shear rate 
-      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-
+      // Compute the parameter based on the shear rate
+      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+        for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+           for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                parameter_buffer[i][j][k] = static_cast< DerivedShearRateMaterialParameterModel const& >( *this ).ComputeParameter( shear_rate[i][j][k] );
             }
          }
       }
    }
-   
+
    /**
-    * @brief Executes the actual parameter calculation on the on the block for the given material up to the interface
-    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return)
-    * @param cell_size Cell_size of the given block 
-    * @param interface_tags Tags describing the interface position 
-    * @param material_sign Sign of the material for identification on interface tags 
-    */ 
-   void DoUpdateParameter( Block & block, 
-                           double const cell_size, 
-                           std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], 
+    * @brief Executes the actual parameter calculation on the on the block for the given material up to the interface.
+    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
+    * @param cell_size Cell_size of the given block.
+    * @param interface_tags Tags describing the interface position.
+    * @param material_sign Sign of the material for identification on interface tags.
+    */
+   void DoUpdateParameter( Block & block,
+                           double const cell_size,
+                           std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
                            std::int8_t const material_sign ) const override {
 
       // Define the correct type of the stencil
       using DerivativeStencil = typename DerivativeStencilSetup::Concretize< DerivedShearRateMaterialParameterModel::derivative_stencil_ >::type;
 
-      // Get the correct offsets for the loop computation 
-      constexpr unsigned int offset_x = DerivativeStencil::DownstreamStencilSize() + 1;
-      constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? DerivativeStencil::DownstreamStencilSize() + 1: 0;
-      constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? DerivativeStencil::DownstreamStencilSize() + 1: 0;
-
-      // extract the velocities from the block 
+      // extract the velocities from the block
       double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::VelocityX );
       double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::VelocityY );
       double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::VelocityZ );
 
-      // extract the appropriate parameter buffer from the block, which should be computed 
+      // extract the appropriate parameter buffer from the block, which should be computed
       double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedShearRateMaterialParameterModel::parameter_buffer_type_ );
 
-      // Compute the viscosity based on the shear rate and model parameter 
-      for( unsigned int i = 0 + offset_x; i < CC::TCX() - offset_x; ++i ){
-         for( unsigned int j = 0 + offset_y; j < CC::TCY() - offset_y; ++j ){
-            for( unsigned int k = 0 + offset_z; k < CC::TCZ() - offset_z; ++k ){
-            
-               if( interface_tags[i][j][k] * material_sign > 0 ) {
-                  // compute the shear rate for this cell 
+      // Compute the viscosity based on the shear rate and model parameter
+      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+         for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+            for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+               if( interface_tags[i][j][k] * material_sign >= 0 ) {
+                  // compute the shear rate for this cell
                   double const shear_rate = ShearRateOperations::ComputeShearRate< DerivativeStencil >( u, v, w, cell_size, i, j, k);
-                  // compute the parameter for the cell 
+                  // compute the parameter for the cell
                   parameter_buffer[i][j][k] = static_cast< DerivedShearRateMaterialParameterModel const& >( *this ).ComputeParameter( shear_rate );
                } else {
                   parameter_buffer[i][j][k] = 0.0;
@@ -184,8 +183,8 @@ class ShearRateMaterialParameterModel : public MaterialParameterModel {
    }
 
    /**
-    * @brief Protected constructor to create the material shear rate model
-    * @note Can only be called from derived classes 
+    * @brief Protected constructor to create the material shear rate model.
+    * @note Can only be called from derived classes.
     */
    explicit ShearRateMaterialParameterModel() : MaterialParameterModel() {
       /** Empty besides base class constructor call */

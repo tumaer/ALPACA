@@ -76,19 +76,19 @@
 #include "topology/tree.h"
 
 /**
- * @brief Defines all initialization functions required for the initial condition
+ * @brief Defines all initialization functions required for the initial condition.
  */
 namespace Initialization {
 
-   // factory functions 
+   // factory functions
    std::vector<std::string> GetMaterialInitialConditions( InitialConditionReader const& initial_condition_reader, unsigned int number_of_materials );
    std::vector<std::string> GetLevelsetInitialConditions( InitialConditionReader const& initial_condition_reader, unsigned int number_of_materials );
-   
-   // Initialization function for the initial condition class 
-   InitialCondition InitializeInitialCondition( InputReader const& input_reader, 
+
+   // Initialization function for the initial condition class
+   InitialCondition InitializeInitialCondition( InputReader const& input_reader,
                                                 TopologyManager const& topology_manager,
                                                 Tree const& tree,
-                                                MaterialManager const& material_manager, 
+                                                MaterialManager const& material_manager,
                                                 UnitHandler const& unit_handler );
 }
 

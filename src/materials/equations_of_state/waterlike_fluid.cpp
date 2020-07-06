@@ -89,11 +89,11 @@ WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& d
 
 /**
  * @brief Computes pressure from inputs as A - B + B * ( rho / rho0 )^gamma.
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
+ * @param density The density used for the computation.
+ * @param momentum_x The momentum in x-direction used for the computation.
+ * @param momentum_y The momentum in y-direction used for the computation.
+ * @param momentum_z The momentum in z-direction used for the computation.
+ * @param energy The energy used for the computation.
  * @return Pressure according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
@@ -108,12 +108,12 @@ double WaterlikeFluid::DoGetPressure( double const density, double const momentu
 }
 
 /**
- * @brief Gives the enthalpy for the given inputs. ( Not available for classic Tait )
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
+ * @brief Gives the enthalpy for the given inputs. ( Not available for classic Tait ).
+ * @param density The density used for the computation.
+ * @param momentum_x The momentum in x-direction used for the computation.
+ * @param momentum_y The momentum in y-direction used for the computation.
+ * @param momentum_z The momentum in z-direction used for the computation.
+ * @param energy The energy used for the computation.
  * @return Zero. This is according to Tait's equation of state correct.
  */
 double WaterlikeFluid::DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
@@ -129,12 +129,12 @@ double WaterlikeFluid::DoGetEnthalpy( double const density, double const momentu
 }
 
 /**
- * @brief Computes energy according to 1/( gamma-1 ) * ( p + B - A ) + B - A + 1/2 * rho *|v|^2
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param pressure .
+ * @brief Computes energy according to 1/( gamma-1 ) * ( p + B - A ) + B - A + 1/2 * rho *|v|^2.
+ * @param density The density used for the computation.
+ * @param momentum_x The momentum in x-direction used for the computation.
+ * @param momentum_y The momentum in y-direction used for the computation.
+ * @param momentum_z The momentum in z-direction used for the computation.
+ * @param pressure The pressure used for the computation.
  * @return Energy according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
@@ -144,7 +144,7 @@ double WaterlikeFluid::DoGetEnergy( double const density, double const momentum_
 }
 
 /**
- * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state
+ * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
  * @return Gruneisen coefficient according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetGruneisen() const {
@@ -152,9 +152,9 @@ double WaterlikeFluid::DoGetGruneisen() const {
 }
 
 /**
- * @brief Computes psi from inputs as gamma * ( p + B - A ) / rho
- * @param pressure .
- * @param one_density .
+ * @brief Computes psi from inputs as gamma * ( p + B - A ) / rho.
+ * @param pressure The pressure used for the computation.
+ * @param one_density The density used for the computation.
  * @return Psi according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetPsi( double const pressure, double const one_density ) const {
@@ -162,9 +162,9 @@ double WaterlikeFluid::DoGetPsi( double const pressure, double const one_density
 }
 
 /**
- * @brief Computes speed of sound from inputs as sqrt( gamma * ( p + B - A ) / rho ) .
- * @param density .
- * @param pressure .
+ * @brief Computes speed of sound from inputs as sqrt( gamma * ( p + B - A ) / rho ).
+ * @param density The density used for the computation.
+ * @param pressure The pressure used for the computation.
  * @return Speed of sound according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetSpeedOfSound( double const density, double const pressure ) const {

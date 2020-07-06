@@ -87,19 +87,19 @@
  * @brief The InputOutputManager class handles creation of and access to a unique output folder
  *        and delegates all output calls. It decides whether simulation output or restart snapshots
  *        have to be written based on user configuration and calls the respective routines. Furthermore,
- *        all used micro time steps used in the simulation can be written to a file. 
+ *        all used micro time steps used in the simulation can be written to a file.
  */
 class InputOutputManager {
-   // Unit handler for dimensionalization of time 
+   // Unit handler for dimensionalization of time
    // (keep it at this position to ensure that it it set before other are initialized that use it)
    UnitHandler const& unit_handler_;
    // Logger must not be const (otherwise no logbook cannot be appended
    LogWriter& logger_;
    // Writer for output data
    OutputWriter const& output_writer_;
-   // Writer of restart data 
+   // Writer of restart data
    RestartManager const& restart_manager_;
-  
+
    // Path data for output (must be first defined for initializer list in constructor)
    std::string const output_folder_name_;
 
@@ -122,63 +122,63 @@ class InputOutputManager {
    std::string const symlink_latest_restart_name_;
    std::chrono::time_point<std::chrono::system_clock> wall_time_of_last_restart_file_;
 
-   // Local function to create the  appropriate folder structure 
+   // Local function to create the  appropriate folder structure
    void CreateOutputFolder() const;
    // local function to write an output with additional logging
-   void WriteOutput( OutputType const output_type, double const output_time, std::string const& filename_without_extension, 
+   void WriteOutput( OutputType const output_type, double const output_time, std::string const& filename_without_extension,
                      std::string const& time_series_filename_without_extension ) const;
 
    // Functions for naming of files and folders
    /**
-    * @brief Returns the output subfolder name 
-    * @param output_type Output type to be used (standard, interface, debug)
-    * @return subfolder name
+    * @brief Returns the output subfolder name.
+    * @param output_type Output type to be used (standard, interface, debug).
+    * @return subfolder name.
     */
-   inline std::string OutputSubfolderName( OutputType const output_type ) const { 
+   inline std::string OutputSubfolderName( OutputType const output_type ) const {
       switch( output_type ) {
-         case OutputType::Debug     : { return "/debug"; } 
+         case OutputType::Debug     : { return "/debug"; }
          case OutputType::Interface : { return "/interface"; }
-         default                    : { return "/domain"; } // standard output 
+         default                    : { return "/domain"; } // standard output
       }
    }
 
    /**
-    * @brief Returns the file name for the output (without time or time_series appendix)
-    * @param output_type Output type to be used (standard, interface, debug)
-    * @return standard output file name
+    * @brief Returns the file name for the output (without time or time_series appendix).
+    * @param output_type Output type to be used (standard, interface, debug).
+    * @return standard output file name.
     */
    inline std::string OutputFileName( OutputType const output_type ) const {
       switch( output_type ) {
-         case OutputType::Debug     : { return output_folder_name_ + OutputSubfolderName( OutputType::Debug) + "/debug_"; } 
+         case OutputType::Debug     : { return output_folder_name_ + OutputSubfolderName( OutputType::Debug) + "/debug_"; }
          case OutputType::Interface : { return output_folder_name_ + OutputSubfolderName( OutputType::Interface) + "/interface_"; }
-         default                    : { return output_folder_name_ + OutputSubfolderName( OutputType::Standard) + "/data_"; } // standard output 
+         default                    : { return output_folder_name_ + OutputSubfolderName( OutputType::Standard) + "/data_"; } // standard output
       }
    }
 
    /**
-    * @brief Returns the suffix for the time series file 
-    * @return suffix
+    * @brief Returns the suffix for the time series file.
+    * @return suffix of the time series file.
     */
    inline std::string TimeSeriesSuffix() const { return "time_series"; }
 
    /**
-    * @brief Returns the restart subfolder name 
-    * @return subfolder name
-    */   
+    * @brief Returns the restart subfolder name.
+    * @return subfolder name for the restart files.
+    */
    inline std::string RestartSubfolderName() const { return "/restart"; }
 
    /**
-    * @brief Returns the file name for the restart (without time appendix)
-    * @return restart file name
+    * @brief Returns the file name for the restart (without time appendix).
+    * @return restart file name.
     */
    inline std::string RestartFileName() const {
       return output_folder_name_ + RestartSubfolderName() + "/restart_";
    }
 
    /**
-    * @brief Returns the name of the latest snapshot to be used for the restart
-    * @return name of latest snapshot
-    */   
+    * @brief Returns the name of the latest snapshot to be used for the restart.
+    * @return name of latest snapshot.
+    */
    inline std::string LatestSnapshotName() const { return "/latest_restart_snapshot"; }
 
    /**
@@ -191,9 +191,9 @@ public:
    explicit InputOutputManager( std::string const& input_file,
                                 std::string const& output_folder,
                                 UnitHandler const& unit_handler,
-                                OutputWriter const& output_writer, 
+                                OutputWriter const& output_writer,
                                 RestartManager const& restart_manager,
-                                double const time_naming_factor, 
+                                double const time_naming_factor,
                                 std::vector<double> const& standard_output_timestamps,
                                 std::vector<double> const& interface_output_timestamps,
                                 RestoreMode const restore_mode,
@@ -216,7 +216,7 @@ public:
 
    // Function to write the time information to a file
    void WriteTimestepFile( std::vector<double> const& timesteps_on_finest_level ) const;
-   // Functions to write simulation data output 
+   // Functions to write simulation data output
    bool WriteFullOutput( double const timestep, bool const force_output = false );
    void WriteSingleOutput( unsigned int const output_key, OutputType const output_type = OutputType::Debug ) const;
    // Functions for restart

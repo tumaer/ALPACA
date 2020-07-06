@@ -81,7 +81,7 @@
  * @tparam DerivedGhostFluidExtender Static Derived extender class which performs the actual iterative extension
  * @tparam field_type The Fluid field type for which the extender is used (PrimeStates, Parameters or Conservatives)
  */
-template< typename DerivedGhostFluidExtender, MaterialFieldType field_type >
+template<typename DerivedGhostFluidExtender, MaterialFieldType field_type>
 class GhostFluidExtender {
 
    friend DerivedGhostFluidExtender;
@@ -140,7 +140,7 @@ private:
 
    /**
     * @brief The default constructor for the IterativeGhostFluidExtender. Calls the default constructor of the base class.
-    * @param material_manager Instance of a material manager, which already has been inialized according to the user input.
+    * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
    explicit GhostFluidExtender( MaterialManager const& material_manager, HaloManager & halo_manager ) :
@@ -161,7 +161,6 @@ public:
    /**
     * @brief Iteratively solves the extension equation. For description of functionality also see base class.
     * @param nodes The nodes for which the extension equation is solved.
-    * @param stage The current stage of the Runge-Kutta method.
     */
    void Extend( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 

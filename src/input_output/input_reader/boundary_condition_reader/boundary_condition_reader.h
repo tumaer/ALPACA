@@ -75,14 +75,14 @@
 #include "boundary_condition/boundary_specifications.h"
 
 /**
- * @brief Defines the class that provides access to the boundary condition data in the input file
- *        It serves as a proxy class for different boundary condition reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ * @brief Defines the class that provides access to the boundary condition data in the input file.
+ *        It serves as a proxy class for different boundary condition reader types (xml,...) that only read the actual data.
+ *        Here, consistency checks are done that all read data are valid.
  */
 class BoundaryConditionReader{
 
 protected:
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit BoundaryConditionReader() = default;
 
    // Functions that must be implemented by the derived classes

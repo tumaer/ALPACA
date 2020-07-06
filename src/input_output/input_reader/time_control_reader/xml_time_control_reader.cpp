@@ -69,35 +69,36 @@
 
 #include "input_output/input_reader/xml_utilities.h"
 
-XmlTimeControlReader::XmlTimeControlReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : 
-   TimeControlReader(), 
+/**
+ * @brief Default constructor for the time-control reader for xml-type input files.
+ * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
+ */
+XmlTimeControlReader::XmlTimeControlReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
+   TimeControlReader(),
    xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
 /**
- * @brief Reads the start time from the input 
- * @return start time of the simulation
+ * @brief See base class definition.
  */
 double XmlTimeControlReader::DoReadStartTime() const {
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "timeControl", "startTime" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "timeControl", "startTime" } );
    return XmlUtilities::ReadDouble( node );
 }
 
 /**
- * @brief Reads the end time from the input 
- * @return end time of the simulation
+ * @brief See base class definition.
  */
 double XmlTimeControlReader::DoReadEndTime() const {
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "timeControl", "endTime" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "timeControl", "endTime" } );
    return XmlUtilities::ReadDouble( node );
 }
 
 /**
- * @brief Reads the CFL number from the input 
- * @return CFL umber of the simulation
+ * @brief See base class definition.
  */
 double XmlTimeControlReader::DoReadCFLNumber() const {
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "timeControl", "CFLNumber" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "timeControl", "CFLNumber" } );
    return XmlUtilities::ReadDouble( node );
 }

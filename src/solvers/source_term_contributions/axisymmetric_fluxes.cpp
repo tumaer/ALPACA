@@ -68,7 +68,7 @@
 #include "axisymmetric_fluxes.h"
 
 /**
- * @brief Computes source terms for axisymmetric simulations. Terms are set accoring to \cite Adami2016 .
+ * @brief Computes source terms for axisymmetric simulations. Terms are set according to \cite Adami2016.
  * @param block Block of the considered phase.
  * @param volume_forces Reference to array of volume forces increments to be filled here (indirect return parameter).
  */
@@ -76,11 +76,11 @@ void AxisymmetricFluxes::ComputeAxisymmetricContributions( Block const& block, d
    double const cell_size, double const node_origin_x ) const {
 
    double const (&velocity_x)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::VelocityX);
-   double const   (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
+   double const (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
    double const (&momentum_x)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::MomentumX);
    // direct use of y-momentum buffer allowed since axisymmetric is only used in 2D
    double const (&momentum_y)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::MomentumY);
-   double const     (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
+   double const (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       double const one_radius = 1.0 / (node_origin_x + ( (double(i) + 0.5) ) * cell_size);

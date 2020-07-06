@@ -73,13 +73,13 @@
 #include "stencils/stencil_utilities.h"
 
 /**
- * @brief constructor to create the material Mach number output
- * @param unit_handler Instance to provide dimensionalization of variables
- * @param material_manager Instance to access all material data
- * @param quantity_name Name of the quantity that is displayed in the ParaView cell data list
- * @param output_flags Flags of the output type that is written (0: standard, 1: interface, 2:debug)
+ * @brief constructor to create the material Mach number output.
+ * @param unit_handler Instance to provide dimensionalization of variables.
+ * @param material_manager Instance to access all material data.
+ * @param quantity_name Name of the quantity that is displayed in the ParaView cell data list.
+ * @param output_flags Flags of the output type that is written (0: standard, 1: interface, 2:debug).
  *
- * @note {row, colmun} = {1,1} marks that the quantity is a scalar
+ * @note {row, colmun} = {1,1} marks that the quantity is a scalar.
  */
 MachNumberOutput::MachNumberOutput( UnitHandler const& unit_handler,
                                     MaterialManager const& material_manager,
@@ -90,7 +90,7 @@ MachNumberOutput::MachNumberOutput( UnitHandler const& unit_handler,
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
@@ -137,10 +137,10 @@ void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  *
  * @note Attention: In case prime state, parameter  variables are used, pay attention that they only exist on leave nodes. In case a division is made on non-leave nodes
- *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes
+ *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes.
  */
 void MachNumberOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
 

@@ -76,13 +76,6 @@
  */
 double WENOCU6::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
 
-#ifndef PERFORMANCE
-   //output error in case something went wrong with the stencil size
-   if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size in WENOCU65 is longer than provided Array");
-   }
-#endif
-
    double const epsilon_weno_cu6 = 1.0e-8 * cell_size * cell_size;
 
    // Assign values to v_i to make it easier to read

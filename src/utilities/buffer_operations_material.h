@@ -80,7 +80,7 @@ namespace BufferOperations {
        * @brief This function copies the values in the Conservative buffer from the Source to the Target buffer.
        *        Source and Target ConservativeBufferType are given as templates. It is done for one node.
        * @tparam SourceBuffer The source ConservativeBufferType.
-       * @tparam TargetBuffer The target ConservativeBufferType
+       * @tparam TargetBuffer The target ConservativeBufferType.
        * @param node The node for which the buffers are copied.
        */
       template<ConservativeBufferType SourceBuffer, ConservativeBufferType TargetBuffer>
@@ -100,7 +100,7 @@ namespace BufferOperations {
        *        Source and Target ConservativeBufferType are given as templates. It is done for a vector of nodes. Calls a copy
        *        function for each node in the vector.
        * @tparam SourceBuffer The source ConservativeBufferType.
-       * @tparam TargetBuffer The target ConservativeBufferType
+       * @tparam TargetBuffer The target ConservativeBufferType.
        * @param nodes The nodes for which the buffers are copied.
        */
       template<ConservativeBufferType SourceBuffer, ConservativeBufferType TargetBuffer>

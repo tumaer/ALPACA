@@ -72,9 +72,9 @@
 
 /**
  * @brief Standard Constructor for Internal Boundaries.
- * @param tree Instance providing information of local node arrangement
- * @param topology Instance providing information of global node arrangement
- * @param communication_manager Instance to carry out actual communication and holding the internal and external neighbor/location relations
+ * @param tree Instance providing information of local node arrangement.
+ * @param topology Instance providing information of global node arrangement.
+ * @param communication_manager Instance to carry out actual communication and holding the internal and external neighbor/location relations.
  * @param number_of_materials Maximum number of materials in the simulation.
  */
 InternalHaloManager::InternalHaloManager( Tree& tree, TopologyManager& topology, CommunicationManager& communication_manager, unsigned int const number_of_materials ) :
@@ -87,7 +87,7 @@ InternalHaloManager::InternalHaloManager( Tree& tree, TopologyManager& topology,
 }
 
 /**
- * @brief Adjusts the values in internal halo cells, according to their type
+ * @brief Adjusts the values in internal halo cells, according to their type.
  * @param level The level on which halos of nodes will be modified.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on specified level. If true: jumps will not be updated on the current level.
@@ -106,9 +106,9 @@ void InternalHaloManager::MaterialHaloUpdateOnLevel( unsigned int const level, M
       // and Conservatives_Plane_TB and so on.
       // Proper cast is handled within SendJumpToChild in internal_boundary_condition
       // as of C++17 vector is guaranteed to be contiguous in memory
-      std::vector<ExchangePlane> jump_buffer_plane( MF::ANOF( field_type ) * number_of_materials_ * communication_manager_.JumpSendCount( level, 0 ) );
-      std::vector<ExchangeStick> jump_buffer_stick( MF::ANOF( field_type ) * number_of_materials_ * communication_manager_.JumpSendCount( level, 1 ) );
-      std::vector<ExchangeCube> jump_buffer_cube( MF::ANOF( field_type ) * number_of_materials_ * communication_manager_.JumpSendCount( level, 2 ) );
+      std::vector<ExchangePlane> jump_buffer_plane( MF::ANOF( field_type ) * number_of_materials_ * communication_manager_.JumpSendCount( level, ExchangeType::Plane ) );
+      std::vector<ExchangeStick> jump_buffer_stick( MF::ANOF( field_type ) * number_of_materials_ * communication_manager_.JumpSendCount( level, ExchangeType::Stick ) );
+      std::vector<ExchangeCube> jump_buffer_cube( MF::ANOF( field_type ) * number_of_materials_ * communication_manager_.JumpSendCount( level, ExchangeType::Cube ) );
       MpiMaterialHaloUpdateJump( requests, communication_manager_.InternalBoundariesJumpMpi( level ), jump_buffer_plane, jump_buffer_stick, jump_buffer_cube, field_type );
       NoMpiMaterialHaloUpdate( communication_manager_.InternalBoundariesJump( level ), field_type );
       MPI_Waitall( requests.size(), requests.data(), MPI_STATUSES_IGNORE ); // buffer-vectors need to be alive till this point
@@ -140,7 +140,7 @@ void InternalHaloManager::InterfaceTagHaloUpdateOnLevel( unsigned int const leve
    // it is necessary that first the non-jump boundaries are carried out to ensure that all parent nodes contain the correct information in their halo cells
    MpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesMpi( level ), requests );
    NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundaries( level ) );
-   // Jump halo update 
+   // Jump halo update
    // (Inteface tag jumps are always handled locally, but might be in the mpi buffer for MaterialHaloUpdates.)
    NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesJump( level ) );
     // Inteface tag jumps are always handled locally, but might be in the mpi buffer for MaterialHaloUpdates.
@@ -162,7 +162,7 @@ void InternalHaloManager::InterfaceHaloUpdateOnLevel( unsigned int const level, 
    // it is necessary that first the non-jump boundaries are carried out to ensure that all parent nodes contain the correct information in their halo cells
    MpiInterfaceHaloUpdate(communication_manager_.InternalBoundariesMpi( level ), type, requests );
    NoMpiInterfaceHaloUpdate(communication_manager_.InternalBoundaries( level ), type );
-   // Jump halo update 
+   // Jump halo update
    // (levelset jumps are always handled locally, but might be in the mpi buffer for MaterialHaloUpdates.)
    NoMpiInterfaceHaloUpdate(communication_manager_.InternalBoundariesJump( level ), type );
    NoMpiInterfaceHaloUpdate(communication_manager_.InternalBoundariesJumpMpi( level ), type );
@@ -198,17 +198,17 @@ void InternalHaloManager::UpdateMaterialJumpMpiRecv( std::uint64_t const id, std
             communication_manager_.Recv( &host_block.GetPrimeStateBuffer(), MF::ANOP(), recv_type, sender_rank, requests );
          }
          break;
-#ifndef PERFORMANCE 
+#ifndef PERFORMANCE
          case MaterialFieldType::Parameters: {
             communication_manager_.Recv( &host_block.GetParameterBuffer(), MF::ANOPA(), recv_type, sender_rank, requests );
          }
          break;
-         default: 
+         default:
             throw std::logic_error( "Material field type not known!" );
-#else 
-         default: /* MaterialFieldType::Parameters: */ 
+#else
+         default: /* MaterialFieldType::Parameters: */
             communication_manager_.Recv( &host_block.GetParameterBuffer(), MF::ANOPA(), recv_type, sender_rank, requests );
-#endif 
+#endif
       }
    }
 }
@@ -251,15 +251,15 @@ void InternalHaloManager::UpdateMaterialJumpNoMpi( std::uint64_t const id, Bound
             }
          }
          break;
-         default: 
+         default:
             throw std::logic_error( "Material field type not known!" );
-#else 
+#else
          default: /* MaterialFieldType::Parameters: */ {
             for( Parameter const pa : MF::ASOPA()) {
                Multiresolution::Prediction( parent_block.GetParameterBuffer( pa ), host_block.GetParameterBuffer( pa ), id, start_indices[0], halo_size[0], start_indices[1], halo_size[1], start_indices[2], halo_size[2] );
-            }         
+            }
          }
-#endif 
+#endif
       }
    }
 }
@@ -290,7 +290,7 @@ void InternalHaloManager::UpdateMaterialHaloCellsNoMpi( std::uint64_t const id, 
 }
 
 /**
- * @brief Set the state of the Halo cells according to the Boundary Type. Only Updates via MPI are executed by this function
+ * @brief Set the state of the Halo cells according to the Boundary Type. Only Updates via MPI are executed by this function.
  * @param id The id of the node to be updated.
  * @param requests In case the Boundary Type requires MPI Communication asynchronous communication is supported via a reference to a MPI_Request vector.
  * @param loc BoundaryLocation to be updated.
@@ -322,21 +322,21 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( std::uint64_t const id
                communication_manager_.Send( &host_block.GetParameterBuffer(), MF::ANOPA(), send_type, rank_of_neighbor, requests );
             }
             break;
-            default: 
+            default:
                throw std::logic_error( "Material field type not known!" );
-#else 
+#else
             default: /* MaterialFieldType::Parameters: */ {
                MPI_Datatype send_type = communication_manager_.SendDatatype( loc, DatatypeForMpi::Double );
                communication_manager_.Send( &host_block.GetParameterBuffer(), MF::ANOPA(), send_type, rank_of_neighbor, requests );
             }
-#endif 
+#endif
          }
       }
    }
 }
 
 /**
- * @brief Set the state of the Halo cells according to the Boundary Type. Only Updates via MPI are executed by this function
+ * @brief Set the state of the Halo cells according to the Boundary Type. Only Updates via MPI are executed by this function.
  * @param id The id of the node to be updated.
  * @param requests In case the Boundary Type requires MPI Communication asynchronous communication is supported via a reference to a MPI_Request vector.
  * @param loc BoundaryLocation to be updated.
@@ -365,7 +365,7 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiRecv( std::uint64_t const id
                communication_manager_.Recv( &host_block.GetParameterBuffer(), MF::ANOPA(), recv_type, rank_of_neighbor, requests );
             }
             break;
-            default: 
+            default:
                throw std::logic_error( "Material field type not known!" );
          }
       }
@@ -423,8 +423,8 @@ inline void InternalHaloManager::ExtendClosestInternalValue( T (&host_buffer)[CC
  * @brief Sends the state of the Halo cells according to the Boundary Type.
  * @param id The id of the node to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
- * @param buffer_type Type of buffer on the levelset block that should be updated
- * @param loc BoundaryLocation to be updated
+ * @param buffer_type Type of buffer on the levelset block that should be updated.
+ * @param loc BoundaryLocation to be updated.
  */
 void InternalHaloManager::UpdateInterfaceHaloCellsMpiSend( std::uint64_t const id, std::vector<MPI_Request>& requests,
                                                           InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
@@ -446,8 +446,8 @@ void InternalHaloManager::UpdateInterfaceHaloCellsMpiSend( std::uint64_t const i
  * @brief Receives the state of the interface halo cells according to the Boundary Type.
  * @param id The id of the node to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
- * @param buffer_type Type of buffer on the levelset block that should be updated
- * @param loc BoundaryLocation to be updated
+ * @param buffer_type Type of buffer on the levelset block that should be updated.
+ * @param loc BoundaryLocation to be updated.
  */
 void InternalHaloManager::UpdateInterfaceHaloCellsMpiRecv( std::uint64_t const id, std::vector<MPI_Request>& requests,
                                                           InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
@@ -473,8 +473,8 @@ void InternalHaloManager::UpdateInterfaceHaloCellsMpiRecv( std::uint64_t const i
 /**
  * @brief Performs all Halo Updates that can be done without communication.
  * @param id The id of the node to be updated.
- * @param buffer_type Type of buffer on the levelset block that should be updated
- * @param loc BoundaryLocation to be updated
+ * @param buffer_type Type of buffer on the levelset block that should be updated.
+ * @param loc BoundaryLocation to be updated.
  */
 void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( std::uint64_t const id, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
    Node& node = tree_.GetNodeWithId( id );
@@ -504,7 +504,7 @@ void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( std::uint64_t const id,
 /* @brief Sends the state of the interface tags according to the Boundary Type.
  * @param id_node The node and its id to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
- * @param loc BoundaryLocation to be updated
+ * @param loc BoundaryLocation to be updated.
  */
 void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
    Node& node = tree_.GetNodeWithId( id );
@@ -521,7 +521,7 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t cons
  * @brief Receives the state of the interface halo cells according to the Boundary Type.
  * @param id The id of the node to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
- * @param loc BoundaryLocation to be updated
+ * @param loc BoundaryLocation to be updated.
  */
 void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
    Node& node = tree_.GetNodeWithId( id );
@@ -538,7 +538,7 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t cons
 /**
  * @brief Performs all interface halo updates that can be done without communication.
  * @param id The id of the node to be updated.
- * @param loc BoundaryLocation to be updated
+ * @param loc BoundaryLocation to be updated.
  */
 void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t const id, BoundaryLocation const loc ) {
    Node& node = tree_.GetNodeWithId( id );
@@ -559,7 +559,7 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t const 
  * @param id The id of the node to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
  * @param remote_child_id Id of the remote child.
- * @param send_buffer necessary for asynchronous communication, as buffer to store temporary data. It has the size of Conservatives_Slice_EW but might also be used for Conservatives_Slice_NS, Conservatives_Slice_TB
+ * @param send_buffer necessary for asynchronous communication, as buffer to store temporary data. It has the size of Conservatives_Slice_EW but might also be used for Conservatives_Slice_NS, Conservatives_Slice_TB.
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
@@ -616,9 +616,9 @@ unsigned int InternalHaloManager::UpdateMaterialJumpMpiSend( std::uint64_t const
  * @brief Method used to execute the Halo Update for all jump boundaries with MPI Communication.
  * @param requests vector of communication request (handle), new handle will be added at the end of the vector.
  * @param boundaries Description of internal boundaries with jump.
- * @param jump_buffer_plane Vector containing all buffers used for the jump exchange of plane boundaries
- * @param jump_buffer_stick Vector containing all buffers used for the jump exchange of stick boundaries
- * @param jump_buffer_cube Vector containing all buffers used for the jump exchange of cube boundaries
+ * @param jump_buffer_plane Vector containing all buffers used for the jump exchange of plane boundaries.
+ * @param jump_buffer_stick Vector containing all buffers used for the jump exchange of stick boundaries.
+ * @param jump_buffer_cube Vector containing all buffers used for the jump exchange of cube boundaries.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
 void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& requests,
@@ -676,7 +676,7 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
                jump_send_counter_cube += UpdateMaterialJumpMpiSend( parent_id, requests, id, &jump_buffer_cube[jump_send_counter_cube], location, field_type );
             }
          }
-#endif 
+#endif
       }
    }
    if( jump_send_counter_plane > jump_buffer_plane.size() ) {
@@ -722,14 +722,14 @@ void InternalHaloManager::MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>&
             CommunicationStatistics::no_jump_halos_recv_++;
             UpdateMaterialHaloCellsMpiRecv( id, requests, location, field_type );
          }
-#endif 
+#endif
       }
    }
 }
 
 /**
- * @brief Method used to execute the Halo Update for all boundaries without MPI Communication
- * @param boundaries description of internal boundaries, either jump or no jump
+ * @brief Method used to execute the Halo Update for all boundaries without MPI Communication.
+ * @param boundaries description of internal boundaries, either jump or no jump.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
 void
@@ -745,17 +745,17 @@ InternalHaloManager::NoMpiMaterialHaloUpdate( std::vector<std::tuple<std::uint64
             UpdateMaterialJumpNoMpi( id, location, field_type );
          }
          break;
-#ifndef PERFORMANCE 
+#ifndef PERFORMANCE
          case InternalBoundaryType::NoJumpBoundaryLocal: {
             UpdateMaterialHaloCellsNoMpi( id, location, field_type );
          }
          break;
          default:
             throw std::logic_error( " Material halo update: unknown boundary type" );
-#else 
-         default: /* InternalBoundaryType::NoJumpBoundaryLocal */ 
+#else
+         default: /* InternalBoundaryType::NoJumpBoundaryLocal */
             UpdateMaterialHaloCellsNoMpi( id, location, field_type );
-#endif 
+#endif
       }
    }
 }
@@ -797,11 +797,11 @@ void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std:
          break;
          default:
             throw std::logic_error( "BoundaryManager::MpiInterfaceTagHaloUpdate: BoundaryType not supported" );
-#else 
+#else
          default: /* InternalBoundaryType::NoJumpBoundaryMpiRecv */ {
             UpdateInterfaceTagHaloCellsMpiRecv( id, requests, location );
          }
-#endif 
+#endif
       }
    }
 }
@@ -809,7 +809,7 @@ void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std:
 /**
  * @brief Executes the InterfaceHaloUpdate for all boundaries that do not need communication.
  * @param boundaries Boundaries to be updated.
- * @param buffer_type Type of buffer on the levelset block that should be updated
+ * @param buffer_type Type of buffer on the levelset block that should be updated.
  */
 void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                    InterfaceBlockBufferType const buffer_type ) {
@@ -828,7 +828,7 @@ void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::
 /**
  * @brief Executes the InterfaceHaloUpdate for all boundaries that do need communication.
  * @param boundaries Boundaries to be updated.
- * @param buffer_type Type of buffer on the levelset block that should be updated
+ * @param buffer_type Type of buffer on the levelset block that should be updated.
  */
 void InternalHaloManager::MpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                  InterfaceBlockBufferType const buffer_type, std::vector<MPI_Request>& requests ) {
@@ -842,17 +842,17 @@ void InternalHaloManager::MpiInterfaceHaloUpdate( std::vector<std::tuple<std::ui
          }
          break;
 
-#ifndef PERFORMANCE 
+#ifndef PERFORMANCE
          case InternalBoundaryType::NoJumpBoundaryMpiRecv: {
             UpdateInterfaceHaloCellsMpiRecv( id, requests, buffer_type, location );
          }
          break;
          default:
             throw std::logic_error( "BoundaryManager::MpiInterfaceHaloUpdate: BoundaryType not supported" );
-#else 
-         default: /* InternalBoundaryType::NoJumpBoundaryLocal */ 
+#else
+         default: /* InternalBoundaryType::NoJumpBoundaryLocal */
             UpdateInterfaceHaloCellsMpiRecv( id, requests, buffer_type, location );
-#endif 
+#endif
       }
    }
 }

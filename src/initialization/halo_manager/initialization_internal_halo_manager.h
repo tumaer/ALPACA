@@ -72,14 +72,14 @@
 #include "materials/material_manager.h"
 
 /**
- * @brief Defines all initialization functions required for the internal halo manager 
+ * @brief Defines all initialization functions required for the internal halo manager.
  */
 namespace Initialization {
 
    // Initialization function of the internal halo manager
    InternalHaloManager InitializeInternalHaloManager( TopologyManager & topology_manager,
-                                                      Tree & tree, 
-                                                      CommunicationManager & communication_manager, 
+                                                      Tree & tree,
+                                                      CommunicationManager & communication_manager,
                                                       MaterialManager const& material_manager );
 }
 

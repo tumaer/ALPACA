@@ -71,7 +71,7 @@
 
 /**
  * @brief Constructor to create a interface block according to an already computed levelset field.
- * @param levelset_initial Reference to Array holding the levelset field to be in this interface block.
+ * @param levelset_initial Reference to array holding the levelset field to be in this interface block.
  */
 InterfaceBlock::InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
 
@@ -222,9 +222,8 @@ auto InterfaceBlock::GetInitialBuffer( InterfaceDescription const interface_desc
 
 /**
  * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
- * made based on the template parameter.
- * Implementation for the average buffer.
- * @return base interface description struct
+ *                made based on the template parameter. Implementation for the base buffer.
+ * @return Base interface description struct.
  */
 template<>
 InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::Base>() {
@@ -240,10 +239,9 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<Inter
 }
 
 /**
- * @brief Wrapper function that returns a interface description buffer (base, right-hand side, reinitialized or initial). The decision is
- * made based on the template parameter.
- * Implementation for the average buffer.
- * @return right-hand side interface description struct
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ *                made based on the template parameter. Implementation for the right-hand side buffer.
+ * @return Right-hand side interface description struct.
  */
 template<>
 InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::RightHandSide>() {
@@ -259,10 +257,9 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<Inter
 }
 
 /**
- * @brief Wrapper function that returns a interface description buffer (base, right-hand side, reinitialized or initial). The decision is
- * made based on the template parameter.
- * Implementation for the average buffer.
- * @return reinitialized interface description struct
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ *                made based on the template parameter. Implementation for the reinitialized buffer.
+ * @return Reinitialized interface description struct.
  */
 template<>
 InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::Reinitialized>() {
@@ -278,10 +275,9 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<Inter
 }
 
 /**
- * @brief Wrapper function that returns a interface description buffer (base, right-hand side, reinitialized or initial). The decision is
- * made based on the template parameter.
- * Implementation for the average buffer.
- * @return initial interface description struct
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ *                made based on the template parameter. Implementation for the initial buffer.
+ * @return Initial interface description struct.
  */
 template<>
 InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::Initial>() {
@@ -350,7 +346,7 @@ InterfaceDescriptions& InterfaceBlock::GetInitialBuffer() {
 }
 
 /**
- * @brief Const overload
+ * @brief Const overload.
  */
 InterfaceDescriptions const& InterfaceBlock::GetInitialBuffer() const {
    return initial_;
@@ -379,7 +375,7 @@ InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer( InterfaceD
 }
 
 /**
- * @brief Const overload
+ * @brief Const overload.
  */
 InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type ) const {
    switch( buffer_type ) {

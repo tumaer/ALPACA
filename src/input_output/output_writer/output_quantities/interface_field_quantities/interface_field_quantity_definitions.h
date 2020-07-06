@@ -73,14 +73,14 @@
 #include <iostream>
 
 /**
- * @brief The InterfaceFieldName enum gives all possible choices for which an output can be written (interface descriptions, interface states and  interface paramteres)
+ * @brief The InterfaceFieldName enum gives all possible choices for which an output can be written (interface descriptions, interface states and  interface paramteres).
  *
  * @note: In order to append a InterfaceFieldQuantity to the ouput follow the steps:
  *        1. Add The field quantity to InterfaceFieldQuantityName in the appropriate group (arbitrary name)
  *        2. Add for this name an entry with default values to the function DataOfInterfaceFieldQuantity below
  *           ( for scalar quantities follow e.g. levelset, for vectorial quantities follow e.g. velocity in material_field_quantity_definitions.h)
  *        3. Add an output constants expression in user_specifications/output_constants.h
- *        4. Add the constructor call in the "initialization_output_writer.cpp" function
+ *        4. Add the constructor call in the "initialization_output_writer.cpp" function.
  */
 enum class InterfaceFieldQuantityName {
    // interface descriptions
@@ -114,7 +114,7 @@ inline std::string SuffixOfInterfaceDescriptionBufferType( InterfaceDescriptionB
 }
 
 /**
- * @brief Defines a struct storing all necessary information to provide the correct information for each InterfaceFieldQuantity
+ * @brief Defines a struct storing all necessary information to provide the correct information for each InterfaceFieldQuantity.
  */
 struct InterfaceFieldQuantityData {
    // Interface field type for which the output is written
@@ -127,17 +127,17 @@ struct InterfaceFieldQuantityData {
    double default_value_;
 
    /**
-    * @brief Gives the dimensions of the quantity
-    * @return Dimensions of the quantity
+    * @brief Gives the dimensions of the quantity.
+    * @return Dimensions of the quantity.
     */
    std::array<unsigned int, 2> GetDimensions() const {
       return { static_cast<unsigned int>( field_indices_.size() ), 1 };
    }
 
    /**
-    * @brief Verifies the quantity data on validity to eliminate non-active fields
-    * @return True if any of the fields are active, otherwise false
-    * @note Manipulates the member data in case some fields are not active
+    * @brief Verifies the quantity data on validity to eliminate non-active fields.
+    * @return True if any of the fields are active, otherwise false.
+    * @note Manipulates the member data in case some fields are not active.
     */
    bool VerifyQuantity() {
       // Local field type for lambda capture
@@ -160,9 +160,9 @@ struct InterfaceFieldQuantityData {
 /*                              Add here new interface field quantities                                                */
 /***********************************************************************************************************************/
 /**
- * @brief Gives the appropriate dat for the interface field quantity
+ * @brief Gives the appropriate dat for the interface field quantity.
  * @param output_quantity The Interface field output quantity identifier.
- * @return Interface Field Type of given identifier
+ * @return Interface Field Type of given identifier.
  */
 inline InterfaceFieldQuantityData DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName const output_quantity ) {
    // General declaration of the struct

@@ -295,44 +295,32 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySi
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( Parameter const parameter) {
-   // currently not needed
-   (void) parameter;
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( Parameter const ) {
    return 1.0;
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( Parameter const parameter) {
-   // currently not needed
-   (void) parameter;
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( Parameter const ) {
    return 1.0;
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::North>::SymmetrySign( Parameter const parameter ) {
-   // currently not needed
-   (void) parameter;
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::North>::SymmetrySign( Parameter const ) {
    return 1.0;
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::South>::SymmetrySign( Parameter const parameter ) {
-   // currently not needed
-   (void) parameter;
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::South>::SymmetrySign( Parameter const ) {
    return 1.0;
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::Top>::SymmetrySign( Parameter const parameter ) {
-   // currently not needed
-   (void) parameter;
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::Top>::SymmetrySign( Parameter const ) {
    return 1.0;
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySign( Parameter const parameter ) {
-   // currently not needed
-   (void) parameter;
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySign( Parameter const ) {
    return 1.0;
 }
 

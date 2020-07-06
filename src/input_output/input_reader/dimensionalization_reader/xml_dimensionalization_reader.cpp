@@ -69,44 +69,48 @@
 
 #include "input_output/input_reader/xml_utilities.h"
 
+/**
+ * @brief Default constructor for the dimensionalization reader for xml-type input files.
+ * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
+ */
 XmlDimensionalizationReader::XmlDimensionalizationReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   DimensionalizationReader(), 
+   DimensionalizationReader(),
    xml_input_file_( std::move( inputfile ) ) {
-   /** Empty besides initializer list and base class constructor call */ 
+   /** Empty besides initializer list and base class constructor call */
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 double XmlDimensionalizationReader::DoReadReferenceLength() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "lengthReference" } );      
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "lengthReference" } );
    return XmlUtilities::ReadDouble( node );
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 double XmlDimensionalizationReader::DoReadReferenceDensity() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "densityReference" } );    
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "densityReference" } );
    return XmlUtilities::ReadDouble( node );
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 double XmlDimensionalizationReader::DoReadReferenceVelocity() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization",  "velocityReference" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization",  "velocityReference" } );
    return XmlUtilities::ReadDouble( node );
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 double XmlDimensionalizationReader::DoReadReferenceTemperature() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "temperatureReference" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "temperatureReference" } );
    return XmlUtilities::ReadDouble( node );
 }

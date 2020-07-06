@@ -78,14 +78,14 @@ namespace BufferOperations {
 
       /**
        * @brief Reconstructs a scalar field at the cell faces.
-       * @param scalar Buffer containing the scalar at the cell center
-       * @param cell_size The cell size used for calculating the reconstruction
-       * @param scalar_at_cell_faces The corresponding scalar components at the cell face
+       * @param scalar Buffer containing the scalar at the cell center.
+       * @param cell_size The cell size used for calculating the reconstruction.
+       * @param scalar_at_cell_faces The corresponding scalar components at the cell face.
        *        Description for the positions of the Array:
        *        [CC::ICX()+1]  [CC::ICY()+1]  [CC::ICZ()+1]  [DTI(CC::DIM())]
        *        Field index x  Field index y  Field index z  Cell face x/y/z
        *
-       * @tparam ReconstructionStencil type to be used for the reconstruction to the cell face
+       * @tparam ReconstructionStencil type to be used for the reconstruction to the cell face.
        */
       template<typename ReconstructionStencil>
       inline void ComputeScalarAtCellFaces( double const (&scalar)[CC::TCX()][CC::TCY()][CC::TCZ()],
@@ -127,14 +127,14 @@ namespace BufferOperations {
 
       /**
        * @brief Computes a three dimensional vectorial field at the cell faces.
-       * @param v1, v2, v3 Buffer containing the x,y,z direction of the vector at the cell face
-       * @param cell_size The cell size used for calculating the derivative
-       * @param vector_at_cell_faces The corresponding vector components at the cell face
+       * @param v1, v2, v3 Buffer containing the x,y,z direction of the vector at the cell face.
+       * @param cell_size The cell size used for calculating the derivative.
+       * @param vector_at_cell_faces The corresponding vector components at the cell face.
        *        Description for the positions of the Array:
        *        [CC::ICX()+1]  [CC::ICY()+1]  [CC::ICZ()+1]  [DTI(CC::DIM())]  [DTI(CC::DIM())]
        *        Field index x  Field index y  Field index z  Cell face x/y/z   Vector component in x/y/z direction
        *
-       * @tparam ReconstructionStencil type to be used for the reconstruction to the cell face
+       * @tparam ReconstructionStencil type to be used for the reconstruction to the cell face.
        */
       template<typename ReconstructionStencil>
       inline void ComputeVectorAtCellFaces( double const (&v1)[CC::TCX()][CC::TCY()][CC::TCZ()],
@@ -184,14 +184,14 @@ namespace BufferOperations {
 
       /**
        * @brief Computes the gradient of a three dimensional vectorial field .
-       * @param v1, v2, v3 Buffer containing the x,y,z direction of the vector at the cell center
-       * @param cell_size The cell size used for calculating the derivative
+       * @param v1, v2, v3 Buffer containing the x,y,z direction of the vector at the cell center.
+       * @param cell_size The cell size used for calculating the derivative.
        * @param gradient The vectorial gradient (tensor dim x dim) field as indirect return parameter.
        *        Description for the positions of the Array:
        *        [CC::ICX()+1]  [CC::ICY()+1]  [CC::ICZ()+1]  [DTI(CC::DIM())][DTI(CC::DIM())]
        *        Field index x  Field index y  Field index z   Velocity gradient: du_i / dx_j
        *
-       * @tparam DerivativeStencil type to be used for the computation of the derivative at the center
+       * @tparam DerivativeStencil type to be used for the computation of the derivative at the center.
        */
       template<typename DerivativeStencil>
       inline void ComputeVectorGradientAtCellCenter( double const (&v1)[CC::TCX()][CC::TCY()][CC::TCZ()],
@@ -223,17 +223,17 @@ namespace BufferOperations {
       }
 
       /**
-       * @brief Computes the gradient of a vector at the cell face
-       * @param v1, v2, v3 Corresponding components of the vector in x,y,z direction at cell center
-       * @param cell_size The cell size used for calculating the derivative
-       * @param gradient_at_cell_faces The corresponding vector components at the cell face
+       * @brief Computes the gradient of a vector at the cell face.
+       * @param v1, v2, v3 Corresponding components of the vector in x,y,z direction at cell center.
+       * @param cell_size The cell size used for calculating the derivative.
+       * @param gradient_at_cell_faces The corresponding vector components at the cell face.
        *        Description for the positions of the Array:
        *        [CC::ICX()+1]  [CC::ICY()+1]  [CC::ICZ()+1]  [DTI(CC::DIM())]  [DTI(CC::DIM())][DTI(CC::DIM())]
        *        Field index x  Field index y  Field index z  Cell face x/y/z   Velocity gradient: dv_i / dx_j
        *
-       * @tparam DerivativeStencilCenter type to be used for the computation of the derivative at the cell center
-       * @tparam DerivativeStencilFace type to be used for the explicit derivative computation at a cell face
-       * @tparam ReconstructionStencil type to be used for the reconstruction of derivatives at cell face
+       * @tparam DerivativeStencilCenter type to be used for the computation of the derivative at the cell center.
+       * @tparam DerivativeStencilFace type to be used for the explicit derivative computation at a cell face.
+       * @tparam ReconstructionStencil type to be used for the reconstruction of derivatives at cell face.
        */
       template<typename DerivativeStencilCenter, typename DerivativeStencilFace, typename ReconstructionStencil>
       inline void ComputeVectorGradientAtCellFaces( double const (&v1)[CC::TCX()][CC::TCY()][CC::TCZ()],

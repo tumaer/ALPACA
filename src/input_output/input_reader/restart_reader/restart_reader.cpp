@@ -71,33 +71,33 @@
 #include <stdexcept>
 
 /**
- * @brief Gives the checked mode used to restore a simulation 
- * @return restore mode identifier of the simulation
+ * @brief Gives the checked mode used to restore a simulation.
+ * @return restore mode identifier of the simulation.
  */
 RestoreMode RestartReader::ReadRestoreMode() const {
    return StringToRestoreMode( DoReadRestoreMode() );
 }
 
 /**
- * @brief Gives the checked filename to be used for the output 
- * @return name of the restore file
- * @note Filename without any white spaces 
+ * @brief Gives the checked filename to be used for the output.
+ * @return name of the restore file.
+ * @note Filename without any white spaces.
  */
-std::string RestartReader::ReadRestoreFilename() const { 
+std::string RestartReader::ReadRestoreFilename() const {
    return StringOperations::RemoveSpaces( DoReadRestoreFilename() );
 }
 
 /**
- * @brief Gives the checked times type used for writing the restart snapshots 
- * @return snapshot times type identifier
+ * @brief Gives the checked times type used for writing the restart snapshots.
+ * @return snapshot times type identifier.
  */
 SnapshotTimesType RestartReader::ReadSnapshotTimesType() const {
    return StringToSnapshotTimesType( DoReadSnapshotTimesType() );
 }
 
 /**
- * @brief Gives the checked interval to be used for writign restart files (in wall seconds)
- * @return interval to be used
+ * @brief Gives the checked interval to be used for writign restart files (in wall seconds).
+ * @return interval to be used.
  */
 unsigned int RestartReader::ReadSnapshotInterval() const {
    // read and make consistency check
@@ -106,12 +106,12 @@ unsigned int RestartReader::ReadSnapshotInterval() const {
       throw std::invalid_argument( "Snapshot interval for restart files must NOT be below zero!" );
    }
 
-   return static_cast<unsigned int>( interval );   
+   return static_cast<unsigned int>( interval );
 }
 
 /**
- * @brief Gives the checked number of snapshots to be kept (for the interval based writing) 
- * @return number of snapshots
+ * @brief Gives the checked number of snapshots to be kept (for the interval based writing).
+ * @return number of snapshots.
  */
 unsigned int RestartReader::ReadSnapshotIntervalsToKeep() const {
    // read and make consistency check
@@ -120,21 +120,21 @@ unsigned int RestartReader::ReadSnapshotIntervalsToKeep() const {
       throw std::invalid_argument( "Snapshot intervals to keep for restart files must NOT be below zero!" );
    }
 
-   return static_cast<unsigned int>( keep );   
+   return static_cast<unsigned int>( keep );
 }
 
 /**
- * @brief Gives the checked time stamps to be used to write restart snapshots 
- * @return timestamps to be used 
+ * @brief Gives the checked time stamps to be used to write restart snapshots
+ * @return timestamps to be used
  */
 std::vector<double> RestartReader::ReadSnapshotTimeStamps() const {
    // Obtain the time stamps and sort them before return
    std::vector<double> time_stamps( DoReadSnapshotTimeStamps() );
-   // If negative elements are present throw error 
+   // If negative elements are present throw error
    if( std::any_of( time_stamps.begin(), time_stamps.end(), [] ( double const timestamp ) { return timestamp < 0.0; } ) ) {
       throw std::invalid_argument( "All time stamps for the restart snapshots must be positive or zero!" );
    }
-   // Sort the time stamps 
+   // Sort the time stamps
    std::sort( time_stamps.begin(), time_stamps.end() );
 
    return time_stamps;

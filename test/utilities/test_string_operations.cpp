@@ -75,7 +75,7 @@ SCENARIO( "An indentation string with empty characters can be created", "[1rank]
    }
 }
 
-SCENARIO( "All spaces from strings cne be removed", "[1rank]" ) {
+SCENARIO( "All spaces from strings can be removed", "[1rank]" ) {
    GIVEN( "String with single space" ) {
       std::string const single_string = "string one";
       REQUIRE( StringOperations::RemoveSpaces( single_string ) == "stringone" );
@@ -90,7 +90,7 @@ SCENARIO( "All spaces from strings cne be removed", "[1rank]" ) {
    }
 }
 
-SCENARIO( "All spaces from strings cne be removed and the string is converted to upper case", "[1rank]" ) {
+SCENARIO( "All spaces from strings can be removed and the string is converted to upper case", "[1rank]" ) {
    GIVEN( "String with single space" ) {
       std::string const single_string = "string one";
       REQUIRE( StringOperations::ToUpperCaseWithoutSpaces( single_string ) == "STRINGONE" );
@@ -125,5 +125,20 @@ SCENARIO( "A string can be converted to a string with scientific notation", "[1r
    GIVEN( "Negative value cropped at four digits with shifted sign space" ) {
       double const value = -0.12345678;
       REQUIRE( StringOperations::ToScientificNotationString( value, 4, true ) == "-1.2346e-01" );
+   }
+}
+
+SCENARIO( "LEading numbers from strings can be removed", "[1rank]" ) {
+   GIVEN( "String with single leading number" ) {
+      std::string const single_string = "1string";
+      REQUIRE( StringOperations::RemoveLeadingNumbers( single_string ) == "string" );
+   }
+   GIVEN( "String with multiple leading numbers" ) {
+      std::string const single_string = "12062string";
+      REQUIRE( StringOperations::RemoveLeadingNumbers( single_string ) == "string" );
+   }
+   GIVEN( "String with multiple single leading number and numbers at the end" ) {
+      std::string const single_string = "1string2";
+      REQUIRE( StringOperations::RemoveLeadingNumbers( single_string ) == "string2" );
    }
 }

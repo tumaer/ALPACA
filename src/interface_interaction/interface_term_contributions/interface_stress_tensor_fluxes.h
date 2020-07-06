@@ -78,7 +78,7 @@
 class InterfaceStressTensorFluxes {
 
    /**
-    * @brief A struct to bundle viscous flux related information of a fluid.
+    * @brief A struct to bundle viscous flux related information of a material.
     */
    struct ViscousMaterialProperties {
       MaterialName const material_;
@@ -98,7 +98,7 @@ class InterfaceStressTensorFluxes {
    };
 
    ViscousMaterialProperties const positive_material_properties_;
-   ViscousMaterialProperties const negative_material_properties_; 
+   ViscousMaterialProperties const negative_material_properties_;
 
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
 

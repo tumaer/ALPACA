@@ -69,18 +69,8 @@
 
 #include <bitset>
 #include "boundary_condition/boundary_specifications.h"
-#include "topology/id_information.h"
-#include "utilities/mathematical_functions.h"
 #include "enums/interface_tag_definition.h"
 #include "utilities/string_operations.h"
-
-namespace {
-   constexpr unsigned int xyz_look_up_table_[3][8] = {
-      {CC::PIOLCFICX(), CC::PIOHCFICX(), CC::PIOLCFICX(), CC::PIOHCFICX(), CC::PIOLCFICX(), CC::PIOHCFICX(), CC::PIOLCFICX(), CC::PIOHCFICX()}, // X-Indecies
-      {CC::PIOLCFICY(), CC::PIOLCFICY(), CC::PIOHCFICY(), CC::PIOHCFICY(), CC::PIOLCFICY(), CC::PIOLCFICY(), CC::PIOHCFICY(), CC::PIOHCFICY()}, // Y-Indecies
-      {CC::PIOLCFICZ(), CC::PIOLCFICZ(), CC::PIOLCFICZ(), CC::PIOLCFICZ(), CC::PIOHCFICZ(), CC::PIOHCFICZ(), CC::PIOHCFICZ(), CC::PIOHCFICZ()}
-   };
-}
 
 /**
  * @brief Default constructor.
@@ -161,64 +151,6 @@ void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, Surf
          } //eq
       } //if
    } //location
-}
-
-/**
- * @brief Averages the child values into the parent, i.e. conservative average of the eight (in 3D) child cells that make up one parent cell.
- * @param child_buffer The child's buffer.
- * @param parent_buffer The parent's buffer to receive the averaged values.
- * @param child_id The id of the child.
- * @note Overrides the values in the parent buffer.
- */
-void Multiresolution::Average( Conservatives const& child_buffer, Conservatives& parent_buffer, std::uint64_t const child_id ) {
-
-   unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings(child_id)];
-   unsigned int const y_start = CC::DIM()!=Dimension::One   ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings(child_id)] : 0;
-   unsigned int const z_start = CC::DIM()==Dimension::Three ? xyz_look_up_table_[2][PositionOfNodeAmongSiblings(child_id)] : 0;
-
-   unsigned int const x_end = x_start + CC::PSOCICX();
-   unsigned int const y_end = y_start + CC::PSOCICY();
-   unsigned int const z_end = z_start + CC::PSOCICZ();
-
-   unsigned int const i_child_start = CC::FICX();
-   unsigned int const j_child_start = CC::DIM()!=Dimension::One   ? CC::FICY() : 0;
-   unsigned int const k_child_start = CC::DIM()==Dimension::Three ? CC::FICZ() : 0;
-
-   unsigned int i_child = i_child_start;
-   unsigned int j_child = j_child_start;
-   unsigned int k_child = k_child_start;
-
-   for( Equation const eq : MF::ASOE()) {
-      auto const& child_values  = child_buffer[eq];
-      auto&       parent_values = parent_buffer[eq];
-
-      i_child = i_child_start;
-      for(unsigned int i = x_start; i < x_end; ++i) {
-         j_child = j_child_start;
-         for(unsigned int j = y_start; j < y_end; ++j) {
-            k_child = k_child_start;
-            for(unsigned int k = z_start; k < z_end; ++k) {
-               if constexpr(CC::DIM() == Dimension::One) {
-                  parent_values[i][j][k]  = ( child_values[i_child][j_child][k_child] + child_values[i_child+1][j_child][k_child]) * 0.5;
-               }
-               if constexpr(CC::DIM() == Dimension::Two) {
-                  parent_values[i][j][k]  = ((child_values[i_child  ][j_child][k_child] + child_values[i_child+1][j_child+1][k_child])
-                     + (child_values[i_child+1][j_child][k_child] + child_values[i_child  ][j_child+1][k_child])) * 0.25 ;
-               }
-               if constexpr(CC::DIM() == Dimension::Three) {
-                  parent_values[i][j][k] = 0.125 * ConsistencyManagedSum(
-                     child_values[i_child][j_child  ][k_child  ] + child_values[i_child+1][j_child+1][k_child+1],
-                     child_values[i_child][j_child]  [k_child+1] + child_values[i_child+1][j_child+1][k_child  ],
-                     child_values[i_child][j_child+1][k_child  ] + child_values[i_child+1][j_child  ][k_child+1],
-                     child_values[i_child][j_child+1][k_child+1] + child_values[i_child+1][j_child  ][k_child  ] );
-               }
-               k_child += 2;
-            } //k
-            j_child += 2;
-         } //j
-         i_child += 2;
-      } //i
-   } //eq
 }
 
 /**

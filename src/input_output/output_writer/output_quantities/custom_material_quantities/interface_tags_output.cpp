@@ -65,81 +65,56 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef HLL_SIGNAL_SPEED_CALCULATOR_H
-#define HLL_SIGNAL_SPEED_CALCULATOR_H
-
-#include <cmath>
-#include "user_specifications/riemann_solver_settings.h"
+#include "input_output/output_writer/output_quantities/custom_material_quantities/interface_tags_output.h"
+#include "communication/mpi_utilities.h"
 
 /**
- * @brief Computes the signal speed estimates for Hll-type solvers according to Einfeldt \cite Einfeldt88, Davis \cite Davis88, Toro \cite Toro94, Arithmetic-averaged \cite Coralic14
- * @param density_left .
- * @param density_right .
- * @param velocity_left .
- * @param velocity_right .
- * @param pressure_left .
- * @param pressure_right .
- * @param speed_of_sound_left .
- * @param speed_of_sound_right .
- * @param gamma .
+ * @brief Constructor to output the interface tags.
+ * @param unit_handler Instance to provide dimensionalization of variables.
+ * @param material_manager Instance to access all material data.
+ * @param quantity_name Name of the quantity that is displayed in the ParaView cell data list.
+ * @param output_flags Flags of the output type that is written (0: standard, 1: interface, 2:debug).
+ *
+ * @note {row, colmun} = {1,1} marks that the quantity is a scalar.
  */
-inline std::pair<double, double> CalculateSignalSpeed ( double const density_left, double const density_right,
-                                                        double const velocity_left, double const velocity_right,
-                                                        double const pressure_left, double const pressure_right,
-                                                        double const speed_of_sound_left, double const speed_of_sound_right,
-                                                        double const gamma ) {
+InterfaceTagsOutput::InterfaceTagsOutput( UnitHandler const& unit_handler,
+                                          MaterialManager const& material_manager,
+                                          std::string const& quantity_name,
+                                          std::array<bool, 3> const output_flags ) :
+   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
+   /** Empty besides initializer list */
+}
 
-   if constexpr( HllSolverSettings::signal_speed_selection == SignalSpeed::Arithmetic ) {
-      double const speed_of_sound_face_average = 0.5 * ( speed_of_sound_left + speed_of_sound_right );
-      double const velocity_face_average       = 0.5 * ( velocity_left + velocity_right );
+/**
+ * @brief see base class definition.
+ */
+void InterfaceTagsOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
-      double const wave_speed_left_simple   = std::min( velocity_face_average - speed_of_sound_face_average , velocity_left  - speed_of_sound_left );
-      double const wave_speed_right_simple  = std::max( velocity_face_average + speed_of_sound_face_average , velocity_right + speed_of_sound_right );
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
-      return std::make_pair( wave_speed_left_simple, wave_speed_right_simple );
-    }
-
-   if constexpr( HllSolverSettings::signal_speed_selection == SignalSpeed::Davis ) {
-      double const wave_speed_left_simple   = std::min( velocity_left - speed_of_sound_left , velocity_right - speed_of_sound_right );
-      double const wave_speed_right_simple  = std::max( velocity_left + speed_of_sound_left , velocity_right + speed_of_sound_right );
-
-      return std::make_pair( wave_speed_left_simple, wave_speed_right_simple );
-   }
-
-   if constexpr( HllSolverSettings::signal_speed_selection == SignalSpeed::Einfeldt ) {
-      double const sqrt_density_left   = std::sqrt( density_left );
-      double const sqrt_density_right  = std::sqrt( density_right );
-      double const rho_div = 1.0 / ( sqrt_density_left + sqrt_density_right );
-
-      double const u_roe_avg = ( ( velocity_left * sqrt_density_left ) + ( velocity_right * sqrt_density_right ) ) * rho_div;
-      double const speed_of_sound_einfeldt = std::sqrt( ( ( speed_of_sound_left * speed_of_sound_left * sqrt_density_left ) + ( speed_of_sound_right * speed_of_sound_right * sqrt_density_right ) ) * rho_div
-                                            + ( 0.5 * sqrt_density_left * sqrt_density_right * rho_div * rho_div ) * ( velocity_right-velocity_left ) * ( velocity_right - velocity_left ) );
-      double const wave_speed_left_simple   = std::min( u_roe_avg - speed_of_sound_einfeldt, velocity_left - speed_of_sound_left );
-      double const wave_speed_right_simple  = std::max( u_roe_avg + speed_of_sound_einfeldt, velocity_right + speed_of_sound_right );
-
-      return std::make_pair( wave_speed_left_simple, wave_speed_right_simple );
-   }
-
-   if constexpr( HllSolverSettings::signal_speed_selection == SignalSpeed::Toro ) {
-      double const z = ( gamma - 1.0 ) / ( 2.0 * gamma );
-      double const p_star = std::pow ( ( ( speed_of_sound_left + speed_of_sound_right ) - 0.5 * ( velocity_right - velocity_left ) * ( gamma - 1.0 ) )
-                                       / ( speed_of_sound_left / std::pow( pressure_left, z ) + speed_of_sound_right / std::pow( pressure_right,z ) ), ( 1.0 / z ) );
-      double q_l = 1.0;
-      double q_r = 1.0;
-
-      if( p_star > pressure_left ) {
-         q_l = std::sqrt( 1.0 + ( gamma + 1.0 ) / ( 2.0 * gamma ) * ( p_star / pressure_left - 1.0 ) );
+   // Loop through number of internal cells
+   for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+      for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+         for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+            cell_data[cell_data_counter++] = double( interface_tags[i][j][k] );
+         }
       }
-
-      if( p_star > pressure_right ) {
-         q_r = std::sqrt( 1.0 + ( gamma + 1.0 ) / ( 2.0 * gamma ) * ( p_star / pressure_right - 1.0 ) );
-      }
-
-      double const wave_speed_left_simple   = velocity_left  - speed_of_sound_left  * q_l;
-      double const wave_speed_right_simple  = velocity_right + speed_of_sound_right * q_r;
-
-      return std::make_pair( wave_speed_left_simple, wave_speed_right_simple );
    }
 }
 
-#endif // HLL_SIGNAL_SPEED_CALCULATOR_H
+/**
+ * @brief see base class definition.
+ */
+void InterfaceTagsOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
+
+   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+
+   /** Assign the correct rank to the data vector */
+   for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+            cell_data[cell_data_counter++] = double( interface_tags[i][j][k] );
+         }
+      }
+   }
+}

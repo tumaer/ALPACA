@@ -100,6 +100,14 @@ namespace ApplyUtilities {
       return {0, 0};
    }
 
+   /**
+    * @brief Gives the array that holds all required data from the provided buffer to apply the stencil.
+    * @param array The array where the appropriate buffer data is written into (indirect return).
+    * @param buffer The buffer where the array takes information from.
+    * @param i,j,k The indices for which cell the stencil is applied.
+    * @tparam S The used stencil.
+    * @note Implementation for the x-direction.
+    */
    template<typename S>
    inline void GetValueVectorFromBufferX( std::array<double, S::StencilSize()> & array
          , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
@@ -108,6 +116,10 @@ namespace ApplyUtilities {
          array[s] = buffer[i + (-S::DownstreamStencilSize() + s)][j][k];
       }
    }
+   /**
+    * @brief See x-direction implementation for details.
+    * @note Implementation for the y-direction.
+    */
    template<typename S>
    inline void GetValueVectorFromBufferY( std::array<double, S::StencilSize()> & array
          , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
@@ -116,6 +128,10 @@ namespace ApplyUtilities {
          array[s] = buffer[i][j + (-S::DownstreamStencilSize() + s)][k];
       }
    }
+   /**
+    * @brief See x-direction implementation for details.
+    * @note Implementation for the z-direction.
+    */
    template<typename S>
    inline void GetValueVectorFromBufferZ( std::array<double, S::StencilSize()> & array
          , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
@@ -124,6 +140,14 @@ namespace ApplyUtilities {
          array[s] = buffer[i][j][k + (-S::DownstreamStencilSize() + s)];
       }
    }
+   /**
+    * @brief Gives the array that holds all required data from the provided buffer to apply the stencil on difference data between two cells.
+    * @param array The array where the appropriate buffer data is written into (indirect return).
+    * @param buffer The buffer where the array takes information from.
+    * @param i,j,k The indices for which cell the stencil is applied.
+    * @tparam S The used stencil.
+    * @note Implementation for the x-direction.
+    */
    template<typename S>
    inline void GetDifferenceVectorFromBufferX( std::array<double, S::StencilSize()> & array
          , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
@@ -135,6 +159,10 @@ namespace ApplyUtilities {
                       - buffer[i + (-1 - S::DownstreamStencilSize() + s)][j][k] ) * one_cell_size;
       }
    }
+   /**
+    * @brief See x-direction implementation for details.
+    * @note Implementation for the y-direction.
+    */
    template<typename S>
    inline void GetDifferenceVectorFromBufferY( std::array<double, S::StencilSize()> & array
          , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
@@ -146,6 +174,10 @@ namespace ApplyUtilities {
                       - buffer[i][j + (-1 - S::DownstreamStencilSize() + s)][k] ) * one_cell_size;
       }
    }
+   /**
+    * @brief See x-direction implementation for details.
+    * @note Implementation for the z-direction.
+    */
    template<typename S>
    inline void GetDifferenceVectorFromBufferZ( std::array<double, S::StencilSize()> & array
          , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]

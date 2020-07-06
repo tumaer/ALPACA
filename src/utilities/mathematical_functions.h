@@ -228,6 +228,6 @@ inline double MinMod(double const value_1, double const value_2) {
    return 0.5 * ( Signum(value_1) + Signum(value_2) ) * std::min(std::abs(value_1),std::abs(value_2));
 }
 
-double GodunovHamiltonian( double const  (&derivatives)[DTI( CC::DIM() )][2], double const  old_levelset_sign );
+double GodunovHamiltonian( double const (&derivatives)[DTI( CC::DIM() )][2], double const  old_levelset_sign );
 
 #endif // MATHEMATICAL_FUNCTIONS_H

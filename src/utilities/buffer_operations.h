@@ -75,7 +75,7 @@ namespace BufferOperations {
 
 /**
  * @brief Sets all values of a single buffer to a certain given value.
- * @tparam T type of the cell values
+ * @tparam T type of the cell values.
  * @param cells The buffer cells that are set to the value.
  * @param value The value that is set in all cells.
  */
@@ -92,7 +92,7 @@ inline void SetSingleBuffer( T (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()], T cons
 
 /**
  * @brief Copies all values from a single buffer into another.
- * @tparam T type of the cell values
+ * @tparam T type of the cell values.
  * @param cells_source The buffer holding the cell values that are copied.
  * @param cells_target The buffer holding the cells where the values are copied into.
  */
@@ -109,7 +109,7 @@ inline void CopySingleBuffer( T const (&cells_source)[CC::TCX()][CC::TCY()][CC::
 
 /**
  * @brief Swaps all values from a single buffer with another.
- * @tparam T type of the cell values
+ * @tparam T type of the cell values.
  * @param cells_first The buffer holding the cell values of the first buffer that is swapped.
  * @param cells_second The buffer holding the cell values of the second buffer that is swapped with the first buffer.
  */
@@ -150,7 +150,7 @@ inline void SwapFieldBuffer( BufferType & first_buffer, BufferType & second_buff
 /**
  * @brief Sets a a certain fixed value into all fields of a field buffer.
  * @tparam BufferType The type of the buffer that should be set.
- * @tparam T type of the cell values
+ * @tparam T type of the cell values.
  * @param buffer The field buffer where the fixed value is set.
  * @param value The value that is set in the field buffer.
  */

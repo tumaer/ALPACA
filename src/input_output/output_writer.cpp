@@ -77,14 +77,14 @@
 
 /**
  * @brief Creates an object to get the simulation data from the RAM to the hard disk.
- * @param standard_mesh_generator The already initialized standard mesh geenrator
- * @param debug_mesh_generator The already initialized debug mesh geenrator
- * @param interface_mesh_generator The already initialized interface mesh geenrator
- * @param material_output_quantities Vector holding all already initialized material output quantities that are written
- * @param interface_output_quantities Vector holding all already initialized interface output quantities that are written
- * @param number_of_materials Number of materials considered in the simulation
+ * @param standard_mesh_generator The already initialized standard mesh geenrator.
+ * @param debug_mesh_generator The already initialized debug mesh geenrator.
+ * @param interface_mesh_generator The already initialized interface mesh geenrator.
+ * @param material_output_quantities Vector holding all already initialized material output quantities that are written.
+ * @param interface_output_quantities Vector holding all already initialized interface output quantities that are written.
+ * @param number_of_materials Number of materials considered in the simulation.
  *
- * @note for the pointer ownership transfer takes place
+ * @note for the pointer ownership transfer takes place.
  */
 OutputWriter::OutputWriter( std::unique_ptr<MeshGenerator const> standard_mesh_generator,
                             std::unique_ptr<MeshGenerator const> debug_mesh_generator,
@@ -106,8 +106,8 @@ OutputWriter::OutputWriter( std::unique_ptr<MeshGenerator const> standard_mesh_g
 }
 
 /**
- * @brief Executes all necessary operations to initialize the xdmf time series file
- * @param time_series_filename_without_extension Name of the time series file (without extension)
+ * @brief Executes all necessary operations to initialize the xdmf time series file.
+ * @param time_series_filename_without_extension Name of the time series file (without extension).
  */
 void OutputWriter::InitializeTimeSeriesFile( std::string const& time_series_filename_without_extension ) const {
    // Only do writing to file on 0 rank
@@ -120,8 +120,8 @@ void OutputWriter::InitializeTimeSeriesFile( std::string const& time_series_file
 }
 
 /**
- * @brief Executes all necessary operations to finalize the xdmf time series file
- * @param time_series_filename_without_extension Name of the time series file (without extension)
+ * @brief Executes all necessary operations to finalize the xdmf time series file.
+ * @param time_series_filename_without_extension Name of the time series file (without extension).
  */
 void OutputWriter::FinalizeTimeSeriesFile( std::string const& time_series_filename_without_extension ) const {
    // Only do writing to file on 0 rank
@@ -135,10 +135,10 @@ void OutputWriter::FinalizeTimeSeriesFile( std::string const& time_series_filena
 
 /**
  * @brief Triggers the output of the simulation results. Based on user Input the correct type of output is created.
- * @param output_type Output type identifier for which the output is written (standard, interface, debug)
+ * @param output_type Output type identifier for which the output is written (standard, interface, debug).
  * @param output_time The time at which the simulation is currently at.
- * @param filename_without_extension Filename without extension where the output is written to
- * @param time_series_filename_without_extension Name of the time series file (without extension)
+ * @param filename_without_extension Filename without extension where the output is written to.
+ * @param time_series_filename_without_extension Name of the time series file (without extension).
  */
 void OutputWriter::WriteOutput( OutputType const output_type,
                                 double const output_time,
@@ -165,11 +165,11 @@ void OutputWriter::WriteOutput( OutputType const output_type,
 }
 
 /**
- * @brief Writes a single time step xdmf file for a given time step
- * @param output_time Time at which the output is written
- * @param hdf5_filename Filename of the hdf5 file (absolute path), where the data information was written
- * @param mesh_generator The mesh generator instance which was used to write the output
- * @param output_type Type of the output to be written (standard, interface, debug)
+ * @brief Writes a single time step xdmf file for a given time step.
+ * @param output_time Time at which the output is written.
+ * @param hdf5_filename Filename of the hdf5 file (absolute path), where the data information was written.
+ * @param mesh_generator The mesh generator instance which was used to write the output.
+ * @param output_type Type of the output to be written (standard, interface, debug).
  */
 void OutputWriter::WriteXdmfTimeStepFile( double const output_time,
                                           std::string const& hdf5_filename,
@@ -188,11 +188,11 @@ void OutputWriter::WriteXdmfTimeStepFile( double const output_time,
 }
 
 /**
- * @brief Append the data to the time series xdmf file
- * @param output_time Time at which the output is written
- * @param hdf5_filename Hdf5 file (absolute path), where the data information was written
- * @param mesh_generator The mesh generator instance which was used to write the output
- * @param output_type Type of the output to be written (standard, interface, debug)
+ * @brief Append the data to the time series xdmf file.
+ * @param output_time Time at which the output is written.
+ * @param hdf5_filename Hdf5 file (absolute path), where the data information was written.
+ * @param mesh_generator The mesh generator instance which was used to write the output.
+ * @param output_type Type of the output to be written (standard, interface, debug).
  */
 void OutputWriter::AppendToXdmfTimeSeriesFile( double const output_time,
                                                std::string const& hdf5_filename,
@@ -207,12 +207,12 @@ void OutputWriter::AppendToXdmfTimeSeriesFile( double const output_time,
 }
 
 /**
- * @brief Writes the information contained in the xdmf file
- * @param output_time Time where the output is written
- * @param hdf5_short_filename short filename of the hdf5 file (without path information)
- * @param mesh_generator The mesh generator instance which was used to write the output
- * @param output_type Type of the output to be used (standard, interface, debug)
- * @return String of the Xdmf data that should be written
+ * @brief Writes the information contained in the xdmf file.
+ * @param output_time Time where the output is written.
+ * @param hdf5_short_filename short filename of the hdf5 file (without path information).
+ * @param mesh_generator The mesh generator instance which was used to write the output.
+ * @param output_type Type of the output to be used (standard, interface, debug).
+ * @return String of the Xdmf data that should be written.
  */
 std::string OutputWriter::XdmfSpatialDataInformation( double const output_time,
                                                       std::string const& hdf5_short_filename,
@@ -256,10 +256,10 @@ std::string OutputWriter::XdmfSpatialDataInformation( double const output_time,
 }
 
 /**
- * @brief Writes the data into the hdf5 file
- * @param hdf5_filename Filename of the hdf5 file (absolute path)
- * @param mesh_generator The mesh generator to be used for the output
- * @param output_type Type of the output that is considered (standard, interface, debug)
+ * @brief Writes the data into the hdf5 file.
+ * @param hdf5_filename Filename of the hdf5 file (absolute path).
+ * @param mesh_generator The mesh generator to be used for the output.
+ * @param output_type Type of the output that is considered (standard, interface, debug).
  */
 void OutputWriter::WriteHdf5File( double const output_time, std::string const& hdf5_filename, MeshGenerator const& mesh_generator, OutputType const output_type ) const {
 
@@ -406,9 +406,9 @@ void OutputWriter::WriteHdf5File( double const output_time, std::string const& h
 }
 
 /**
- * @brief Computes a map that assigns for all different quantity dimensions the appropriate quantity indices in the output_quantity vector
- * @param quantities Vector with all quantities for which the map should be computed
- * @return Map with key: Array with both quantity dimensions (row, column); value: Vector with all indices in the quantities vector for the given dimension
+ * @brief Computes a map that assigns for all different quantity dimensions the appropriate quantity indices in the output_quantity vector.
+ * @param quantities Vector with all quantities for which the map should be computed.
+ * @return Map with key: Array with both quantity dimensions (row, column); value: Vector with all indices in the quantities vector for the given dimension.
  */
 std::map<std::array<unsigned int,2>,std::vector<unsigned int>> OutputWriter::ComputeDimensionMap( std::vector<std::unique_ptr<OutputQuantity const>> const& quantities ) const {
    // Map that is returned

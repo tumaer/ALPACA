@@ -68,11 +68,11 @@
 #include "input_output/input_reader/dimensionalization_reader/dimensionalization_reader.h"
 
 /**
- * @brief Gives the checked reference length of the dimensionalization parameter 
- * @return length refernce value
+ * @brief Gives the checked reference length of the dimensionalization parameter.
+ * @return length refernce value.
  */
 double DimensionalizationReader::ReadReferenceLength() const {
-   // Get the reference value and make consistency check 
+   // Get the reference value and make consistency check
    double const reference_value( DoReadReferenceLength() );
    if( reference_value <= 0.0 ) {
       throw std::invalid_argument( "Reference length must be larger than zero!" );
@@ -81,11 +81,11 @@ double DimensionalizationReader::ReadReferenceLength() const {
 }
 
 /**
- * @brief Gives the checked reference velocity of the dimensionalization parameter 
- * @return velocity refernce value
+ * @brief Gives the checked reference velocity of the dimensionalization parameter.
+ * @return velocity refernce value.
  */
 double DimensionalizationReader::ReadReferenceVelocity() const {
-   // Get the reference value and make consistency check 
+   // Get the reference value and make consistency check
    double const reference_value( DoReadReferenceVelocity() );
    if( reference_value <= 0.0 ) {
       throw std::invalid_argument( "Reference velocity must be larger than zero!" );
@@ -94,11 +94,11 @@ double DimensionalizationReader::ReadReferenceVelocity() const {
 }
 
 /**
- * @brief Gives the checked reference density of the dimensionalization parameter 
- * @return density refernce value
+ * @brief Gives the checked reference density of the dimensionalization parameter.
+ * @return density refernce value.
  */
 double DimensionalizationReader::ReadReferenceDensity() const {
-   // Get the reference value and make consistency check 
+   // Get the reference value and make consistency check
    double const reference_value( DoReadReferenceDensity() );
    if( reference_value <= 0.0 ) {
       throw std::invalid_argument( "Reference density must be larger than zero!" );
@@ -107,11 +107,11 @@ double DimensionalizationReader::ReadReferenceDensity() const {
 }
 
 /**
- * @brief Gives the checked reference temperature of the dimensionalization parameter 
- * @return temperature refernce value
+ * @brief Gives the checked reference temperature of the dimensionalization parameter.
+ * @return temperature refernce value.
  */
 double DimensionalizationReader::ReadReferenceTemperature() const {
-   // Get the reference value and make consistency check 
+   // Get the reference value and make consistency check
    double const reference_value( DoReadReferenceTemperature() );
    if( reference_value <= 0.0 ) {
       throw std::invalid_argument( "Reference temperature must be larger than zero!" );

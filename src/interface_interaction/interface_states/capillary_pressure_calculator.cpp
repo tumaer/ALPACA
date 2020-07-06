@@ -76,11 +76,11 @@
  * @brief      The default constructor of the class.
  *
  * @param[in]  material_manager  The material manager containing information about the materials used in the simulation. Necessary to get the
- * surface tension coefficient.
+ *                               surface tension coefficient.
  */
 CapillaryPressureCalculator::CapillaryPressureCalculator(MaterialManager const& material_manager) :
-   surface_tension_coefficient_( CC::CapillaryForcesActive() ? 
-                                 material_manager.GetMaterialPairing( MaterialSignCapsule::NegativeMaterial(), 
+   surface_tension_coefficient_( CC::CapillaryForcesActive() ?
+                                 material_manager.GetMaterialPairing( MaterialSignCapsule::NegativeMaterial(),
                                                                       MaterialSignCapsule::PositiveMaterial()).GetSurfaceTensionCoefficient() : 0.0 ) {
    // Empty besides initializer list.
 }

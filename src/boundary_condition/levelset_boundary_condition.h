@@ -88,14 +88,14 @@ public:
 
    /**
     * @brief Performs all levelset halo updates in external boundaries.
-    * @param node Node on which the halo update is done
-    * @param buffer_type Identifier of the buffer type of the levelset block to be updated
+    * @param node Node on which the halo update is done.
+    * @param buffer_type Identifier of the buffer type of the levelset block to be updated.
     */
    virtual void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type ) const = 0;
 
    /**
     * @brief Performs all interface tag halo updates in external boundaries.
-    * @param node Node on which the halo update is done
+    * @param node Node on which the halo update is done.
     */
    virtual void UpdateInterfaceTagExternal( Node& node ) const = 0;
 };

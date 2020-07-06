@@ -95,10 +95,10 @@ namespace {
 
 /**
  * @brief Constructs the manager for writing and reading restart snapshots.
- * @param unit_handler Instance to provide (non-)dimensionalization of values
+ * @param unit_handler Instance to provide (non-)dimensionalization of values.
  * @param tree The tree to read and write the simulation data. It is only modified if the simulation is restored from a snapshot.
  * @param topology The topology to get and set information about the global structure of the simulation. It is only modified if the simulation is restored from a snapshot.
- * @param maximum_level The maximum level of the simulation
+ * @param maximum_level The maximum level of the simulation.
  */
 RestartManager::RestartManager( UnitHandler const& unit_handler, TopologyManager & topology_manager, Tree & tree, unsigned int const maximum_level ) :
    // Start initializer list

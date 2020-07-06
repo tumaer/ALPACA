@@ -72,13 +72,13 @@
 
 /**
  * @brief Defines the class that provides access to the dimensionalization data in the input file.
- *        It serves as a proxy class for different dimensionalization reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ *        It serves as a proxy class for different dimensionalization reader types (xml,...) that only read the actual data.
+ *        Here, consistency checks are done that all read data are valid.
  */
 class DimensionalizationReader{
 
 protected:
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit DimensionalizationReader() = default;
 
    // Functions that must be implemented by the derived classes
@@ -94,7 +94,7 @@ public:
    DimensionalizationReader( DimensionalizationReader&& ) = delete;
    DimensionalizationReader& operator=( DimensionalizationReader&& ) = delete;
 
-   // Return functions 
+   // Return functions
    double ReadReferenceLength() const;
    double ReadReferenceVelocity() const;
    double ReadReferenceDensity() const;

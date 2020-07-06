@@ -76,28 +76,28 @@
 #include "materials/material.h"
 
 /**
- * @brief Defines all initialization functions required for one single material
+ * @brief Defines all initialization functions required for one single material.
  */
 namespace Initialization {
 
-   // initialize function for the equation of state 
-   std::unique_ptr<EquationOfState const> InitializeEquationOfState( EquationOfStateName const eos_name, 
-                                                                     std::unordered_map<std::string, double> const& eos_data, 
+   // initialize function for the equation of state
+   std::unique_ptr<EquationOfState const> InitializeEquationOfState( EquationOfStateName const eos_name,
+                                                                     std::unordered_map<std::string, double> const& eos_data,
                                                                      UnitHandler const& unit_handler );
 
-   // initialize function for the shear viscosity model 
-   std::unique_ptr<MaterialParameterModel const> InitializeShearViscosityModel( MaterialPropertyModelName const model_name, 
-                                                                                std::unordered_map<std::string, double> const& model_data, 
-                                                                                UnitHandler const& unit_handler );  
+   // initialize function for the shear viscosity model
+   std::unique_ptr<MaterialParameterModel const> InitializeShearViscosityModel( MaterialPropertyModelName const model_name,
+                                                                                std::unordered_map<std::string, double> const& model_data,
+                                                                                UnitHandler const& unit_handler );
 
-   // initialize function for the thermal conductivity model 
-   std::unique_ptr<MaterialParameterModel const> InitializeThermalConductivityModel( MaterialPropertyModelName const model_name, 
-                                                                                     std::unordered_map<std::string, double> const& model_data, 
+   // initialize function for the thermal conductivity model
+   std::unique_ptr<MaterialParameterModel const> InitializeThermalConductivityModel( MaterialPropertyModelName const model_name,
+                                                                                     std::unordered_map<std::string, double> const& model_data,
                                                                                      UnitHandler const& unit_handler );
 
-   // initialize function for the complete material 
-   Material InitializeMaterial( unsigned int const material_index, 
-                                MaterialReader const& material_reader, 
+   // initialize function for the complete material
+   Material InitializeMaterial( unsigned int const material_index,
+                                MaterialReader const& material_reader,
                                 UnitHandler const& unit_handler );
 } // namespace initialization
 

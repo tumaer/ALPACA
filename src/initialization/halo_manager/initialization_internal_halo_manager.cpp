@@ -70,16 +70,16 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the complete internal halo manager class with the given input classes
-    * @param topology_manager Class providing global (on all ranks) node information 
-    * @param tree Tree class providing local (on current rank) node information 
-    * @param communication_manager Calls providing communication handling between different ranks 
-    * @param material_manager material_manager Instance providing initialized material data
-    * @return The fully initialized InternalHaloManager class 
+    * @brief Initializes the complete internal halo manager class with the given input classes.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param communication_manager Calls providing communication handling between different ranks
+    * @param material_manager material_manager Instance providing initialized material data.
+    * @return The fully initialized InternalHaloManager class.
     */
    InternalHaloManager InitializeInternalHaloManager( TopologyManager & topology_manager,
-                                                      Tree & tree, 
-                                                      CommunicationManager & communication_manager, 
+                                                      Tree & tree,
+                                                      CommunicationManager & communication_manager,
                                                       MaterialManager const& material_manager ) {
 
       return InternalHaloManager( tree, topology_manager, communication_manager, material_manager.GetNumberOfMaterials() );

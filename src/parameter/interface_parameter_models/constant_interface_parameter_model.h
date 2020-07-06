@@ -65,96 +65,71 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_H
-#define RIEMANN_SOLVER_H
-#include <array>
 
-#include "block_definitions/block.h"
-#include "eigendecomposition.h"
-#include "materials/material_manager.h"
+#ifndef CONSTANT_INTERFACE_PARAMETER_MODEL_H
+#define CONSTANT_INTERFACE_PARAMETER_MODEL_H
 
-
-namespace {
-   /**
-    * @brief Helper function to create the index sequence used to enforce symmetry while summing up conservative equation contributions in characteristic decomposition.
-    * @tparam RemainingIndices Zero-based index sequence representing the non-mandatory equations (i.e. non-standard Euler equations)
-    * @return The created index sequence.
-    */
-   template<std::size_t... RemainingIndices>
-   constexpr std::array<std::array<unsigned int, MF::ANOE()>, DTI(CC::DIM())> MakeConservativeEquationSummationSequence(std::index_sequence<RemainingIndices...> const) {
-#if DIMENSION == 1
-      return {{ {ETI(Equation::Mass), ETI(Equation::MomentumX), ETI(Equation::Energy), (RemainingIndices+DTI(CC::DIM())+2)...} }};
-#elif DIMENSION == 2
-      return {{ {ETI(Equation::Mass), ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::Energy), (RemainingIndices+DTI(CC::DIM())+2)...},
-                {ETI(Equation::Mass), ETI(Equation::MomentumY), ETI(Equation::MomentumX), ETI(Equation::Energy), (RemainingIndices+DTI(CC::DIM())+2)...} }};
-#else
-      return {{ {ETI(Equation::MomentumY), ETI(Equation::MomentumZ), ETI(Equation::MomentumX), ETI(Equation::Energy), ETI(Equation::Mass), (RemainingIndices+DTI(CC::DIM())+2)...},
-                {ETI(Equation::MomentumZ), ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::Energy), ETI(Equation::Mass), (RemainingIndices+DTI(CC::DIM())+2)...},
-                {ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::MomentumZ), ETI(Equation::Energy), ETI(Equation::Mass), (RemainingIndices+DTI(CC::DIM())+2)...} }};
-#endif
-   }
-
-   /**
-    * @brief Helper function to create the index sequence used to enforce symmetry while summing up contributions of the characteristic fields.
-    * @tparam RemainingIndices Zero-based index sequence representing the non-standard characteristic fields (i.e. characteristic fields not appearing in the standard Euler equations).
-    * @return The created index sequence.
-    */
-   template<std::size_t... RemainingIndices>
-   constexpr std::array<std::array<unsigned int, MF::ANOE()-2>, DTI(CC::DIM())> MakeCharacteristicFieldSummationSequence(std::index_sequence<RemainingIndices...> const) {
-#if DIMENSION == 1
-      return {{ {1, (RemainingIndices+DTI(CC::DIM())+1)...} }};
-#elif DIMENSION == 2
-      return {{ {1, 2, (RemainingIndices+DTI(CC::DIM())+1)...}, {2, 1, (RemainingIndices+DTI(CC::DIM())+1)...} }};
-#else
-      return {{ {2, 3, 1, (RemainingIndices+DTI(CC::DIM())+1)...},
-                {3, 1, 2, (RemainingIndices+DTI(CC::DIM())+1)...},
-                {1, 2, 3, (RemainingIndices+DTI(CC::DIM())+1)...} }};
-#endif
-   }
-}
+#include "parameter/interface_parameter_model.h"
+#include "enums/interface_tag_definition.h"
 
 /**
- * @brief Interface to solve the underlying system of equations. Uses spatial reconstruction stencils to approximate the solution.
+ * @brief The ConstantInterfaceParameterModel class implements the specific computation for a interface parameter model that gives constant values.
+ *        It provides the loop structure to compute the parameter for a single given node. The actual implementation of the model param = const. is done
+ *        in the derived class.
+ * @note This class serves as a compatability class to provide the same behavior for all material pairings in case one uses a parameter model to avoid additional
+ *       if else statements calling if a model is used or not. Therefore, if one material uses a model, all materials at least must define a constant model.
+ *
+ * @tparam DerivedConstantInterfaceParameterModel derived constan model class that provides the model computation.
  */
-template<typename DerivedRiemannSolver>
-class RiemannSolver {
+template<typename DerivedConstantInterfaceParameterModel>
+class ConstantInterfaceParameterModel : public InterfaceParameterModel {
 
-   friend DerivedRiemannSolver;
+   // friend model, which effectively implements the computation of the parameter
+   friend DerivedConstantInterfaceParameterModel;
 
-   static constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence(std::make_index_sequence<MF::ANOE() - DTI(CC::DIM()) - 2>{});
-   static constexpr auto  characteristic_field_summation_sequence_ =  MakeCharacteristicFieldSummationSequence(std::make_index_sequence<MF::ANOE() - DTI(CC::DIM()) - 2>{});
+   /**
+    * @brief Executes the actual parameter calculation on the complete block
+    * @param node Node for which the parameter is computed
+    */
+   void DoUpdateParameter( Node & node  ) const override {
 
-   const EigenDecomposition& eigendecomposition_calculator_;
-   const MaterialManager& material_manager_;
+      // Obtain the interface tags and volume fraction
+      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
-   explicit RiemannSolver(  MaterialManager const& material_manager,  EigenDecomposition const& eigendecomposition_calculator) :
-      eigendecomposition_calculator_(eigendecomposition_calculator),
-      material_manager_(material_manager)
-   {
-      //Empty constructor besides initializer list.
+      // extract the parameter from the block, which should be computed
+      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedConstantInterfaceParameterModel::parameter_buffer_type_ );
+
+      // Compute the parameter based on constan values
+      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+         for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+            for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+
+               // Only compute the parameter for cut cells. Average quantities based on the volume fraction
+               if( interface_tags[i][j][k] == ITTI( IT::OldCutCell ) ) {
+                  parameter_buffer[i][j][k] = static_cast< DerivedConstantInterfaceParameterModel const& >( *this ).ComputeParameter();
+               } else {
+                  parameter_buffer[i][j][k] = 0.0;
+               }
+            } //k
+         } //j
+      }//i
+   }
+
+   /**
+    * @brief Protected constructor to create the interface constant model.
+    * @note Can only be called from derived classes.
+    */
+   explicit ConstantInterfaceParameterModel() : InterfaceParameterModel() {
+      /** Empty besides base class constructor call */
    }
 
 public:
-   RiemannSolver() = delete;
-   ~RiemannSolver() = default;
-   RiemannSolver( RiemannSolver const& ) = delete;
-   RiemannSolver& operator=( RiemannSolver const& ) = delete;
-   RiemannSolver( RiemannSolver&& ) = delete;
-   RiemannSolver& operator=( RiemannSolver&& ) = delete;
+   virtual ~ConstantInterfaceParameterModel() = default;
+   ConstantInterfaceParameterModel( ConstantInterfaceParameterModel const& ) = delete;
+   ConstantInterfaceParameterModel& operator=( ConstantInterfaceParameterModel const& ) = delete;
+   ConstantInterfaceParameterModel( ConstantInterfaceParameterModel&& ) = delete;
+   ConstantInterfaceParameterModel& operator=( ConstantInterfaceParameterModel&& ) = delete;
 
-   /**
-    * @brief Solves the right hand side of the underlying system of equations within the provided node.
-    * @param mat_block Container holding the relevant fluid data to compute the update.
-    * @param cell_size The size of the cells in the block.
-    * @param fluxes_x, fluxes_y, fluxes_z The fluxes over the cell faces as computed by this Riemann solver.
-    * Indirect return parameter.
-    */
-   void Update(std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-      double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const {
-      static_cast<DerivedRiemannSolver const&>(*this).UpdateImplementation(mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z);
-   }
 };
 
-#endif // RIEMANN_SOLVER_H
+#endif // CONSTANT_INTERFACE_PARAMETER_MODEL_H

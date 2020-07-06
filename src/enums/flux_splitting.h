@@ -71,7 +71,7 @@
 #include <iostream>
 
 /**
- * @brief Identifier for flux splitting schemes to be used in Roe Riemann Solver
+ * @brief Identifier for flux splitting schemes to be used in Roe Riemann Solver.
  */
 enum class FluxSplitting { Roe, LocalLaxFriedrichs, GlobalLaxFriedrichs, Roe_M, LocalLaxFriedrichs_M };
 

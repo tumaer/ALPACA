@@ -73,19 +73,19 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the complete set of materials with the given input reader 
-    * @param material_reader Reader that provides access to the material data of the input file 
-    * @param unit_handler Instance to provide (non-)dimensionalization of values 
-    * @return The fully initialized set of materials present in the simulation 
+    * @brief Initializes the complete set of materials with the given input reader.
+    * @param material_reader Reader that provides access to the material data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized set of materials present in the simulation.
     */
    std::vector<Material> InitializeMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler ) {
       // read the number of materials present in the simulation
       unsigned int const number_of_materials( material_reader.ReadNumberOfMaterials() );
 
-      // Check if too much materials have been specified 
-      if( number_of_materials + 1 >= MTI( MaterialName::MaterialOutOfBounds ) ) { 
+      // Check if too much materials have been specified
+      if( number_of_materials + 1 >= MTI( MaterialName::MaterialOutOfBounds ) ) {
          throw std::invalid_argument( "This number of materials is not currently not supported!" );
-      } 
+      }
 
       // In case of capillary forces at least tow materials must be defined
       if( CC::CapillaryForcesActive() && number_of_materials < 2 ) {
@@ -100,36 +100,36 @@ namespace Initialization {
          materials.push_back( InitializeMaterial( mat_index, material_reader, unit_handler ) );
       }
 
-      // return the created vector 
+      // return the created vector
       return materials;
    }
 
    /**
-    * @brief Initializes the complete set of material pairings with the given input reader 
-    * @param material_reader Reader that provides access to the material data of the input file 
-    * @param unit_handler Instance to provide (non-)dimensionalization of values 
-    * @return The fully initialized set of material pairings present in the simulation 
+    * @brief Initializes the complete set of material pairings with the given input reader.
+    * @param material_reader Reader that provides access to the material data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized set of material pairings present in the simulation.
     */
    std::vector<MaterialPairing> InitializeMaterialPairings( MaterialReader const& material_reader, UnitHandler const& unit_handler ) {
-      // First read the number of all materials 
+      // First read the number of all materials
       unsigned int const number_of_materials = material_reader.ReadNumberOfMaterials();
-      // Check if too much materials have been specified 
-      if( number_of_materials + 1 >= MTI( MaterialName::MaterialOutOfBounds ) ) { 
+      // Check if too much materials have been specified
+      if( number_of_materials + 1 >= MTI( MaterialName::MaterialOutOfBounds ) ) {
          throw std::invalid_argument( "This number of materials is currently not supported!" );
-      } 
+      }
 
-      // Generate all combinations of indices 
+      // Generate all combinations of indices
       std::vector<std::vector<unsigned int>> pairing_indices( GetMaterialPairingIndices( number_of_materials ) );
 
-      // Check if too much material pairing combinations have been specified 
-      if( pairing_indices.size() + 1 >= MPTI( MaterialPairingName::MaterialPairingOutOfBounds ) ) { 
+      // Check if too much material pairing combinations have been specified
+      if( pairing_indices.size() + 1 >= MPTI( MaterialPairingName::MaterialPairingOutOfBounds ) ) {
          throw std::invalid_argument( "This number of material pairings is currently not supported!" );
-      } 
+      }
 
-      // declare vector that is returned  
+      // declare vector that is returned
       std::vector<MaterialPairing> material_pairings;
       // Definition and Initialization of the materialPairing vector depending on Single or Multiphase ( for later correct access )
-      // NOTE: This if else can be removed if the general multimaterial approach is incorporated in the framework or the call to fill surface tension coefficient 
+      // NOTE: This if else can be removed if the general multimaterial approach is incorporated in the framework or the call to fill surface tension coefficient
       //       in capillary forces calculator is removed
       // Single material
       if( pairing_indices.size() == 0 ) {
@@ -137,8 +137,8 @@ namespace Initialization {
          material_pairings.push_back( MaterialPairing() );
       }
       // Multimaterial
-      else {  
-         // Reserve enough entries in the material pairing vector 
+      else {
+         // Reserve enough entries in the material pairing vector
          material_pairings.reserve( pairing_indices.size() );
          // Initialize each pairing individually
          for( auto const& indices : pairing_indices ) {
@@ -146,16 +146,16 @@ namespace Initialization {
          }
       }
 
-      // return the created vector 
+      // return the created vector
       return material_pairings;
    }
 
 
    /**
-    * @brief Initializes the complete material manager class with the given input reader 
-    * @param input_reader Reader that provides access to the full data of the input file 
-    * @param unit_handler Instance to provide (non-)dimensionalization of values 
-    * @return The fully initialized MaterialManager class 
+    * @brief Initializes the complete material manager class with the given input reader.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized MaterialManager class.
     */
    MaterialManager InitializeMaterialManager( InputReader const& input_reader, UnitHandler const& unit_handler ) {
 

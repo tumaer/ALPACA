@@ -71,32 +71,55 @@
 #include "utilities/string_operations.h"
 
 /**
- * @brief Sets up a material pairing for the given input data 
- * @param surface_tension_coefficient Fixed value of the surface tension coefficient (dimensional)
- * @param unit_handler Instance to provide (non-)dimensionalization of values (ownership transfer takes place)
- * 
- * @note No default values are specified to ensure that everything is provided. Default values are set during the initialization 
+ * @brief Sets up a material pairing for the given input data.
+ * @param dimensional_surface_tension_coefficient Fixed dimensional value of the surface tension coefficient (ownership takes place).
+ * @param surface_tension_coefficient_model The model used for the surface tension coefficient.
+ * @param unit_handler Instance to provide (non-)dimensionalization of values.
+ *
+ * @note No default values are specified to ensure that everything is provided. Default values are set during the initialization.
  */
-MaterialPairing::MaterialPairing( double const surface_tension_coefficient, 
-                                  UnitHandler const& unit_handler ) : 
-   // Start initializer list 
-   surface_tension_coefficient_( unit_handler.NonDimensionalizeValue( surface_tension_coefficient, UnitType::SurfaceTensionCoefficient ) ) {
+MaterialPairing::MaterialPairing( double const dimensional_surface_tension_coefficient,
+                                  std::unique_ptr<InterfaceParameterModel const> surface_tension_coefficient_model,
+                                  UnitHandler const& unit_handler ) :
+   // Start initializer list
+   surface_tension_coefficient_( unit_handler.NonDimensionalizeValue( dimensional_surface_tension_coefficient, UnitType::SurfaceTensionCoefficient ) ),
+   surface_tension_coefficient_model_( std::move( surface_tension_coefficient_model ) ) {
    /** Empty besides initializer list */
 }
 
 /**
- * @brief Sets up a material pairing with no input data  
+ * @brief Sets up a material pairing with no input data
  * @note Function can be removed when the surface tension coefficient hard coding is removed from the capillary pressure calculator.
  */
-MaterialPairing::MaterialPairing() : 
-   surface_tension_coefficient_( -1.0 ) {
+MaterialPairing::MaterialPairing() :
+   surface_tension_coefficient_( -1.0 ),
+   surface_tension_coefficient_model_( nullptr ) {
+   /** Empty besides initializer list */
+}
+
+/**
+ * @brief Move constructor.
+ * @param pairing Material pairing from which the data are moved.
+ */
+MaterialPairing::MaterialPairing( MaterialPairing && pairing ) :
+   // Start initializer list
+   surface_tension_coefficient_( pairing.surface_tension_coefficient_ ),
+   surface_tension_coefficient_model_( std::move( pairing.surface_tension_coefficient_model_ ) ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief Gives the surface tension coefficient  (fixed value)
- * @return surface tension coefficient 
+ * @return surface tension coefficient
  */
 double MaterialPairing::GetSurfaceTensionCoefficient() const {
    return surface_tension_coefficient_;
+}
+
+/**
+ * @brief Gives the model of the surface tension coefficient.
+ * @return The instance of the surface tension coefficient model.
+ */
+InterfaceParameterModel const& MaterialPairing::GetSurfaceTensionCoefficientModel() const {
+   return *surface_tension_coefficient_model_;
 }

@@ -76,7 +76,7 @@
  * @param old_levelset_sign The sign of the original level-set value.
  * @return The GH as a double value.
  */
-double GodunovHamiltonian( double const  (&derivatives)[DTI( CC::DIM() )][2], double const  old_levelset_sign ) {
+double GodunovHamiltonian( double const (&derivatives)[DTI( CC::DIM() )][2], double const  old_levelset_sign ) {
    std::array<double, DTI( CC::DIM() )> godunov_hamiltonian_contributions;
    for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
       godunov_hamiltonian_contributions[d] = std::max( std::max( 0.0 , old_levelset_sign * derivatives[d][0] ) * std::max( 0.0 , old_levelset_sign * derivatives[d][0] )

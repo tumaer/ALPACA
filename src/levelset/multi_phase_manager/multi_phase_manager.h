@@ -92,7 +92,7 @@ using InterfaceExtenderConcretization = InterfaceExtenderSetup::Concretize< inte
 
 /**
  * @brief The MultiPhaseManager provides functionality to simulate multi-phase flows. It allows to propagate a level-set field in time, to perform cut-cell mixing
- * and to extend fluid states to ghost cells.
+ *        and to extend fluid states to ghost cells.
  * @tparam DerivedMultiPhaseManager Typename as template parameter due to CRTP.
  */
 template<typename DerivedMultiPhaseManager>
@@ -142,26 +142,23 @@ public:
    /**
     * @brief Performs cut-cell mixing as provided by the CUT_CELL_MIXER object.
     * @param nodes The nodes which has to be mixed.
-    * @param stage The current stage of the Runge-Kutta method.
     */
-   void Mix( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const {
-      static_cast<DerivedMultiPhaseManager const&>( *this ).MixImplementation( nodes, stage );
+   void Mix( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).MixImplementation( nodes );
    }
 
    /**
     * @brief Ensures a well-resolved level-set field satisfying the distance property.
     * @param nodes The node whose levelset field is considered.
-    * @param stage The current stage of the Runge-Kutta method.
     * @param is_last_stage Indicates whether scale separation has to be done or not (default = false).
     */
-   void EnforceWellResolvedDistanceFunction( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, bool const is_last_stage = false ) const {
-      static_cast<DerivedMultiPhaseManager const&>( *this ).EnforceWellResolvedDistanceFunctionImplementation( nodes, stage, is_last_stage );
+   void EnforceWellResolvedDistanceFunction( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).EnforceWellResolvedDistanceFunctionImplementation( nodes, is_last_stage );
    }
 
    /**
     * @brief Extend material states to ghost material.
     * @param nodes The nodes for which extension has to be done.
-    * @param stage The current stage of the Runge-Kutta method.
     */
    void Extend( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
       static_cast<DerivedMultiPhaseManager const&>( *this ).ExtendPrimeStatesImplementation( nodes );
@@ -177,12 +174,11 @@ public:
 
    /**
     * @brief After integration of the level-set field related quantities have to be adjusted to the propagated level-set field.
-    * Quantities which are adjusted are the interface tags and the volume fraction.
+    *        Quantities which are adjusted are the interface tags and the volume fraction.
     * @param nodes The nodes on the finest level for which interface-tags and volume fractions have to be adjusted.
-    * @param stage The current stage of the Runge-Kutta method.
     */
-   void PropagateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const {
-      static_cast<DerivedMultiPhaseManager const&>( *this ).PropagateLevelsetImplementation( nodes, stage );
+   void PropagateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).PropagateLevelsetImplementation( nodes );
    }
 
    /**
@@ -197,7 +193,7 @@ public:
 
    /**
     * @brief Initializes the volume fraction buffer. Volume fractions are calculated based on the reinitialized level-set buffer.
-    * ATTENTION: This method should only be called during the initialization of the simulation.
+    * @note ATTENTION: This method should only be called during the initialization of the simulation.
     * @param nodes The nodes for which the volume fractions should be calculated.
     */
    void InitializeVolumeFractionBuffer( std::vector<std::reference_wrapper<Node>> const& nodes ) const {

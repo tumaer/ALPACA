@@ -76,7 +76,7 @@
 enum class DatatypeForMpi : unsigned short { Double = 0, Byte = 1 };
 
 /**
- * @brief Converts a DatatypeForMpi identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Datatype to Index".
+ * @brief Converts a DatatypeForMpi identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Datatype To Index".
  * @param d The Mpi Datatype identifier.
  * @return Index to be used in Arrays.
  */

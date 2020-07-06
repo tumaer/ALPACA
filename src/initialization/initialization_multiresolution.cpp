@@ -71,28 +71,28 @@ namespace Initialization {
 
    /**
     * @brief Creates a Multiresolution object.
-    * @param input_reader Reader that provides access to the full data of the input file
-    * @param topology_manager Class providing global (on all ranks) node information  
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param topology_manager Class providing global (on all ranks) node information.
     * @return A multiresolution object with thresholding conditions accroding to given input.
     */
    Multiresolution InitializeMultiresolution( InputReader const& input_reader,TopologyManager const& topology_manager ) {
-      
+
       // Get the data local (for logging)
       unsigned int const maximum_level = topology_manager.GetMaximumLevel();
       unsigned int const epsilon_reference_level = input_reader.GetMultiResolutionReader().ReadEpsilonLevelReference();
       double const epsilon_reference = input_reader.GetMultiResolutionReader().ReadEpsilonReference();
 
-      // Create the thresholder 
+      // Create the thresholder
       Thresholder thresholder = Thresholder( maximum_level, epsilon_reference_level, epsilon_reference );
 
-      // Log data 
+      // Log data
       LogWriter & logger = LogWriter::Instance();
       logger.LogMessage( " " );
       if( maximum_level > 1 ) {
-         // tmp string for maximum size determination 
+         // tmp string for maximum size determination
          std::string const level_string( std::to_string( maximum_level - 1 ) + std::to_string( maximum_level ) );
 
-         logger.LogMessage(   "Epsilon Level 0 and Level 1" + std::string( level_string.size() - 2, ' ' ) + " : " 
+         logger.LogMessage(   "Epsilon Level 0 and Level 1" + std::string( level_string.size() - 2, ' ' ) + " : "
                             + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( 1 ), 9 ) );
          logger.LogMessage(   "Epsilon Level " + std::to_string( maximum_level - 1 ) + " and Level " + std::to_string( maximum_level ) + " : "
                             + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( maximum_level ), 9 ) );

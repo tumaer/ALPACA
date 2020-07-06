@@ -74,23 +74,23 @@
 #include "input_output/output_writer.h"
 
 /**
- * @brief Defines all initialization functions required for the output writer  
+ * @brief Defines all initialization functions required for the output writer.
  */
 namespace Initialization {
 
    // factory functions for the output writer
-   std::unique_ptr<MeshGenerator const> GetStandardMeshGenerator( UnitHandler const& unit_handler, 
-                                                                  TopologyManager const& topology,  
-                                                                  Tree const& flower, 
+   std::unique_ptr<MeshGenerator const> GetStandardMeshGenerator( UnitHandler const& unit_handler,
+                                                                  TopologyManager const& topology,
+                                                                  Tree const& flower,
                                                                   double const node_size_on_level_zero );
    std::vector<std::unique_ptr<OutputQuantity const>> GetMaterialOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager );
    std::vector<std::unique_ptr<OutputQuantity const>> GetInterfaceOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager );
 
 
    // Initialization function for the input_output manager
-   OutputWriter InitializeOutputWriter( TopologyManager & topology_manager, 
-                                        Tree & tree, 
-                                        MaterialManager const& material_manager, 
+   OutputWriter InitializeOutputWriter( TopologyManager & topology_manager,
+                                        Tree & tree,
+                                        MaterialManager const& material_manager,
                                         UnitHandler const& unit_handler );
 }
 

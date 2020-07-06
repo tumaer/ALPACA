@@ -174,7 +174,9 @@ class ModularAlgorithmAssembler {
    template<ConservativeBufferType C>
    void DoObtainPrimeStatesFromConservativesForLevelsetNodes( Node& node ) const;
 
-   void UpdateParameters( std::vector<unsigned int> const updated_levels ) const;
+   void UpdateParameters( std::vector<unsigned int> const updated_levels,
+                          bool const exist_multi_nodes_global,
+                          std::vector<std::reference_wrapper<Node>> const& nodes_needing_multiphase_treatment ) const;
 
    void LogNodeNumbers() const;
    void LogPerformanceNumbers( std::vector<double> const& loop_times ) const;

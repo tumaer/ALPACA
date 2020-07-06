@@ -72,7 +72,8 @@
 #include "boundary_specifications.h"
 
 /**
- * @brief The BoundaryConstants class
+ * @brief The BoundaryConstants class providing general information and data structures that can be used to update the hallo cells in
+ *        the external boundaries.
  */
 template<BoundaryLocation>
 class BoundaryConstants {
@@ -113,6 +114,7 @@ public:
     * @brief Gives the value of the internal cell that is the "symmetry partner" to the given halo cell.
     * @param values Reference of the buffer the value should be taken from.
     * @param i,j,k Indices of the halo cell.
+    * @return The symmetry value.
     * @tparam T Base type of the buffer.
     */
    template<class T>
@@ -123,6 +125,7 @@ public:
     * @brief Gives the value of the internal cell which is needed to achieve a zero gradient in the halo cell(s).
     * @param values Reference of the buffer the value should be taken from.
     * @param i,j,k Indices of the halo cell.
+    * @return The zero gradient value.
     * @tparam T Base type of the buffer.
     */
    static inline T ZeroGradientValue(T (&values)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k);

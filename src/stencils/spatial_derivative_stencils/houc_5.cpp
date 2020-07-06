@@ -71,17 +71,7 @@
 * @brief Implements the 5th order HOUC stencil of \cite Nourgaliev2007. Also See base class.
 * @note Hotpath function.
 */
-double HOUC5::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
-
-#ifndef PERFORMANCE
-   // Suppresses Compiler Warning "Wunused. The Input cell_size is not needed in all stencils, but for unified interface all derived inherite it.
-   (void)cell_size;
-
-   // Output error in case something went wrong with the stencil size
-   if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size in HOUC is longer than provided Array");
-   }
-#endif
+double HOUC5::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const ) const {
 
    // Assign values to v_i to make it easier to read
    double const v0 = array[downstream_stencil_size_ - 3 * evaluation_properties[1]];

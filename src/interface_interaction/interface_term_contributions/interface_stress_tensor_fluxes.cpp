@@ -145,8 +145,8 @@ void InterfaceStressTensorFluxes::ComputeInterfaceFluxes( Node& node
  * @param      node                                    The node for which the fluxes are added.
  * @param[in]  delta_aperture_field                    The delta aperture field.
  * @param[in]  u_interface_normal_field                The normal projected interface velocity field.
- * @param[in]  interface_stress_tensor_positive_material  The interface stress tensor of the positive material
- * @param[in]  interface_stress_tensor_negative_material  The interface stress tensor of the negative material
+ * @param[in]  interface_stress_tensor_positive_material  The interface stress tensor of the positive material.
+ * @param[in]  interface_stress_tensor_negative_material  The interface stress tensor of the negative material.
  */
 void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node
                                                           , double const (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]
@@ -385,7 +385,7 @@ void InterfaceStressTensorFluxes::AddAxisymmetricPartToViscousStressTensor( Node
                                                                           , double (&tau)[CC::ICX()][CC::ICY()][CC::ICZ()][DTI(CC::DIM())][DTI(CC::DIM())]) const {
 
    std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const    (&volume_fractions)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
+   double const (&volume_fractions)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::VolumeFraction);
 
    double const cell_size = node.GetCellSize();
 

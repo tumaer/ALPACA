@@ -75,8 +75,7 @@
 
 /**
  * @brief The InterfaceBlock class holds the interface data, such as the interface describing variables (levelset, volume fraction) and other interfaces
- *        variables that are required for the computations (e.g., interface velocity) Does NOT manipulate the data itself,
- *        but provides access to the data.
+ *        variables that are required for the computations (e.g., interface velocity) Does NOT manipulate the data itself, but provides access to the data.
  */
 class InterfaceBlock {
 

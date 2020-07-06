@@ -73,15 +73,15 @@
 #include "utilities/string_operations.h"
 
 /**
- * @brief The InputType enum defines the type of the input file that is used for the output. 
- *        (XML: An xml file is used as input )
+ * @brief The InputType enum defines the type of the input file that is used for the output.
+ *        (XML: An xml file is used as input ).
  */
 enum class InputType { Xml };
 
 /**
- * @brief Converts the InputType to its corresponding string (for logging)
+ * @brief Converts the InputType to its corresponding string (for logging).
  * @param type The Input type identifier.
- * @return String to be used 
+ * @return String to be used.
  */
 inline std::string InputTypeToString( InputType const type ) {
 
@@ -96,12 +96,12 @@ inline std::string InputTypeToString( InputType const type ) {
 }
 
 /**
- * @brief Gives the input type for a given string 
- * @param type Type as a string  
- * @return input type identifier
+ * @brief Gives the input type for a given string.
+ * @param type Type as a string.
+ * @return input type identifier.
  */
 inline InputType StringToInputType( std::string const& type ) {
-   // Get the file extension 
+   // Get the file extension
    std::string const type_upper_case( StringOperations::ToUpperCaseWithoutSpaces( type ) );
    // cannot use switch for strings
    if( type_upper_case == "XML" ) {

@@ -73,7 +73,7 @@
 #include "topology/topology_manager.h"
 
 /**
- * @brief Defines all initialization functions required for the multiresolution
+ * @brief Defines all initialization functions required for the multiresolution.
  */
 namespace Initialization {
 

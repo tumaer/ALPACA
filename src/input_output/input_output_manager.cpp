@@ -80,29 +80,33 @@
 #include "user_specifications/compile_time_constants.h"
 #include "communication/mpi_utilities.h"
 
-// Helper function for better readability in the code below
 namespace {
-   inline void RemoveTimeStamps( std::vector<double> & time_stamps, double const maxmimum_value ) {
-      time_stamps.erase( time_stamps.begin(), std::find_if_not(time_stamps.begin(), time_stamps.end(), [&maxmimum_value]( double const timestamp )
-                                                               { return timestamp <= maxmimum_value; } ) );
+   /**
+    * @brief Removes The time stamps from a given vector up to a maximum value.
+    * @param time_stamps The vector holding all time stamps.
+    * @param maximum_value The maximum value allowed in the time stamp vector (includint the value).
+    */
+   inline void RemoveTimeStamps( std::vector<double> & time_stamps, double const maximum_value ) {
+      time_stamps.erase( time_stamps.begin(), std::find_if_not(time_stamps.begin(), time_stamps.end(), [&maximum_value]( double const timestamp )
+                                                               { return timestamp <= maximum_value; } ) );
    }
 }
 
 /**
  * @brief Default constructor using the inputs from the operating system.
- * @param input_file Input file name with the full path
- * @param output_folder Name of the output folder where the data is written into
- * @param unit_handler Instance to provide (non-)dimensionalization of values
- * @param output_writer Full initialized output writer class
- * @param restart_manager Full initialized restar_manager class
- * @param time_naming_factor Factor that is used for naming the ouput files
- * @param standard_output_timestamps Timestamps when output is desired for the standard or debug output
- * @param interface_output_timestamps Timestamps when output is desired for the interface output
- * @param restore_mode Restore mode (Off, soft, forced)
- * @param restore_filename Filename that is used for restoring the simulation if mode is enabled
- * @param restart_snapshot_timestampsTimestamps when restart files are desired
- * @param restart_snapshot_interval Interval (in wall seconds) when a restart file should be written
- * @param restart_intervals_to_keep Number of intervals that are kept in total .
+ * @param input_file Input file name with the full path.
+ * @param output_folder Name of the output folder where the data is written into.
+ * @param unit_handler Instance to provide (non-)dimensionalization of values.
+ * @param output_writer Full initialized output writer class.
+ * @param restart_manager Full initialized restar_manager class.
+ * @param time_naming_factor Factor that is used for naming the ouput files.
+ * @param standard_output_timestamps Timestamps when output is desired for the standard or debug output.
+ * @param interface_output_timestamps Timestamps when output is desired for the interface output.
+ * @param restore_mode Restore mode (Off, soft, forced).
+ * @param restore_filename Filename that is used for restoring the simulation if mode is enabled.
+ * @param restart_snapshot_timestampsTimestamps when restart files are desired.
+ * @param restart_snapshot_interval Interval (in wall seconds) when a restart file should be written.
+ * @param restart_intervals_to_keep Number of intervals that are kept in total.
  */
 InputOutputManager::InputOutputManager( std::string const& input_file,
                                         std::string const& output_folder,
@@ -174,7 +178,7 @@ InputOutputManager::InputOutputManager( std::string const& input_file,
 }
 
 /**
- * @brief Destructor to destroy the object with operations
+ * @brief Destructor to destroy the object with operations.
  * @note In the destructor all operations are carried out to finalize the output and restart operations.
  */
 InputOutputManager::~InputOutputManager() {
@@ -318,9 +322,9 @@ bool InputOutputManager::WriteFullOutput( double const timestep, bool const forc
 }
 
 /**
- * @brief Writes debug output with the given debug key (for detailed debug output after algorithm substep)
+ * @brief Writes debug output with the given debug key (for detailed debug output after algorithm substep).
  * @param output_key The output key indicating at which algorithm substep the output is triggered.
- * @param output_type Output type identifier that is used (standard, interface, debug). Default: Debug
+ * @param output_type Output type identifier that is used (standard, interface, debug). Default: Debug.
  */
 void InputOutputManager::WriteSingleOutput( unsigned int const output_key, OutputType const output_type ) const {
   // correct file naming
@@ -331,11 +335,11 @@ void InputOutputManager::WriteSingleOutput( unsigned int const output_key, Outpu
 }
 
 /**
- * @brief Carries out the actual output writing (call of output writer) with additional logging
- * @param output_type Output type identifier that is used (standard, interface, debug)
- * @param output_time Time of the output
- * @param filename_without_extension Filename without extension where the output is written into
- * @param time_series_filename_without_extension Filename of the time series data that is written
+ * @brief Carries out the actual output writing (call of output writer) with additional logging.
+ * @param output_type Output type identifier that is used (standard, interface, debug).
+ * @param output_time Time of the output.
+ * @param filename_without_extension Filename without extension where the output is written into.
+ * @param time_series_filename_without_extension Filename of the time series data that is written.
  */
 void InputOutputManager::WriteOutput( OutputType const output_type,
                                       double const output_time,
@@ -349,7 +353,7 @@ void InputOutputManager::WriteOutput( OutputType const output_type,
    output_writer_.WriteOutput( output_type, output_time, filename_without_extension, time_series_filename_without_extension );
 
    // Final logging
-   logger_.LogMessage(  OutputTypeToString( output_type ) + " output file written at t = " 
+   logger_.LogMessage(  OutputTypeToString( output_type ) + " output file written at t = "
                         + StringOperations::ToScientificNotationString( output_time, 9 ), true, true );
 
    // Debug loggin information for full writing process
@@ -436,7 +440,7 @@ void InputOutputManager::WriteRestartFile( double const timestep, bool const for
 
 /**
  * @brief Restores the simulation from the user configured snapshot and returns the simulation time of the snapshot.
- * @return The time of the simulation snapshot (negative if no restart is carried out)
+ * @return The time of the simulation snapshot (negative if no restart is carried out).
  */
 double InputOutputManager::RestoreSimulationFromSnapshot() {
    // Restart time that is returned (negative if restart is not carried out)

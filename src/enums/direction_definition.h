@@ -72,13 +72,13 @@
 
 /**
  * @brief Identifier for spatial direction, i.e. x, y and z.
- * 
- * @note Do NOT change the indices of the enum entries (used for mapping in arrays)
+ *
+ * @note Do NOT change the indices of the enum entries (used for mapping in arrays).
  */
 enum class Direction : unsigned int { X = 0, Y = 1, Z = 2 };
 
 /**
- * @brief Converts a direction identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Direction to Index"
+ * @brief Converts a direction identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Direction To Index".
  * @param d The direction identifier.
  * @return Index to be used in Arrays.
  */

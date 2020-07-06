@@ -78,8 +78,8 @@
 
 /**
  * @brief Default constructor.
- * @param topology Instance that provides node data on a global level
- * @param maximum_level Maximum present level for the simulation
+ * @param topology Instance that provides node data on a global level.
+ * @param maximum_level Maximum present level for the simulation.
  */
 CommunicationManager::CommunicationManager(TopologyManager & topology, unsigned int const maximum_level) :
    // Start initializer list
@@ -105,17 +105,17 @@ CommunicationManager::CommunicationManager(TopologyManager & topology, unsigned 
 }
 
 /**
- * @brief Counts the necessary amount of planes, sticks and cubes for jump sends
- * @param loc Location necessary to determine type
+ * @brief Counts the necessary amount of planes, sticks and cubes for jump sends.
+ * @param loc Location necessary to determine type.
  * @param jump_send_counters [0] plane, [1] stick and [2] cube count.
  */
 void IncrementJumpSendCounter(BoundaryLocation const loc, std::array<unsigned int, 3> &jump_send_counters) {
    if(LTI(loc) <= LTI(BoundaryLocation::Bottom)) {
-      jump_send_counters[0]++; //Plane
+      jump_send_counters[ETTI( ExchangeType::Plane )]++; //Plane
    } else if(LTI(loc) <= LTI(BoundaryLocation::SouthWest)) {
-      jump_send_counters[1]++; //Stick
+      jump_send_counters[ETTI( ExchangeType::Stick )]++; //Stick
    } else {
-      jump_send_counters[2]++; //Cube
+      jump_send_counters[ETTI( ExchangeType::Cube )]++; //Cube
    }
 }
 
@@ -221,11 +221,11 @@ void CommunicationManager::GenerateNeighborRelationForHaloUpdate(unsigned int co
 namespace {
 
 /**
- * Bitset used to convert natural boundaries into it's 9 Halo Boundary sides
+ * Bitset used to convert natural boundaries into it's 9 Halo Boundary sides.
  * e.g. std::bitset<26> (CC::ANBL()[LTI(EAST)] gives all halo positions contained in east natural boundary side, e.g. east-south-bottom.
  * The bitset fills the tables with the configuration below with 0 or 1.
- * wsb, wst, wnb, wnt, esb, est, enb, ent, sw, se, nw, ne, tw, te, bw, be, ts, tn, bs, bn, b, t, s, n, w, e
- * returns an unsigned int that has all bits set for a specific natural boundary location
+ * wsb, wst, wnb, wnt, esb, est, enb, ent, sw, se, nw, ne, tw, te, bw, be, ts, tn, bs, bn, b, t, s, n, w, e.
+ * returns an unsigned int that has all bits set for a specific natural boundary location.
  */
 constexpr std::array<std::uint64_t, 6> bitsets_for_natural_boundary_locations = {
    0x3d5401,  //east
@@ -238,9 +238,9 @@ constexpr std::array<std::uint64_t, 6> bitsets_for_natural_boundary_locations = 
 }
 
 /**
- * @brief Finds the neighbors of a specific node and sorts them into the array. Domain Boundaries are inserted only as natural (e,w,n,s,t,b), internals are inserted per direction e.g diagonal wnb
- * @param global_id global node's id
- * @param nodes_internal_boundaries output array for internal boundaries, all HaloBoundarySides are included that are not part of externals BC
+ * @brief Finds the neighbors of a specific node and sorts them into the array. Domain Boundaries are inserted only as natural (e,w,n,s,t,b), internals are inserted per direction e.g diagonal wnb.
+ * @param global_id global node's id.
+ * @param nodes_internal_boundaries output array for internal boundaries, all HaloBoundarySides are included that are not part of externals BC.
  * @param external_boundaries all external boundaries are included as natural Boundary Side e.g. east, west...
  */
 void CommunicationManager::NeighborsOfNode(std::uint64_t const global_id, std::vector<std::tuple<std::uint64_t, BoundaryLocation>> &nodes_internal_boundaries, std::vector<std::tuple<std::uint64_t, BoundaryLocation>> &external_boundaries) {
@@ -269,13 +269,13 @@ void CommunicationManager::InvalidateCache() {
 }
 
 /**
- * @brief Wrapper for MPI_Send or MPI_Isend, use like MPI_Send
- * @param buffer initial address of send buffer (choice)
- * @param count number of elements in send buffer (integer)
- * @param datatype datatype of each send buffer element (handle)
- * @param destination_rank rank of destination (integer)
- * @param requests vector of communication request (handle), new handle will be added at the end of the vector
- * @return Error value see MPI_Isend for details
+ * @brief Wrapper for MPI_Send or MPI_Isend, use like MPI_Send.
+ * @param buffer initial address of send buffer (choice).
+ * @param count number of elements in send buffer (integer).
+ * @param datatype datatype of each send buffer element (handle).
+ * @param destination_rank rank of destination (integer).
+ * @param requests vector of communication request (handle), new handle will be added at the end of the vector.
+ * @return Error value see MPI_Isend for details.
  * @note Must not be called in single-core mode (will hang).
  */
 int CommunicationManager::Send(void const* buffer, int const count, MPI_Datatype const datatype, int const destination_rank, std::vector<MPI_Request>& requests) {
@@ -291,13 +291,13 @@ int CommunicationManager::Send(void const* buffer, int const count, MPI_Datatype
 }
 
 /**
- * @brief Wrapper for MPI_Recv or MPI_Irecv, use like MPI_Recv
- * @param buffer initial address of send buffer (choice)
- * @param count number of elements in send buffer (integer)
- * @param datatype datatype of each send buffer element (handle)
- * @param source_rank MPI rank of source
- * @param requests vector of communication request (handle), new handle will be added at the end of the vector
- * @return Error value see MPI_Irecv for details
+ * @brief Wrapper for MPI_Recv or MPI_Irecv, use like MPI_Recv.
+ * @param buffer initial address of send buffer (choice).
+ * @param count number of elements in send buffer (integer).
+ * @param datatype datatype of each send buffer element (handle).
+ * @param source_rank MPI rank of source.
+ * @param requests vector of communication request (handle), new handle will be added at the end of the vector.
+ * @return Error value see MPI_Irecv for details.
  * @note Must not be called in single-core mode (will hang).
  */
 int CommunicationManager::Recv(void *buffer, int const count, MPI_Datatype const datatype, int const source_rank, std::vector<MPI_Request>& requests) {
@@ -314,8 +314,8 @@ int CommunicationManager::Recv(void *buffer, int const count, MPI_Datatype const
 
 /**
  * @brief Returns a tag, that can be used for one communication with another rank. TagForRank must be called in the same order on all participating ranks. If replacing the communication with MPI_Send/MPI_Recv is valid, it's OK.
- * @param rank of the communication partner
- * @return tag for communication
+ * @param rank of the communication partner.
+ * @return tag for communication.
  */
 int CommunicationManager::TagForRank( unsigned int const rank ) {
    partner_tag_map_[rank] = ( partner_tag_map_[rank]++ ) % mpi_tag_ub_;
@@ -330,36 +330,36 @@ void CommunicationManager::ResetTagsForPartner() {
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all internal jump boundary relations that require mpi communication
- * @param level Level for which the list should be returned
- * @return List with relations for all internal mpi jump boundaries
+ * @brief Gives a reference to the list for a given level holding all internal jump boundary relations that require mpi communication.
+ * @param level Level for which the list should be returned.
+ * @return List with relations for all internal mpi jump boundaries.
  */
 std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesJumpMpi(unsigned int const level) const {
    return internal_boundaries_jump_mpi_[level];
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all internal jump boundary relations that do not require mpi communication
- * @param level Level for which the list should be returned
- * @return List with relations for all internal no-mpi jump boundaries
+ * @brief Gives a reference to the list for a given level holding all internal jump boundary relations that do not require mpi communication.
+ * @param level Level for which the list should be returned.
+ * @return List with relations for all internal no-mpi jump boundaries.
  */
 std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesJump(unsigned int const level) const {
    return internal_boundaries_jump_[level];
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all internal non-jump boundary relations that require mpi communication
- * @param level Level for which the list should be returned
- * @return List with relations for all internal mpi non-jump boundaries
+ * @brief Gives a reference to the list for a given level holding all internal non-jump boundary relations that require mpi communication.
+ * @param level Level for which the list should be returned.
+ * @return List with relations for all internal mpi non-jump boundaries.
  */
 std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesMpi(unsigned int const level) const {
    return internal_boundaries_mpi_[level];
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all internal non-jump boundary relations that do not require mpi communication
- * @param level Level for which the list should be returned
- * @return List with relations for all internal no-mpi non-jump boundaries
+ * @brief Gives a reference to the list for a given level holding all internal non-jump boundary relations that do not require mpi communication.
+ * @param level Level for which the list should be returned.
+ * @return List with relations for all internal no-mpi non-jump boundaries.
  */
 std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundaries(unsigned int const level) const {
    return internal_boundaries_[level];
@@ -382,9 +382,9 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all external boundary relations
- * @param level Level for which the list should be returned
- * @return List with relations for all external boundary nodes
+ * @brief Gives a reference to the list for a given level holding all external boundary relations.
+ * @param level Level for which the list should be returned.
+ * @return List with relations for all external boundary nodes.
  */
 std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& CommunicationManager::ExternalBoundaries( unsigned int const level ) const {
    return external_boundaries_[level];
@@ -399,20 +399,20 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& CommunicationMan
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all internal jump boundary relations that require mpi communication
- * @param level Level for which the list should be returned
- * @return List with internal mpi jump boundaries
+ * @brief Gives a reference to the list for a given level holding all internal jump boundary relations that require mpi communication.
+ * @param level Level for which the list should be returned.
+ * @return List with internal mpi jump boundaries.
  */
 bool CommunicationManager::AreBoundariesValid( unsigned const level ) const {
    return boundaries_valid_[level];
 }
 
 /**
- * @brief Gives a reference to the list for a given level holding all internal jump boundaries that require mpi communication
- * @param level Level for which the list should be returned
- * @param exchange_type Type of the exchange buffer that is used (0: plane, 1: stick, 2:cube)
- * @return List with internal mpi jump boundaries
+ * @brief Gives a reference to the list for a given level holding all internal jump boundaries that require mpi communication.
+ * @param level Level for which the list should be returned.
+ * @param type Type of the exchange buffer that is used.
+ * @return List with internal mpi jump boundaries.
  */
-unsigned CommunicationManager::JumpSendCount(unsigned const level, unsigned int const exchange_type) {
-   return jump_send_count_[level][exchange_type];
+unsigned CommunicationManager::JumpSendCount(unsigned const level, ExchangeType const type) {
+   return jump_send_count_[level][ETTI( type )];
 }

@@ -82,14 +82,9 @@
  *
  * @return     The shock/rarefaction relation and its derivative.
  */
-std::array<double, 2> TwoRarefactionIterativeInterfaceRiemannSolver::ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-   double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
-#ifndef PERFORMANCE
-  (void) p; // Avoid compiler warning
-  (void) pressure_function; // Avoid compiler warning
-  (void) A; // Avoid compiler warning
-  (void) B; // Avoid compiler warning
-#endif
+std::array<double, 2> TwoRarefactionIterativeInterfaceRiemannSolver::ObtainFunctionAndDerivativeImplementation( double const initial_root, double const ,
+   double const , double const one_pressure_function, double const pressure_constant, double const , double const , double const C, double const D ) const {
+
   return {RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
           RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ) };
 }

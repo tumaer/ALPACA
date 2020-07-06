@@ -73,14 +73,14 @@
 
 /**
  * @brief The FedkiwGhostFluidExtender class extends material-states from real-material to ghost-material by iteratively solving the extension equation.
- * The approach follows \cite osher2006level
+ *        The approach follows \cite osher2006level.
  *
  * @tparam field_type The Fluid field type for which the extender is used (PrimeStates, Parameters or Conservatives)
  */
-template< MaterialFieldType field_type >
-class FedkiwGhostFluidExtender : public GhostFluidExtender< FedkiwGhostFluidExtender< field_type >, field_type > {
+template<MaterialFieldType field_type>
+class FedkiwGhostFluidExtender : public GhostFluidExtender<FedkiwGhostFluidExtender<field_type>, field_type> {
    // Definition for shortening
-   using GhostFluidExtenderSpecification = GhostFluidExtender< FedkiwGhostFluidExtender< field_type >, field_type >;
+   using GhostFluidExtenderSpecification = GhostFluidExtender<FedkiwGhostFluidExtender<field_type>, field_type>;
    // friend declaration
    friend GhostFluidExtenderSpecification;
 

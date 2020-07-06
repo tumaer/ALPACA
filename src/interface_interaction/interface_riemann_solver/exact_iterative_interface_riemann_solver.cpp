@@ -68,7 +68,7 @@
 #include "exact_iterative_interface_riemann_solver.h"
 
 /**
- * @brief      Calculates the shock/rarefaction relation and its derivative. See \cite Toro2009 .
+ * @brief      Calculates the shock/rarefaction relation and its derivative. See \cite Toro2009.
  *
  * @param[in]  initial_root           The interface pressure of the current iteration.
  * @param[in]  p                      The left/right pressure defining the interface Riemann problem.

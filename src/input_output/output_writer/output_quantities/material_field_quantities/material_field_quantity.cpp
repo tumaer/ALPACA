@@ -70,15 +70,15 @@
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
- * @brief constructor to create material field output
- * @param unit_handler Unit handler class for dimensionalization
- * @param material_manager Material manager for accessing material data
- * @param quantity_name The name of the material field quantity used for the output
- * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug)
- * @param quantity_data Data struct that contains all relevant information of the material quantity
- * @param buffer_type Conservative buffert type identifier (default: Average)
+ * @brief constructor to create material field output.
+ * @param unit_handler Unit handler class for dimensionalization.
+ * @param material_manager Material manager for accessing material data.
+ * @param quantity_name The name of the material field quantity used for the output.
+ * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug).
+ * @param quantity_data Data struct that contains all relevant information of the material quantity.
+ * @param buffer_type Conservative buffert type identifier (default: Average).
  *
- * @note The quantity_name is written in the file (seen in ParaView cell_data list)
+ * @note The quantity_name is written in the file (seen in ParaView cell_data list).
  */
 MaterialFieldQuantity::MaterialFieldQuantity( UnitHandler const& unit_handler,
                                               MaterialManager const& material_manager,
@@ -94,7 +94,7 @@ MaterialFieldQuantity::MaterialFieldQuantity( UnitHandler const& unit_handler,
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
@@ -178,7 +178,7 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 void MaterialFieldQuantity::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
 

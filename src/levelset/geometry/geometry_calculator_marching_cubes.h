@@ -72,7 +72,7 @@
 
 /**
  * @brief The GeometryCalculatorMarchingCubes class calculates volume fractions and cell face apertures based on the marching-cube
- * algorithm as presented in \cite Lauer2012.
+ *        algorithm as presented in \cite Lauer2012.
  * @note This class is derived and inherits from the abstract class GeometryCalculator.
  */
 class GeometryCalculatorMarchingCubes : public GeometryCalculator<GeometryCalculatorMarchingCubes> {

@@ -197,7 +197,7 @@ void InterfaceTermSolver::FillDeltaApertureBuffer( Node const& node
 
 /**
  * @brief Weights the face fluxes of a specific phase according to the cell-face apertures. This is only done for multi-phase nodes which contain a
- * level-set field.
+ *        level-set field.
  * @param node The node which contains the phase.
  * @param material The material specifying the phase.
  * @param face_fluxes_x The fluxes over the cell phases in x-direction.
@@ -246,7 +246,7 @@ void InterfaceTermSolver::WeightFaceFluxes(Node const& node, MaterialName const 
 
 /**
  * @brief Weights the volume forces of a specific phase according to the volume fraction. This is only done for multi-phase nodes which contain a
- * level-set field.
+ *        level-set field.
  * @param node The node which contains the phase.
  * @param volume_forces The volume forces acting on cells.
  * @param material The material specifying the phase.

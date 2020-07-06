@@ -76,6 +76,10 @@
 
 #include "block_definitions/field_material_definitions.h"
 
+/**
+ * @brief The CommunicationTypes class collects all information about the different types used for the MPI-communication. It specifies
+ *        the sizes, start indices and other information to allow specific buffer communication in one single chunk.
+ */
 class CommunicationTypes{
 
    static constexpr std::array<int,3 > block_size_ = { CC::TCX(), CC::TCY(), CC::TCZ() };
@@ -229,13 +233,15 @@ public:
 
 /**
  * @brief Gives the total number values need to be transferred per conservative variable (+buffer copies),
- *        which need to be transferred if the content of a whole block is to be sent from one rank to another
+ *        which need to be transferred if the content of a whole block is to be sent from one rank to another.
+ * @return The size of a full block (internal + halos).
  */
 constexpr int FullBlockSendingSize() {return CC::TCX()*CC::TCY()*CC::TCZ();}
 
 /**
  * @brief Gives the total number values need to be transferred per conservative variable (+buffer copies),
- *        if the content of all internal cells of a whole block is to be sent from one rank to another
+ *        if the content of all internal cells of a whole block is to be sent from one rank to another.
+ * @return The size of the internal block.
  */
 constexpr int DomainBlockSendingSize() {return CC::ICX()*CC::ICY()*CC::ICZ();}
 

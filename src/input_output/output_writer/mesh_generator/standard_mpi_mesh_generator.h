@@ -72,11 +72,11 @@
 #include "input_output/output_writer/mesh_generator.h"
 
 /**
- * @brief The StandardMpiMeshGenerator generates a mesh for the output (currently xdmf + hdf5) using a mpi routine. 
- * 
- * It provides the functionality of a non-ambiguous mesh (vertex IDs and coordinates) using a mpi-routine. 
- * If the mpi-routine is not used double placed vertices will be present in the output. The mesh represents the current multi-resolution
- * situation including jumps between different blocks. Only leaf nodes are written. 
+ * @brief The StandardMpiMeshGenerator generates a mesh for the output (currently xdmf + hdf5) using a mpi routine.
+ *
+ *        It provides the functionality of a non-ambiguous mesh (vertex IDs and coordinates) using a mpi-routine.
+ *        If the mpi-routine is not used double placed vertices will be present in the output. The mesh represents the current multi-resolution
+ *        situation including jumps between different blocks. Only leaf nodes are written.
  */
 class StandardMpiMeshGenerator : public MeshGenerator {
 
@@ -90,9 +90,9 @@ class StandardMpiMeshGenerator : public MeshGenerator {
 
    // virtual functions required from the base class to compute data to hdf5 file
    void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;   
+   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
 
-   // virtual dimension functions required from base class 
+   // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
    hsize_t DoGetGlobalNumberOfCells() const override;
    hsize_t DoGetLocalNumberOfCells() const override;

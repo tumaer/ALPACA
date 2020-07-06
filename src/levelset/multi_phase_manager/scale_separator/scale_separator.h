@@ -80,7 +80,7 @@ class ScaleSeparator {
    friend DerivedScaleSeparator;
 
 protected:
-   const MaterialManager& material_manager_;
+   MaterialManager const& material_manager_;
    HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
 
    ScaleSeparator() = delete;
@@ -103,10 +103,9 @@ public:
    /**
     * @brief Performs a scale separation procedure.
     * @param nodes The nodes for which scale separation should be done.
-    * @param stage The current stage of the RK scheme.
     */
-   void SeparateScales(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedScaleSeparator const&>(*this).SeparateScalesImplementation(nodes, stage);
+   void SeparateScales(std::vector<std::reference_wrapper<Node>> const& nodes) const {
+      static_cast<DerivedScaleSeparator const&>(*this).SeparateScalesImplementation(nodes);
    }
 
 };

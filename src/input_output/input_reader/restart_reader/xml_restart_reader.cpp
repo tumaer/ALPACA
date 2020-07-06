@@ -70,67 +70,64 @@
 #include "input_output/input_reader/xml_utilities.h"
 #include "utilities/string_operations.h"
 
+/**
+ * @brief Default constructor for the restart reader for xml-type input files.
+ * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
+ */
 XmlRestartReader::XmlRestartReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   RestartReader(), 
+   RestartReader(),
    xml_input_file_( std::move( inputfile ) ) {
-   /** Empty besides initializer list and base class constructor call */  
+   /** Empty besides initializer list and base class constructor call */
 }
 
 /**
- * @brief Reads the mode used to restore a simulation 
- * @return restore mode string 
+ * @brief See base class definition.
  */
 std::string XmlRestartReader::DoReadRestoreMode() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "restore", "mode" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "restore", "mode" } );
    return XmlUtilities::ReadString( node );
 }
 
- 
+
 /**
- * @brief Reads the filename to be used for the output 
- * @return name of the restore file
- * @note raw filename
+ * @brief See base class definition.
  */
 std::string XmlRestartReader::DoReadRestoreFilename() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "restore", "fileName" } );   
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "restore", "fileName" } );
    return XmlUtilities::ReadString( node );
 }
 
 /**
- * @brief Reads the times type used for writing the restart snapshots 
- * @return snapshot times type string
+ * @brief See base class definition.
  */
 std::string XmlRestartReader::DoReadSnapshotTimesType() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "snapshots", "type" } );     
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "snapshots", "type" } );
    return XmlUtilities::ReadString( node );
 }
 
 /**
- * @brief Reads the interval to be used for writign restart files (in wall seconds)
- * @return interval to be used
+ * @brief See base class definition.
  */
 int XmlRestartReader::DoReadSnapshotInterval() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "snapshots", "interval" } );     
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "snapshots", "interval" } );
    return XmlUtilities::ReadInt( node );
 }
 
 /**
- * @brief Reads the number of snapshots to be kept (for the interval based writing) 
- * @return number of snapshots
+ * @brief See base class definition.
  */
 int XmlRestartReader::DoReadSnapshotIntervalsToKeep() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "snapshots", "intervalsToKeep" } );  
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "snapshots", "intervalsToKeep" } );
    return XmlUtilities::ReadInt( node );
 }
 
 /**
- * @brief Reads the time stamps to be used to write restart snapshots 
- * @return timestamps to be used 
+ * @brief See base class definition.
  */
 std::vector<double> XmlRestartReader::DoReadSnapshotTimeStamps() const {
    // Obtain correct node

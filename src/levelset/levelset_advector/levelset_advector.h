@@ -94,10 +94,9 @@ public:
    /**
     * @brief Calculates the right-hand side to solve the level-set advection equation.
     * @param node The node for which the level-set field is propagated in time.
-    * @param stage The current stage of the Runge-Kutta method.
     */
-   void Advect(Node& node, unsigned int const stage = 0) const {
-      static_cast<DerivedLevelsetAdvector const&>(*this).AdvectImplementation(node, stage);
+   void Advect( Node& node ) const {
+      static_cast<DerivedLevelsetAdvector const&>(*this).AdvectImplementation( node );
    }
 };
 

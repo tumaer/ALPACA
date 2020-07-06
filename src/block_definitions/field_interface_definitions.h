@@ -104,10 +104,10 @@ public:
    InterfaceFieldsDefinitions& operator=( InterfaceFieldsDefinitions&& ) = delete;
 
    /**
-    * @brief Gives whether the given field name and index is active
-    * @param field_type Identifier for the interface field type (Description, States or Parameters)
-    * @param field_index Index of the given field
-    * @return True if active, otherwise False
+    * @brief Gives whether the given field name and index is active.
+    * @param field_type Identifier for the interface field type (Description, States or Parameters).
+    * @param field_index Index of the given field.
+    * @return True if active, otherwise False.
     */
    static constexpr bool IsFieldActive( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
@@ -151,10 +151,10 @@ public:
    }
 
    /**
-    * @brief Gives the name used for reading input files for the given field and index
-    * @param field_type Interface field type for which the output name should be returned
-    * @param field_index field index for given type for which the output name should be returned
-    * @return Input name for field and index (empty if not specified)
+    * @brief Gives the name used for reading input files for the given field and index.
+    * @param field_type Interface field type for which the output name should be returned.
+    * @param field_index field index for given type for which the output name should be returned.
+    * @return Input name for field and index (empty if not specified).
     */
    static constexpr auto InputName( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
@@ -172,11 +172,11 @@ public:
 
    /**
     * @brief Gives the name used in the input for the given field.
-    * @param ls InterfaceDescription type for which the input name should be returned
+    * @param id InterfaceDescription type for which the input name should be returned.
     * @return Input name for interface description field (empty if not specified)
     */
-   static constexpr auto InputName( InterfaceDescription const ls ) {
-      return FieldDetails::ActiveInterfaceDescriptions::GetInputName( IDTI( ls ) );
+   static constexpr auto InputName( InterfaceDescription const id ) {
+      return FieldDetails::ActiveInterfaceDescriptions::GetInputName( IDTI( id ) );
    }
 
    /**
@@ -219,8 +219,8 @@ public:
 
    /**
     * @brief Gives the dimension/unit of the given field.
-    * @param id InterfaceDescription type for which the unit should be returned
-    * @return Unit of desired field
+    * @param id InterfaceDescription type for which the unit should be returned.
+    * @return Unit of desired field.
     */
    static constexpr auto FieldUnit( InterfaceDescription const id ) {
       return FieldDetails::ActiveInterfaceDescriptions::GetUnit( IDTI( id ) );
@@ -228,8 +228,8 @@ public:
 
    /**
     * @brief Gives the dimension/unit of the given field.
-    * @param is Interface State type for which the unit should be returned
-    * @return Unit of desired field
+    * @param is Interface State type for which the unit should be returned.
+    * @return Unit of desired field.
     */
    static constexpr auto FieldUnit( InterfaceState const is ) {
       return FieldDetails::ActiveInterfaceStates::GetUnit( ISTI( is ) );
@@ -237,28 +237,34 @@ public:
 
    /**
     * @brief Gives the dimension/unit of the given field.
-    * @param ip Interface Parameter type for which the unit should be returned
-    * @return Unit of desired field
+    * @param ip Interface Parameter type for which the unit should be returned.
+    * @return Unit of desired field.
     */
    static constexpr auto FieldUnit( InterfaceParameter const ip ) {
       return FieldDetails::ActiveInterfaceParameters::GetUnit( IPTI( ip ) );
    }
 
    /**
-    * @brief Gives the number of Description considered in the simulation.
-    * @return Number of active Description
+    * @brief Gives the number of InterfaceDescription considered in the simulation.
+    * @return Number of active InterfaceDescription.
+    *
+    * @note Depending on the configuration of active inteface description, the number can change.
     */
    static constexpr unsigned int ANOD() { return FieldDetails::ActiveInterfaceDescriptions::Count; }
 
    /**
     * @brief Gives the number of interface states considered in the simulation.
-    * @return Number of active interface states
+    * @return Number of active interface states.
+    *
+    * @note Depending on the configuration of active prime states, the number can change (e.g., pressure activated).
     */
    static constexpr unsigned int ANOS() { return FieldDetails::ActiveInterfaceStates::Count; }
 
    /**
     * @brief Gives the number of interface parameters considered in the simulation.
-    * @return Number of active interface parameters
+    * @return Number of active interface parameters.
+    *
+    * @note Depending on the configuration of active prime states, the number can change.
     */
    static constexpr unsigned int ANOPA() { return FieldDetails::ActiveInterfaceParameters::Count; }
 
@@ -372,8 +378,8 @@ public:
    /**
     * @brief Gives the appropriate index to the given interface field to be extended (for states or parameters). "FITE = Field Index to extend".
     * @param field_type The interface field type.
-    * @param array_index Index in the array
-    * @return Number of fields to be extended.
+    * @param field_index Index of the field.
+    * @return Appropriate index of the desired field in the active field definitions.
     *
     * @note Since no sanity check is done if the index is valid this function should ALWAYS be called in conjunction with the NOFTE() function
     *       that gives the appropriate number of fields that should be extended

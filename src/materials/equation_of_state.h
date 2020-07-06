@@ -82,7 +82,8 @@ class EquationOfState {
    virtual double DoGetEnergy     ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const = 0;
    virtual double DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
 #ifndef PERFORMANCE
-      // Avoids compiler warnings
+      // Avoids compiler warnings (here we use the PERFORMANCE flags to avoid compiler warnings to explicitly name the variables that should
+      // be used for derived classes)
       ( void ) density;
       ( void ) momentum_x;
       ( void ) momentum_y;
@@ -118,11 +119,11 @@ public:
 
    /**
     * @brief Computes the pressure for given input of a arbitrary density, momentum and energy according to the material equation of state.
-    * @param density .
-    * @param momentum_x .
-    * @param momentum_y .
-    * @param momentum_z .
-    * @param energy .
+    * @param density The density used for the computation.
+    * @param momentum_x The momentum in x-direction used for the computation.
+    * @param momentum_y The momentum in y-direction used for the computation.
+    * @param momentum_z The momentum in z-direction used for the computation.
+    * @param energy The energy used for the computation.
     * @return Pressure for the state imposed by the inputs of the implemented material.
     */
    double GetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
@@ -131,11 +132,11 @@ public:
 
    /**
     * @brief GetEnthalpy Computes the Enthalpy based on the given inputs according to the implemented equation of state and the material parameters.
-    * @param density .
-    * @param momentum_x .
-    * @param momentum_y .
-    * @param momentum_z .
-    * @param energy .
+    * @param density The density used for the computation.
+    * @param momentum_x The momentum in x-direction used for the computation.
+    * @param momentum_y The momentum in y-direction used for the computation.
+    * @param momentum_z The momentum in z-direction used for the computation.
+    * @param energy The energy used for the computation.
     * @return enthalpy for the state imposed by the inputs of the implemented material.
     */
    double GetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
@@ -144,11 +145,11 @@ public:
 
    /**
     * @brief Computes the temperature for given input of a arbitrary density, momentum and energy according to the material equation of state.
-    * @param density .
-    * @param momentum_x .
-    * @param momentum_y .
-    * @param momentum_z .
-    * @param energy .
+    * @param density The density used for the computation.
+    * @param momentum_x The momentum in x-direction used for the computation.
+    * @param momentum_y The momentum in y-direction used for the computation.
+    * @param momentum_z The momentum in z-direction used for the computation.
+    * @param energy The energy used for the computation.
     * @return Temperature for the state imposed by the inputs of the implemented material.
     * @note Returns -1.0 if the equation of state cannot supply a temperature calculation.
     */
@@ -158,11 +159,11 @@ public:
 
    /**
     * @brief Computes the energy in the material for given input of density, momentum and pressure.
-    * @param density .
-    * @param momentum_x .
-    * @param momentum_y .
-    * @param momentum_z .
-    * @param pressure .
+    * @param density The density used for the computation.
+    * @param momentum_x The momentum in x-direction used for the computation.
+    * @param momentum_y The momentum in y-direction used for the computation.
+    * @param momentum_z The momentum in z-direction used for the computation.
+    * @param pressure The pressure used for the computation.
     * @return Energy for the state imposed by the inputs of the implemented material.
     */
    double GetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
@@ -171,8 +172,8 @@ public:
 
    /**
     * @brief Computes the speed of sound for given input of arbitrary density and pressure according to the material equation of state.
-    * @param density .
-    * @param pressure .
+    * @param density The density used for the computation.
+    * @param pressure The pressure used for the computation.
     * @return Speed of sound for the state imposed by the inputs of the implemented material.
     */
    double GetSpeedOfSound( double const density, double const pressure ) const {
@@ -197,7 +198,7 @@ public:
 
    /**
     * @brief Computes psi for given input of arbitrary density and pressure according to the material equation of state in generalized form.
-    * @param pressure .
+    * @param pressure The pressure used for the computation.
     * @param one over density ( saves costs ) .
     * @return Psi for the state imposed by the inputs of the implemented material.
     */

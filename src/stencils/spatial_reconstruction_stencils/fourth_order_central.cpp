@@ -72,17 +72,7 @@
 /**
  * @brief Computes the flux at one cell face according to a first order scheme. Also See base class.
  */
-double FourthOrderCentral::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
-
-#ifndef PERFORMANCE
-   (void)cell_size;
-   (void)evaluation_properties;
-
-   // Output error in case something went wrong with the stencil size
-   if(array.size() < stencil_size_) {
-      throw std::logic_error("Stencil size in First Order is longer than provided Array");
-   }
-#endif
+double FourthOrderCentral::ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const ) const {
 
    double const result = 9.0 * (array[downstream_stencil_size_ - 0] + array[downstream_stencil_size_ + 1]) - 1.0 * (array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ + 2]);
 

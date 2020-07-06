@@ -68,18 +68,18 @@
 #include "input_output/input_reader/initial_condition_reader/initial_condition_reader.h"
 
 /**
- * @brief Reads the initial condition expression string for a given material index
- * @param material_index Index of the material for which the data is read
- * @return Expression string for the material initial condition
+ * @brief Reads the initial condition expression string for a given material index.
+ * @param material_index Index of the material for which the data is read.
+ * @return Expression string for the material initial condition.
  */
 std::string InitialConditionReader::ReadMaterialInitialConditions( unsigned int const material_index ) const {
    return DoReadMaterialInitialConditions( material_index );
 }
 
 /**
- * @brief Reads the initial condition expression string for a given levelset index
- * @param levelset_index Index of the levelset for which the data is read
- * @return Expression string for the levelset initial condition
+ * @brief Reads the initial condition expression string for a given levelset index.
+ * @param levelset_index Index of the levelset for which the data is read.
+ * @return Expression string for the levelset initial condition.
  */
 std::string InitialConditionReader::ReadLevelsetInitialConditions( unsigned int const levelset_index ) const {
    return DoReadLevelsetInitialConditions( levelset_index );

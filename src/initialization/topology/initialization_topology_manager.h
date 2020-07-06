@@ -74,20 +74,20 @@
 #include "enums/direction_definition.h"
 
 /**
- * @brief Defines all initialization functions required for the topology manager 
+ * @brief Defines all initialization functions required for the topology manager.
  */
 namespace Initialization {
 
    // Factory function to compute the number of blocks per dimension of level zero
    std::array<unsigned int, 3> GetNumberOfNodesOnLevelZero( MultiResolutionReader const& multi_resolution_reader );
 
-   // Functions to return the directions on which periodicity is used 
+   // Functions to return the directions on which periodicity is used
    bool IsMaterialPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction );
    bool IsLevelsetPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction );
    unsigned int GetActivePeriodicDirections( BoundaryConditionReader const& boundary_condition_reader );
 
-   // Initialization function for the topology manager class 
-   TopologyManager InitializeTopologyManager( InputReader const& input_reader, 
+   // Initialization function for the topology manager class
+   TopologyManager InitializeTopologyManager( InputReader const& input_reader,
                                               MaterialManager const& material_manager );
 }
 

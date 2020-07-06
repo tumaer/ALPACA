@@ -79,10 +79,10 @@ namespace InterfaceExtenderSetup {
 
    /**
     * @brief Function returning the typedef of a InterfaceExtender based on a constexpr template. For each InterfaceFieldType an extension exists.
-    * 
+    *
     * @tparam InterfaceExtenders The constexpr template parameter to specify the exact InterfaceExtender type.
     */
-   template< InterfaceExtenders >
+   template<InterfaceExtenders >
    struct Concretize;
 
    /**
@@ -90,8 +90,8 @@ namespace InterfaceExtenderSetup {
     */
    template<>
    struct Concretize< InterfaceExtenders::TwoPhase > {
-      typedef TwoPhaseInterfaceExtender< InterfaceFieldType::States > type_states;
-      typedef TwoPhaseInterfaceExtender< InterfaceFieldType::Parameters > type_parameters;
+      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::States > type_states;
+      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::Parameters > type_parameters;
    };
 
 }

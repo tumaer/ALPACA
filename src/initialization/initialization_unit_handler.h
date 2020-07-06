@@ -72,11 +72,11 @@
 #include "input_output/input_reader.h"
 
 /**
- * @brief Defines all initialization functions required for the unit handler
+ * @brief Defines all initialization functions required for the unit handler.
  */
 namespace Initialization {
 
-   // Initialization function of the unit handler 
+   // Initialization function of the unit handler
    UnitHandler InitializeUnitHandler( InputReader const& input_reader );
 }
 

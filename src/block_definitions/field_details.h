@@ -136,8 +136,8 @@ namespace FieldDetails {
 
    /**
    * @brief Bundles relevant configuration data for active material fields (i.e. conservative equations, prime states, interface quantities).
-   * @tparam DerivedActiveFieldsDefinition CRTP template parameter
-   * @tparam FieldEnum Enumeration type of the underlying material field
+   * @tparam DerivedActiveFieldsDefinition CRTP template parameter.
+   * @tparam FieldEnum Enumeration type of the underlying material field.
    */
    template<typename DerivedActiveFieldsDefinition, typename FieldEnum>
    struct ActiveFieldsDefinition {
@@ -182,7 +182,7 @@ namespace FieldDetails {
       /**
       * @brief Gives the name of the field as it should be used in input reading.
       * @param index Index of the field.
-      * @return Name used for input
+      * @return Name used for input.
       */
       static constexpr auto GetInputName( unsigned int const index ) {
          return DerivedActiveFieldsDefinition::Definition[index].InputName;
@@ -252,7 +252,7 @@ namespace FieldDetails {
    };
 
    /**
-   * @brief Configuration of the active interface states.
+   * @brief Configuration of the active interface description fields.
    */
    struct ActiveInterfaceDescriptions : public ActiveFieldsDefinition< ActiveInterfaceDescriptions, InterfaceDescriptionPool > {
       static constexpr auto Definition = MakeArray(
@@ -313,7 +313,7 @@ enum class Equation : unsigned int {
    // Example     = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::Example ),
 };
 /**
- * @brief Converts an equation identifier to a (C++11 standard compliant, i. e. positive) array index. "ETI = Equation to Index"
+ * @brief Converts an equation identifier to a (C++11 standard compliant, i. e. positive) array index. "ETI = Equation To Index".
  * @param e The equation identifier.
  * @return Index to be used in Arrays.
  */
@@ -336,7 +336,7 @@ enum class PrimeState : unsigned int {
    // Example     = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Example ),
 };
 /**
- * @brief Converts a prime state identifier to a (C++11 standard compliant, i. e. positive) array index. "PTI = Prime state to Index"
+ * @brief Converts a prime state identifier to a (C++11 standard compliant, i. e. positive) array index. "PTI = Prime state To Index".
  * @param p The prime state identifier.
  * @return Index to be used in Arrays.
  */
@@ -355,7 +355,7 @@ enum class Parameter : unsigned int {
 };
 
 /**
- * @brief Converts a parameter identifier to a (C++11 standard compliant, i. e. positive) array index. "PTI = Parameter to Index"
+ * @brief Converts a parameter identifier to a (C++11 standard compliant, i. e. positive) array index. "PTI = Parameter To Index".
  * @param p The parameter identifier.
  * @return Index to be used in Arrays.
  */
@@ -374,7 +374,7 @@ enum class InterfaceDescription : unsigned int {
 };
 
 /**
- * @brief Converts a interface description identifier to a (C++11 standard compliant, i. e. positive) array index. "IDTI = Interface Descriptions To Index"
+ * @brief Converts a interface description identifier to a (C++11 standard compliant, i. e. positive) array index. "IDTI = Interface Descriptions To Index".
  * @param id The interface description identifier.
  * @return Index to be used in arrays.
  */
@@ -395,7 +395,7 @@ enum class InterfaceState : unsigned int {
 };
 
 /**
- * @brief Converts a interface state identifier to a (C++11 standard compliant, i. e. positive) array index. "ISTI = Interface State To Index"
+ * @brief Converts a interface state identifier to a (C++11 standard compliant, i. e. positive) array index. "ISTI = Interface State To Index".
  * @param is The interface state identifier.
  * @return Index to be used in arrays.
  */
@@ -412,7 +412,7 @@ enum class InterfaceParameter : unsigned int {
    // Example           = FieldDetails::ActiveInterfaceParameters::FieldIndex( FieldDetails::InterfaceParameterPool::Example ),
 };
 /**
- * @brief Converts a interface parameter identifier to a (C++11 standard compliant, i. e. positive) array index. "ISTI = Interface Parameter To Index"
+ * @brief Converts a interface parameter identifier to a (C++11 standard compliant, i. e. positive) array index. "ISTI = Interface Parameter To Index".
  * @param ip The interface parameter identifier.
  * @return Index to be used in arrays.
  */

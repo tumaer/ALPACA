@@ -129,7 +129,7 @@ namespace MpiVertexFilter {
             send_list[target_rank].push_back(target_source_id);
          }
          //set up recv list
-         std::vector<uint64_t> recv_id_list;
+         std::vector<std::uint64_t> recv_id_list;
          recv_id_list = topology.GetNeighboringLeaves(node_id, recv_direction);
          //add every neighbor
          for(auto const& source_id: recv_id_list) {

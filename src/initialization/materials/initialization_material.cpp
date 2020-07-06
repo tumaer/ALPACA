@@ -85,11 +85,11 @@
 namespace Initialization {
 
    /**
-    * @brief Returns a pointer to the equation of state obtained from the given input data
-    * @param eos_name Name of the equation of state
-    * @param eos_data All parameters specified for the equation of state from the input file
-    * @param unit_handler Instance to provide (non-)dimensionalization of values
-    * @return pointer to the const base class of all equations of state
+    * @brief Returns a pointer to the equation of state obtained from the given input data.
+    * @param eos_name Name of the equation of state.
+    * @param eos_data All parameters specified for the equation of state from the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return pointer to the const base class of all equations of state.
     */
    std::unique_ptr<EquationOfState const> InitializeEquationOfState( EquationOfStateName const eos_name,
                                                                      std::unordered_map<std::string, double> const& eos_data,
@@ -141,11 +141,11 @@ namespace Initialization {
    }
 
    /**
-    * @brief Gives the model for the material property shear viscosity for the given input data
-    * @param model_name Name of the shear viscosity model
-    * @param model_data Data of the shear viscosity model
-    * @param unit_handler Instance to provide (non-)dimensionalization of values
-    * @return pointer to the const base class of all material parameter models
+    * @brief Gives the model for the material property shear viscosity for the given input data.
+    * @param model_name Name of the shear viscosity model.
+    * @param model_data Data of the shear viscosity model.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return pointer to the const base class of all material parameter models.
     */
    std::unique_ptr<MaterialParameterModel const> InitializeShearViscosityModel( MaterialPropertyModelName const model_name,
                                                                                 std::unordered_map<std::string, double> const& model_data,
@@ -170,7 +170,7 @@ namespace Initialization {
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
-         case MaterialPropertyModelName::ShearViscosityCarreau : {
+         case MaterialPropertyModelName::ShearViscosityCarreauYasuda : {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<CarreauYasudaShearViscosityModel const> model( std::make_unique<CarreauYasudaShearViscosityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
@@ -195,11 +195,11 @@ namespace Initialization {
    }
 
    /**
-    * @brief Gives the model for the material property thermal conductivity for the given input data
-    * @param model_name Name of the thermal conductivity model
-    * @param model_data Data of the thermal conductivity model
-    * @param unit_handler Instance to provide (non-)dimensionalization of values
-    * @return pointer to the const base class of all material parameter models
+    * @brief Gives the model for the material property thermal conductivity for the given input data.
+    * @param model_name Name of the thermal conductivity model.
+    * @param model_data Data of the thermal conductivity model.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return pointer to the const base class of all material parameter models.
     */
    std::unique_ptr<MaterialParameterModel const> InitializeThermalConductivityModel( MaterialPropertyModelName const model_name,
                                                                                      std::unordered_map<std::string, double> const& model_data,
@@ -225,21 +225,20 @@ namespace Initialization {
    }
 
    /**
-    * @brief Initializes a complete material with the given input reader
-    * @param material_index Index of the material to be read from the input file
-    * @param material_reader Reader that provides access to the material data of the input file
-    * @param unit_handler Instance to provide (non-)dimensionalization of values
-    * @return Full initialized material
+    * @brief Initializes a complete material with the given input reader.
+    * @param material_index Index of the material to be read from the input file.
+    * @param material_reader Reader that provides access to the material data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return Full initialized material.
     *
     * @note during the initialization checks are done to read only variables that are required with the given
-    *       compile time settings
+    *       compile time settings.
     */
    Material InitializeMaterial( unsigned int const material_index,
                                 MaterialReader const& material_reader,
                                 UnitHandler const& unit_handler ) {
 
-      //**************************************************************************************************************************************
-      // 1. Read all data from input file
+      // Read all data from input file
       // Always read the data for the equation of state
       EquationOfStateName const eos_name( material_reader.ReadEquationOfStateName( material_index + 1 ) );
       // data map cannot be const since specific heat is added below in case for NobelAbelStiffened Gas
@@ -300,8 +299,7 @@ namespace Initialization {
          eos_data[specific_heat_name] = material_reader.ReadFixedValue( material_indices, MaterialProperty::SpecificHeatCapacity );
       }
 
-      //**************************************************************************************************************************************
-      // 2. Create final data (eos + modles) and log information
+      // Create final data (eos + modles) and log information
       // logger
       LogWriter & logger = LogWriter::Instance();
       logger.LogMessage( " " );
@@ -361,8 +359,7 @@ namespace Initialization {
 
       logger.LogMessage( std::string( 60, '-' ) );
 
-      //**************************************************************************************************************************************
-      // 3. return the final fully initialized material ( move operations to transfer pointer ownership (deleted move constructor))
+      // Return the final fully initialized material ( move operations to transfer pointer ownership (deleted move constructor))
       return Material(
          std::move( eos ),
          bulk_viscosity_fixed_value,

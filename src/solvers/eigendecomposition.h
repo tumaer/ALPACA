@@ -79,12 +79,12 @@
 
 /**
  * @brief The RoeEigenvalues class computes Roe eigenvalues and eigenvectors within one block. For further information consult
- * \cite Roe1981.
- * For characteristic decomposition, especially the eigenvectors used here, consult \cite Fedkiw1999a.
+ *        \cite Roe1981.
+ *        For characteristic decomposition, especially the eigenvectors used here, consult \cite Fedkiw1999a.
  */
 class EigenDecomposition {
 
-   const MaterialManager& material_manager_;
+   MaterialManager const& material_manager_;
 
    static constexpr std::array<std::array<unsigned int, 3>, 3> direction_momentum_indices_ = {{
       {0, 1, 2},
@@ -179,11 +179,11 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
    // We need to use the conservative buffer for density as the prime state is only consistent (if zero) after last RK stage
    Conservatives const& conservatives = block.GetAverageBuffer();
-   double const    (&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Mass);
-   double const     (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
+   double const (&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Mass);
+   double const (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
 
    PrimeStates const& prime_states = block.GetPrimeStateBuffer();
-   double const   (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
+   double const (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
 
    double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen();
 

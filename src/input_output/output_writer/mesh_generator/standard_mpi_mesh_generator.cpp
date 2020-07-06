@@ -70,14 +70,14 @@
 #include "input_output/output_writer/mesh_generator/mesh_generator_utilities.h"
 
 /**
- * @brief Constructor to create the standard mpi mesh generator
- * @param topology_manager Instance to provide node information on different ranks 
- * @param flower Instance to provide node information of current rank 
- * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero 
- * @param is_mpi_filtering_active Flag whether mpi filtering should be used or not 
+ * @brief Constructor to create the standard mpi mesh generator.
+ * @param topology_manager Instance to provide node information on different ranks.
+ * @param flower Instance to provide node information of current rank.
+ * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero.
+ * @param is_mpi_filtering_active Flag whether mpi filtering should be used or not.
  */
-StandardMpiMeshGenerator::StandardMpiMeshGenerator( TopologyManager const& topology_manager, 
-                                                    Tree const& flower, 
+StandardMpiMeshGenerator::StandardMpiMeshGenerator( TopologyManager const& topology_manager,
+                                                    Tree const& flower,
                                                     double const dimensionalized_node_size_on_level_zero,
                                                     bool const mpi_filtering_active ) :
    MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ),
@@ -86,74 +86,74 @@ StandardMpiMeshGenerator::StandardMpiMeshGenerator( TopologyManager const& topol
 }
 
 /**
- * @brief See base class implementation 
+ * @brief See base class implementation.
  */
 std::vector<std::reference_wrapper<Node const>> StandardMpiMeshGenerator::DoGetLocalNodes() const {
    return tree_.Leaves();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardMpiMeshGenerator::DoGetGlobalNumberOfCells() const {
-   return hsize_t( std::get<1>( topology_.NodeAndLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock(); 
+   return hsize_t( std::get<1>( topology_.NodeAndLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardMpiMeshGenerator::DoGetLocalNumberOfCells() const {
    return hsize_t( topology_.LocalLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardMpiMeshGenerator::DoGetLocalCellsStartIndex() const {
    return hsize_t( topology_.LeafOffsetOfRank( MpiUtilities::MyRankId() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 std::vector<hsize_t> StandardMpiMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinates() const {
    return { hsize_t( std::get<1>( topology_.NodeAndLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t ( 3 ) };
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 std::vector<hsize_t> StandardMpiMeshGenerator::DoGetLocalDimensionsOfVertexCoordinates() const {
    return { hsize_t( topology_.LocalLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t ( 3 ) };
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardMpiMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
    return hsize_t( topology_.LeafOffsetOfRank( MpiUtilities::MyRankId() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock();
 }
 
 /**
- * @brief See base class definition
- * 
- * @note The coordinates are created regardless they are needed at the end. If the mpi routine is used for filtering, some of the 
- *       coordinates would not be needed anymore, but they still persist in the final vector to avoid complex reassignments. 
- */ 
+ * @brief See base class definition.
+ *
+ * @note The coordinates are created regardless they are needed at the end. If the mpi routine is used for filtering, some of the
+ *       coordinates would not be needed anymore, but they still persist in the final vector to avoid complex reassignments.
+ */
 void StandardMpiMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const {
-   // get the correct number of leaves fo the rank 
+   // get the correct number of leaves fo the rank
    std::vector<std::uint64_t> local_leaf_ids = topology_.LocalLeafIds();
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_leaf_ids.size() * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock() * 3 );
 
-   // Loop over all local leaves 
+   // Loop over all local leaves
    std::size_t vertex_coordinates_counter = 0;
    for( auto const& id : local_leaf_ids ) {
       // Get all information fo the current leave ( cell size and origin )
       double const block_size = DomainSizeOfId( id, dimensionalized_node_size_on_level_zero_ );
       double const cell_size = MeshGeneratorUtilities::CellSizeForBlockSize( block_size );
       std::array<double, 3> block_origin = DomainCoordinatesOfId( id, block_size );
-      // Loop through all internal cells to append coordinates 
+      // Loop through all internal cells to append coordinates
       for( unsigned int k = 0; k <= CC::ICZ(); ++k ) {
          for( unsigned int j = 0; j <= CC::ICY(); ++j ) {
             for( unsigned int i = 0; i <= CC::ICX(); ++i ) {
@@ -168,20 +168,20 @@ void StandardMpiMeshGenerator::DoComputeVertexCoordinates( std::vector<double> &
 }
 
 /**
- * @brief See base class definition
- */ 
+ * @brief See base class definition.
+ */
 void StandardMpiMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const {
    /************************************************************************/
    /** 1. Create full set of vertices */
-   // Local leave definitions 
+   // Local leave definitions
    std::size_t number_of_local_leaves = topology_.LocalLeafIds().size();
    // Global offset between ranks (global vector is filled in the order (rank0, rank1, ..., rankN))
    unsigned int const offset = topology_.LeafOffsetOfRank( MpiUtilities::MyRankId() );
    // Resize Vertex ID vector ( 8 vertices span one cell )
    vertex_ids.resize( number_of_local_leaves * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock() * 8 );
    unsigned long long int vertex_id_counter = 0;
-   /** 
-    * Definition of offset parameters in y and z-direction to be specified for loop computation of vertices 
+   /**
+    * Definition of offset parameters in y and z-direction to be specified for loop computation of vertices
     * Vertices are described in increasing order:
     * v( x,y,z ) = ( 0,0,0 )               -> ID: 0
     * v( x,y,z ) = ( total,0,0 )           -> ID: max
@@ -195,7 +195,7 @@ void StandardMpiMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long lon
    std::vector<unsigned long long int> leave_offset;
    leave_offset.reserve( number_of_local_leaves );
 
-   // loop through all number of leaves 
+   // loop through all number of leaves
    for( unsigned int leaves_counter = 0; leaves_counter < number_of_local_leaves; leaves_counter++ ) {
       //store cell_vetrex offset for each leave
       leave_offset.push_back( vertex_id_counter );
@@ -204,8 +204,8 @@ void StandardMpiMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long lon
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
                // Shift index for correct indexing in the global mesh (no duplicated IDs)
                unsigned long long int const shift = ( leaves_counter + offset ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock();
-               
-               // Add all vertices for one cell 
+
+               // Add all vertices for one cell
                vertex_ids[vertex_id_counter    ] =    i    +    j    * j_ids_skew +    k    * k_ids_skew + shift;
                vertex_ids[vertex_id_counter + 1] = ( i+1 ) +    j    * j_ids_skew +    k    * k_ids_skew + shift;
                vertex_ids[vertex_id_counter + 2] = ( i+1 ) + ( j+1 ) * j_ids_skew +    k    * k_ids_skew + shift;
@@ -222,12 +222,12 @@ void StandardMpiMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long lon
 
    /************************************************************************/
    /** 2. Vertex filtering */
-   // Carry out MPI sending and receiving operations to remove duplicated vertex ids of two neighboring cells 
-   // separation of x,y and z-axis 
-   // Only done if the vertex filter is set properly. Otherwise double created vertices are present in the grid 
+   // Carry out MPI sending and receiving operations to remove duplicated vertex ids of two neighboring cells
+   // separation of x,y and z-axis
+   // Only done if the vertex filter is set properly. Otherwise double created vertices are present in the grid
    if( mpi_filtering_active_ ) {
       FilterVertexIDs( vertex_ids, leave_offset );
-   }  
+   }
 }
 
 /**

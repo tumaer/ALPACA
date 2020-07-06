@@ -79,10 +79,9 @@
 
 /**
  * @brief The OutputWriter class handles the output to the filesystem in XDMF + HDF5 file format for ParaView. OutputWriter must not change any data.
- *
- * If provides the functionality that a xdmf and hdf5 file is written. Therefore, the mesh is generated in the specific format depending on the desired output type
- * (standard, interface, debug). Furthermore, an xdmf file is written that provides the direct access to all files for the simulation in a time series.
- * The xdmf file can be used with the Xdmf2 and Xdmf3 reader in ParaView.
+ *        It provides the functionality that a xdmf and hdf5 file is written. Therefore, the mesh is generated in the specific format depending on the desired output type
+ *        (standard, interface, debug). Furthermore, an xdmf file is written that provides the direct access to all files for the simulation in a time series.
+ *        The xdmf file can be used with the Xdmf2 and Xdmf3 reader in ParaView.
  */
 class OutputWriter {
    // Specification that this variable is used from the base class to avoid shadowing
