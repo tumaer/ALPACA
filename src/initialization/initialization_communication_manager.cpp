@@ -70,9 +70,9 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the complete communication manager class with the given input classes
-    * @param topology_manager Class providing global (on all ranks) node information  
-    * @return The fully initialized CommunicationManager class 
+    * @brief Initializes the complete communication manager class with the given input classes.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @return The fully initialized CommunicationManager class.
     */
    CommunicationManager InitializeCommunicationManager( TopologyManager & topology_manager ) {
 

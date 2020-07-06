@@ -93,7 +93,7 @@ private:
 
 public:
    TwoPhaseBufferHandler() = delete;
-   explicit TwoPhaseBufferHandler(const MaterialManager& material_manager);
+   explicit TwoPhaseBufferHandler(MaterialManager const& material_manager);
    ~TwoPhaseBufferHandler() = default;
    TwoPhaseBufferHandler( TwoPhaseBufferHandler const& ) = delete;
    TwoPhaseBufferHandler& operator=( TwoPhaseBufferHandler const& ) = delete;

@@ -90,8 +90,8 @@ ApertureCutCellMixer::ApertureCutCellMixer( HaloManager & halo_manager ) : TwoPh
  * @param node The node for which the mixing contributions are determined.
  * @param material The material which allows to identify the phase for which the mixing contributions are determined.
  * @param mixing_contributions Indirect return which contains information about the single mixing contributions. A single mixing contribution contains information
- * about the target cell indices (i_target, j_target and k_target - saved as unsigned int), the mixing fraction beta (saved as double) and a factor necessary to calculate the
- * mixing fluxes.
+ *        about the target cell indices (i_target, j_target and k_target - saved as unsigned int), the mixing fraction beta (saved as double) and a factor necessary to calculate the
+ *        mixing fluxes.
  */
 void ApertureCutCellMixer::CalculateMixingContributionsImplementation(Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const {
 

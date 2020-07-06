@@ -203,7 +203,7 @@ void TwoPhaseBufferHandler::CalculatePrimesFromIntegratedConservativesImplementa
 }
 
 /**
- * See base class.
+ * @brief See base class.
  * @param node See base class.
  */
 void TwoPhaseBufferHandler::CalculateConservativesFromExtendedPrimesImplementation( Node &node ) const {

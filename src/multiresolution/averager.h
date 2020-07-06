@@ -93,6 +93,8 @@ public:
 
    void AverageMaterial( std::vector<unsigned int> const& child_levels_descending ) const;
 
+   void AverageParameters( std::vector<unsigned int> const child_levels_descending ) const;
+
    void AverageInterfaceTags( std::vector<unsigned int> const& levels_with_updated_parents_descending ) const;
 };
 

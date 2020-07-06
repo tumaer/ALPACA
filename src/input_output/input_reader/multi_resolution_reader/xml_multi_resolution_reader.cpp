@@ -70,64 +70,61 @@
 #include "user_specifications/compile_time_constants.h"
 #include "input_output/input_reader/xml_utilities.h"
 
+/**
+ * @brief Default constructor for the multiresolution reader for xml-type input files.
+ * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
+ */
 XmlMultiResolutionReader::XmlMultiResolutionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   MultiResolutionReader(), 
+   MultiResolutionReader(),
    xml_input_file_( std::move( inputfile ) ) {
-   /** Empty besides initializer list and base class constructor call */ 
+   /** Empty besides initializer list and base class constructor call */
 }
 
-
 /**
- * @brief Reads the size of a node on level zero
- * @return node size on level zero
+ * @brief See base class definition.
  */
 double XmlMultiResolutionReader::DoReadNodeSizeOnLevelZero() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "nodeSize" } );    
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "nodeSize" } );
    return XmlUtilities::ReadDouble( node );
 }
 
 /**
- * @brief Reads the number of nodes on level zero for a given direction
- * @param direction Direction identifier for which the number of nodes should be read
- * @return number of nodes 
+ * @brief See base class definition.
  */
 int XmlMultiResolutionReader::DoReadNumberOfNodes( Direction const direction ) const {
-   // Get the correct component name 
-   std::string const component = direction == Direction::X ? "x" : 
+   // Get the correct component name
+   std::string const component = direction == Direction::X ? "x" :
                                  direction == Direction::Y ? "y" :
                                                              "z";
    // obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "nodeRatio", component } );  
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "nodeRatio", component } );
    return XmlUtilities::ReadInt( node );
 }
 
 /**
- * @brief Reads the maximum level used for the simulation
- * @return maximum level of the simulation
+ * @brief See base class definition.
  */
 int XmlMultiResolutionReader::DoReadMaximumLevel() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* level_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "multiResolution", "maximumLevel" } );      
+   tinyxml2::XMLElement const* level_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "multiResolution", "maximumLevel" } );
    return XmlUtilities::ReadInt( level_node );
 }
 
 /**
- * @brief Reads the reference epsilon value used for the refinement criterion
- * @return epsilon refernce value
+ * @brief See base class definition.
  */
 int XmlMultiResolutionReader::DoReadEpsilonLevelReference() const {
    // Obtain correct nodes
-   tinyxml2::XMLElement const* level_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "multiResolution", "refinementCriterion", "levelOfEpsilonReference" } );    
+   tinyxml2::XMLElement const* level_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "multiResolution", "refinementCriterion", "levelOfEpsilonReference" } );
    return XmlUtilities::ReadInt( level_node );
 }
 
 /**
- * @brief Reads reference level where the epsilon reference is enforced
- * @return level of reference
+ * @brief See base class definition.
  */
 double XmlMultiResolutionReader::DoReadEpsilonReference() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* epsilon_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "multiResolution", "refinementCriterion", "epsilonReference" } );    
+   tinyxml2::XMLElement const* epsilon_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "multiResolution", "refinementCriterion", "epsilonReference" } );
    return XmlUtilities::ReadDouble( epsilon_node );
 }

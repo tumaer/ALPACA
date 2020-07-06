@@ -81,7 +81,7 @@ using SP = StencilProperty;
 
 /**
  * @brief Unique identifier to indicate whether a stencil should reconstruct based on cell-centered values or based
- * on differences (HJ-WENO like reconstruction).
+ *        on differences (HJ-WENO like reconstruction).
  */
 enum class ReconstructionType {Values, Differences};
 

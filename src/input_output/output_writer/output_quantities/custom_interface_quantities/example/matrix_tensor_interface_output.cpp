@@ -69,15 +69,15 @@
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
- * @brief constructor to create a matrix/tensor interface output quantity
- * @param unit_handler Unit handler class for dimensionalization
- * @param material_manager Material manager for accessing material data
- * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list
- * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug)
+ * @brief constructor to create a matrix/tensor interface output quantity.
+ * @param unit_handler Unit handler class for dimensionalization.
+ * @param material_manager Material manager for accessing material data.
+ * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list.
+ * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug).
  *
- * @note {row, colmun} = {DTI( CC::DIM(),1} marks that the quantity is a matrix of current dimension and 2. For tensor { DTI( CC::DIM() ), DTI( CC::DIM() ) } should be used
+ * @note {row, colmun} = {DTI( CC::DIM(),1} marks that the quantity is a matrix of current dimension and 2. For tensor { DTI( CC::DIM() ), DTI( CC::DIM() ) } should be used.
  * @note In ParaView a matrix/tensor will be displayed by its name and m * n + 1 scalar entries (for each component + magnitude). The components are numbered from 0 to m*n-1, where
- *       the ordering columns followed by rows (for a 2 x 2 => 0 : 00, 1: 01, 2: 10, 3: 11)
+ *       the ordering columns followed by rows (for a 2 x 2 => 0 : 00, 1: 01, 2: 10, 3: 11).
  */
 MatrixTensorInterfaceOutput::MatrixTensorInterfaceOutput( UnitHandler const& unit_handler,
                                                           MaterialManager const& material_manager,
@@ -88,7 +88,7 @@ MatrixTensorInterfaceOutput::MatrixTensorInterfaceOutput( UnitHandler const& uni
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void MatrixTensorInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
    /**
@@ -140,6 +140,9 @@ void MatrixTensorInterfaceOutput::DoComputeCellData( Node const& node, std::vect
                // cell_data[cell_data_counter + 1] = matrix_tensor[1][0];
                // // ...
                // cell_data[cell_data_counter + dimensions[0] * dimensions[1] - 1] = matrix_tensor[dimensions[0] - 1][dimensions[1] - 1];
+
+               // // Increment the counter
+               // cell_data_counter += dimensions[0] * dimensions[1];
             }
          }
       }
@@ -167,7 +170,7 @@ void MatrixTensorInterfaceOutput::DoComputeCellData( Node const& node, std::vect
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void MatrixTensorInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
 

@@ -70,13 +70,13 @@
 #include "utilities/mathematical_functions.h"
 
 /**
- * @brief constructor to create interface field output
- * @param unit_handler Unit handler class for dimensionalization
- * @param material_manager Material manager for accessing material data
- * @param quantity_name The name of the interface field quantity used for the output
- * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug)
- * @param quantity_data Data struct that contains all relevant information of the material quantity
- * @param buffer_type interface description buffer type to be used (default: Base)
+ * @brief constructor to create interface field output.
+ * @param unit_handler Unit handler class for dimensionalization.
+ * @param material_manager Material manager for accessing material data.
+ * @param quantity_name The name of the interface field quantity used for the output.
+ * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug).
+ * @param quantity_data Data struct that contains all relevant information of the material quantity.
+ * @param buffer_type interface description buffer type to be used (default: Base).
  */
 InterfaceFieldQuantity::InterfaceFieldQuantity( UnitHandler const& unit_handler,
                                                 MaterialManager const& material_manager,
@@ -92,7 +92,7 @@ InterfaceFieldQuantity::InterfaceFieldQuantity( UnitHandler const& unit_handler,
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
@@ -148,7 +148,7 @@ void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<do
 }
 
 /**
- * @brief See base class definition
+ * @brief See base class definition.
  */
 void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
 

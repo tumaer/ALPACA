@@ -72,14 +72,14 @@
 namespace Initialization {
 
    /**
-    * @brief Computes the correct number of blocks on level zero used in the simulation 
-    * @param multi_resolution_reader Instance that provides access to the multiresolution data in the input file 
-    * @return Number of blocks in each direction
+    * @brief Computes the correct number of blocks on level zero used in the simulation.
+    * @param multi_resolution_reader Instance that provides access to the multiresolution data in the input file.
+    * @return Number of blocks in each direction.
     */
    std::array<unsigned int, 3> GetNumberOfNodesOnLevelZero( MultiResolutionReader const& multi_resolution_reader ) {
-      // Initialize number of blocks with default values 
+      // Initialize number of blocks with default values
       std::array<unsigned int, 3> number_of_nodes = { 1, 1, 1 };
-      // Read each direction if required 
+      // Read each direction if required
       number_of_nodes[0] = multi_resolution_reader.ReadNumberOfNodes( Direction::X );
       // For two and three dimensions
       if constexpr( CC::DIM() != Dimension::One ) {
@@ -94,17 +94,17 @@ namespace Initialization {
    }
 
    /**
-    * @brief Checks whether the material boundary conditions are periodic or not for a given direction 
-    * @param boundary_condition_reader Instance that provide access to the boundary condition data in the input file 
-    * @param direction Direction for which periodicity is checked
-    * @return true if it is periodic, false else
-    * @note Function throws error if boundary types on opposite sides do not match
+    * @brief Checks whether the material boundary conditions are periodic or not for a given direction.
+    * @param boundary_condition_reader Instance that provide access to the boundary condition data in the input file.
+    * @param direction Direction for which periodicity is checked.
+    * @return true if it is periodic, false else.
+    * @note Function throws error if boundary types on opposite sides do not match.
     */
    bool IsMaterialPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction ) {
-      // Declare the boundary locations 
-      BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East : 
+      // Declare the boundary locations
+      BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East :
                                               direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
-      BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West : 
+      BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West :
                                                direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
       // Declare the two boundary conditions
       MaterialBoundaryType const first_boundary = boundary_condition_reader.ReadMaterialBoundaryType( first_location );
@@ -124,17 +124,17 @@ namespace Initialization {
    }
 
    /**
-    * @brief Checks whether the levelset boundary conditions are periodic or not for a given direction 
-    * @param boundary_condition_reader Instance that provide access to the boundary condition data in the input file
-    * @param direction Direction for which periodicity is checked
-    * @return true if it is periodic, false else
-    * @note Function throws error if boundary types on opposite sides do not match
+    * @brief Checks whether the levelset boundary conditions are periodic or not for a given direction.
+    * @param boundary_condition_reader Instance that provide access to the boundary condition data in the input file.
+    * @param direction Direction for which periodicity is checked.
+    * @return true if it is periodic, false else.
+    * @note Function throws error if boundary types on opposite sides do not match.
     */
    bool IsLevelsetPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction ) {
-      // Declare the boundary locations 
-      BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East : 
+      // Declare the boundary locations
+      BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East :
                                               direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
-      BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West : 
+      BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West :
                                                direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
       // Declare the two boundary conditions
       LevelSetBoundaryType const first_boundary = boundary_condition_reader.ReadLevelsetBoundaryType( first_location );
@@ -154,56 +154,56 @@ namespace Initialization {
    }
 
    /**
-    * @brief Gives the value for the active periodic directions used in the simulation 
-    * @param boundary_condition_reader Reader to access the boundary condition data of the input file 
-    * @param material_manager material_manager Instance providing initialized material data
-    * @return Value of active periodic directions 
+    * @brief Gives the value for the active periodic directions used in the simulation.
+    * @param boundary_condition_reader Reader to access the boundary condition data of the input file.
+    * @param material_manager material_manager Instance providing initialized material data.
+    * @return Value of active periodic directions.
     */
    unsigned int GetActivePeriodicDirections( BoundaryConditionReader const& boundary_condition_reader, MaterialManager const& material_manager ) {
-      // Define the return value 
+      // Define the return value
       unsigned int active_periodic_locations = 0;
 
-      // read the number of materials 
+      // read the number of materials
       std::size_t const number_of_materials = material_manager.GetNumberOfMaterials();
 
       // Check the x-direction (levelset only if multi material)
-      bool levelset_periodic = number_of_materials > 1 ? IsLevelsetPeriodic( boundary_condition_reader, Direction::X ) : false; 
-      bool material_periodic = IsMaterialPeriodic( boundary_condition_reader, Direction::X ); 
+      bool levelset_periodic = number_of_materials > 1 ? IsLevelsetPeriodic( boundary_condition_reader, Direction::X ) : false;
+      bool material_periodic = IsMaterialPeriodic( boundary_condition_reader, Direction::X );
 
       if( levelset_periodic || material_periodic ) {
          if( levelset_periodic != material_periodic && number_of_materials > 1 ) {
             throw std::invalid_argument( "Incorrect use of East-West periodic condition, both boundaries from the levelset and material must be periodic!" );
          } else {
             active_periodic_locations |= PeriodicBoundariesLocations::EastWest;
-         }  
-      } 
+         }
+      }
 
       // Check the y-direction (levelset only if multi material)
       if constexpr( CC::DIM() != Dimension::One ) {
-         levelset_periodic = number_of_materials > 1 ? IsLevelsetPeriodic( boundary_condition_reader, Direction::Y ) : false; 
-         material_periodic = IsMaterialPeriodic( boundary_condition_reader, Direction::Y );    
+         levelset_periodic = number_of_materials > 1 ? IsLevelsetPeriodic( boundary_condition_reader, Direction::Y ) : false;
+         material_periodic = IsMaterialPeriodic( boundary_condition_reader, Direction::Y );
 
          if( levelset_periodic || material_periodic ) {
             if( levelset_periodic != material_periodic && number_of_materials > 1 ) {
                throw std::invalid_argument( "Incorrect use of North-South periodic condition, both boundaries from the levelset and material must be periodic!" );
             } else {
                active_periodic_locations |= PeriodicBoundariesLocations::NorthSouth;
-            }  
-         } 
+            }
+         }
       }
 
       // Check the z-direction (levelset only if multi material)
       if constexpr( CC::DIM() == Dimension::Three ) {
-         levelset_periodic = number_of_materials > 1 ? IsLevelsetPeriodic( boundary_condition_reader, Direction::Z ) : false; 
-         material_periodic = IsMaterialPeriodic( boundary_condition_reader, Direction::Z );    
+         levelset_periodic = number_of_materials > 1 ? IsLevelsetPeriodic( boundary_condition_reader, Direction::Z ) : false;
+         material_periodic = IsMaterialPeriodic( boundary_condition_reader, Direction::Z );
 
          if( levelset_periodic || material_periodic ) {
             if( levelset_periodic != material_periodic && number_of_materials > 1 ) {
                throw std::invalid_argument( "Incorrect use of Top-Bottom periodic condition, both boundaries from the levelset and material must be periodic!" );
             } else {
                active_periodic_locations |= PeriodicBoundariesLocations::TopBottom;
-            }  
-         } 
+            }
+         }
       }
 
       return active_periodic_locations;
@@ -211,16 +211,16 @@ namespace Initialization {
 
 
    /**
-    * @brief Initializes the complete topology manager class with the given input classes
-    * @param input_reader Reader that provides access to the full data of the input file
-    * @param material_manager material_manager Instance providing initialized material data
-    * @return The fully initialized TopologyManager class 
+    * @brief Initializes the complete topology manager class with the given input classes.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param material_manager material_manager Instance providing initialized material data.
+    * @return The fully initialized TopologyManager class.
     */
-   TopologyManager InitializeTopologyManager( InputReader const& input_reader, 
+   TopologyManager InitializeTopologyManager( InputReader const& input_reader,
                                               MaterialManager const& material_manager ) {
 
-      return TopologyManager( GetNumberOfNodesOnLevelZero( input_reader.GetMultiResolutionReader() ), 
-                              input_reader.GetMultiResolutionReader().ReadMaximumLevel(), 
+      return TopologyManager( GetNumberOfNodesOnLevelZero( input_reader.GetMultiResolutionReader() ),
+                              input_reader.GetMultiResolutionReader().ReadMaximumLevel(),
                               GetActivePeriodicDirections( input_reader.GetBoundaryConditionReader(), material_manager ) );
    }
 }

@@ -72,7 +72,8 @@
 
 /**
  * @brief Work-around class to reduce cyclic dependencies and still query the material sign where needed.
- * It is the user's responsibility to call functions only after initialization.
+ *        It is the user's responsibility to call functions only after initialization (currently done in the constructor of the material manager
+ *        class that holds all information for the two materials).
  */
 class MaterialSignCapsule {
 

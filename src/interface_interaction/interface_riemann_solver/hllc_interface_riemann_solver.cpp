@@ -79,7 +79,8 @@ HllcInterfaceRiemannSolver::HllcInterfaceRiemannSolver( MaterialManager const& m
 }
 
 /**
- * @brief Solves the Riemann problem at the interface with a generalized HLLC approach. See \cite Hu2008 for details. DO NOT USE with WATERLIKE EOS
+ * @brief Solves the Riemann problem at the interface with a generalized HLLC approach. See \cite Hu2008 for details.
+ * @note DO NOT USE with WATERLIKE EOS.
  * @param rho_left Density of the left fluid.
  * @param p_left Pressure of the left fluid.
  * @param velocity_normal_left Velocity normal to the interface of the left fluid.
@@ -93,9 +94,7 @@ HllcInterfaceRiemannSolver::HllcInterfaceRiemannSolver( MaterialManager const& m
  */
 std::array<double, 3> HllcInterfaceRiemannSolver::SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
    double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
-   double const delta_p ) const {
-  // Hllc is not applicable for surface tension calculations
-  (void) delta_p;
+   double const ) const {
 
   // obtain parameters of the left (negative) material
   double const one_rho_left      = 1.0 / std::max(rho_left, std::numeric_limits<double>::epsilon());

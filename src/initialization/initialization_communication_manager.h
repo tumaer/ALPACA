@@ -71,7 +71,7 @@
 #include "communication/communication_manager.h"
 
 /**
- * @brief Defines all initialization functions required for the communication manager
+ * @brief Defines all initialization functions required for the communication manager.
  */
 namespace Initialization {
 

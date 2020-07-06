@@ -76,7 +76,7 @@ namespace {
    /**
     * @brief Filters zero entries from the input.
     * @param descending_values Must be unique and ordered descending.
-    * @return copy of the input vector with the zero entries cut
+    * @return copy of the input vector with the zero entries cut.
     */
    std::vector<unsigned int> DescendingVectorWithoutZero( std::vector<unsigned int> const& descending_values ) {
       return std::vector<unsigned int>( std::cbegin( descending_values ), std::find( std::cbegin( descending_values ), std::cend( descending_values ), 0 ) );
@@ -256,4 +256,90 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
       MPI_Waitall( requests.size(), requests.data(), MPI_STATUSES_IGNORE );
       requests.clear();
    }
+}
+
+/**
+ * @brief Fill parents of nodes on the given level via projection operations for all parameters.
+ * @param child_levels_descending The levels of the children holding the data to be projected.
+ */
+void Averager::AverageParameters( std::vector<unsigned int> const child_levels_descending ) const {
+   for( unsigned int child_level : child_levels_descending ) {
+      // if level 0 should be reached, break the loop as there is no parent level available
+      if( child_level == 0 ) break;
+
+      std::vector<MPI_Request> requests;
+      std::vector<std::tuple<std::uint64_t, int, int>> child_parent_rank_relations; //id, rank-child, rank-parent
+      unsigned int sendcounter = 0;
+      std::vector<std::uint64_t> no_mpi_list;
+
+      //sort by mpi necessary or not
+      for( std::uint64_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+         std::uint64_t const parent_id = ParentIdOfNode( child_id );
+         int const rank_of_child = topology_.GetRankOfNode( child_id );
+         int const rank_of_parent = topology_.GetRankOfNode( parent_id );
+
+         if( rank_of_child == communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
+            //Non MPI Projection
+
+            no_mpi_list.push_back( child_id );
+         } else if( rank_of_child == communicator_.MyRankId() || rank_of_parent == communicator_.MyRankId() ) {
+            //MPI Projection
+
+            child_parent_rank_relations.push_back( std::make_tuple( child_id, rank_of_child, rank_of_parent ) );
+            if( rank_of_child == communicator_.MyRankId() ) {
+               sendcounter += topology_.GetMaterialsOfNode( child_id ).size(); // needed for buffer size
+            }
+         }
+      } // nodes on level
+
+      std::vector<Parameters> send_buffer_parent( sendcounter );
+      sendcounter = 0;
+
+      for( auto const& rank_relation : child_parent_rank_relations ) {
+         std::uint64_t const child_id = std::get<0>( rank_relation );
+         int const rank_of_child = std::get<1>( rank_relation );
+         int const rank_of_parent = std::get<2>( rank_relation );
+
+         if( rank_of_child == communicator_.MyRankId() && rank_of_parent != communicator_.MyRankId() ) {
+            // MPI_Send
+            Node const& child = tree_.GetNodeWithId( child_id );
+            unsigned int const pos = PositionOfNodeAmongSiblings( child_id );
+
+            for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
+               Multiresolution::Average( child.GetPhaseByMaterial( material ).GetParameterBuffer(), send_buffer_parent.at( sendcounter ), child_id );
+               communicator_.Send( &send_buffer_parent.at( sendcounter ), MF::ANOPA(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_parent, requests );
+               sendcounter++;
+
+               if constexpr( DP::Profile() ) {
+                  CommunicationStatistics::average_level_send_++;
+               }
+            }
+         } else if( rank_of_child != communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
+            //MPI_Recv
+            std::uint64_t const parent_id = ParentIdOfNode( child_id );
+            Node& parent = tree_.GetNodeWithId( parent_id );
+            unsigned int const pos = PositionOfNodeAmongSiblings( child_id );
+
+            for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
+               communicator_.Recv( &parent.GetPhaseByMaterial( material ).GetParameterBuffer(), MF::ANOPA(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_child, requests );
+               if constexpr( DP::Profile() ) {
+                  CommunicationStatistics::average_level_recv_++;
+               }
+            }
+         }
+      }
+
+      for( std::uint64_t const child_id : no_mpi_list ) {
+         std::uint64_t const parent_id = ParentIdOfNode( child_id );
+         Node& parent = tree_.GetNodeWithId( parent_id );
+         Node const& child = tree_.GetNodeWithId( child_id );
+
+         for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
+            Multiresolution::Average( child.GetPhaseByMaterial( material ).GetParameterBuffer(), parent.GetPhaseByMaterial( material ).GetParameterBuffer(), child_id );
+         }
+      }
+
+      MPI_Waitall( requests.size(), requests.data(), MPI_STATUSES_IGNORE );
+      requests.clear();
+   } // child_level
 }

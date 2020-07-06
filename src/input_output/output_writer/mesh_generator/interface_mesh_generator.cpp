@@ -71,79 +71,79 @@
 #include "topology/id_information.h"
 
 /**
- * @brief Constructor to create the interface mesh generator
- * @param unit_handler Instance for dimensionalization of variables
- * @param topology_manager Instance to provide node information on different ranks 
- * @param flower Instance to provide node information of current rank 
- * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero 
+ * @brief Constructor to create the interface mesh generator.
+ * @param unit_handler Instance for dimensionalization of variables.
+ * @param topology_manager Instance to provide node information on different ranks.
+ * @param flower Instance to provide node information of current rank.
+ * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero.
  */
-InterfaceMeshGenerator::InterfaceMeshGenerator( TopologyManager const& topology_manager, 
-                                                Tree const& flower, 
+InterfaceMeshGenerator::InterfaceMeshGenerator( TopologyManager const& topology_manager,
+                                                Tree const& flower,
                                                 double const dimensionalized_node_size_on_level_zero ) :
    MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ) {
    /** Empty besides call of base class constructor */
 }
 
 /**
- * @brief See base class implementation 
+ * @brief See base class implementation.
  */
 std::vector<std::reference_wrapper<Node const>> InterfaceMeshGenerator::DoGetLocalNodes() const {
    return tree_.InterfaceLeaves();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t InterfaceMeshGenerator::DoGetGlobalNumberOfCells() const {
-   return hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock(); 
+   return hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t InterfaceMeshGenerator::DoGetLocalNumberOfCells() const {
    return hsize_t( topology_.LocalInterfaceLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t InterfaceMeshGenerator::DoGetLocalCellsStartIndex() const {
    return hsize_t( topology_.InterfaceLeafOffsetOfRank( MpiUtilities::MyRankId() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 std::vector<hsize_t> InterfaceMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinates() const {
    return { hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t ( 3 ) };
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 std::vector<hsize_t> InterfaceMeshGenerator::DoGetLocalDimensionsOfVertexCoordinates() const {
    return { hsize_t( topology_.LocalInterfaceLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t ( 3 ) };
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t InterfaceMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
    return hsize_t( topology_.InterfaceLeafOffsetOfRank( MpiUtilities::MyRankId() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock();
 }
 
 /**
- * @brief See base class definition
- */ 
+ * @brief See base class definition.
+ */
 void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const {
 
-   // get the correct number of interface leaves for the rank 
+   // get the correct number of interface leaves for the rank
    std::vector<std::uint64_t> local_interface_leaf_ids = topology_.LocalInterfaceLeafIds();
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_interface_leaf_ids.size() * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock() * 3 );
 
-   // Compute the correct coordinates of the vertices 
+   // Compute the correct coordinates of the vertices
    std::size_t vertex_counter = 0;
    for( auto const& id : local_interface_leaf_ids ) {
       double const block_size = DomainSizeOfId( id, dimensionalized_node_size_on_level_zero_ );
@@ -163,20 +163,20 @@ void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & v
 }
 
 /**
- * @brief See base class definition
- */ 
+ * @brief See base class definition.
+ */
 void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const {
    /************************************************************************/
    /** 1. Create full set of vertices */
-   // Local leave definitions 
+   // Local leave definitions
    std::size_t number_of_local_interface_leaves = topology_.LocalInterfaceLeafIds().size();
    // Global offset between ranks (global vector is filled in the order (rank0, rank1, ..., rankN))
    unsigned int const offset = topology_.InterfaceLeafOffsetOfRank( MpiUtilities::MyRankId() );
    // Resize Vertex ID vector ( 8 vertices span one cell )
    vertex_ids.resize( number_of_local_interface_leaves * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock() * 8 );
    unsigned long long int vertex_id_counter = 0;
-   /** 
-    * Definition of offset parameters in y and z-direction to be specified for loop computation of vertices 
+   /**
+    * Definition of offset parameters in y and z-direction to be specified for loop computation of vertices
     * Vertices are described in increasing order:
     * v( x,y,z ) = ( 0,0,0 )               -> ID: 0
     * v( x,y,z ) = ( total,0,0 )           -> ID: max
@@ -187,7 +187,7 @@ void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long 
    constexpr unsigned int j_ids_skew = ( CC::ICX() + 1 );
    constexpr unsigned int k_ids_skew = ( CC::ICX() + 1 ) * ( CC::ICY() + 1 );
 
-   // loop through all number of leaves 
+   // loop through all number of leaves
    for( unsigned int leaves_counter = 0; leaves_counter < number_of_local_interface_leaves; leaves_counter++ ) {
       //store cell_vetrex offset for each node
       for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
@@ -195,7 +195,7 @@ void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long 
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
                // Shift index for correct indexing in the global mesh (no duplicated IDs)
                unsigned long long int const shift = ( leaves_counter + offset ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock();
-               // Add all vertices for one cell 
+               // Add all vertices for one cell
                vertex_ids[vertex_id_counter    ] =    i    +    j    * j_ids_skew +    k    * k_ids_skew + shift;
                vertex_ids[vertex_id_counter + 1] = ( i+1 ) +    j    * j_ids_skew +    k    * k_ids_skew + shift;
                vertex_ids[vertex_id_counter + 2] = ( i+1 ) + ( j+1 ) * j_ids_skew +    k    * k_ids_skew + shift;
@@ -212,5 +212,5 @@ void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long 
 
    /************************************************************************/
    /** 2. Vertex filtering */
-   // Not implemented yet -> There are doubled vertices in the output 
+   // Not implemented yet -> There are doubled vertices in the output
 }

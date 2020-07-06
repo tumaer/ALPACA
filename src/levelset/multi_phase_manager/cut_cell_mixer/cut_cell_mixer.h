@@ -77,7 +77,7 @@
 using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geometry_calculator>::type;
 
 /**
- * @brief The CutCellMixer class mixes small cut-cells with its neighbours.
+ * @brief The CutCellMixer class mixes small cut-cells with its neighbors.
  * @tparam DerivedCutCellMixer Typename as template parameter due to CRTP.
  */
 template<typename DerivedCutCellMixer>
@@ -109,10 +109,9 @@ public:
    /**
     * @brief Provides functionality for a cut-cell mixing procedure.
     * @param node The node for which mixing has to be performed.
-    * @param stage The current stage of the Runge-Kutta method.
     */
-   void Mix(Node& node, unsigned int const stage) const {
-      static_cast<DerivedCutCellMixer const&>(*this).MixImplementation(node, stage);
+   void Mix(Node& node) const {
+      static_cast<DerivedCutCellMixer const&>(*this).MixImplementation(node );
    }
 };
 

@@ -103,7 +103,7 @@ std::string ConstantThermalConductivityModel::GetLogData( unsigned int const ind
 }
 
 /**
- * @brief Provides a constant thermal conductivity from user input
+ * @brief Provides a constant thermal conductivity from user input.
  * @return The constant thermal conductivity
  */
 double ConstantThermalConductivityModel::ComputeParameter() const {

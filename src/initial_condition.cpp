@@ -74,7 +74,7 @@
  * @brief Default constructor for class Converting the user-expressions for the initial conditions.
  * @param material_initial_expressions Initial expressions for all materials contained in the simulation.
  * @param levelset_initial_expressions Initial expressions for all levelset fields contained in the simulation
- *        (All must be referenced from material-N to material-1).
+ *        (All must be referenced as a function between material-N and material-1).
  * @param material_names List of all material names contained in the simulation.
  * @param variable_names_prime_states List of all names for the prime states that are read for the initial conditions.
  * @param variable_name_levelset Name of the variable used to specify levelset field.
@@ -125,7 +125,7 @@ std::unique_ptr<UserExpression const> InitialCondition::CreateInputExpression( s
 /**
  * @brief Gives the initial density at the provided location for the given material.
  * @param node_id The id of the node to be initialized.
- * @param material The material in the block to be filled with the returned data
+ * @param material The material in the block to be filled with the returned data.
  * @param initial_values Reference to array holding the resulting density. Indirect return value.
  */
 void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,

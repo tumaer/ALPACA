@@ -72,6 +72,10 @@
 #include "boundary_condition/external_halo_manager.h"
 #include "communication/communication_manager.h"
 
+/**
+ * @brief The halo manager class provides the functionality to handle halo updates from one node to another (internal) or to update the halos
+ *        lying in external boundaries.
+ */
 class HaloManager {
 
 private:

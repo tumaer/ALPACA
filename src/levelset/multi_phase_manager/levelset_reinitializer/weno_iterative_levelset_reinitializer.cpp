@@ -71,7 +71,7 @@
 
 /**
  * @brief Computes the advection velocity used for the iterative reinitialization. The advection velocity is a smoothened signum of the levelset.
- * Smoothening is necessary for small absolute level-set values to not reinitialize there.
+ *        Smoothening is necessary for small absolute level-set values to not reinitialize there.
  * @param levelset The levelset-value.
  * @return The advection velocity.
  */
@@ -92,7 +92,7 @@ WenoIterativeLevelsetReinitializer::WenoIterativeLevelsetReinitializer( HaloMana
 
 /**
  * @brief Reinitializes the levelset field of a node using a HJ WENO scheme.
- * @param node The levelset block which has to be reinitialized.
+ * @param node The node with levelset block which has to be reinitialized.
  * @param is_last_stage Return whether it's the last RK stage or not.
  * @return The residuum for the current node.
  */

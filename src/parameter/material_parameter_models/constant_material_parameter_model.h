@@ -71,60 +71,59 @@
 #include "parameter/material_parameter_model.h"
 
 /**
- * @brief The ConstantMaterialParameterModel class implements the specific computation for a material parameter model that gives constant values. 
- *        It provides the loop structure to compute the parameter for a single given block. The actual implementation of the model param = const. is done 
- *        in the derived class. 
+ * @brief The ConstantMaterialParameterModel class implements the specific computation for a material parameter model that gives constant values.
+ *        It provides the loop structure to compute the parameter for a single given block. The actual implementation of the model param = const. is done
+ *        in the derived class.
  * @note This class serves as a compatability class to provide the same behavior for all materials in case one uses a parameter model to avoid additional
  *       if else statements calling if a model is used or not. Therefore, if one material uses a model, all materials at least must define a constant model.
- * 
- * @tparam DerivedConstantMaterialParameterModel derived constan model class that provides the model computation
+ *
+ * @tparam DerivedConstantMaterialParameterModel derived constan model class that provides the model computation.
  */
 template<typename DerivedConstantMaterialParameterModel>
-class ConstantMaterialParameterModel : public MaterialParameterModel { 
+class ConstantMaterialParameterModel : public MaterialParameterModel {
 
    // friend model, which effectively implements the computation of the parameter
    friend DerivedConstantMaterialParameterModel;
 
    /**
-    * @brief Executes the actual parameter calculation on the complete block
-    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return)
-    */ 
+    * @brief Executes the actual parameter calculation on the complete block.
+    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
+    */
    void DoUpdateParameter( Block & block, double const ) const override {
 
-      // extract the parameter from the block, which should be computed 
+      // extract the parameter from the block, which should be computed
       double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedConstantMaterialParameterModel::parameter_buffer_type_ );
 
-      // Compute the parameter based on constant values 
-      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-
+      // Compute the parameter based on constant values
+      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+         for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+            for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                parameter_buffer[i][j][k] = static_cast< DerivedConstantMaterialParameterModel const& >( *this ).ComputeParameter();
             }
          }
       }
    }
-   
+
    /**
-    * @brief Executes the actual parameter calculation on the on the block for the given material up to the interface
-    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return)
-    * @param interface_tags Tags describing the interface position 
-    * @param material_sign Sign of the material for identification on interface tags 
-    */ 
-   void DoUpdateParameter( Block & block, 
-                           double const, 
-                           std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], 
+    * @brief Executes the actual parameter calculation on the on the block for the given material up to the interface.
+    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
+    * @param interface_tags Tags describing the interface position.
+    * @param material_sign Sign of the material for identification on interface tags.
+    */
+   void DoUpdateParameter( Block & block,
+                           double const,
+                           std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
                            std::int8_t const material_sign ) const override {
 
-      // extract the parameter from the block, which should be computed 
+      // extract the parameter from the block, which should be computed
       double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedConstantMaterialParameterModel::parameter_buffer_type_ );
 
-      // Compute the parameter based on constan values 
-      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+      // Compute the parameter based on constan values
+      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+         for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+            for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
 
-               parameter_buffer[i][j][k] = interface_tags[i][j][k] * material_sign > 0 ? 
+               parameter_buffer[i][j][k] = interface_tags[i][j][k] * material_sign >= 0 ?
                                            static_cast< DerivedConstantMaterialParameterModel const& >( *this ).ComputeParameter() : 0.0;
             } //k
          } //j
@@ -132,9 +131,9 @@ class ConstantMaterialParameterModel : public MaterialParameterModel {
    }
 
    /**
-    * @brief Protected constructor to create the material constant model
-    * @note Can only be called from derived classes 
-    */      
+    * @brief Protected constructor to create the material constant model.
+    * @note Can only be called from derived classes.
+    */
    explicit ConstantMaterialParameterModel() : MaterialParameterModel() {
       /** Empty besides base class constructor call */
    }

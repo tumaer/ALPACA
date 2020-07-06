@@ -65,50 +65,74 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef HLLC_RIEMANN_SOLVER_H
-#define HLLC_RIEMANN_SOLVER_H
 
-#include "riemann_solver.h"
-#include "block_definitions/block.h"
-#include "enums/direction_definition.h"
-#include "materials/equation_of_state.h"
-#include "materials/material_manager.h"
-#include "user_specifications/compile_time_constants.h"
+#ifndef TEMPERATURE_INTERFACE_PARAMETER_MODEL_H
+#define TEMPERATURE_INTERFACE_PARAMETER_MODEL_H
+
+#include "parameter/interface_parameter_model.h"
 
 /**
- * @brief Discretization of the Riemann solver using the HLLC procedure according to \cite Toro2009, chapter 10.4.
+ * @brief The TemperatureInterfaceParameterModel class implements the specific computation for a interface parameter model that gives temperature dependent values.
+ *        It provides the loop structure to compute the parameter for a single given node. The actual implementation of the model param = f(T) is done
+ *        in the derived class.
+ *
+ * @tparam DerivedTemperatureInterfaceParameterModel derived temperature model class that provides the model computation.
  */
-class HllcRiemannSolver : public RiemannSolver<HllcRiemannSolver> {
+template<typename DerivedTemperatureInterfaceParameterModel>
+class TemperatureInterfaceParameterModel : public InterfaceParameterModel {
 
-   friend RiemannSolver;
+   // friend model, which effectively implements the computation of the parameter
+   friend DerivedTemperatureInterfaceParameterModel;
 
-   // is used to distinguish principal and secondary momenta such that one single Riemann solver
-   // routine can be used for all three spatial directions
-   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = {{
-      {ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::MomentumZ)},
-      {ETI(Equation::MomentumY), ETI(Equation::MomentumX), ETI(Equation::MomentumZ)},
-      {ETI(Equation::MomentumZ), ETI(Equation::MomentumX), ETI(Equation::MomentumY)}
-   }};
+   /**
+    * @brief Executes the actual parameter calculation on the complete block.
+    * @param node Node for which the parameter is computed.
+    */
+   void DoUpdateParameter( Node & node  ) const override {
 
-   template<Direction DIR>
-   void ComputeFluxes(std::pair<MaterialName const, Block> const& mat_block, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double const (&Roe_eigenvectors_left) [CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double const cell_size) const;
+      // extract the temperature from the block
+      double const (&T_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
+      double const (&T_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
 
-   void UpdateImplementation(std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-      double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const;
+      // extract the parameter from the block, which should be computed
+      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedTemperatureInterfaceParameterModel::parameter_buffer_type_ );
+
+      // Obtain the interface tags and volume fraction
+      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( Levelset::VolumeFraction );
+
+      // Compute the parameter based on constan values
+      for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+         for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+            for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+
+               // Only compute the parameter for cut cells. Average quantities based on the volume fraction
+               if( interface_tags[i][j][k] == ITTI( IT::OldCutCell ) ) {
+                  double const averaged_T = volume_fraction[i][j][k] * T_positive[i][j][k] + ( 1.0 - volume_fraction[i][j][k] ) * T_negative[i][j][k];
+                  parameter_buffer[i][j][k] = static_cast< DerivedTemperatureInterfaceParameterModel const& >( *this ).ComputeParameter( averaged_T );
+               } else {
+                  parameter_buffer[i][j][k] = 0.0;
+               }
+            } //k
+         } //j
+      }//i
+   }
+
+   /**
+    * @brief Protected constructor to create the interface temperature model.
+    * @note Can only be called from derived classes.
+    */
+   explicit TemperatureInterfaceParameterModel() : InterfaceParameterModel() {
+      /** Empty besides base class constructor call */
+   }
 
 public:
-   HllcRiemannSolver() = delete;
-   explicit HllcRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator);
-   ~HllcRiemannSolver() = default;
-   HllcRiemannSolver( HllcRiemannSolver const& ) = delete;
-   HllcRiemannSolver& operator=( HllcRiemannSolver const& ) = delete;
-   HllcRiemannSolver( HllcRiemannSolver&& ) = delete;
-   HllcRiemannSolver& operator=( HllcRiemannSolver&& ) = delete;
+   virtual ~TemperatureInterfaceParameterModel() = default;
+   TemperatureInterfaceParameterModel( TemperatureInterfaceParameterModel const& ) = delete;
+   TemperatureInterfaceParameterModel& operator=( TemperatureInterfaceParameterModel const& ) = delete;
+   TemperatureInterfaceParameterModel( TemperatureInterfaceParameterModel&& ) = delete;
+   TemperatureInterfaceParameterModel& operator=( TemperatureInterfaceParameterModel&& ) = delete;
+
 };
 
-#endif // HLLC_RIEMANN_SOLVER_H
+#endif // TEMPERATURE_INTERFACE_PARAMETER_MODEL_H

@@ -84,11 +84,11 @@ private:
    void SetVolumeFractionBuffer( Node& node ) const;
    void UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
 
-   void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const;
-   void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, bool const is_last_stage = false ) const;
+   void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
    void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes) const;
    void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
-   void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const;
+   void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const;
 

@@ -75,8 +75,8 @@
 /**
  * @brief The InterfaceFieldQuantity class handles the output to the filesystem in Xdmf+HDF5 file format for ParaView. InterfaceFieldQuantity must not change any data.
  *
- * This quantity is used to write all interface fields to the hdf5/xdmf file if desired. For activating different fields use the "output_constants.h" file. If a new
- * interface field needs to be added, refer to the "interface_field_quantity_definitions.h". Here, nothing has to be changed.
+ *        This quantity is used to write all interface fields to the hdf5/xdmf file if desired. For activating different fields use the "output_constants.h" file. If a new
+ *        interface field needs to be added, refer to the "interface_field_quantity_definitions.h". Here, nothing has to be changed.
  */
 class InterfaceFieldQuantity : public OutputQuantity {
 

@@ -70,29 +70,27 @@
 #include "input_output/input_reader/xml_utilities.h"
 
 /**
- * @brief Construct a new Xml Material Reader object 
- * @param inputfile The already opened xml input file (shared pointer to distribute it on different readers)
+ * @brief Default constructor for the material reader for xml-type input files.
+ * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
 XmlMaterialReader::XmlMaterialReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
    MaterialReader(),
    xml_input_file_( std::move( inputfile ) ) {
-   /** Empty besides initializer list and base class constructor call */ 
+   /** Empty besides initializer list and base class constructor call */
 }
-  
+
 /**
- * @brief Reads the number of materials used for the simulation 
- * @return number of materials 
+ * @brief Reads the number of materials used for the simulation
+ * @return number of materials
  */
 int XmlMaterialReader::DoReadNumberOfMaterials() const {
    // Get correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", "numberOfMaterials" } );  
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", "numberOfMaterials" } );
    return XmlUtilities::ReadInt( node );
 }
 
 /**
- * @brief Reads the equation of state name for a given material index 
- * @param material_index The index of the material (index start: 1)
- * @return Read string of the equation of state name
+ * @brief See base class definition.
  */
 std::string XmlMaterialReader::DoReadEquationOfStateName( unsigned int const material_index ) const {
    // Define the material tag
@@ -104,15 +102,13 @@ std::string XmlMaterialReader::DoReadEquationOfStateName( unsigned int const mat
 }
 
 /**
- * @brief Reads the equation of state data for a given single material index 
- * @param material_index The index of the material (index start: 1)
- * @return Map storing all provided parameters (no check on consistency and validity)
- */  
+ * @brief See base class definition.
+ */
 std::unordered_map<std::string, double> XmlMaterialReader::DoReadEquationOfStateData( unsigned int const material_index ) const {
    // Define the material tag and move to the eos node
    std::string const material_tag( "material" + std::to_string( material_index ) );
    tinyxml2::XMLElement const* eos_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "equationOfState" } );
-   // Declare the map 
+   // Declare the map
    std::unordered_map<std::string, double> eos_properties;
    // Fill the map with all values that are present
    eos_node = eos_node->FirstChildElement();
@@ -129,80 +125,71 @@ std::unordered_map<std::string, double> XmlMaterialReader::DoReadEquationOfState
 }
 
 /**
- * @brief Reads the fixed value of a property for a given set of indices (more than one indicates material pairing models)
- * @param material_indices The indices of the materials (index start: 1)
- * @param property Identifier which property should be read
- * @return fixed value of the given property 
- */    
-double XmlMaterialReader::DoReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {  
+ * @brief See base class definition.
+ */
+double XmlMaterialReader::DoReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {
    // Obtain the correct tags dependent on the input data
    std::string const material_tag( MaterialReader::MaterialInputTag( material_indices ) );
    std::string const property_tag( MaterialPropertyToString( property, false ) );
 
    // In the following two options are tried
-   try{ 
-      // First try to read the fixed value directly from the property node 
+   try{
+      // First try to read the fixed value directly from the property node
       // Obtain the correct node for the given material tag and property. Multiple material indices imply material pairings.
-      tinyxml2::XMLElement const* property_node = material_indices.size() > 1 ? 
-         XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag } ) : 
+      tinyxml2::XMLElement const* property_node = material_indices.size() > 1 ?
+         XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag } ) :
          XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "properties", property_tag } );
 
       return XmlUtilities::ReadDouble( property_node );
 
    } catch( std::invalid_argument const& )  {
-      // Second try to read the fixed value from the additional tag <fixedValue> in the property node 
+      // Second try to read the fixed value from the additional tag <fixedValue> in the property node
       // Obtain the correct node for the given material tag and property. Multiple material indices imply material pairings.
-      tinyxml2::XMLElement const* property_node = material_indices.size() > 1 ? 
-         XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag, "fixedValue" } ) : 
+      tinyxml2::XMLElement const* property_node = material_indices.size() > 1 ?
+         XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag, "fixedValue" } ) :
          XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "properties", property_tag, "fixedValue" } );
-      
+
       return XmlUtilities::ReadDouble( property_node );
    }
 }
 
 /**
- * @brief Reads the parameter model name of a specific property for a given set of indices (more than one indicates material pairing models)
- * @param material_indices The indices of the materials (index start: 1)
- * @param property Identifier which property should be read
- * @return Read string of the model name
- */  
-std::string XmlMaterialReader::DoReadModelName( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {  
+ * @brief See base class definition.
+ */
+std::string XmlMaterialReader::DoReadModelName( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {
    // Obtain the correct tags dependent on the inout data
    std::string const material_tag( MaterialReader::MaterialInputTag( material_indices ) );
    std::string const property_tag( MaterialPropertyToString( property, false ) );
    // Obtain the correct node for the given material tag and property. Multiple aterial indices imply interface property.
-   // Directly move to the model name node to get error back propagation in case 
-   tinyxml2::XMLElement const* model_name_node = material_indices.size() > 1 ? 
-      XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag, "model", "name" } ) : 
+   // Directly move to the model name node to get error back propagation in case
+   tinyxml2::XMLElement const* model_name_node = material_indices.size() > 1 ?
+      XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag, "model", "name" } ) :
       XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "properties", property_tag, "model", "name" } );
-   
-   // return the correct string 
+
+   // return the correct string
    return XmlUtilities::ReadString( model_name_node );
 }
 
 /**
- * @brief Reads the model data of a specific property for a given set of indices (more than one indicates material pairing models)
- * @param material_indices The indices of the materials (index start: 1)
- * @param property Identifier which property should be read
- * @return Map storing all provided model parameters (no check on consistency and validity)
- */     
-std::unordered_map<std::string, double> XmlMaterialReader::DoReadModelData( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {  
+ * @brief See base class definition.
+ */
+std::unordered_map<std::string, double> XmlMaterialReader::DoReadModelData( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {
    // Obtain the correct tags dependent on the inout data
    std::string const material_tag( MaterialReader::MaterialInputTag( material_indices ) );
    std::string const property_tag( MaterialPropertyToString( property, false ) );
    // Obtain the correct node for the given material tag and property. Multiple aterial indices imply interface property.
-   // Directly move to the model parameter node to get error back propagation in case 
-   tinyxml2::XMLElement const* parameter_node = material_indices.size() > 1 ? 
-      XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag, "model", "parameter" } ) : 
+   // Directly move to the model parameter node to get error back propagation in case
+   tinyxml2::XMLElement const* parameter_node = material_indices.size() > 1 ?
+      XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materialPairings", material_tag, property_tag, "model", "parameter" } ) :
       XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "properties", property_tag, "model", "parameter" } );
-   
-   // Declare map to be filled and get the first element of the map 
+
+   // Declare map to be filled and get the first element of the map
    std::unordered_map<std::string, double> model_properties;
    parameter_node = parameter_node->FirstChildElement();
    // Loop through the whole property block and add everything except model related data
    while( parameter_node != nullptr ) {
       std::string const name( parameter_node->Name() );
-      // read parameter 
+      // read parameter
       model_properties[name] = XmlUtilities::ReadDouble( parameter_node );
       parameter_node = parameter_node->NextSiblingElement();
    }

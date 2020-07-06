@@ -74,7 +74,7 @@
 double EigenDecomposition::global_eigenvalues_[DTI(CC::DIM())][MF::ANOE()];
 
 /**
- * @brief Standard constructor using an already existing MaterialManager
+ * @brief Standard constructor using an already existing MaterialManager.
  * @param material_manager The MaterialManager provides the correct equation of state for a given Material.
  */
 EigenDecomposition::EigenDecomposition( MaterialManager const& material_manager) : material_manager_(material_manager)
@@ -147,7 +147,7 @@ void EigenDecomposition::ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName co
 
 /**
  * @brief Stores the global Lax-Friedrichs eigenvalues for later usage.
- * @param eigenvalues The eigenvalues to be set .
+ * @param eigenvalues The eigenvalues to be set.
  */
 void EigenDecomposition::SetGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const {
    for( unsigned int d = 0; d < DTI(CC::DIM()); ++d ) {
@@ -159,6 +159,7 @@ void EigenDecomposition::SetGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM
 
 /**
  * @brief Gives the stored global Lax-Friedrichs eigenvalues.
+ * @return The buffer holding the global eigenvalues.
  */
 auto EigenDecomposition::GetGlobalEigenvalues() const -> double const (&)[DTI(CC::DIM())][MF::ANOE()] {
    return global_eigenvalues_;

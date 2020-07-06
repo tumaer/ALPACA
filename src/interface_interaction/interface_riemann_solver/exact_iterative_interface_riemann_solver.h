@@ -71,7 +71,7 @@
 #include "iterative_interface_riemann_solver.h"
 
 /**
- * @brief      Class for exact iterative interface riemann solver. Computes the exact solution of a Riemann problem.
+ * @brief Class for exact iterative interface riemann solver. Computes the exact solution of a Riemann problem.
  */
 class ExactIterativeInterfaceRiemannSolver : public IterativeInterfaceRiemannSolver<ExactIterativeInterfaceRiemannSolver> {
 
@@ -83,7 +83,7 @@ class ExactIterativeInterfaceRiemannSolver : public IterativeInterfaceRiemannSol
 public:
    ExactIterativeInterfaceRiemannSolver() = delete;
    /**
-    * @brief      Default constructor.
+    * @brief Default constructor.
     *
     * @param[in]  material_manager  The material manager.
     */

@@ -75,7 +75,7 @@
 
 /**
  * @brief The GeometryCalculator class provides functions for basic geometric calculations (normals, curvature, etc.) based on the
- * level-set field and serves as abstract class for more sophisticated geometrical functions (apertures, volume fraction, etc.).
+ *        level-set field and serves as abstract class for more sophisticated geometrical functions (apertures, volume fraction, etc.).
  */
 template<typename DerivedGeometryCalculator>
 class GeometryCalculator {

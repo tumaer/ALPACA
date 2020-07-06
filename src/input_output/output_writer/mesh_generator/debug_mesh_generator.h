@@ -72,11 +72,9 @@
 #include "input_output/output_writer/mesh_generator.h"
 
 /**
- * @brief The DebugMeshGenerator generates a mesh for the output (currently xdmf + hdf5) for all nodes on all levels. 
- * 
- * It provides the functionality of a non-ambiguous mesh printing the full topology information. This includes all nodes on 
- * all levels including the halo cells. Non-ambiguity is provided by placing a gap between different blocks 
- * and levels.  
+ * @brief The DebugMeshGenerator generates a mesh for the output (currently xdmf + hdf5) for all nodes on all levels.
+ *        It provides the functionality of a non-ambiguous mesh printing the full topology information. This includes all nodes on
+ *        all levels including the halo cells. Non-ambiguity is provided by placing a gap between different blocks and levels.
  */
 class DebugMeshGenerator : public MeshGenerator {
 
@@ -90,9 +88,9 @@ class DebugMeshGenerator : public MeshGenerator {
 
    // virtual functions required from the base class to compute data to hdf5 file
    void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;   
+   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
 
-   // virtual dimension functions required from base class 
+   // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
    hsize_t DoGetGlobalNumberOfCells() const override;
    hsize_t DoGetLocalNumberOfCells() const override;
@@ -103,8 +101,8 @@ class DebugMeshGenerator : public MeshGenerator {
 
 public:
    DebugMeshGenerator() = delete;
-   explicit DebugMeshGenerator( TopologyManager const& topology, 
-                                Tree const& flower, 
+   explicit DebugMeshGenerator( TopologyManager const& topology,
+                                Tree const& flower,
                                 double const dimensionalized_node_size_on_level_zero,
                                 unsigned int const number_of_z_nodes_on_level_zero );
    virtual ~DebugMeshGenerator() = default;

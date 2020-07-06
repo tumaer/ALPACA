@@ -71,10 +71,10 @@
 #include "input_output/input_reader.h"
 
 /**
- * @brief Defines all initialization functions required for the input reader
+ * @brief Defines all initialization functions required for the input reader.
  */
 namespace Initialization {
-   // Initialization function for the input reader 
+   // Initialization function for the input reader
    InputReader InitializeInputReader( std::string const& input_filename );
 }
 

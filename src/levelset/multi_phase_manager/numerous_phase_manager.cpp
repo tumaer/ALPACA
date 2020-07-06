@@ -81,21 +81,19 @@ NumerousPhaseManager::NumerousPhaseManager( MaterialManager const& material_mana
 /**
  * @brief Implements a cut-cell mixing procedure for multi-level set simulations. See also base class.
  * @param nodes See base class.
- * @param stage See base class.
  */
-void NumerousPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const {
+void NumerousPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
    for( Node& node : nodes ) {
-      cut_cell_mixer_.Mix( node, stage );
+      cut_cell_mixer_.Mix( node );
    }
 }
 
 /**
  * @brief See base class.
  * @param nodes See base class.
- * @param stage See base class.
  * @param is_last_stage See base class.
  */
-void NumerousPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const, bool const is_last_stage ) const {
+void NumerousPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
    levelset_reinitializer_.Reinitialize( nodes, is_last_stage );
 }
 
@@ -120,7 +118,7 @@ void NumerousPhaseManager::ExtendInterfaceStatesImplementation( std::vector<std:
  * @param nodes See base class.
  * @param stage See base class.
  */
-void NumerousPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& , unsigned int const ) const {
+void NumerousPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& ) const {
    throw std::logic_error( "Not yet implemented: NumerousPhaseManager::PropagateLevelset" );
 }
 

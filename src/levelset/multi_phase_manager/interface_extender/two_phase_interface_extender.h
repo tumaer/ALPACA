@@ -71,10 +71,10 @@
 
 #include "interface_extender.h"
 
-template< InterfaceFieldType field_type >
-class TwoPhaseInterfaceExtender : public InterfaceExtender< TwoPhaseInterfaceExtender< field_type >, field_type > {
+template<InterfaceFieldType field_type>
+class TwoPhaseInterfaceExtender : public InterfaceExtender<TwoPhaseInterfaceExtender<field_type>, field_type> {
    // Definition for shortening
-   using InterfaceExtenderSpecification = InterfaceExtender< TwoPhaseInterfaceExtender< field_type >, field_type >;
+   using InterfaceExtenderSpecification = InterfaceExtender<TwoPhaseInterfaceExtender<field_type>, field_type>;
 
    friend InterfaceExtenderSpecification;
 
@@ -122,7 +122,7 @@ private:
                for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
                   for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
                      /**
-                       * JW: We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
+                       * We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
                        * conditions at the end of the narrow band). The convergence criteria is only checked for the extension band.
                        */
                      if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && std::abs( interface_tags[i][j][k] ) > ITTI( IT::NewCutCell ) ) {

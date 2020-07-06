@@ -69,11 +69,11 @@
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
- * @brief constructor to create a vectorial interface output quantity
- * @param unit_handler Unit handler class for dimensionalization
- * @param material_manager Material manager for accessing material data
- * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list
- * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug)
+ * @brief constructor to create a vectorial interface output quantity.
+ * @param unit_handler Unit handler class for dimensionalization.
+ * @param material_manager Material manager for accessing material data.
+ * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list.
+ * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug).
  *
  * @note {row, colmun} = {DTI( CC::DIM() ),1} marks that the quantity is a vector with components equal to current dimension of simulation, everything else is treated
  *       as a matrix.
@@ -88,7 +88,7 @@ VectorialInterfaceOutput::VectorialInterfaceOutput( UnitHandler const& unit_hand
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void VectorialInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
@@ -138,6 +138,9 @@ void VectorialInterfaceOutput::DoComputeCellData( Node const& node, std::vector<
                // cell_data[cell_data_counter + 1] = vector[1];
                // // ...
                // cell_data[cell_data_counter + dimensions[0] - 1] = vector[dimensions[0] - 1];
+
+               // // Increment the counter
+               // cell_data_counter += dimensions[0];
             }
          }
       }
@@ -163,7 +166,7 @@ void VectorialInterfaceOutput::DoComputeCellData( Node const& node, std::vector<
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void VectorialInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
 

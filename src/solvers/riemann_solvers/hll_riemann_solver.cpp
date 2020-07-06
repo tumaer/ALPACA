@@ -65,10 +65,10 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "hll_riemann_solver.h"
+#include "solvers/riemann_solvers/hll_riemann_solver.h"
 
 #include "utilities/mathematical_functions.h"
-#include "solvers/hll_signal_speed_calculator.h"
+#include "solvers/riemann_solvers/hll_signal_speed_calculator.h"
 #include "stencils/stencil_utilities.h"
 
 /**
@@ -84,8 +84,8 @@ HllRiemannSolver::HllRiemannSolver( MaterialManager const& material_manager, Eig
 
 /**
  * @brief Solving the right hand side of the underlying system of equations. Using local characteristic decomposition
- * in combination with spatial reconstruction of cell averaged values (finite volume approach) and flux determination by HLL procedure.
- * See base class.
+ *        in combination with spatial reconstruction of cell averaged values (finite volume approach) and flux determination by HLL procedure.
+ *        See base class.
  */
 void HllRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
    double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
@@ -126,7 +126,7 @@ void HllRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block
 }
 
 /**
- * @brief Computes the cell face fluxes with the set stencil using local characteristic decomposition & HLL procedure
+ * @brief Computes the cell face fluxes with the set stencil using local characteristic decomposition & HLL procedure.
  * @param mat_block The block and material information of the phase under consideration.
  * @param fluxes Reference to an array which is filled with the computed fluxes (indirect return parameter).
  * @param roe_eigenvectors_left .
@@ -138,7 +138,7 @@ void HllRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block
 template<Direction DIR>
 void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
    double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double const  (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+   double const (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
    double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
    double const cell_size ) const {
 
@@ -153,7 +153,7 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
    std::vector<double> flux_left( MF::ANOE() );                   // F(state_face_left)
    std::vector<double> flux_right( MF::ANOE() );                  // F(state_face_right)
 
-   unsigned int constexpr principal_momentum = momentum_order_[DTI(DIR)][0];
+   constexpr unsigned int principal_momentum = momentum_order_[DTI(DIR)][0];
 
    constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX()-1 : CC::FICX();
    constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY()-1 : CC::FICY();

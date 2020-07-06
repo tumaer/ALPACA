@@ -77,7 +77,7 @@ namespace MpiUtilities {
    /**
     * @brief Reduces a bool across MPI ranks.
     * @param input local bool.
-    * @param operation The redcution operation. Default: or
+    * @param operation The redcution operation. Default: or.
     * @return Global results.
     */
    inline bool GloballyReducedBool( bool const input, MPI_Op const operation = MPI_LOR ) {

@@ -65,50 +65,45 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef HLL_RIEMANN_SOLVER_H
-#define HLL_RIEMANN_SOLVER_H
+#ifndef ROE_RIEMANN_SOLVER_H
+#define ROE_RIEMANN_SOLVER_H
 
-#include "riemann_solver.h"
+#include "solvers/riemann_solvers/riemann_solver.h"
 #include "block_definitions/block.h"
 #include "enums/direction_definition.h"
-#include "materials/material.h"
+#include "utilities/helper_functions.h"
+#include "materials/equation_of_state.h"
 #include "materials/material_manager.h"
 #include "user_specifications/compile_time_constants.h"
 
+
 /**
- * @brief Discretization of the Riemann solver using the HLL procedure according to \cite Toro2009, chapter 10.3.
+ * @brief Discretization of the RiemannSolver using Roe eigenvalues/-vectors.
  */
-class HllRiemannSolver : public RiemannSolver<HllRiemannSolver> {
+class RoeRiemannSolver : public RiemannSolver<RoeRiemannSolver> {
 
    friend RiemannSolver;
 
-   // is used to distinguish principal and secondary momenta such that one single Riemann solver
-   // routine can be used for all three spatial directions
-   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = {{
-      {ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::MomentumZ)},
-      {ETI(Equation::MomentumY), ETI(Equation::MomentumX), ETI(Equation::MomentumZ)},
-      {ETI(Equation::MomentumZ), ETI(Equation::MomentumX), ETI(Equation::MomentumY)}
-   }};
-
    template<Direction DIR>
-   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double const  (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double const cell_size ) const;
+   void ComputeFluxes(Block const& b, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&advection)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
+      double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double (&fluxfunction_wavespeed)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()]) const;
 
-   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+   void UpdateImplementation(std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
       double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
       double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const;
+      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const;
 
 public:
-   HllRiemannSolver() = delete;
-   explicit HllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
-   ~HllRiemannSolver() = default;
-   HllRiemannSolver( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver& operator=( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver( HllRiemannSolver&& ) = delete;
-   HllRiemannSolver& operator=( HllRiemannSolver&& ) = delete;
+   RoeRiemannSolver() = delete;
+   explicit RoeRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator);
+   ~RoeRiemannSolver() = default;
+   RoeRiemannSolver( RoeRiemannSolver const& ) = delete;
+   RoeRiemannSolver& operator=( RoeRiemannSolver const& ) = delete;
+   RoeRiemannSolver( RoeRiemannSolver&& ) = delete;
+   RoeRiemannSolver& operator=( RoeRiemannSolver&& ) = delete;
 };
 
-#endif // HLL_RIEMANN_SOLVER_H
+#endif // ROE_RIEMANN_SOLVER_H

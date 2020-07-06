@@ -75,10 +75,10 @@
  *
  * @tparam field_type The Fluid field type for which the extender is used (PrimeStates, Parameters or Conservatives)
  */
-template< MaterialFieldType field_type >
-class UpwindGhostFluidExtender : public GhostFluidExtender< UpwindGhostFluidExtender< field_type >, field_type > {
+template<MaterialFieldType field_type>
+class UpwindGhostFluidExtender : public GhostFluidExtender<UpwindGhostFluidExtender<field_type>, field_type> {
    // Definition for shortening
-   using GhostFluidExtenderSpecification = GhostFluidExtender< UpwindGhostFluidExtender< field_type >, field_type >;
+   using GhostFluidExtenderSpecification = GhostFluidExtender<UpwindGhostFluidExtender<field_type>, field_type>;
    // friend declaration
    friend GhostFluidExtenderSpecification;
 
@@ -143,7 +143,7 @@ protected:
                }
             }
 
-            // Loop through internal block - finally, fill extension band and cut-cell neighbours
+            // Loop through internal block - finally, fill extension band and cut-cell neighbors
             for( unsigned int i = CC::FICX()-i_offset_; i <= CC::LICX()+i_offset_; ++i ) {
                for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
                   for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {

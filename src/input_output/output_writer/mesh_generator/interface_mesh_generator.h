@@ -73,12 +73,11 @@
 
 /**
  * @brief The InterfaceMeshGenerator generates a mesh for the output (currently xdmf + hdf5) using only the interface leaves.
- *
- * It provides the functionality of a (currently) ambiguous mesh (vertex IDs and coordinates) for all nodes containing an interface.
- * Ambiguity is generated, since in parallel writing, different ranks generate IDs and coordinates for the
- * same vertex (at block borders). For remove the ambiguity a vertex filter should be implemented or a complete
- * different routine must be provided.
- * The final mesh represents all nodes containing interfaces (always finest level). Only leaf nodes are written.
+ *        It provides the functionality of a (currently) ambiguous mesh (vertex IDs and coordinates) for all nodes containing an interface.
+ *        Ambiguity is generated, since in parallel writing, different ranks generate IDs and coordinates for the
+ *        same vertex (at block borders). For remove the ambiguity a vertex filter should be implemented or a complete
+ *        different routine must be provided.
+ *        The final mesh represents all nodes containing interfaces (always finest level). Only leaf nodes are written.
  */
 class InterfaceMeshGenerator : public MeshGenerator {
 

@@ -70,12 +70,12 @@
 #include "topology/id_information.h"
 
 /**
- * @brief Default constructor.
- * @param setup .
- * @param tree .
- * @param external_boundary_manager .
- * @param communication_manager .
- * @param maximum_level .
+ * @brief Default constructor for Halo Manager instance.
+ * @param tree Instance to provide local (current rank) node information.
+ * @param external_halo_manager Instance to provide halo updates on nodes having an external boundary.
+ * @param internal_halo_manager Instance to provide halo updates on nodes having internal boundaries.
+ * @param communication_manager Instance to access communication information.
+ * @param maximum_level The maximum level used in the simulation.
  */
 HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager & internal_halo_manager,
                           CommunicationManager const& communication_manager, unsigned int const maximum_level ) :
@@ -89,7 +89,7 @@ HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_m
 }
 
 /**
- * @brief Adjusts the values in the halo cells, according to their type (symmetry, internal, ...).
+ * @brief Adjusts the values in the halo cells, according to their type. (symmetry, internal, ...).
  * @param levels_ascending The levels on which halos of nodes will be modified in ascending order.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on all specified level. If true: jumps will not be updated on the coarsest level in "upddate_levels".
@@ -110,7 +110,7 @@ void HaloManager::MaterialHaloUpdate( std::vector<unsigned int> const& levels_as
 }
 
 /**
- * @brief Adjusts the material values in all halo cells, according to their type
+ * @brief Adjusts the material values in all halo cells, according to their type.
  * @param level The level on which halos of nodes will be modified.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on specified level. If true: jumps will not be updated on the current level.
@@ -121,7 +121,7 @@ void HaloManager::MaterialHaloUpdateOnLevel( unsigned int const level, MaterialF
 }
 
 /**
- * @brief Adjusts the values in internal halo cells, according to their type
+ * @brief Adjusts the values in internal halo cells, according to their type.
  * @param level The level on which halos of nodes will be modified.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  * @param cut_jumps Decider if jump halos should be updated on specified level. If true: jumps will not be updated on the current level.
@@ -131,7 +131,7 @@ void HaloManager::MaterialInternalHaloUpdateOnLevel( unsigned int const level, M
 }
 
 /**
- * @brief Adjusts the material values in external halo cells, according to their type
+ * @brief Adjusts the material values in external halo cells, according to their type.
  * @param level The level on which halos of nodes will be modified.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
@@ -170,16 +170,7 @@ void HaloManager::InterfaceTagHaloUpdateOnLmax() const {
 }
 
 /**
- * @brief Calls a interface halo update of the specified "interface-tag" buffer on Lmax (only!).
- * @param type The identifier of the buffer that is to be updated.
- */
-void HaloManager::InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType const type ) const {
-   // perform interface halo update on Lmax
-   InterfaceHaloUpdateOnLevelList( { maximum_level_ }, type );
-}
-
-/**
- * @brief Adjusts the values in the interface tag buffer according to their type (symmetry, internal ...).
+ * @brief Adjusts the values in the interface tag buffer according to their type. (symmetry, internal ...).
  * @param updated_levels The levels on which halos of nodes will be modified.
  */
 void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> const& updated_levels ) const {
@@ -195,7 +186,16 @@ void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> c
 }
 
 /**
- * @brief Adjusts the values in the stated interface block buffer according to their type (symmetry, internal ...).
+ * @brief Calls a interface halo update of the specified interface buffer on Lmax (only!).
+ * @param type The identifier of the buffer that is to be updated.
+ */
+void HaloManager::InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType const type ) const {
+   // perform interface halo update on Lmax
+   InterfaceHaloUpdateOnLevelList( { maximum_level_ }, type );
+}
+
+/**
+ * @brief Adjusts the values in the stated interface block buffer according to their type. (symmetry, internal ...).
  * @param updated_levels The levels on which halos of nodes will be modified.
  * @param type The identifier of the buffer that is to be updated.
  */

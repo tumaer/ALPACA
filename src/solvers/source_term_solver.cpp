@@ -85,10 +85,10 @@ SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std
 /**
  * @brief Computes additions to the right hand side solution due to the present source terms.
  * @param mat_block The phase with its material identifier.
- * @param cell_size .
- * @param node_origin_x .
+ * @param cell_size The cell size of the node.
+ * @param node_origin_x The coordinate of the node origin in x-direction.
  * @param face_fluxes_x, face_fluxes_y, face_fluxes_z Fluxes across the cell face.
- * @param volume_forces .
+ * @param volume_forces The volume forces acting at the cell center of the node.
  */
 void SourceTermSolver::Sources(std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
    double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],

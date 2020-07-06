@@ -78,7 +78,7 @@
 
 /**
  * @brief The Material class defines an interface for different materials containing an equation of state and other pure material properties
- *        (e.g. viscosity, thermal conductivity, specific heat capacity). Furthermore, it stores parameter models for properties that allow such 
+ *        (e.g. viscosity, thermal conductivity, specific heat capacity). Furthermore, it stores parameter models for properties that allow such
  *        computations. The Material class does not manipulate any data.
  */
 class Material {
@@ -86,21 +86,21 @@ class Material {
    // const pointer to the specific equation of state
    std::unique_ptr<EquationOfState const> equation_of_state_;
 
-   // material properties (fixed values). 
+   // material properties (fixed values).
    double const bulk_viscosity_;
    double const shear_viscosity_;
    double const thermal_conductivity_;
-   double const specific_heat_capacity_; 
+   double const specific_heat_capacity_;
    // material property models (non-fixed computations)
    std::unique_ptr<MaterialParameterModel const> shear_viscosity_model_;
    std::unique_ptr<MaterialParameterModel const> thermal_conductivity_model_;
 
 public:
-   explicit Material( std::unique_ptr<EquationOfState const> equation_of_state, 
-                      double const bulk_viscosity,
-                      double const shear_viscosity, 
-                      double const thermal_conductivity, 
-                      double const specific_heat_capacity, 
+   explicit Material( std::unique_ptr<EquationOfState const> equation_of_state,
+                      double const dimensional_bulk_viscosity,
+                      double const dimensional_shear_viscosity,
+                      double const dimensional_thermal_conductivity,
+                      double const dimensional_specific_heat_capacity,
                       std::unique_ptr<MaterialParameterModel const> shear_viscosity_model,
                       std::unique_ptr<MaterialParameterModel const> thermal_conductivity_model,
                       UnitHandler const& unit_handler );
@@ -112,7 +112,7 @@ public:
    Material( Material&& material );
    Material& operator=( Material&& ) = delete;
 
-   // return functions of member variables 
+   // return functions of member variables
    EquationOfState const& GetEquationOfState() const;
    std::vector<double> GetShearAndBulkViscosity() const;
    double GetShearViscosity() const;
@@ -123,4 +123,4 @@ public:
    MaterialParameterModel const& GetThermalConductivityModel() const;
 };
 
-#endif 
+#endif

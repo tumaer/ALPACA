@@ -73,12 +73,17 @@
 #include "materials/material_pairing.h"
 
 /**
- * @brief Defines all initialization functions required for one single material pairing
+ * @brief Defines all initialization functions required for one single material pairing.
  */
 namespace Initialization {
 
+   // initialize function for the surface tension coefficient model
+   std::unique_ptr<InterfaceParameterModel const> InitializeSurfaceTensionCoefficientModel( MaterialPropertyModelName const model_name,
+                                                                                            std::unordered_map<std::string, double> const& model_data,
+                                                                                            UnitHandler const& unit_handler );
+
    // initialize function for the complete material pairing
-   MaterialPairing InitializeMaterialPairing( std::vector<unsigned int> const& material_indices, 
+   MaterialPairing InitializeMaterialPairing( std::vector<unsigned int> const& material_indices,
                                               MaterialReader const& material_reader,
                                               UnitHandler const& unit_handler );
 

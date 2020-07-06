@@ -77,15 +77,6 @@
 #include "internal_boundary_types.h"
 
 /**
- * @brief Container of the interface tag array. In order to store it in std::vectors. Used for more efficient MPI communication.
- */
-struct InterfaceTagBundle {
-   std::int8_t interface_tags_[CC::TCX()][CC::TCY()][CC::TCZ()];
-};
-// Check Memory Layout at compile time for safe MPI sending (Ensures Compiler did not pad the struct)
-static_assert( sizeof( InterfaceTagBundle ) == CC::TCX() * CC::TCY() * CC::TCZ() * sizeof( std::int8_t ), "InterfaceTagBundle is not contiguous in Memory" );
-
-/**
  * @brief The CommunicationManager class provides the functionality for communicating data between nodes and ranks. Furthermore, it holds the neighbor relations
  *        between nodes and external relations for external node boundaries.
  */
@@ -142,7 +133,7 @@ public:
    void InvalidateCache();
 
    // Returns the counter for jump boundaries for the different exchange types
-   unsigned JumpSendCount( unsigned int const level, unsigned int const exchange_type );
+   unsigned int JumpSendCount( unsigned int const level, ExchangeType const type );
 
    // Send and receive function to buffer data between nodes and ranks
    int Send( void const* buffer, int const count, MPI_Datatype const datatype, int const destination_rank, std::vector<MPI_Request>& requests );

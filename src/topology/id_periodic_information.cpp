@@ -73,13 +73,13 @@
 namespace {
 
    /**
-    * @brief Checks whether a given neighbor location of a node represents an external periodic location
-    * @param periodic_location Periodic location to be checked
-    * @param neighbor_location Location where the neighbor node lies 
-    * @param id Node if that is investigated
-    * @param number_of_nodes_on_level_zero Number of nodes on level zero in the three Cartesian directions
-    * @param active_periodic_locations Active periodic locations for the simulation (1: East-West, 2:North-South, 4:Top-Bottom)
-    * @return True if neighbor location is an external periodic boundary, otherwise False
+    * @brief Checks whether a given neighbor location of a node represents an external periodic location.
+    * @param periodic_location Periodic location to be checked.
+    * @param neighbor_location Location where the neighbor node lies.
+    * @param id Node if that is investigated.
+    * @param number_of_nodes_on_level_zero Number of nodes on level zero in the three Cartesian directions.
+    * @param active_periodic_locations Active periodic locations for the simulation (1: East-West, 2:North-South, 4:Top-Bottom).
+    * @return True if neighbor location is an external periodic boundary, otherwise False.
     */
    bool NeighborIsExternalPeriodic( PeriodicBoundariesLocations const periodic_location, BoundaryLocation const neighbor_location, std::uint64_t const id,
                                    std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
@@ -289,7 +289,7 @@ namespace {
             throw std::invalid_argument("Boundary Type in IsExternal does not exist");
          }
          break;
-#else 
+#else
          default : /* BoundaryLocation::Top */ {
             std::uint32_t const tows_exponent( 1u << LevelOfNode(id) );
             std::bitset<20> top_mask( ( number_of_nodes_on_level_zero[2] * tows_exponent ) - 1u );
@@ -489,7 +489,7 @@ bool PeriodicIsExternalBoundary( BoundaryLocation const location, std::uint64_t 
                   PeriodicIsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero, active_periodic_locations )    );
       default:
          throw std::invalid_argument("Boundary Location not Found in GetNeighborId() - Impossible Error");
-#else 
+#else
       default: /* BoundaryLocation::WestSouthBottom */
          return ( PeriodicIsNaturalExternalBoundary( BoundaryLocation::West,   id, number_of_nodes_on_level_zero, active_periodic_locations ) ||
                   PeriodicIsNaturalExternalBoundary( BoundaryLocation::South,  id, number_of_nodes_on_level_zero, active_periodic_locations ) ||

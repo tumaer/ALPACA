@@ -80,8 +80,8 @@ namespace BufferOperations {
        * @brief This function copies the values in the InterfaceDescription buffer from the Source to the Target buffer.
        *        Source and Target InterfaceDescriptionBufferType are given as templates. It is done for one node.
        * @tparam SourceBuffer The source InterfaceDescriptionBufferType.
-       * @tparam TargetBuffer The target InterfaceDescriptionBufferType
-       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @tparam TargetBuffer The target InterfaceDescriptionBufferType.
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset).
        * @param node The node for which the buffers are copied.
        */
       template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
@@ -99,8 +99,8 @@ namespace BufferOperations {
        *        Source and Target InterfaceDescriptionBufferType are given as templates. It is done for a vector of nodes. Calls a copy
        *        function for each node in the vector.
        * @tparam SourceBuffer The source InterfaceDescriptionBufferType.
-       * @tparam TargetBuffer The target InterfaceDescriptionBufferType
-       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @tparam TargetBuffer The target InterfaceDescriptionBufferType.
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset).
        * @param nodes The nodes for which the buffers are copied.
        */
       template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
@@ -115,7 +115,7 @@ namespace BufferOperations {
        *        This is done for a single node.
        * @tparam FirstBuffer The first InterfaceDescriptionBufferType.
        * @tparam SecondBuffer The second InterfaceDescriptionBufferType.
-       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset).
        * @param node The node for which the buffers are swapped.
        */
       template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
@@ -130,7 +130,7 @@ namespace BufferOperations {
        *        This is done for a node vector. Calls the a swap function on each node in the vector.
        * @tparam FirstBuffer The first InterfaceDescriptionBufferType.
        * @tparam SecondBuffer The second InterfaceDescriptionBufferType.
-       * @tparam The InterfaceDescription type that should be copied (Default: Levelset)
+       * @tparam The InterfaceDescription type that should be copied (Default: Levelset).
        * @param node The nodes for which the buffers are swapped.
        */
       template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>

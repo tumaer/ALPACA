@@ -92,121 +92,121 @@ UnitHandler::UnitHandler( double const density_reference, double const velocity_
    /** Empty besides initializer list */
 }
 
-/** 
+/**
  * @brief Translates a unit based value into a unitless one, using the specific function calls of the given unit type.
- * @param value value which should be made dimensionless
- * @param unit_type Unit of the value 
+ * @param value value which should be made dimensionless.
+ * @param unit_type Unit of the value..
  * @return Unitless value.
- */ 
+ */
 double UnitHandler::NonDimensionalizeValue( double const value, UnitType const unit_type ) const {
-   switch( unit_type ) { 
+   switch( unit_type ) {
       case UnitType::Unitless  : {
          return value;
       }
       case UnitType::Length : {
-         return value / length_reference_; 
+         return value / length_reference_;
       }
       case UnitType::Time : {
-         return value / time_reference_; 
+         return value / time_reference_;
       }
       case UnitType::Mass : {
-         return value / mass_reference_; 
+         return value / mass_reference_;
       }
       case UnitType::Density : {
-         return value / density_reference_; 
+         return value / density_reference_;
       }
       case UnitType::Velocity : {
-         return value / velocity_reference_; 
+         return value / velocity_reference_;
       }
       case UnitType::Momentum : {
-         return value / momentum_reference_; 
+         return value / momentum_reference_;
       }
       case UnitType::Pressure : {
-         return value / pressure_reference_; 
+         return value / pressure_reference_;
       }
       case UnitType::Temperature : {
-         return value / temperature_reference_; 
+         return value / temperature_reference_;
       }
       case UnitType::Energy : {
-         return value / energy_reference_; 
+         return value / energy_reference_;
       }
       case UnitType::Viscosity  : {
-         return value / viscosity_reference_; 
+         return value / viscosity_reference_;
       }
       case UnitType::ThermalConductivity  : {
-         return value / thermal_conductivity_reference_; 
+         return value / thermal_conductivity_reference_;
       }
       case UnitType::SurfaceTensionCoefficient  : {
-         return value / surface_tension_coefficient_reference_; 
-      } 
+         return value / surface_tension_coefficient_reference_;
+      }
       default : {
-         throw std::logic_error( "UnitType " + std::to_string( static_cast<int>( unit_type ) ) + " is unknown and cannot be non-dimensionalized" ); 
-      } //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
-   }
-}
-
-/** 
- * @brief Translates a unitless value into a dimensional one, using the specific function calls of the given unit type.
- * @param value value which should be dimensionalized
- * @param unit_type Unit of the value 
- * @return Unitless value.
- */ 
-double UnitHandler::DimensionalizeValue( double const value, UnitType const unit_type ) const {
-   switch( unit_type ) { 
-      case UnitType::Unitless : {
-         return value; 
-      }
-      case UnitType::Length : {
-         return value * length_reference_; 
-      }
-      case UnitType::Time : {
-         return value * time_reference_; 
-      }
-      case UnitType::Mass : {
-         return value * mass_reference_; 
-      }
-      case UnitType::Density : {
-         return value * density_reference_; 
-      }
-      case UnitType::Velocity : {
-         return value * velocity_reference_; 
-      }
-      case UnitType::Momentum : {
-         return value * momentum_reference_; 
-      }
-      case UnitType::Pressure : {
-         return value * pressure_reference_; 
-      }
-      case UnitType::Temperature : {
-         return value * temperature_reference_; 
-      }
-      case UnitType::Energy : {
-         return value * energy_reference_; 
-      }
-      case UnitType::Viscosity  : {
-         return value * viscosity_reference_; 
-      }
-      case UnitType::ThermalConductivity  : {
-         return value * thermal_conductivity_reference_; 
-      }
-      case UnitType::SurfaceTensionCoefficient  : {
-         return value * surface_tension_coefficient_reference_; 
-      } 
-      default : {
-         throw std::logic_error( "UnitType " + std::to_string( static_cast<int>( unit_type ) ) + " is unknown and cannot be dimensionalized" ); 
+         throw std::logic_error( "UnitType " + std::to_string( static_cast<int>( unit_type ) ) + " is unknown and cannot be non-dimensionalized" );
       } //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
    }
 }
 
 /**
- * @brief Non-dimensionalizes a given value with a set of nominator and denominator units
- * @param value Dimensonal value that should be non-dimensionalized 
- * @param nominator_units All units used in the nominator 
- * @param denominator_units All units used in the denominator
- * @return Dimensionless value 
+ * @brief Translates a unitless value into a dimensional one, using the specific function calls of the given unit type.
+ * @param value value which should be dimensionalized.
+ * @param unit_type Unit of the value.
+ * @return Unitless value.
+ */
+double UnitHandler::DimensionalizeValue( double const value, UnitType const unit_type ) const {
+   switch( unit_type ) {
+      case UnitType::Unitless : {
+         return value;
+      }
+      case UnitType::Length : {
+         return value * length_reference_;
+      }
+      case UnitType::Time : {
+         return value * time_reference_;
+      }
+      case UnitType::Mass : {
+         return value * mass_reference_;
+      }
+      case UnitType::Density : {
+         return value * density_reference_;
+      }
+      case UnitType::Velocity : {
+         return value * velocity_reference_;
+      }
+      case UnitType::Momentum : {
+         return value * momentum_reference_;
+      }
+      case UnitType::Pressure : {
+         return value * pressure_reference_;
+      }
+      case UnitType::Temperature : {
+         return value * temperature_reference_;
+      }
+      case UnitType::Energy : {
+         return value * energy_reference_;
+      }
+      case UnitType::Viscosity  : {
+         return value * viscosity_reference_;
+      }
+      case UnitType::ThermalConductivity  : {
+         return value * thermal_conductivity_reference_;
+      }
+      case UnitType::SurfaceTensionCoefficient  : {
+         return value * surface_tension_coefficient_reference_;
+      }
+      default : {
+         throw std::logic_error( "UnitType " + std::to_string( static_cast<int>( unit_type ) ) + " is unknown and cannot be dimensionalized" );
+      } //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
+   }
+}
+
+/**
+ * @brief Non-dimensionalizes a given value with a set of nominator and denominator units.
+ * @param value Dimensional value that should be non-dimensionalized.
+ * @param nominator_units All units used in the nominator.
+ * @param denominator_units All units used in the denominator.
+ * @return Dimensionless value.
  */
 double UnitHandler::NonDimensionalizeValue( double const value, std::vector<UnitType> const& nominator_units, std::vector<UnitType> const& denominator_units ) const {
-   // declare nominator and denominator values 
+   // declare nominator and denominator values
    double nominator = 1.0;
    double denominator = 1.0;
    // Loop through all nominator and get nominator value (use dimensionalize function since the multiplication is required)
@@ -222,14 +222,14 @@ double UnitHandler::NonDimensionalizeValue( double const value, std::vector<Unit
 }
 
 /**
- * @brief Dimensionalizes a given value with a set of nominator and denominator units
- * @param value Dimensonal value that should be dimensionalized 
- * @param nominator_units All units used in the nominator 
- * @param denominator_units All units used in the denominator
- * @return Dimensional value 
+ * @brief Dimensionalizes a given value with a set of nominator and denominator units.
+ * @param value Dimensional value that should be dimensionalized.
+ * @param nominator_units All units used in the nominator.
+ * @param denominator_units All units used in the denominator.
+ * @return Dimensional value.
  */
 double UnitHandler::DimensionalizeValue( double const value, std::vector<UnitType> const& nominator_units, std::vector<UnitType> const& denominator_units ) const {
-   // declare nominator and denominator values 
+   // declare nominator and denominator values
    double nominator = 1.0;
    double denominator = 1.0;
    // Loop through all nominator and get nominator value (use dimensionalize function since the multiplication is required)

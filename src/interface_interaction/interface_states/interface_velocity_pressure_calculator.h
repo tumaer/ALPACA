@@ -75,7 +75,7 @@
 using InterfaceRiemannSolverConcretization = InterfaceRiemannSolverSetup::Concretize<interface_riemann_solver>::type;
 
 /**
- * @brief      This class calculates the interface pressure and velocity and saves it in the respective buffers of the interface block.
+ * @brief This class calculates the interface pressure and velocity and saves it in the respective buffers of the interface block.
  */
 class InterfaceVelocityPressureCalculator {
 

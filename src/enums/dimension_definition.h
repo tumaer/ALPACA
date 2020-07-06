@@ -70,15 +70,16 @@
 
 #include <type_traits>
 
-//ATTENTION: it is absolutely neccesary to keep 1D = 1, 2D = 2 and 3D = 3. Otherwise, the code will break. If additional Dimension types are required, please append them.
-//NH: NEVER EVER change the underlying type.
 /**
  * @brief Identifier for the dimensions to be simulated, i.e. one-dimensional, two-dimensional or three-dimensional.
+ *
+ * @note It is absolutely neccesary to keep 1D = 1, 2D = 2 and 3D = 3. Otherwise, the code will break. If additional Dimension types are required, please append them.
+ *       NEVER EVER change the underlying type.
  */
 enum class Dimension : unsigned int { One = 1, Two = 2, Three = 3 };
 
 /**
- * @brief Converts a dimension identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Dimension to Index"
+ * @brief Converts a dimension identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Dimension To Index".
  * @param d The dimension identifier.
  * @return Index to be used in Arrays.
  */

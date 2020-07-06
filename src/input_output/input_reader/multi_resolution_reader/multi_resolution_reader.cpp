@@ -73,12 +73,12 @@
 #include "enums/dimension_definition.h"
 
 /**
- * @brief Gives the checked number of nodes on level zero for a given direction
- * @param direction Direction identifier for which the number of nodes should be read
- * @return number of nodes 
+ * @brief Gives the checked number of nodes on level zero for a given direction.
+ * @param direction Direction identifier for which the number of nodes should be read.
+ * @return number of nodes.
  */
 unsigned int MultiResolutionReader::ReadNumberOfNodes( Direction const direction ) const {
-   // Read the block number and check on consistency 
+   // Read the block number and check on consistency
    int const number_of_nodes( DoReadNumberOfNodes( direction ) );
    if( number_of_nodes <= 0 ) {
       throw std::invalid_argument( "At least one block must be present on level zero in each direction!" );
@@ -90,40 +90,40 @@ unsigned int MultiResolutionReader::ReadNumberOfNodes( Direction const direction
 }
 
 /**
- * @brief Gives the checked size of a node on level zero
- * @return node size on level zero
+ * @brief Gives the checked size of a node on level zero.
+ * @return node size on level zero.
  */
 double MultiResolutionReader::ReadNodeSizeOnLevelZero() const {
-   // Read the node size value and check on consistency 
+   // Read the node size value and check on consistency
    double const node_size( DoReadNodeSizeOnLevelZero() );
    if( node_size <= 0.0 ) {
       throw std::invalid_argument( "Node size on level zero must be greater zero!" );
    }
    return node_size;
-}                                          
+}
 
 /**
- * @brief Gives the checked maximum level used for the simulation
- * @return maximum level of the simulation
+ * @brief Gives the checked maximum level used for the simulation.
+ * @return maximum level of the simulation.
  */
 unsigned int MultiResolutionReader::ReadMaximumLevel() const {
    // Read the value and check on consistency
-   unsigned int const maximum_level( DoReadMaximumLevel() );
-   if( maximum_level > CC::AMNL() ) {
+   int const maximum_level( DoReadMaximumLevel() );
+   if( maximum_level > static_cast<int>( CC::AMNL() ) ) {
       throw std::invalid_argument( "Maximum level must NOT be larger than " + std::to_string( CC::AMNL() )  + "!" );
    }
    if( maximum_level < 0 ) {
       throw std::invalid_argument( "Maximum level must NOT be below zero!" );
    }
-   return static_cast<unsigned int>( maximum_level ); 
+   return static_cast<unsigned int>( maximum_level );
 }
 
 /**
- * @brief Gives the checked reference epsilon value used for the refinement criterion
- * @return epsilon refernce value
+ * @brief Gives the checked reference epsilon value used for the refinement criterion.
+ * @return epsilon refernce value.
  */
 double MultiResolutionReader::ReadEpsilonReference() const {
-   // Read the reference value and check on consistency 
+   // Read the reference value and check on consistency
    double const reference( DoReadEpsilonReference() );
    if( reference <= 0.0 ) {
       throw std::invalid_argument( "Epsilon reference must be larger than zero!" );
@@ -132,14 +132,14 @@ double MultiResolutionReader::ReadEpsilonReference() const {
 }
 
 /**
- * @brief Gives the checked reference level where the epsilon reference is enforced
- * @return level of reference
+ * @brief Gives the checked reference level where the epsilon reference is enforced.
+ * @return level of reference.
  */
 unsigned int MultiResolutionReader::ReadEpsilonLevelReference() const {
-   // Read the reference level and check on consistency 
+   // Read the reference level and check on consistency
    int const reference_level( DoReadEpsilonLevelReference() );
    if( reference_level < 0 ) {
       throw std::invalid_argument( "Level of epsilon reference must NOT be below zero!" );
    }
-   return static_cast<unsigned int>( reference_level ); 
+   return static_cast<unsigned int>( reference_level );
 }

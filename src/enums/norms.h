@@ -69,7 +69,7 @@
 #define NORMS_H
 
 /**
- * @brief Identifer for Norms to be used in error estimates and alike
+ * @brief Identifer for Norms to be used in error estimates and alike.
  */
 enum class Norm { Linfinity, Lone, Ltwo };
 

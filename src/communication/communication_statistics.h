@@ -71,7 +71,7 @@
 #include <string>
 
 /**
- * @brief The CommunicationStatistics struct gathers information about the MPI Communication.
+ * @brief The CommunicationStatistics struct gathers information about the MPI Communication for proper logging output.
  */
 struct CommunicationStatistics {
 public:

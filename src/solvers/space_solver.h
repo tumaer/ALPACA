@@ -77,7 +77,7 @@
 #include "interface_interaction/interface_term_solver.h"
 
 #include "levelset/levelset_advector/levelset_advector_setup.h"
-#include "riemann_solver_setup.h"
+#include "solvers/riemann_solvers/riemann_solver_setup.h"
 
 using RiemannSolverConcretization = RiemannSolverSetup::Concretize<riemann_solver>::type;
 using LevelsetAdvectorConcretization = LevelsetAdvectorSetup::Concretize<levelset_advector>::type;
@@ -95,7 +95,7 @@ class SpaceSolver {
 
 public:
    SpaceSolver() = delete;
-   explicit SpaceSolver( const MaterialManager& material_manager, std::array<double, 3> gravity);
+   explicit SpaceSolver( MaterialManager const& material_manager, std::array<double, 3> gravity);
    ~SpaceSolver() = default;
    SpaceSolver( SpaceSolver const& ) = delete;
    SpaceSolver& operator=( SpaceSolver const& ) = delete;

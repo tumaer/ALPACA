@@ -69,15 +69,15 @@
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
- * @brief constructor to create a vectorial material output quantity
- * @param unit_handler Unit handler class for dimensionalization
- * @param material_manager Material manager for accessing material data
- * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list
- * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug)
+ * @brief constructor to create a vectorial material output quantity.
+ * @param unit_handler Unit handler class for dimensionalization.
+ * @param material_manager Material manager for accessing material data.
+ * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list.
+ * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug).
  *
  * @note {row, colmun} = {DTI( CC::DIM() ),1} marks that the quantity is a vector with components equal to current dimension of simulation, everything else is treated
  *                       as a matrix.
- * @note In ParaView a vector will be displayed by its name and four scalar entries (X-, Y-, Z-Component and the total magnitude)
+ * @note In ParaView a vector will be displayed by its name and four scalar entries (X-, Y-, Z-Component and the total magnitude).
  */
 VectorialMaterialOutput::VectorialMaterialOutput( UnitHandler const& unit_handler,
                                             MaterialManager const& material_manager,
@@ -88,7 +88,7 @@ VectorialMaterialOutput::VectorialMaterialOutput( UnitHandler const& unit_handle
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void VectorialMaterialOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
@@ -151,6 +151,9 @@ void VectorialMaterialOutput::DoComputeCellData( Node const& node, std::vector<d
                // cell_data[cell_data_counter + 1] = vector[1];
                // // ...
                // cell_data[cell_data_counter + dimensions[0] - 1] = vector[dimensions[0] - 1];
+
+               // // Increment the counter
+               // cell_data_counter += dimensions[0] * dimensions[1];
             }
          }
       }
@@ -180,10 +183,10 @@ void VectorialMaterialOutput::DoComputeCellData( Node const& node, std::vector<d
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  *
  * @note Attention: In case prime state, parameter  variables are used, pay attention that they only exist on leave nodes. In case a division is made on non-leave nodes
- *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes
+ *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes.
  */
 void VectorialMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
 

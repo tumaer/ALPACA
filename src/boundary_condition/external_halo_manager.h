@@ -76,7 +76,8 @@
 #include "topology/node.h"
 
 /**
- * @brief Container of the external boundaries conditions for materials and interfaces.
+ * @brief Container of the external boundaries conditions for materials and interfaces. Furthermore, provides functionality to update halo cells
+ *        of external boundaries of a single node, based on the provided boundary conditions.
  */
 class ExternalHaloManager {
 
@@ -96,9 +97,7 @@ public:
    ExternalHaloManager& operator=( ExternalHaloManager&& ) = delete;
 
    void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) const;
-
    void UpdateInterfaceTagExternal( Node& node, BoundaryLocation const loc ) const;
-
    void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type, BoundaryLocation const loc ) const;
 };
 

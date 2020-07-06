@@ -138,7 +138,7 @@ ModularAlgorithmAssembler::ModularAlgorithmAssembler( double const start_time,
    averager_( topology_, communicator_, tree_ ),
    multi_phase_manager_( material_manager_, halo_manager_ ),
    prime_state_handler_( material_manager ),
-   parameter_manager_( material_manager_ ),
+   parameter_manager_( material_manager_, halo_manager_ ),
    space_solver_( material_manager_, gravity ),
    logger_( LogWriter::Instance() )
 {
@@ -395,7 +395,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
       BO::Material::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
 
       ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( {all_levels_.back()} );
-      multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, 0, true );
+      multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, true );
       multi_phase_manager_.InitializeVolumeFractionBuffer( nodes_needing_multiphase_treatment );
       UpdateInterfaceTags( child_levels_descending );
 
@@ -418,8 +418,11 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
 
    // Calculate the parameters based on the initialized prime states and save them in the parameter buffer.
    if constexpr( CC::ParameterModelActive() ) {
-      UpdateParameters( all_levels_ );
+      std::vector<unsigned int> levels_to_update( all_levels_ );
+      std::reverse( levels_to_update.begin(), levels_to_update.end() );
+      UpdateParameters( levels_to_update, exist_multi_nodes_global, nodes_needing_multiphase_treatment );
    }
+
 
    if( exist_multi_nodes_global ) {
       multi_phase_manager_.ObtainInterfaceStates( nodes_needing_multiphase_treatment );
@@ -526,7 +529,7 @@ void ModularAlgorithmAssembler::Advance() {
 
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
-            multi_phase_manager_.PropagateLevelset( nodes_needing_multiphase_treatment, stage );
+            multi_phase_manager_.PropagateLevelset( nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "PropagateLevelset                  " );
             ProvideDebugInformation( "PropagateLevelset in MultiphaseManager - Done ", plot_this_step, print_this_step, debug_key );
          }
@@ -588,13 +591,13 @@ void ModularAlgorithmAssembler::Advance() {
 
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
-            multi_phase_manager_.Mix( nodes_needing_multiphase_treatment, stage );
+            multi_phase_manager_.Mix( nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "Mixing                             " );
             ProvideDebugInformation( "Mixing - Done ", plot_this_step, print_this_step, debug_key );
 
             bool const is_last_stage = time_integrator_.IsLastStage( stage );
             SetTimeInProfileRuns( function_timer );
-            multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, stage, is_last_stage );
+            multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, is_last_stage );
             LogElapsedTimeSinceInProfileRuns( function_timer, "EnforceWellResolvedDistanceFunction" );
             std::string&& message = is_last_stage ? "EnforceWellResolvedDistanceFunction ( possibly with scale separation ) - Done " : "EnforceWellResolvedDistanceFunction - Done ";
             ProvideDebugInformation( message, plot_this_step, print_this_step, debug_key );
@@ -629,11 +632,16 @@ void ModularAlgorithmAssembler::Advance() {
 
          // Calculate the parameters based on the prime states and save them in the parameter buffer.
          if constexpr( CC::ParameterModelActive() ) {
+            // Make the update on all levels
+            std::vector<unsigned int> levels_to_update( all_levels_ );
+            std::reverse( levels_to_update.begin(), levels_to_update.end() );
+
             SetTimeInProfileRuns( function_timer );
-            UpdateParameters( all_levels_ ); //TODO-19 JW and NH: It would suffice to do it on updated_levels if we could track nodes that were load balanced but not integrated.
+            UpdateParameters( levels_to_update, exist_multi_nodes_global, nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateParameters " );
             ProvideDebugInformation( "UpdateParameters - Done ", plot_this_step, print_this_step, debug_key );
          }
+
 
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
@@ -1216,19 +1224,34 @@ void ModularAlgorithmAssembler::ObtainPrimeStatesFromConservatives( std::vector<
 
 /**
  * @brief Calculates the parameters based on other primestates. This is done for all leaves on the given levels.
- * @param updated_levels A vector containing the levels for whose leaves the parameters are calculated.
+ * @param updated_levels A vector containing the levels for whose leaves the parameters are calculated (in descending order).
+ * @param exist_multi_nodes_global Flag whether multi fluid nodes exists and extension should be performed.
+ * @param nodes_needing_multiphase_treatment Nodes that need multiphase treatment.
+
  */
-void ModularAlgorithmAssembler::UpdateParameters( std::vector<unsigned int> const updated_levels ) const {
+void ModularAlgorithmAssembler::UpdateParameters( std::vector<unsigned int> const updated_levels,
+                                                  bool const exist_multi_nodes_global,
+                                                  std::vector<std::reference_wrapper<Node>> const& nodes_needing_multiphase_treatment ) const {
    // loop over all levels
-   for( unsigned int const &level : updated_levels ) {
+   for( unsigned int const& level : updated_levels ) {
       for( Node &node : tree_.LeavesOnLevel( level ) ) {
-         parameter_manager_.UpdateParameter( node );
+         parameter_manager_.UpdateParameters( node );
       } // nodes on level
    } // levels
 
-   // Potentially here the parameters are extended
+   // Extension of all parameters that require multiphase treatment
+   if( exist_multi_nodes_global ) {
+      parameter_manager_.ExtendParameters( nodes_needing_multiphase_treatment );
+   }
 
-   // Potentially here the parameters are halo updated
+   // Before the halo update can be done, also the coarser non-leaf nodes must be computed by an averaging procedure
+   std::vector<unsigned int> parents_to_update( updated_levels );
+   parents_to_update.pop_back();
+   averager_.AverageParameters( parents_to_update );
+
+   // Final halo update on all levels
+   halo_manager_.MaterialHaloUpdate( all_levels_, MaterialFieldType::Parameters );
+
 }
 
 
@@ -1292,11 +1315,11 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
    double g = 0.0;
 
    //scaling for viscosity and surface tension limited timestep size - values taken from \cite Sussman2000
-   double constexpr nu_timestep_size_constant = 3.0/14.0 ;
-   double constexpr sigma_timestep_size_constant = M_PI*8.0;
+   constexpr double nu_timestep_size_constant = 3.0/14.0 ;
+   constexpr double sigma_timestep_size_constant = M_PI*8.0;
 
    //scaling for thermal-diffusivity limited timestep size - value taken from \cite Pieper2016
-   double constexpr thermal_diffusivity_dt_constant = 0.1;
+   constexpr double thermal_diffusivity_dt_constant = 0.1;
    double thermal_diffusivity = 0.0;
 
    for( Node& node : tree_.Leaves() ) {

@@ -74,20 +74,20 @@
 #include "log_writer.h"
 #include "enums/unit_type.h"
 
- /** 
+ /**
  * @brief The UnitHandler class takes care of the conversions between unitless and non-unitless representations of quantities.
  *        Within the Simulation Kernel only non-dimensional quantities are used. In the user input and output,
- *        however, values are given in unit repesentation.
+ *        however, values are given in unit representation.
  */
 class UnitHandler {
    // Input file reference values and SI units
-   double const density_reference_; // input file 
-   double const velocity_reference_;// input file 
+   double const density_reference_; // input file
+   double const velocity_reference_;// input file
    double const length_reference_; // inputfile + SI unit [m]
    double const temperature_reference_; // input file + SI unit [K]
    double const time_reference_; // SI unit [s]
    double const mass_reference_; // SI unit [kg]
-   // derived reference values for each exisitng unit type 
+   // derived reference values for each exisitng unit type
    double const momentum_reference_;
    double const pressure_reference_;
    double const energy_reference_;

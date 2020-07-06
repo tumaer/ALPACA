@@ -74,7 +74,7 @@
 
 /**
  * @brief The BufferHandler class provides functionality to translate values from the different buffers (e.g. calculate prime state from conservatives for
- * only real fluid cells).
+ *        only real fluid cells).
  * @tparam Typename as template parameter due to CRTP.
  */
 template<typename DerivedBufferHandler>
@@ -116,7 +116,7 @@ public:
 
    /**
     * @brief During the scale-separation procedure small flow structures at the interface get dissolved. Thus, in the material which is not dissolved,
-    * real-material cells can be generated. Those cells have to be filled with prime-state values from the last RK stage.
+    *        real-material cells can be generated. Those cells have to be filled with prime-state values from the last RK stage.
     * @param node The node, for which the conservatives have to be corrected.
     */
    void AdaptConservativesToWellResolvedDistanceFunction( Node& node ) const {
@@ -125,7 +125,7 @@ public:
 
    /**
     * @brief We integrate conservatives in time. After time integration it is necessary to calculate and store the prime states
-    * for the integrated conservatives. This is done in this function.
+    *        for the integrated conservatives. This is done in this function.
     * @param node The node for which we calculate the prime states.
     */
    void CalculatePrimesFromIntegratedConservatives( Node& node ) const {
@@ -134,7 +134,7 @@ public:
 
    /**
     * @brief Populates the cells of the conservative_rhs in which we extendwith correct values, based on the information we have in the
-    * prime state buffer.
+    *        prime state buffer.
     * @param node The node for which conservatives are calculated.
     */
    void CalculateConservativesFromExtendedPrimes( Node& node ) const {

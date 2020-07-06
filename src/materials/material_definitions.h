@@ -87,7 +87,7 @@ enum class MaterialName : unsigned short {
 };
 
 /**
- * @brief Converts a Material identifier to a (C++11 standard compliant, i. e. positive) sortabel integer. "MTI = Material to Index".
+ * @brief Converts a Material identifier to a (C++11 standard compliant, i. e. positive) sortabel integer. "MTI = Material To Index".
  * @param m The material identifier.
  * @return Integer to be used for sorting.
  */
@@ -117,7 +117,7 @@ enum class MaterialPairingName : unsigned short {
 };
 
 /**
- * @brief Converts a MaterialPairing identifier to a (C++11 standard compliant, i. e. positive) sortabel integer. "MPTI = Material Pairing to Index".
+ * @brief Converts a MaterialPairing identifier to a (C++11 standard compliant, i. e. positive) sortabel integer. "MPTI = Material Pairing To Index".
  * @param mp The material pairing identifier.
  * @return Integer to be used for sorting.
  */
@@ -133,7 +133,9 @@ constexpr MaterialPairingName ITMP( typename std::underlying_type<MaterialPairin
 /**
  * @brief Creates for the given number of materials all pairing indices.
  * @param number_of_materials Number of materials considered.
- * @return vector with pairing indices .
+ * @return vector with pairing indices.
+ *
+ * @note Do not change the order here, since this reflects the same order as in the enum class of the pairings.
  */
 inline std::vector<std::vector<unsigned int>> GetMaterialPairingIndices( unsigned int const number_of_materials ) {
    // Generate all combinations of indices

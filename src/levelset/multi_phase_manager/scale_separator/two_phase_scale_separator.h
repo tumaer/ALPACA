@@ -71,13 +71,16 @@
 
 #include "scale_separator.h"
 
+/**
+ * @brief Class providing the functionality to identify and handle scale separation for levelset fields for two different phases.
+ */
 class TwoPhaseScaleSeparator : public ScaleSeparator<TwoPhaseScaleSeparator> {
 
    friend ScaleSeparator;
 
 private:
 
-   void SeparateScalesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
+   void SeparateScalesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
 
 public:
 

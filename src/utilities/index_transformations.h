@@ -77,7 +77,7 @@ namespace BIT {
 
 /**
  * @brief Transforms an x-index in an buffer of size "total cells" to an index in an buffer of size "internal cells".
- * "T2I" means "Total Cell to Inner Cell".
+ *        "T2I" means "Total Cell to Inner Cell".
  * @param i The x-index in the buffer of size "total cells".
  * @return The x-index in the buffer of size "inner cells".
  */
@@ -87,7 +87,7 @@ constexpr unsigned int T2IX(unsigned int i) {
 
 /**
  * @brief Transforms an y-index in an buffer of size "total cells" to an index in an buffer of size "internal cells".
- * "T2I" means "Total Cell to Inner Cell".
+ *        "T2I" means "Total Cell to Inner Cell".
  * @param j The y-index in the buffer of size "total cells".
  * @return The y-index in the buffer of size "inner cells".
  */
@@ -97,7 +97,7 @@ constexpr unsigned int T2IY(unsigned int j) {
 
 /**
  * @brief Transforms an z-index in an buffer of size "total cells" to an index in an buffer of size "internal cells".
- * "T2I" means "Total Cell to Inner Cell".
+ *        "T2I" means "Total Cell to Inner Cell".
  * @param k The z-index in the buffer of size "total cells".
  * @return The z-index in the buffer of size "inner cells".
  */
@@ -107,7 +107,7 @@ constexpr unsigned int T2IZ(unsigned int k) {
 
 /**
  * @brief Transforms an x-index in an buffer of size "inner cells" to an index in an buffer of size "total cells".
- * "I2T" means "Inner Cell to Total Cell".
+ *        "I2T" means "Inner Cell to Total Cell".
  * @param i The x-index in the buffer of size "inner cells".
  * @return The x-index in the buffer of size "total cells".
  */
@@ -117,7 +117,7 @@ constexpr unsigned int I2TX(unsigned int i) {
 
 /**
  * @brief Transforms an y-index in an buffer of size "inner cells" to an index in an buffer of size "total cells".
- * "I2T" means "Inner Cell to Total Cell".
+ *        "I2T" means "Inner Cell to Total Cell".
  * @param j The y-index in the buffer of size "inner cells".
  * @return The y-index in the buffer of size "total cells".
  */
@@ -127,7 +127,7 @@ constexpr unsigned int I2TY(unsigned int j) {
 
 /**
  * @brief Transforms an z-index in an buffer of size "inner cells" to an index in an buffer of size "total cells".
- * "I2T" means "Inner Cell to Total Cell".
+ *        "I2T" means "Inner Cell to Total Cell".
  * @param k The z-index in the buffer of size "inner cells".
  * @return The z-index in the buffer of size "total cells".
  */
@@ -137,7 +137,7 @@ constexpr unsigned int I2TZ(unsigned int k) {
 
 /**
  * @brief Transforms an x-index in an buffer of size "total cells" to an index in an flux buffer.
- * "T2F" means "Total Cell to Flux Array".
+ *        "T2F" means "Total Cell to Flux Array".
  * @param i The x-index in the buffer of size "total cells".
  * @return The x-index in the flux buffer.
  */
@@ -147,7 +147,7 @@ constexpr unsigned int T2FX(unsigned int i) {
 
 /**
  * @brief Transforms an y-index in an buffer of size "total cells" to an index in an flux buffer.
- * "T2F" means "Total Cell to Flux Array".
+ *        "T2F" means "Total Cell to Flux Array".
  * @param j The y-index in the buffer of size "total cells".
  * @return The y-index in the flux buffer.
  */
@@ -157,7 +157,7 @@ constexpr unsigned int T2FY(unsigned int j) {
 
 /**
  * @brief Transforms an z-index in an buffer of size "total cells" to an index in an flux buffer.
- * "T2F" means "Total Cell to Flux Array".
+ *        "T2F" means "Total Cell to Flux Array".
  * @param k The z-index in the buffer of size "total cells".
  * @return The z-index in the flux buffer.
  */

@@ -72,7 +72,9 @@
 #include "interface_riemann_solver.h"
 
 /**
- * @brief Solves a Riemann problem using a generalized HLLC approach according to \cite Hu2008. NOT USABLE TOGETHER WITH WATERLIKE EOS
+ * @brief Solves a Riemann problem using a generalized HLLC approach according to \cite Hu2008.
+ * @note NOT USABLE TOGETHER WITH WATERLIKE EOS.
+ * @note NOT USABLE FOR SURFACE TENSION COMPUTATIONS.
  */
 class HllcInterfaceRiemannSolver : public InterfaceRiemannSolver<HllcInterfaceRiemannSolver> {
 

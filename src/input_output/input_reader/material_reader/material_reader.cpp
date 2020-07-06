@@ -70,16 +70,16 @@
 
 
 /**
- * @brief Converts a given number of indices into a proper string used as an input tag of the material
- * @param material_indices Indices to be converted 
- * @return Material input string (e.g., "material1_2_3" for indices {1,2,3})
+ * @brief Converts a given number of indices into a proper string used as an input tag of the material.
+ * @param material_indices Indices to be converted.
+ * @return Material input string (e.g., "material1_2_3" for indices {1,2,3}).
  */
 std::string MaterialReader::MaterialInputTag( std::vector<unsigned int> const& material_indices ) const {
-   // Make vector local 
+   // Make vector local
    std::vector<unsigned int> indices( material_indices );
    // Sort the vector to get deterministic behavior independent on order in input vector
    std::sort( indices.begin(), indices.end() );
-   // Create proper string 
+   // Create proper string
    std::string index_string( "material" + std::to_string( indices.front() ) );
    // erase first already added element
    indices.erase( indices.begin() );
@@ -91,8 +91,8 @@ std::string MaterialReader::MaterialInputTag( std::vector<unsigned int> const& m
 }
 
 /**
- * @brief Gives the checked number of materials used for the simulation 
- * @return number of materials 
+ * @brief Gives the checked number of materials used for the simulation.
+ * @return number of materials.
  */
 unsigned int MaterialReader::ReadNumberOfMaterials() const {
    // read and make consistency check
@@ -101,52 +101,52 @@ unsigned int MaterialReader::ReadNumberOfMaterials() const {
       throw std::invalid_argument( "Number of materials must NOT be below zero!" );
    }
 
-   return static_cast<unsigned int>( number_of_materials ); 
+   return static_cast<unsigned int>( number_of_materials );
 }
 
 /**
- * @brief Gives the equation of state name for a given material index 
- * @param material_index The index of the material (index start: 1)
- * @return Identifier of the equation of state name  
+ * @brief Gives the equation of state name for a given material index.
+ * @param material_index The index of the material (index start: 1).
+ * @return Identifier of the equation of state name.
  */
 EquationOfStateName MaterialReader::ReadEquationOfStateName( unsigned int const material_index ) const {
    return StringToEos( DoReadEquationOfStateName( material_index ) );
 }
 
 /**
- * @brief Gives the equation of state data for a given single material index 
- * @param material_index The index of the material (index start: 1)
- * @return Map storing all provided parameters (no check on consistency and validity)
+ * @brief Gives the equation of state data for a given single material index.
+ * @param material_index The index of the material (index start: 1).
+ * @return Map storing all provided parameters (no check on consistency and validity).
  */
 std::unordered_map<std::string, double> MaterialReader::ReadEquationOfStateData( unsigned int const material_index ) const {
    return DoReadEquationOfStateData( material_index );
 }
 
 /**
- * @brief Gives the fixed value of a property for a given set of indices (more than one indicates material pairing models)
- * @param material_indices The indices of the materials (index start: 1)
- * @param property Identifier which property should be read
- * @return fixed value of the given property 
+ * @brief Gives the fixed value of a property for a given set of indices (more than one indicates material pairing models).
+ * @param material_indices The indices of the materials (index start: 1).
+ * @param property Identifier which property should be read.
+ * @return fixed value of the given property.
  */
 double MaterialReader::ReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {
    return DoReadFixedValue( material_indices, property );
 }
 
 /**
- * @brief Gives the parameter model name of a specific property for a given set of indices (more than one indicates material pairing models)
- * @param material_indices The indices of the materials (index start: 1)
- * @param property Identifier which property should be read
- * @return Identifier of the parameter model name  
+ * @brief Gives the parameter model name of a specific property for a given set of indices (more than one indicates material pairing models).
+ * @param material_indices The indices of the materials (index start: 1).
+ * @param property Identifier which property should be read.
+ * @return Identifier of the parameter model name.
  */
 MaterialPropertyModelName MaterialReader::ReadModelName( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {
    return StringToMaterialPropertyModel( property, DoReadModelName( material_indices, property ) );
 }
 
 /**
- * @brief Gives the model data of a specific property for a given set of indices (more than one indicates material pairing models)
- * @param material_indices The indices of the materials (index start: 1)
- * @param property Identifier which property should be read
- * @return Map storing all provided model parameters (no check on consistency and validity)
+ * @brief Gives the model data of a specific property for a given set of indices (more than one indicates material pairing models).
+ * @param material_indices The indices of the materials (index start: 1).
+ * @param property Identifier which property should be read.
+ * @return Map storing all provided model parameters (no check on consistency and validity).
  */
 std::unordered_map<std::string, double> MaterialReader::ReadModelData( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const {
    return DoReadModelData( material_indices, property );

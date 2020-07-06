@@ -84,10 +84,10 @@ enum class InterfaceBlockBufferType {
 };
 
 /**
- * @brief Mapping function to map an interface description buffer to the given interface block buffer type
- * @param description_field The Identifier of the description field (Levelset or VolumeFraction)
- * @param buffer_type The corresponding interface description buffer type (Base, RightHandSide, Reinitialized)
- * @return Appropriate InterfaceBlockBufferType
+ * @brief Mapping function to map an interface description buffer to the given interface block buffer type.
+ * @param description_field The Identifier of the description field (Levelset or VolumeFraction).
+ * @param buffer_type The corresponding interface description buffer type (Base, RightHandSide, Reinitialized).
+ * @return Appropriate InterfaceBlockBufferType.
  */
 static constexpr InterfaceBlockBufferType MapInterfaceDescritpionToInterfaceBlockBufferType( InterfaceDescription const description_field, InterfaceDescriptionBufferType const buffer_type ) {
    switch( buffer_type ) {
@@ -124,14 +124,13 @@ static constexpr InterfaceBlockBufferType MapInterfaceDescritpionToInterfaceBloc
             }
          }
       }
-      break;
    }
 }
 
 /**
- * @brief Mapping function to map an interface state to the given interface block buffer type
- * @param state The Identifier of the interface state field (Velocity, PressurePositive or PressureNegative)
- * @return Appropriate InterfaceBlockBufferType
+ * @brief Mapping function to map an interface state to the given interface block buffer type.
+ * @param state The Identifier of the interface state field (Velocity, PressurePositive or PressureNegative).
+ * @return Appropriate InterfaceBlockBufferType.
  */
 static constexpr InterfaceBlockBufferType MapInterfaceStateToInterfaceBlockBufferType( InterfaceState const state ) {
    switch( state ) {
@@ -149,8 +148,9 @@ static constexpr InterfaceBlockBufferType MapInterfaceStateToInterfaceBlockBuffe
 }
 
 /**
- * @brief Mapping function to map an interface parameter to the given interface block buffer type
- * @param parameter The Identifier of the interface parameter field (SurfaceTensionCoefficient)
+ * @brief Mapping function to map an interface parameter to the given interface block buffer type.
+ * @param parameter The Identifier of the interface parameter field (SurfaceTensionCoefficient).
+ * @return Appropriate InterfaceBlockBufferType.
  */
 static constexpr InterfaceBlockBufferType MapInterfaceParameterToInterfaceBlockBufferType( InterfaceParameter const parameter ) {
    switch( parameter ) {
@@ -161,11 +161,11 @@ static constexpr InterfaceBlockBufferType MapInterfaceParameterToInterfaceBlockB
 }
 
 /**
- * @brief Mapping function to map an interface field and index to the given interface block buffer type
- * @param field_type The Identifier of the interface field (States, Parameters or Levelsets)
- * @param field_index Index of the given field
- * @param buffer_type The corresponding interface buffer type (Base, RightHandSide, Reinitialized)
- * @return Appropriate InterfaceBlockBufferType
+ * @brief Mapping function to map an interface field and index to the given interface block buffer type.
+ * @param field_type The Identifier of the interface field (States, Parameters or Description).
+ * @param field_index Index of the given field.
+ * @param buffer_type The corresponding interface buffer type (Base, RightHandSide, Reinitialized).
+ * @return Appropriate InterfaceBlockBufferType.
  */
 static constexpr InterfaceBlockBufferType MapInterfaceFieldToInterfaceBlockBufferType( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::RightHandSide ) {
    switch( field_type ) {

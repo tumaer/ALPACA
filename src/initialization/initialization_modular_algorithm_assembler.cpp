@@ -73,14 +73,16 @@
 namespace Initialization {
 
    /**
-    * @brief Computes the gravity source term
-    * @return gravity in x-, y- and z-direction
+    * @brief Computes the gravity source term.
+    * @param source_term_reader The reader providing access to all source term information of the input file.
+    * param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return gravity in x-, y- and z-direction.
     */
    std::array<double, 3> GetGravity( SourceTermReader const& source_term_reader, UnitHandler const& unit_handler ) {
-      // Initialize the gravity with zero 
+      // Initialize the gravity with zero
       std::array<double, 3> gravity = { 0.0, 0.0, 0.0 };
 
-      // Only proceed if gravity is activated 
+      // Only proceed if gravity is activated
       if constexpr( CC::GravityIsActive() ) {
          gravity[0] = unit_handler.NonDimensionalizeValue( source_term_reader.ReadGravity( Direction::X ), { UnitType::Length }, { UnitType::Time, UnitType::Time } );
          // For two and three dimensions
@@ -97,8 +99,9 @@ namespace Initialization {
    }
 
    /**
-    * @brief Get a vector containing all levels of the current simulation 
-    * @return vector with all levels 
+    * @brief Get a vector containing all levels of the current simulation.
+    * @param maximum_level Maximum level used for the simulation.
+    * @return vector with all levels.
     */
    std::vector<unsigned int> GetAllLevels( unsigned int const maximum_level ) {
       std::vector<unsigned int> all_levels( maximum_level + 1 ); //Level zero need to be counted as well
@@ -107,35 +110,35 @@ namespace Initialization {
    }
 
    /**
-    * @brief Initializes the complete modular algorithm assembler class with the given input classes
-    * @param input_reader Reader that provides access to the full data of the input file 
-    * @param topology_manager Class providing global (on all ranks) node information 
-    * @param tree Tree class providing local (on current rank) node information 
-    * @param communication_manager Calls providing communication handling between different ranks
-    * @param multiresolution Instance to provide mutliresolution computations for remeshing and so fourth
-    * @param material_manager Instance providing initialized material data
-    * @param input_output_manager Instance to provide restart handling and output writing 
-    * @param initial_condition Instance for handling initial conditions 
-    * @param unit_handler Instance to provide (non-)dimensionalization of values 
-    * @return The fully initialized Modular algorithm assembler class  
+    * @brief Initializes the complete modular algorithm assembler class with the given input classes.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param communication_manager Calls providing communication handling between different ranks.
+    * @param multiresolution Instance to provide mutliresolution computations for remeshing and so fourth.
+    * @param material_manager Instance providing initialized material data.
+    * @param input_output_manager Instance to provide restart handling and output writing.
+    * @param initial_condition Instance for handling initial conditions.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized Modular algorithm assembler class.
     */
-   ModularAlgorithmAssembler InitializeModularAlgorithmAssembler( InputReader const& input_reader, 
-                                                                  TopologyManager & topology_manager, 
-                                                                  Tree & tree, 
-                                                                  CommunicationManager & communication_manager, 
-                                                                  HaloManager & halo_manager, 
+   ModularAlgorithmAssembler InitializeModularAlgorithmAssembler( InputReader const& input_reader,
+                                                                  TopologyManager & topology_manager,
+                                                                  Tree & tree,
+                                                                  CommunicationManager & communication_manager,
+                                                                  HaloManager & halo_manager,
                                                                   Multiresolution const& multiresolution,
-                                                                  MaterialManager const& material_manager, 
-                                                                  InputOutputManager & input_output_manager, 
-                                                                  InitialCondition const& initial_condition, 
+                                                                  MaterialManager const& material_manager,
+                                                                  InputOutputManager & input_output_manager,
+                                                                  InitialCondition const& initial_condition,
                                                                   UnitHandler const& unit_handler ) {
 
-      // Get data that is logged 
-      double const start_time = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadStartTime(), UnitType::Time ); 
-      double const end_time = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadEndTime(), UnitType::Time ); 
+      // Get data that is logged
+      double const start_time = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadStartTime(), UnitType::Time );
+      double const end_time = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadEndTime(), UnitType::Time );
       double const cfl_number = input_reader.GetTimeControlReader().ReadCFLNumber();
 
-      // Log data 
+      // Log data
       LogWriter & logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Time control data: " );
@@ -144,26 +147,26 @@ namespace Initialization {
       logger.LogMessage( StringOperations::Indent( 2 ) + "CFL number: " + std::to_string( cfl_number ) );
       logger.LogMessage( " " );
 
-      // Compute the cell size on maximum level 
+      // Compute the cell size on maximum level
       unsigned int const maximum_level = topology_manager.GetMaximumLevel();
       // The MAA required the dimensionless cell size -> No dimensionalization required
-      double const cell_size_on_maximum_level = tree.GetNodeSizeOnLevelZero() / double( CC::ICX() ) / double( 1 << maximum_level ); 
+      double const cell_size_on_maximum_level = tree.GetNodeSizeOnLevelZero() / double( CC::ICX() ) / double( 1 << maximum_level );
 
       // initialize the algorithm assembler
-      return ModularAlgorithmAssembler( start_time, 
-                                        end_time, 
+      return ModularAlgorithmAssembler( start_time,
+                                        end_time,
                                         cfl_number,
-                                        GetGravity( input_reader.GetSourceTermReader(), unit_handler ), 
+                                        GetGravity( input_reader.GetSourceTermReader(), unit_handler ),
                                         GetAllLevels( maximum_level ),
-                                        cell_size_on_maximum_level, 
-                                        unit_handler, 
-                                        initial_condition, 
-                                        tree, 
-                                        topology_manager, 
-                                        halo_manager, 
+                                        cell_size_on_maximum_level,
+                                        unit_handler,
+                                        initial_condition,
+                                        tree,
+                                        topology_manager,
+                                        halo_manager,
                                         communication_manager,
-                                        multiresolution, 
-                                        material_manager, 
+                                        multiresolution,
+                                        material_manager,
                                         input_output_manager );
    }
 } // namespace Initialization

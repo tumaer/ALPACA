@@ -72,7 +72,7 @@
  * @brief Constructor for the LinearizedInterfaceRiemannSolver.
  * @param material_manager See base class.
  */
-LinearizedInterfaceRiemannSolver::LinearizedInterfaceRiemannSolver( const MaterialManager& material_manager ) :
+LinearizedInterfaceRiemannSolver::LinearizedInterfaceRiemannSolver( MaterialManager const& material_manager ) :
    InterfaceRiemannSolver( material_manager ) {
   // Empty besides call of base class constructor.
 }

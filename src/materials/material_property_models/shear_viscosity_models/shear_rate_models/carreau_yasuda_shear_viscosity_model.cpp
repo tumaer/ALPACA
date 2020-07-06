@@ -71,7 +71,7 @@
 #include "utilities/string_operations.h"
 
 /**
- * @brief Constructor to instantiate the Carreau-Yasuda shear viscosity model. The model is implemented based on \cite{Bird1987}
+ * @brief Constructor to instantiate the Carreau-Yasuda shear viscosity model. The model is implemented based on \cite{Bird1987}.
  *                                                                               mu0/mu-inf = viscosity at zero/infinite shear rates.
  *        mu = mu_inf + (mu0  - mu_inf) * (1 + (gamma_dot / k)^a)^((n-1)/a)          k      = the shear rate where the viscosity is constant (depending on n and a).
  *                                                                                gamma_dot = shear rate.

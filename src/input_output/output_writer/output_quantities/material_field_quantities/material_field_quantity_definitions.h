@@ -77,26 +77,26 @@
  * @brief The MaterialFieldOutputName enum gives all possible choices for which an output can be written (conservatives, primes states and paramteres)
  *
  * @note: In order to append a MaterialFieldQuantity to the ouput follow the steps:
- *        1. Add The field quantity to MaterialFieldQuantityName in the appropriate group (arbitrary name) 
+ *        1. Add The field quantity to MaterialFieldQuantityName in the appropriate group (arbitrary name)
  *        2. Add for this name an entry with default values to the function DataOfMaterialFieldQuantity below
  *           ( for scalar quantities follow e.g. mass, for vectorial quantities follow e.g. velocity)
- *        3. Add an output constants expression in user_specifications/output_constants.h 
- *        4. Add the constructor call in the "initialization_output_writer.cpp" function
+ *        3. Add an output constants expression in user_specifications/output_constants.h
+ *        4. Add the constructor call in the "initialization_output_writer.cpp" function.
  */
 enum class MaterialFieldQuantityName {
    // conservatives
    Mass, Momentum, Energy,
    // prime states
-   Density, Temperature, Pressure, Velocity,   
+   Density, Temperature, Pressure, Velocity,
    // parameters
-   ShearViscosity, ThermalConductivity                    
+   ShearViscosity, ThermalConductivity
 };
 
 /**
- * @brief Returns the suffix for a given conservative buffer type 
- * @param buffer_type Conservative buffer type identifier
- * @return suffix for the given identifier
- */ 
+ * @brief Returns the suffix for a given conservative buffer type.
+ * @param buffer_type Conservative buffer type identifier.
+ * @return suffix for the given identifier.
+ */
 inline std::string SuffixOfConservativeBufferType( ConservativeBufferType const buffer_type ) {
    switch (buffer_type) {
       case ConservativeBufferType::Average : {
@@ -105,49 +105,49 @@ inline std::string SuffixOfConservativeBufferType( ConservativeBufferType const 
       case ConservativeBufferType::RightHandSide : {
          return "_rhs";
       }
-      default : { //last possibility ConservativeBufferType::Initial : 
+      default : { //last possibility ConservativeBufferType::Initial :
          return "_initial";
       }
    }
 }
 
 /**
- * @brief Defines a struct storing all necessary information to provide correct information for each MaterialFieldQuantity
- */ 
+ * @brief Defines a struct storing all necessary information to provide correct information for each MaterialFieldQuantity.
+ */
 struct MaterialFieldQuantityData {
    // material field type for which the output is written
    MaterialFieldType field_type_;
    // indices of the field type which should be included in the output (more than one element generates vectorial output)
    std::vector<unsigned int> field_indices_;
-   // default value for the debug output 
+   // default value for the debug output
    double debug_default_value_;
 
    /**
-    * @brief Gives the dimensions of the quantity 
-    * @return Dimensions of the quantity 
+    * @brief Gives the dimensions of the quantity.
+    * @return Dimensions of the quantity.
     */
    std::array<unsigned int, 2> GetDimensions() const {
       return { static_cast<unsigned int>( field_indices_.size() ), 1 };
    }
 
    /**
-    * @brief Verifies the quantity data on validity to eliminate non-active fields   
-    * @return True if any of the fields are active, otherwise false
-    * @note Manipulates the member data in case some fields are not active 
+    * @brief Verifies the quantity data on validity to eliminate non-active fields.
+    * @return True if any of the fields are active, otherwise false.
+    * @note Manipulates the member data in case some fields are not active.
     */
    bool VerifyQuantity() {
       // Local field type for lambda capture
       MaterialFieldType const field_type = field_type_;
-      // Store current size for warning handling 
+      // Store current size for warning handling
       size_t current_size = field_indices_.size();
-      // Erase all elements that are not active 
-      field_indices_.erase( std::remove_if( field_indices_.begin(), field_indices_.end(), 
+      // Erase all elements that are not active
+      field_indices_.erase( std::remove_if( field_indices_.begin(), field_indices_.end(),
                                             [&field_type]( double const& index ) { return !MF::IsFieldActive( field_type, index ); } ), field_indices_.end() );
       // Throw warning if some of the fields have been rejected
       if( current_size != field_indices_.size() ) {
          std::cerr << "Output Warning! Some of the desired material fields are not active! Continue with reduced set!" << std::endl;
       }
-      
+
       // If no field index is left anymore return false otherwise true
       return !field_indices_.empty();
    }
@@ -157,16 +157,16 @@ struct MaterialFieldQuantityData {
 /*                              Add here new material field quantities                                                    */
 /***********************************************************************************************************************/
 /**
- * @brief Gives the appropriate data for a material field output quantity to generate the output
+ * @brief Gives the appropriate data for a material field output quantity to generate the output.
  * @param output_quantity The material field output quantity identifier.
- * @return Quantity data struct for the given name 
+ * @return Quantity data struct for the given name.
  */
 inline MaterialFieldQuantityData DataOfMaterialFieldQuantity( MaterialFieldQuantityName const output_quantity ) {
-   // General declaration of the struct 
+   // General declaration of the struct
    MaterialFieldQuantityData quantity_data;
    // Differ between all quantities
    switch (output_quantity) {
-      // conservatives 
+      // conservatives
       case MaterialFieldQuantityName::Mass : {
          quantity_data.field_type_          = MaterialFieldType::Conservatives;
          quantity_data.field_indices_       = { ETI( Equation::Mass ) };
@@ -175,7 +175,7 @@ inline MaterialFieldQuantityData DataOfMaterialFieldQuantity( MaterialFieldQuant
       }
       case MaterialFieldQuantityName::Momentum : {
          quantity_data.field_type_          = MaterialFieldType::Conservatives;
-         quantity_data.field_indices_       = { ETI( Equation::MomentumX ) 
+         quantity_data.field_indices_       = { ETI( Equation::MomentumX )
 #if DIMENSION != 1
             , ETI(Equation::MomentumY)
 #endif
@@ -236,8 +236,8 @@ inline MaterialFieldQuantityData DataOfMaterialFieldQuantity( MaterialFieldQuant
          quantity_data.field_indices_       = { PTI( Parameter::ThermalConductivity ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
-      }      
-      // default if nothing matches 
+      }
+      // default if nothing matches
       default : {
          throw std::logic_error( "Material field output quantity is not known!" );
       }

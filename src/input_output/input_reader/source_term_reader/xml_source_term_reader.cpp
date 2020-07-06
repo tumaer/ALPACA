@@ -69,20 +69,22 @@
 
 #include "input_output/input_reader/xml_utilities.h"
 
+/**
+ * @brief Default constructor for the source term reader for xml-type input files.
+ * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
+ */
 XmlSourceTermReader::XmlSourceTermReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   SourceTermReader(), 
+   SourceTermReader(),
    xml_input_file_( std::move( inputfile ) ) {
-   /** Empty besides initializer list and base class constructor call */ 
+   /** Empty besides initializer list and base class constructor call */
 }
 
 /**
- * @brief Reads the gravity in a certain direction 
- * @param direction Direction in which the gravity should be read
- * @return gravity in that direction
+ * @brief See base class definition.
  */
 double XmlSourceTermReader::DoReadGravity( Direction const direction ) const {
-   // Get the correct component name 
-   std::string const component = direction == Direction::X ? "x" : 
+   // Get the correct component name
+   std::string const component = direction == Direction::X ? "x" :
                                  direction == Direction::Y ? "y" :
                                                              "z";
    // obtain correct node

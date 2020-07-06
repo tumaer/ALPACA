@@ -70,23 +70,23 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the complete internal halo manager class with the given input classes
-    * @param topology_manager Class providing global (on all ranks) node information 
-    * @param tree Tree class providing local (on current rank) node information 
-    * @param external_halo_manager Instance for handling external boundary conditions 
-    * @param internal_halo_manager Instance for handling internal boundary conditions 
-    * @param communication_manager Calls providing communication handling between different ranks 
-    * @return The fully initialized HaloManager class 
+    * @brief Initializes the complete internal halo manager class with the given input classes.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param external_halo_manager Instance for handling external boundary conditions.
+    * @param internal_halo_manager Instance for handling internal boundary conditions.
+    * @param communication_manager Calls providing communication handling between different ranks.
+    * @return The fully initialized HaloManager class.
     */
    HaloManager InitializeHaloManager( TopologyManager const& topology_manager,
-                                      Tree & tree, 
+                                      Tree & tree,
                                       ExternalHaloManager const& external_halo_manager,
                                       InternalHaloManager & internal_halo_manager,
                                       CommunicationManager & communication_manager ) {
-      
+
       // return the initializedhalo manager
-      return HaloManager( tree, 
-                          external_halo_manager, 
+      return HaloManager( tree,
+                          external_halo_manager,
                           internal_halo_manager,
                           communication_manager,
                           topology_manager.GetMaximumLevel() );

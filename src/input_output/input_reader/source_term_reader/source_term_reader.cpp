@@ -70,10 +70,10 @@
 #include "enums/direction_definition.h"
 
 /**
- * @brief Gives the gravity in a certain direction 
- * @param direction Direction in which the gravity should be read
- * @return gravity in that direction
- * 
+ * @brief Gives the gravity in a certain direction.
+ * @param direction Direction in which the gravity should be read.
+ * @return gravity in that direction.
+ *
  * @note No check on negative values is required. This would prevent the declaration of negative accelerations.
  */
 double SourceTermReader::ReadGravity( Direction const direction ) const {

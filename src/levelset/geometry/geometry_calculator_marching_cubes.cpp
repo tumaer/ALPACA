@@ -88,10 +88,7 @@ namespace {
 constexpr double ApertureMMMP(std::array<double, 4> const face) { // 8
    return 0.5 * ((face[3] / (face[3] - face[0]) ) * (face[3] / (face[3] - face[2]) ));
 }
-constexpr double ApertureMMMM(std::array<double, 4> const face) { // 0
-#ifndef PERFORMANCE
-   (void) face; //Avoid compiler warning
-#endif
+constexpr double ApertureMMMM(std::array<double, 4> const ) { // 0
    return 0.0;
 }
 constexpr double AperturePMMM(std::array<double, 4> const face) { // 1
@@ -143,15 +140,12 @@ constexpr double AperturePMPP(std::array<double, 4> const face) { // 13
 constexpr double ApertureMPPP(std::array<double, 4> const face) { // 14
    return 1.0 - AperturePMMM(face);
 }
-constexpr double AperturePPPP(std::array<double, 4> const face) { // 15
-#ifndef PERFORMANCE
-   (void) face; //Avoid compiler warning
-#endif
+constexpr double AperturePPPP(std::array<double, 4> const ) { // 15
    return 1.0;
 }
 
 /**
- * Function lookup table for aperture calculation.
+ * @brief Function lookup table for aperture calculation.
  */
 std::array<std::function<double (std::array<double, 4> const)>, 16> ApertureFunctionLookup = {ApertureMMMM, AperturePMMM, ApertureMPMM, AperturePPMM, ApertureMMPM, AperturePMPM, ApertureMPPM, AperturePPPM, ApertureMMMP, AperturePMMP, ApertureMPMP, AperturePPMP, ApertureMMPP, AperturePMPP, ApertureMPPP, AperturePPPP};
 
@@ -171,7 +165,7 @@ double CellFaceAperture(std::array<double, 4> const face){
 }
 
 /**
- * @brief Calculates the cell face apertures according to \cite Lauer2012 .
+ * @brief Calculates the cell face apertures according to \cite Lauer2012.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.
@@ -301,7 +295,7 @@ std::array<double, 6> ComputeCellFaceApertureCellBasedImplementation(double cons
 }
 
 /**
- * @brief Calculates the cell face apertures according to \cite Lauer2012 .
+ * @brief Calculates the cell face apertures according to \cite Lauer2012.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.
@@ -459,7 +453,7 @@ std::array<double, 6> ComputeCellFaceApertureSubCellBasedImplementation(double c
 }
 
 /**
- * @brief Calculates the volume fraction of a single cell based on \cite Lauer2012 .
+ * @brief Calculates the volume fraction of a single cell based on \cite Lauer2012.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.
@@ -566,7 +560,7 @@ double ComputeVolumeFractionCellBasedImplementation(double const (&levelset)[CC:
 }
 
 /**
- * @brief Calculates the volume fraction of a single cell based on \cite Lauer2012 .
+ * @brief Calculates the volume fraction of a single cell based on \cite Lauer2012.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.
@@ -737,7 +731,7 @@ double ComputeVolumeFractionSubCellBasedImplementation(double const (&levelset)[
 }
 
 /**
- * @brief Calculates the cell face apertures according to \cite Lauer2012 .
+ * @brief Calculates the cell face apertures according to \cite Lauer2012.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.
@@ -756,7 +750,7 @@ std::array<double, 6> GeometryCalculatorMarchingCubes::ComputeCellFaceApertureIm
 }
 
 /**
- * @brief Calculates the volume fraction of a single cell based on \cite Lauer2012 .
+ * @brief Calculates the volume fraction of a single cell based on \cite Lauer2012.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.

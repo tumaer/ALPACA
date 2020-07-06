@@ -79,7 +79,7 @@
  * @tparam DerivedInterfaceExtender Static Derived extender class which performs the actual iterative extension
  * @tparam field_type The Interface field type for which the extender is used (States or Parameters)
  */
-template< typename DerivedInterfaceExtender, InterfaceFieldType field_type >
+template<typename DerivedInterfaceExtender, InterfaceFieldType field_type>
 class InterfaceExtender {
 
    friend DerivedInterfaceExtender;

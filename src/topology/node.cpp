@@ -70,11 +70,11 @@
 #include "id_information.h"
 
 /**
- * @brief Constructs a node object holding blocks for all specified materials
- * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$
+ * @brief Constructs a node object holding blocks for all specified materials.
+ * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$.
  * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
- * @param materials The materials which are present in this node
- * @param initial_interface_tag Uniform initial interface tag of the node 
+ * @param materials The materials which are present in this node.
+ * @param initial_interface_tag Uniform initial interface tag of the node.
  */
 Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag) :
    node_size_(DomainSizeOfId(id,node_size_on_level_zero)),
@@ -97,8 +97,8 @@ Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::ve
  * @brief Constructs a node object based on already existing fluid data.
  * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$
  * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
- * @param initial_interface_tags Buffer containing the full field of interface tags for this node
- * @param interface_block Interface block that is added to the node
+ * @param initial_interface_tags Buffer containing the full field of interface tags for this node.
+ * @param interface_block Interface block that is added to the node.
  */
 Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
    std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block) :
@@ -211,7 +211,7 @@ std::unordered_map<MaterialName, Block> const& Node::GetPhases() const {
 
 /**
  * @brief Returns the material data of the respective material.
- * @param material Name of the material for which the block should be returned
+ * @param material Name of the material for which the block should be returned.
  * @return The material data as bundled in a Block object.
  */
 Block& Node::GetPhaseByMaterial(MaterialName const material) {

@@ -72,30 +72,30 @@
 #include "input_output/output_writer/mesh_generator.h"
 
 /**
- * @brief The StandardFinestLevelMeshGenerator generates a mesh for the output (currently xdmf + hdf5) using a virtual mapping of the mesh on the finest level. 
- * 
- * It provides the functionality of a non-ambiguous mesh (vertex IDs and coordinates) using the currently finest level as a 
- * reference. All blocks are virtually mapped onto the current maximum level. Therefore, the final hdf5 file is 
- * overloaded with vertex coordinates of the finest level, where a lot of are not used in the reading, e.g. using ParaView.
- * Nevertheless, the final mesh represents the current multi-resolution situation including jumps between different blocks. Only 
- * leaf nodes are written.  
- * 
- * Example for specification of vertex IDs:
- * 
- * Actual mesh situation:                         Virtual mapping on finest level 
- * 
- *  4____5________6_______________7                8____9____10___11___12___13___14___15
- *  |____|________|_______________|                |____|____|____|____|____|____|____|
- *  0    1        2               3                0    1    2    3    4    5    6    7  
- * 
- * Final Output: 
- * 
- *  8____9________11______________15               
- *  |____|________|_______________|               
- *  0    1        3               7               
- * 
- * Coordinates written to hdf5: all from 0 to 15, even only 8 are used, to provide direct mapping from vertex IDs to coordinates (required for reading)
- * 
+ * @brief The StandardFinestLevelMeshGenerator generates a mesh for the output (currently xdmf + hdf5) using a virtual mapping of the mesh on the finest level.
+ *
+ *        It provides the functionality of a non-ambiguous mesh (vertex IDs and coordinates) using the currently finest level as a
+ *        reference. All blocks are virtually mapped onto the current maximum level. Therefore, the final hdf5 file is
+ *        overloaded with vertex coordinates of the finest level, where a lot of are not used in the reading, e.g. using ParaView.
+ *        Nevertheless, the final mesh represents the current multi-resolution situation including jumps between different blocks. Only
+ *        leaf nodes are written.
+ *
+ *        Example for specification of vertex IDs:
+ *
+ *        Actual mesh situation:                         Virtual mapping on finest level
+ *
+ *         4____5________6_______________7                8____9____10___11___12___13___14___15
+ *         |____|________|_______________|                |____|____|____|____|____|____|____|
+ *         0    1        2               3                0    1    2    3    4    5    6    7
+ *
+ *        Final Output:
+ *
+ *         8____9________11______________15
+ *         |____|________|_______________|
+ *         0    1        3               7
+ *
+ *        Coordinates written to hdf5: all from 0 to 15, even only 8 are used, to provide direct mapping from vertex IDs to coordinates (required for reading)
+ *
  */
 class StandardFinestLevelMeshGenerator : public MeshGenerator {
 
@@ -104,7 +104,7 @@ class StandardFinestLevelMeshGenerator : public MeshGenerator {
    using MeshGenerator::tree_;
    using MeshGenerator::dimensionalized_node_size_on_level_zero_;
 
-   // Self defined variables 
+   // Self defined variables
    std::array<unsigned int, 3> const number_of_nodes_on_level_zero_;
 
    // local functions required for the computation
@@ -114,9 +114,9 @@ class StandardFinestLevelMeshGenerator : public MeshGenerator {
 
    // virtual functions required from the base class to compute data to hdf5 file
    void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;   
+   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
 
-   // virtual dimension functions required from base class 
+   // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
    hsize_t DoGetGlobalNumberOfCells() const override;
    hsize_t DoGetLocalNumberOfCells() const override;
@@ -127,9 +127,9 @@ class StandardFinestLevelMeshGenerator : public MeshGenerator {
 
 public:
    StandardFinestLevelMeshGenerator() = delete;
-   explicit StandardFinestLevelMeshGenerator( TopologyManager const& topology_manager, 
-                                              Tree const& flower, 
-                                              double const dimensionalized_node_size_on_level_zero, 
+   explicit StandardFinestLevelMeshGenerator( TopologyManager const& topology_manager,
+                                              Tree const& flower,
+                                              double const dimensionalized_node_size_on_level_zero,
                                               std::array<unsigned int, 3> const number_of_nodes_on_level_zero );
    virtual ~StandardFinestLevelMeshGenerator() = default;
    StandardFinestLevelMeshGenerator( StandardFinestLevelMeshGenerator const& ) = delete;

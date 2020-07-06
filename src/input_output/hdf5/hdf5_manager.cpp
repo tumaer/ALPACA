@@ -70,15 +70,15 @@
 #include <stdexcept>
 
 /**
- * @brief Default constructor (private)
- * @note can only be used to create a singleton hdf5 writer
+ * @brief Default constructor (private).
+ * @note can only be used to create a singleton hdf5 writer.
  */
 Hdf5Manager::Hdf5Manager() {
    /** Empty constructor */
 }
 
 /**
- * @brief Destructor checks whether a file is still open and closes it
+ * @brief Destructor checks whether a file is still open and closes it.
  */
 Hdf5Manager::~Hdf5Manager() {
    if( file_.is_open_ ) {
@@ -87,8 +87,9 @@ Hdf5Manager::~Hdf5Manager() {
 }
 
 /**
- * @brief Opens a file to write hdf5 content into
- * @param filename Name of the file
+ * @brief Opens a file to write/read hdf5 content into/from.
+ * @param filename Name of the file.
+ * @param file_access The mode used to open the hdf5 file.
  */
 void Hdf5Manager::OpenFile( std::string const& filename, Hdf5Access const file_access ) {
 #ifndef PERFORMANCE
@@ -189,11 +190,11 @@ hsize_t Hdf5Manager::GetDatasetExtent( std::string const& dataset_name ) const {
  *        Therefore, this function MUST be called before writing to a dataset.
  * @param dataset_name Name of the dataset that should be linked into the group/file.
  * @param dataspace_total_dimensions One-dimensional vector specifying the global dimensions of the dataspace (number of values + dimensions of each value)
- *        (e.g., 1000 cells where each is a 3D vector => {1000, 3, 1}, 1000 cells where each is a matrix nxm => {1000,n,m})
+ *        (e.g., 1000 cells where each is a 3D vector => {1000, 3, 1}, 1000 cells where each is a matrix nxm => {1000,n,m}).
  * @param dataset_local_dimensions The actual dimensions that are written to the file in one chunk
- *        (e.g. Global dimensions: {1000,3,1} where each vector is written once => local_dimensions = {1,3,1}.)
+ *        (e.g. Global dimensions: {1000,3,1} where each vector is written once => local_dimensions = {1,3,1}).
  * @param local_elements_start_index The start index, where the current rank starts to write the cell values.
- * @param datatype_id Hdf5 identifier which datatype should be used for the dataset (e.g., H5T_NATIVE_ULLONG, H5_NATIVE_DOUBLE)
+ * @param datatype_id Hdf5 identifier which datatype should be used for the dataset (e.g., H5T_NATIVE_ULLONG, H5_NATIVE_DOUBLE).
  *
  * @note The dataset is always appended to the current active group. Use ActivateGroup function to control.
  * @note The two-way writing procedure should be used, where already present (contiguous) data can be piped into the file without any further modifications. For each dataset, this function
@@ -254,8 +255,8 @@ void Hdf5Manager::OpenDatasetForWriting( std::string const& dataset_name, std::v
  *        Therefore, this function MUST be called before reading from a dataset.
  * @param dataset_name Name of the dataset that should be read.
  * @param dataset_local_dimensions The actual dimensions that are read from the file in one chunk
- *        (e.g. Global dimensions: {1000,3,1} where each vector is read once => local_dimensions = {1,3,1}.)
- * @param datatype_id Hdf5 identifier which datatype should be used for the dataset (e.g., H5T_NATIVE_ULLONG, H5_NATIVE_DOUBLE)
+ *        (e.g. Global dimensions: {1000,3,1} where each vector is read once => local_dimensions = {1,3,1}).
+ * @param datatype_id Hdf5 identifier which datatype should be used for the dataset (e.g., H5T_NATIVE_ULLONG, H5_NATIVE_DOUBLE).
  *
  * @note The dataset is always appended to the current active group. Use ActivateGroup function to control.
  */
@@ -306,11 +307,11 @@ void Hdf5Manager::OpenDatasetForReading( std::string const& dataset_name, std::v
  *        Therefore, this function MUST be called before writing to a dataset.
  * @param dataspace_name Name of the dataspace that should be used.
  * @param dataspace_total_dimensions One-dimensional vector specifying the global dimensions of the dataspace (number of values + dimensions of each value)
- *        (e.g., 1000 cells where each is a 3D vector => {1000, 3, 1}, 1000 cells where each is a matrix nxm => {1000,n,m})
- * @param dataset_local_dimensions The actual dimensions that are written to the file in one chunk
- *        (e.g. Global dimensions: {1000,3,1} where each vector is written once => local_dimensions = {1,3,1}.)
+ *        (e.g., 1000 cells where each is a 3D vector => {1000, 3, 1}, 1000 cells where each is a matrix nxm => {1000,n,m}).
+ * @param dataset_local_dimensions The actual dimensions that are written to the file in one chunk.
+ *        (e.g. Global dimensions: {1000,3,1} where each vector is written once => local_dimensions = {1,3,1}).
  * @param local_elements_start_index The start index, where the current rank starts to write the cell values.
- * @param datatype_id Hdf5 identifier which datatype should be used for the dataset (e.g., H5T_NATIVE_ULLONG, H5_NATIVE_DOUBLE)
+ * @param datatype_id Hdf5 identifier which datatype should be used for the dataset (e.g., H5T_NATIVE_ULLONG, H5_NATIVE_DOUBLE).
  *
  * @note The dataset is always appended to the current active group. Use ActivateGroup function to control.
  * @note The two-way writing procedure should be used where different datasets have the same extent and only the name of the datasets and the values differ. Hence, different datasets

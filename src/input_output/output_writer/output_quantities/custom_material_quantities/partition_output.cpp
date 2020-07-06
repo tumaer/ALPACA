@@ -69,56 +69,49 @@
 #include "communication/mpi_utilities.h"
 
 /**
- * @brief constructor to output the rank number 
- * @param unit_handler Instance to provide dimensionalization of variables  
- * @param material_manager Instance to access all material data
- * @param quantity_name Name of the quantity that is displayed in the ParaView cell data list
- * @param output_flags Flags of the output type that is written (0: standard, 1: interface, 2:debug)
- * 
- * @note {row, colmun} = {1,1} marks that the quantity is a scalar 
- */  
-PartitionOutput::PartitionOutput( UnitHandler const& unit_handler, 
-                                  MaterialManager const& material_manager, 
-                                  std::string const& quantity_name, 
-                                  std::array<bool, 3> const output_flags ) : 
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
-   /** Empty besides initializer list */  
+ * @brief constructor to output the rank number.
+ * @param unit_handler Instance to provide dimensionalization of variables.
+ * @param material_manager Instance to access all material data.
+ * @param quantity_name Name of the quantity that is displayed in the ParaView cell data list.
+ * @param output_flags Flags of the output type that is written (0: standard, 1: interface, 2:debug).
+ *
+ * @note {row, colmun} = {1,1} marks that the quantity is a scalar.
+ */
+PartitionOutput::PartitionOutput( UnitHandler const& unit_handler,
+                                  MaterialManager const& material_manager,
+                                  std::string const& quantity_name,
+                                  std::array<bool, 3> const output_flags ) :
+   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ),
+   rank_in_double_format_( double( MpiUtilities::MyRankId() ) ) {
+   /** Empty besides initializer list */
 }
 
 /**
- * @brief see base class definition
- */ 
-void PartitionOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
-   (void) node; // compiler warning
-   
-   // convert rank into double format
-   double const rank_in_double_format = double( MpiUtilities::MyRankId() );
+ * @brief see base class definition.
+ */
+void PartitionOutput::DoComputeCellData( Node const& , std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
    // Loop through number of internal cells
-   for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
-      for( unsigned int j = 0; j < CC::ICY(); ++j ) {
-         for( unsigned int i = 0; i < CC::ICX(); ++i ) {
-             cell_data[cell_data_counter++] = rank_in_double_format;
+   for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+      for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+         for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+             cell_data[cell_data_counter++] = rank_in_double_format_;
          }
       }
    }
 }
 
 /**
- * @brief see base class definition
- */ 
-void PartitionOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
-   (void) node; // compiler warning
-
-   // convert rank into double format
-   double const rank_in_double_format = double( MpiUtilities::MyRankId() );
+ * @brief see base class definition.
+ */
+void PartitionOutput::DoComputeDebugCellData( Node const& , std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
 
    /** Assign the correct rank to the data vector */
    for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
       for( unsigned int j = 0; j < CC::TCY(); ++j ) {
          for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-             cell_data[cell_data_counter++] = rank_in_double_format;
+             cell_data[cell_data_counter++] = rank_in_double_format_;
          }
       }
    }
-} 
+}

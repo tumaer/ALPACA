@@ -312,13 +312,8 @@ void ScaleSeparationProcedure(Node& node){
 /**
  * @brief Performs a scale separation procedure for a given vector of nodes.
  * @param nodes The nodes for which scale separation is done.
- * @param stage The current stage of the RK scheme.
  */
-void TwoPhaseScaleSeparator::SeparateScalesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-#ifndef PERFORMANCE
-   (void) stage; //Avoid compiler warning
-#endif
-
+void TwoPhaseScaleSeparator::SeparateScalesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const {
    for(Node& node : nodes) {
       ScaleSeparationProcedure(node);
    }

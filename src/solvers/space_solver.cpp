@@ -187,8 +187,8 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
       } //equation
 
       //save boundary fluxes for correction at jump boundary conditions
-      double   (&boundary_fluxes_west)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::West );
-      double   (&boundary_fluxes_east)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::East );
+      double (&boundary_fluxes_west)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::West );
+      double (&boundary_fluxes_east)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::East );
       double  (&boundary_fluxes_south)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::South );
       double  (&boundary_fluxes_north)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::North );
       double (&boundary_fluxes_bottom)[MF::ANOE()][CC::ICY()][CC::ICZ()] = phase.second.GetBoundaryJumpFluxes( BoundaryLocation::Bottom );

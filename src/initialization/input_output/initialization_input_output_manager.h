@@ -74,22 +74,22 @@
 #include "input_output/input_output_manager.h"
 
 /**
- * @brief Defines all initialization functions required for the input-output manager 
+ * @brief Defines all initialization functions required for the input-output manager.
  */
 namespace Initialization {
 
    // factory functions for the input output manager
-   std::vector<double> ComputeOutputTimes( OutputReader const& output_reader, 
-                                           TimeControlReader const& time_control_reader, 
-                                           UnitHandler const& unit_handler, 
+   std::vector<double> ComputeOutputTimes( OutputReader const& output_reader,
+                                           TimeControlReader const& time_control_reader,
+                                           UnitHandler const& unit_handler,
                                            OutputType const output_type );
    std::vector<double> ComputeSnapshotTimes( RestartReader const& restart_reader, TimeControlReader const& time_control_reader, UnitHandler const& unit_handler );
 
 
    // Initialization function for the input_output manager
-   InputOutputManager InitializeInputOutputManager( InputReader const& input_reader, 
+   InputOutputManager InitializeInputOutputManager( InputReader const& input_reader,
                                                     OutputWriter const& output_writer,
-                                                    RestartManager const& restart_manager, 
+                                                    RestartManager const& restart_manager,
                                                     UnitHandler const& unit_handler );
 }
 

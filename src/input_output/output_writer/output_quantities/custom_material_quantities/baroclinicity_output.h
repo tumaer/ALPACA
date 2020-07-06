@@ -72,20 +72,20 @@
 #include "topology/node.h"
 
 /**
- * @brief The BaroclinicityOutput class handles the output of the baroclinicity term of the vorticity transport equation 
+ * @brief The BaroclinicityOutput class handles the output of the baroclinicity term of the vorticity transport equation
  *        into a output file (currently Xdmf + HDF5). BaroclinicityOutput must not change any data.
  */
 class BaroclinicityOutput : public OutputQuantity {
 
-private: 
+private:
    // Compute functions required from base class
    void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;   
+   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
 
 public:
    BaroclinicityOutput() = delete;
-   explicit BaroclinicityOutput( UnitHandler const& unit_handler, 
-                                 MaterialManager const& material_manager, 
+   explicit BaroclinicityOutput( UnitHandler const& unit_handler,
+                                 MaterialManager const& material_manager,
                                  std::string const& quantity_name,
                                  std::array<bool, 3> const output_flags );
    virtual ~BaroclinicityOutput() = default;

@@ -71,15 +71,15 @@
 #include "topology/id_information.h"
 
 /**
- * @brief Constructor to create the standard finest level mesh generator
- * @param topology_manager Instance to provide node information on different ranks 
- * @param flower Instance to provide node information of current rank 
- * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero 
- * @param number_of_nodes_on_level_zero Number of nodes in all directions on level zero
+ * @brief Constructor to create the standard finest level mesh generator.
+ * @param topology_manager Instance to provide node information on different ranks.
+ * @param flower Instance to provide node information of current rank.
+ * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero.
+ * @param number_of_nodes_on_level_zero Number of nodes in all directions on level zero.
  */
-StandardFinestLevelMeshGenerator::StandardFinestLevelMeshGenerator( TopologyManager const& topology_manager, 
-                                                                    Tree const& flower, 
-                                                                    double const dimensionalized_node_size_on_level_zero, 
+StandardFinestLevelMeshGenerator::StandardFinestLevelMeshGenerator( TopologyManager const& topology_manager,
+                                                                    Tree const& flower,
+                                                                    double const dimensionalized_node_size_on_level_zero,
                                                                     std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) :
    MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ),
    number_of_nodes_on_level_zero_( number_of_nodes_on_level_zero ) {
@@ -87,8 +87,8 @@ StandardFinestLevelMeshGenerator::StandardFinestLevelMeshGenerator( TopologyMana
 }
 
 /**
- * @brief Counts the vertices per dimension for the current global maximum level of the simulation  
- * @return Number of vertices in each dimension on maximum level 
+ * @brief Counts the vertices per dimension for the current global maximum level of the simulation.
+ * @return Number of vertices in each dimension on maximum level.
  */
 std::array<unsigned long long int, 3> StandardFinestLevelMeshGenerator::GlobalNumberOfVerticesPerDimension() const {
 
@@ -100,8 +100,8 @@ std::array<unsigned long long int, 3> StandardFinestLevelMeshGenerator::GlobalNu
 }
 
 /**
- * @brief Returns the total global number of vertices on the finest level for the global maxmum level of the simulation 
- * @return Total number of vertices on finest level  
+ * @brief Returns the total global number of vertices on the finest level for the global maxmum level of the simulation.
+ * @return Total number of vertices on finest level.
  */
 unsigned long long int StandardFinestLevelMeshGenerator::TotalNumberOfVerticesOnFinestLevel() const {
    auto&& count_per_dimension = GlobalNumberOfVerticesPerDimension();
@@ -109,15 +109,15 @@ unsigned long long int StandardFinestLevelMeshGenerator::TotalNumberOfVerticesOn
 }
 
 /**
- * @brief Gives the local number of vertices present on this rank on finest level and start index
- * @return Return the local number of vertices and start index  
+ * @brief Gives the local number of vertices present on this rank on finest level and start index.
+ * @return Return the local number of vertices and start index.
  */
 std::array<unsigned long long int, 2> StandardFinestLevelMeshGenerator::GetLocalNumberOfVerticesAndStartIndex() const {
-   // Define the total number of vertices and current rank situation 
+   // Define the total number of vertices and current rank situation
    unsigned long long int total_number_vertices = TotalNumberOfVerticesOnFinestLevel();
-   int const rank = MpiUtilities::MyRankId(); 
+   int const rank = MpiUtilities::MyRankId();
    int const number_of_ranks = MpiUtilities::NumberOfRanks();
-   // Compute the number of local number of vertices and given start index 
+   // Compute the number of local number of vertices and given start index
    int const remainder = total_number_vertices % number_of_ranks;
    unsigned long long int local_number_vertices = total_number_vertices / number_of_ranks;
    unsigned long long int const start_index = local_number_vertices * rank + ( rank < remainder ? rank : remainder );
@@ -126,66 +126,66 @@ std::array<unsigned long long int, 2> StandardFinestLevelMeshGenerator::GetLocal
 }
 
 /**
- * @brief See base class implementation 
+ * @brief See base class implementation.
  */
 std::vector<std::reference_wrapper<Node const>> StandardFinestLevelMeshGenerator::DoGetLocalNodes() const {
    return tree_.Leaves();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardFinestLevelMeshGenerator::DoGetGlobalNumberOfCells() const {
-   return hsize_t( std::get<1>( topology_.NodeAndLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock(); 
+   return hsize_t( std::get<1>( topology_.NodeAndLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardFinestLevelMeshGenerator::DoGetLocalNumberOfCells() const {
    return hsize_t( topology_.LocalLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardFinestLevelMeshGenerator::DoGetLocalCellsStartIndex() const {
    return hsize_t( topology_.LeafOffsetOfRank( MpiUtilities::MyRankId() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 std::vector<hsize_t> StandardFinestLevelMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinates() const {
    return { hsize_t( TotalNumberOfVerticesOnFinestLevel() ), hsize_t ( 3 ) };
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 std::vector<hsize_t> StandardFinestLevelMeshGenerator::DoGetLocalDimensionsOfVertexCoordinates() const {
    return { hsize_t( GetLocalNumberOfVerticesAndStartIndex()[0] ), hsize_t ( 3 ) };
 }
 
 /**
- * @brief See base class implementation
- */ 
+ * @brief See base class implementation.
+ */
 hsize_t StandardFinestLevelMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
    return hsize_t( GetLocalNumberOfVerticesAndStartIndex()[1] );
 }
 
 /**
- * @brief See base class definition
- */ 
+ * @brief See base class definition.
+ */
 void StandardFinestLevelMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const {
-   // Obtain correct local number of vertices and start index 
+   // Obtain correct local number of vertices and start index
    unsigned int const maximum_level = topology_.GetCurrentMaximumLevel();
    std::array<unsigned long long int, 2>&& local_number_vertices_and_startIndex = GetLocalNumberOfVerticesAndStartIndex();
 
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_number_vertices_and_startIndex[0] * 3 );
 
-   // Generate the vertex coordinates on the finest level 
+   // Generate the vertex coordinates on the finest level
    // Remember: The mesh generator class already take the dimensionalized node size. Therfore, no additional dimensionalization is required.
    unsigned long long int const resolution = 1 << maximum_level;
    double const cell_size_x = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICX();
@@ -208,14 +208,14 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexCoordinates( std::vector<d
 }
 
 /**
- * @brief See base class definition
- */ 
+ * @brief See base class definition.
+ */
 void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const {
-   
+
    // Resize Vertex ID vector ( 8 vertices span one cell )
    vertex_ids.resize( topology_.LocalLeafIds().size() * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock() * 8 );
-   /** 
-    * Definition of offset parameters in x and y-direction to be specified for loop computation of vertices 
+   /**
+    * Definition of offset parameters in x and y-direction to be specified for loop computation of vertices
     * Vertices are described in increasing order:
     * v( x,y,z ) = ( 0,0,0 )               -> ID: 0
     * v( x,y,z ) = ( total,0,0 )           -> ID: max
@@ -232,7 +232,7 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned 
    unsigned long long int vertex_id_counter = 0;
    unsigned long long int const resolution = 1 << maximum_level;
    for( std::uint64_t const& id : topology_.LocalLeafIds() ){
-      // Additional distance to be considered between current level of node and maximum level where IDs are specified  
+      // Additional distance to be considered between current level of node and maximum level where IDs are specified
       unsigned long long int const level_factor = resolution >> LevelOfNode( id );
       //Find index of nodes domain by coordinates function; Cast from double to long! -> for indices greater 2^53 this is incorrect
       std::array<double, 3> const block_origin = DomainCoordinatesOfId( id, 1 );
@@ -275,7 +275,7 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned 
    }//for node id
 
    /**
-    * @note: In other mesh_generators filtering operations are required to remove double placed vertices or to assign the 
+    * @note: In other mesh_generators filtering operations are required to remove double placed vertices or to assign the
     *        correct ID to double placed vertices. In the finest level Output this is not required, since the IDs are mapped to the unique IDs on the finest
     *        level.
     */

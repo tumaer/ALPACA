@@ -76,7 +76,7 @@
 /**
  * @brief The MaterialPropertyName defines the identifiers to all different pure material and material pairing properties that exist.
  *        It is used to provide a defined mapping for the properties between input, transfer and output.
- * @note The identifier is also used for the mapping of specific property parameter models
+ * @note The identifier is also used for the mapping of specific property parameter models.
  */
 enum class MaterialProperty {
    ShearViscosity,
@@ -87,9 +87,9 @@ enum class MaterialProperty {
 };
 
 /**
- * @brief Converts the material property to a proper string that can be used for input and output of the data
- * @param property The material property identifier
- * @return first_capitalized Flag to indicate if the first letter should be capitalized or not
+ * @brief Converts the material property to a proper string that can be used for input and output of the data.
+ * @param property The material property identifier.
+ * @return first_capitalized Flag to indicate if the first letter should be capitalized or not.
  *
  * @note Do not change the string obtained for the given property, since this is also used for mapping the property to a corresponding
  *       parameter model. In case change both.
@@ -134,7 +134,7 @@ enum class MaterialPropertyModelName {
       // Shear rate models
       ShearViscosityPowerLaw,
       ShearViscosityCross,
-      ShearViscosityCarreau,
+      ShearViscosityCarreauYasuda,
 
       // Temperature models
       ShearViscositySutherland,
@@ -142,13 +142,17 @@ enum class MaterialPropertyModelName {
    // Thermal conductivity models
       // constant model
       ThermalConductivityConstant,
+
+   // Surface tension coefficient models
+      // constant model
+      SurfaceTensionCoefficientConstant
 };
 
 /**
- * @brief Converts a string to its corresponding MaterialPropertyModelName
- * @param property Material property for which the model is used (e.g. ShearViscosity, ThermalConductivity)
- * @param model_name Name of the model that is desired (e.g., Constant, Carreau)
- * @return Name of the material property model
+ * @brief Converts a string to its corresponding MaterialPropertyModelName.
+ * @param property Material property for which the model is used (e.g. ShearViscosity, ThermalConductivity).
+ * @param model_name Name of the model that is desired (e.g., Constant, Carreau).
+ * @return Name of the material property model.
  */
 inline MaterialPropertyModelName StringToMaterialPropertyModel( MaterialProperty const property, std::string const& model_name ) {
    // transform string to upper case without spaces
@@ -159,13 +163,17 @@ inline MaterialPropertyModelName StringToMaterialPropertyModel( MaterialProperty
    // shear rate models
    else if( name_upper_case == "SHEARVISCOSITYPOWERLAW" ) { return MaterialPropertyModelName::ShearViscosityPowerLaw; }
    else if( name_upper_case == "SHEARVISCOSITYCROSS" ) { return MaterialPropertyModelName::ShearViscosityCross; }
-   else if( name_upper_case == "SHEARVISCOSITYCARREAU" ) { return MaterialPropertyModelName::ShearViscosityCarreau; }
+   else if( name_upper_case == "SHEARVISCOSITYCARREAUYASUDA" ) { return MaterialPropertyModelName::ShearViscosityCarreauYasuda; }
    // temperature models
    else if( name_upper_case == "SHEARVISCOSITYSUTHERLAND" ) { return MaterialPropertyModelName::ShearViscositySutherland; }
 
    // conductivity models
    // constant
    else if( name_upper_case == "THERMALCONDUCTIVITYCONSTANT" ) { return MaterialPropertyModelName::ThermalConductivityConstant; }
+
+   // surface tension coefficient models
+   // constant
+   else if( name_upper_case == "SURFACETENSIONCOEFFICIENTCONSTANT" ) { return MaterialPropertyModelName::SurfaceTensionCoefficientConstant; }
 
    // default behavior if nothing is known
    else { throw std::logic_error( "Material property model is not known!" ); }
@@ -181,7 +189,8 @@ inline std::string MaterialPropertyModelToString( MaterialPropertyModelName cons
    switch( name ) {
       // All constant models
       case MaterialPropertyModelName::ShearViscosityConstant :
-      case MaterialPropertyModelName::ThermalConductivityConstant : {
+      case MaterialPropertyModelName::ThermalConductivityConstant :
+      case MaterialPropertyModelName::SurfaceTensionCoefficientConstant : {
          return "Constant";
       }
       // All specific models
@@ -191,8 +200,8 @@ inline std::string MaterialPropertyModelToString( MaterialPropertyModelName cons
       case MaterialPropertyModelName::ShearViscosityCross : {
          return "Cross";
       }
-      case MaterialPropertyModelName::ShearViscosityCarreau : {
-         return "Carreau";
+      case MaterialPropertyModelName::ShearViscosityCarreauYasuda : {
+         return "CarreauYasuda";
       }
       case MaterialPropertyModelName::ShearViscositySutherland : {
          return "Sutherland";

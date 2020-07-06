@@ -65,49 +65,50 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_SETUP_H
-#define RIEMANN_SOLVER_SETUP_H
+#ifndef HLL_RIEMANN_SOLVER_H
+#define HLL_RIEMANN_SOLVER_H
 
-#include "user_specifications/numerical_setup.h"
-#include "riemann_solver.h"
-#include "roe_riemann_solver.h"
-#include "hllc_riemann_solver.h"
-#include "hll_riemann_solver.h"
+#include "solvers/riemann_solvers/riemann_solver.h"
+#include "block_definitions/block.h"
+#include "enums/direction_definition.h"
+#include "materials/material.h"
+#include "materials/material_manager.h"
+#include "user_specifications/compile_time_constants.h"
 
 /**
- * @brief A namespace to get a RiemannSolver type based on a specified constexpr.
+ * @brief Discretization of the Riemann solver using the HLL procedure according to \cite Toro2009, chapter 10.3.
  */
-namespace RiemannSolverSetup {
+class HllRiemannSolver : public RiemannSolver<HllRiemannSolver> {
 
-   /**
-    * @brief Function returning the typedef of a RiemannSolver based on a constexpr template.
-    * 
-    * @tparam RiemannSolvers The constexpr template parameter to specify the exact RiemannSolver type.
-    */
-   template<RiemannSolvers>
-   struct Concretize;
+   friend RiemannSolver;
 
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<RiemannSolvers::Roe> {
-      typedef RoeRiemannSolver type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<RiemannSolvers::Hllc> {
-      typedef HllcRiemannSolver type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<RiemannSolvers::Hll> {
-      typedef HllRiemannSolver type;
-   };
-}
+   // is used to distinguish principal and secondary momenta such that one single Riemann solver
+   // routine can be used for all three spatial directions
+   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = {{
+      {ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::MomentumZ)},
+      {ETI(Equation::MomentumY), ETI(Equation::MomentumX), ETI(Equation::MomentumZ)},
+      {ETI(Equation::MomentumZ), ETI(Equation::MomentumX), ETI(Equation::MomentumY)}
+   }};
 
-#endif // RIEMANN_SOLVER_SETUP_H
+   template<Direction DIR>
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double const (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
+      double const cell_size ) const;
+
+   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+      double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
+      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const;
+
+public:
+   HllRiemannSolver() = delete;
+   explicit HllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
+   ~HllRiemannSolver() = default;
+   HllRiemannSolver( HllRiemannSolver const& ) = delete;
+   HllRiemannSolver& operator=( HllRiemannSolver const& ) = delete;
+   HllRiemannSolver( HllRiemannSolver&& ) = delete;
+   HllRiemannSolver& operator=( HllRiemannSolver&& ) = delete;
+};
+
+#endif // HLL_RIEMANN_SOLVER_H

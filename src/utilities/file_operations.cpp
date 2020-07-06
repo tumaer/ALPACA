@@ -95,7 +95,7 @@ std::string RemoveFilePath( std::string const& filename ) {
 /**
  * @brief Changes the extension of a given file. Can handle filenames with full (absolute or relative) path.
  * @param filename_with_path .
- * @param extension The furture extension of the file.
+ * @param extension The future extension of the file.
  * @return New filename (with path if input had path).
  */
 std::string ChangeFileExtension( std::string const& filename_with_path, std::string const extension ) {
@@ -105,8 +105,8 @@ std::string ChangeFileExtension( std::string const& filename_with_path, std::str
 
 /**
  * @brief Gives the extension of a given file. Can handle filenames with full (absolute or relative) path.
- * @param filename Name of the file
- * @return Extension of the file (without dot)
+ * @param filename Name of the file.
+ * @return Extension of the file (without dot).
  */
 std::string GetFileExtension( std::string const& filename ) {
    auto const positon_of_last_dot = filename.find_last_of('.');
@@ -135,8 +135,8 @@ bool CreateFolder( std::string const& path ) {
 }
 
 /**
- * @brief Finds and adds the next free integer-counter to the path
- * $THIS FUNCTION IS NOT THREAD SAFE, i.e. if one thread creates a folder in between calls, the results are different$
+ * @brief Finds and adds the next free integer-counter to the path.
+ * $THIS FUNCTION IS NOT THREAD SAFE, i.e. if one thread creates a folder in between calls, the results are different$.
  * @param path The candidate for the path name.
  * @param start_number The next number to be checked (0 by default).
  * @return The path name that is not yet existing.
@@ -170,11 +170,11 @@ void WriteTextBasedFile( std::string const& filename, std::string const& content
 }
 
 /**
- * @brief Appends content to an exisitng file containing human readable (ascii) text to disk.
- * @param filename The name of the file to be appeneded.
+ * @brief Appends content to an existing file containing human readable (ascii) text to disk.
+ * @param filename The name of the file to be appended.
  * @param content The text to be written into the file.
  */
-void AppendToTextBasedFile( std::string const& filename, std::string const& content ) {     
+void AppendToTextBasedFile( std::string const& filename, std::string const& content ) {
    std::ofstream output_stream( filename, std::ios::app );
    output_stream << content;
    output_stream.flush();

@@ -72,17 +72,17 @@
 #include "materials/material_manager.h"
 
 /**
- * @brief Defines all initialization functions required for the material manager 
+ * @brief Defines all initialization functions required for the material manager.
  */
 namespace Initialization {
 
-   // Initialize function fot the full set of materials 
+   // Initialize function fot the full set of materials
    std::vector<Material> InitializeMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler );
 
-   // Initialize function for the full set of material pairings 
+   // Initialize function for the full set of material pairings
    std::vector<MaterialPairing> InitializeMaterialPairings( MaterialReader const& material_reader, UnitHandler const& unit_handler );
 
-   // Initialize function for the complete material manager 
+   // Initialize function for the complete material manager
    MaterialManager InitializeMaterialManager( InputReader const& input_reader, UnitHandler const& unit_handler );
 
 } // namespace Initialization

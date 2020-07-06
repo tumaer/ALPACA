@@ -225,10 +225,10 @@ void ViscousFluxes::ComputeTauFluxes( double const (&velocity_gradient_at_cell_f
 }
 
 /**
- * @brief Computes tau, the viscous part of the stress tensor, for a field dependent viscosity
+ * @brief Computes tau, the viscous part of the stress tensor, for a field dependent viscosity.
  * @param velocity_gradient_at_cell_faces The velocity gradient field at cell faces.
- * @param shear_viscosity The shear_viscosity field at the cell faces
- * @param bulk_viscoisty The constant bulk viscosity
+ * @param shear_viscosity The shear_viscosity field at the cell faces.
+ * @param bulk_viscosity The constant bulk viscosity.
  * @param tau The viscous part of the stress tensor.
  */
 void ViscousFluxes::ComputeTauFluxes( double const (&velocity_gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())]

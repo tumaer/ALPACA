@@ -74,7 +74,7 @@
 
 /**
  * @brief Class that implements the main functionality for mixing between two fluids. Specializations
- * necessary since different choices for the mixing contributions exist.
+ *        necessary since different choices for the mixing contributions exist.
  * @tparam DerivedTwoPhaseCutCellMixer Typename as template parameter due to CRTP.
  */
 template<typename DerivedTwoPhaseCutCellMixer>
@@ -95,7 +95,7 @@ private:
    static constexpr unsigned int FICMOZ = CC::DIM() == Dimension::Three ? CC::HS() - 1 : 0;
 
    /**
-    * @brief LICPO Gives the index of the Last Internal Cell Plus One in a block per dimension. I. e. the returned index must be included if the interal cells are of interest.
+    * @brief LICPO Gives the index of the Last Internal Cell Plus One in a block per dimension. I. e. the returned index must be included if the internal cells are of interest.
     */
    static constexpr unsigned int LICPOX = CC::HS() + CC::ICX();
    static constexpr unsigned int LICPOY = CC::DIM() != Dimension::One   ? (CC::HS() + CC::ICY()) : 0;
@@ -115,12 +115,8 @@ private:
    /**
     * @brief Performs mixing on given nodes. Mixing weights are obtained by a interface-normal based splitting.
     * @param node See base class.
-    * @param stage See base class.
     */
-   void MixImplementation(Node& node, unsigned int const stage) const {
-#ifndef PERFORMANCE
-      (void) stage; // Avoid compiler warning
-#endif
+   void MixImplementation(Node& node ) const {
 
       /***
       * mixing_contributions contains the relevant information about the mixing operations of one block.
@@ -185,8 +181,8 @@ private:
     * @param node The node for which the mixing fluxes are calculated.
     * @param material The material which specifies the phase for which the mixing contributions are calculated.
     * @param mixing_contributions The mixing contributions for which the corresponding fluxes are calculated. A mixing contribution tuple contains information about the mixing operation
-    * between two cells. It contains the indices of the target cell (i_target, j_target and k_target - saved as unsigned int), the mixing fraction beta (saved as double) and a factor necessary
-    * to calculate the mixing fluxes (saved a a double).
+    *        between two cells. It contains the indices of the target cell (i_target, j_target and k_target - saved as unsigned int), the mixing fraction beta (saved as double) and a factor necessary
+    *        to calculate the mixing fluxes (saved a a double).
     * @param contribution_identifier An identifier which mixing contribution is considered.
     * @param mixing_fluxes Indirect return parameter for the mixing fluxes.
     */

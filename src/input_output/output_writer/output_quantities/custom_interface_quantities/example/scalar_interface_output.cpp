@@ -69,13 +69,13 @@
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**
- * @brief constructor to create a scalar interface output quantity
- * @param unit_handler Unit handler class for dimensionalization
- * @param material_manager Material manager for accessing material data
- * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list
- * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug)
+ * @brief constructor to create a scalar interface output quantity.
+ * @param unit_handler Unit handler class for dimensionalization.
+ * @param material_manager Material manager for accessing material data.
+ * @param quantity_name Name of the quantity which is displayed in the ParaView cell-data list.
+ * @param output_flags Flags for which output type an output is written (0: standard, 1: interface, 2:debug).
  *
- * @note {row, colmun} = {1,1} marks that the quantity is a scalar
+ * @note {row, colmun} = {1,1} marks that the quantity is a scalar.
  */
 ScalarInterfaceOutput::ScalarInterfaceOutput( UnitHandler const& unit_handler,
                                               MaterialManager const& material_manager,
@@ -86,7 +86,7 @@ ScalarInterfaceOutput::ScalarInterfaceOutput( UnitHandler const& unit_handler,
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void ScalarInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
 
@@ -149,7 +149,7 @@ void ScalarInterfaceOutput::DoComputeCellData( Node const& node, std::vector<dou
 }
 
 /**
- * @brief see base class definition
+ * @brief see base class definition.
  */
 void ScalarInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
 

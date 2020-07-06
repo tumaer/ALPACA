@@ -72,23 +72,23 @@
 #include "input_output/input_reader.h"
 
 /**
- * @brief Defines all initialization functions required for the modular algorithm assembler
+ * @brief Defines all initialization functions required for the modular algorithm assembler.
  */
 namespace Initialization {
 
-   // Factory function to compute the gravity 
+   // Factory function to compute the gravity
    std::array<double, 3> GetGravity( SourceTermReader const& source_term_reader, UnitHandler const& unit_handler );
 
    // Initialization function for the modular algorithm assembler
-   ModularAlgorithmAssembler InitializeModularAlgorithmAssembler( InputReader const& input_reader, 
-                                                                  TopologyManager & topology_manager, 
-                                                                  Tree & tree, 
-                                                                  CommunicationManager & communication_manager, 
-                                                                  HaloManager & halo_manager, 
+   ModularAlgorithmAssembler InitializeModularAlgorithmAssembler( InputReader const& input_reader,
+                                                                  TopologyManager & topology_manager,
+                                                                  Tree & tree,
+                                                                  CommunicationManager & communication_manager,
+                                                                  HaloManager & halo_manager,
                                                                   Multiresolution const& multiresolution,
-                                                                  MaterialManager const& material_manager, 
-                                                                  InputOutputManager & input_output_manager, 
-                                                                  InitialCondition const& initial_condition, 
+                                                                  MaterialManager const& material_manager,
+                                                                  InputOutputManager & input_output_manager,
+                                                                  InitialCondition const& initial_condition,
                                                                   UnitHandler const& unit_handler );
 } // namespace Initialization
 

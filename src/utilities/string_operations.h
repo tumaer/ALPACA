@@ -84,6 +84,8 @@ std::string ToUpperCaseWithoutSpaces( std::string const& word );
 std::string RemoveSpaces( std::string const& word );
 // gives a empty string with a certain width
 std::string Indent( unsigned int const width );
+// remove leading numbers from a string 
+std::string RemoveLeadingNumbers( std::string const& word );
 
 } // namespace StringOperations
 

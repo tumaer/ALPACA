@@ -162,7 +162,7 @@ struct FieldBuffer {
 
    /**
     * @brief Gives the number of buffers contained in the field.
-    * @return Number of buffers.
+    * @return Number of fields contained in the buffer.
     */
    static constexpr std::size_t GetNumberOfFields() {
       return N;

@@ -72,20 +72,20 @@
 #include "topology/node.h"
 
 /**
- * @brief The BaroclinicHelicityOutputityOutput class handles the output of the helicity into a output file (currently Xdmf + HDF5). 
+ * @brief The HelicityOutputOutput class handles the output of the helicity into a output file (currently Xdmf + HDF5).
  *        HelicityOutput must not change any data.
  */
 class HelicityOutput : public OutputQuantity {
 
-private: 
+private:
    // Compute functions required from base class
    void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;   
+   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
 
 public:
    HelicityOutput() = delete;
-   explicit HelicityOutput( UnitHandler const& unit_handler, 
-                            MaterialManager const& material_manager, 
+   explicit HelicityOutput( UnitHandler const& unit_handler,
+                            MaterialManager const& material_manager,
                             std::string const& quantity_name,
                             std::array<bool, 3> const output_flags );
    virtual ~HelicityOutput() = default;

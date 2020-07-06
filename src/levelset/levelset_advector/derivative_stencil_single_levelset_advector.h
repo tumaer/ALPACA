@@ -78,7 +78,7 @@ class DerivativeStencilSingleLevelsetAdvector : public LevelsetAdvector<Derivati
 
    friend LevelsetAdvector;
 
-   void AdvectImplementation(Node& node, unsigned int const stage = 0) const;
+   void AdvectImplementation( Node& node ) const;
 
 public:
    explicit DerivativeStencilSingleLevelsetAdvector() = default;

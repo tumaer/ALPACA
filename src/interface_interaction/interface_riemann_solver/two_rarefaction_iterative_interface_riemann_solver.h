@@ -71,8 +71,8 @@
 #include "iterative_interface_riemann_solver.h"
 
 /**
- * @brief      Class for two rarefaction iterative interface riemann solver. Provides functionality to compute the solution of a Riemann problem.
- * assuming a two rarefaction solution.
+ * @brief Class for two rarefaction iterative interface riemann solver. Provides functionality to compute the solution of a Riemann problem
+ *        assuming a two rarefaction solution.
  */
 class TwoRarefactionIterativeInterfaceRiemannSolver : public IterativeInterfaceRiemannSolver<TwoRarefactionIterativeInterfaceRiemannSolver> {
 

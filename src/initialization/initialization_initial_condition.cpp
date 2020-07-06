@@ -72,11 +72,11 @@
 namespace Initialization {
 
    /**
-    * @brief Reads the initial material condition expression string for all materials
-    * @param initial_condition_reader Instance that provides access to the initial condition data in the input file
-    * @param number_of_materials Number of materials present in the current simulation
-    * @param variable_names_prime_states All names of the prime states that are read (contains empty strings for prime states that should not be read)
-    * @return Initial condition expression strings for all materials
+    * @brief Reads the initial material condition expression string for all materials.
+    * @param initial_condition_reader Instance that provides access to the initial condition data in the input file.
+    * @param number_of_materials Number of materials present in the current simulation.
+    * @param variable_names_prime_states All names of the prime states that are read (contains empty strings for prime states that should not be read).
+    * @return Initial condition expression strings for all materials.
     */
    std::vector<std::string> GetMaterialInitialConditions( InitialConditionReader const& initial_condition_reader,
                                                           unsigned int const number_of_materials,
@@ -107,11 +107,11 @@ namespace Initialization {
    }
 
    /**
-    * @brief Reads the initial levelset condition expressions of all interfaces
-    * @param initial_condition_reader Instance that provides access to the initial condition data in the input file
-    * @param number_of_materials Number of materials present in the current simulation
-    * @param variable_name_levelset Name of the levelset variable that is used
-    * @return Initial condition expression strings for all levelsets
+    * @brief Reads the initial levelset condition expressions of all interfaces.
+    * @param initial_condition_reader Instance that provides access to the initial condition data in the input file.
+    * @param number_of_materials Number of materials present in the current simulation.
+    * @param variable_name_levelset Name of the levelset variable that is used.
+    * @return Initial condition expression strings for all levelsets.
     */
    std::vector<std::string> GetLevelsetInitialConditions( InitialConditionReader const& initial_condition_reader,
                                                           unsigned int number_of_materials,
@@ -142,13 +142,13 @@ namespace Initialization {
    }
 
    /**
-    * @brief Initializes the complete initial condition class with the given input classes
-    * @param input_reader Reader that provides access to the full data of the input file
-    * @param topology_manager Class providing global (on all ranks) node information
-    * @param tree Tree class providing local (on current rank) node information
-    * @param material_manager Instance providing initialized material data
-    * @param unit_handler Instance to provide (non-)dimensionalization of values
-    * @return The fully initialized InititalCondition class
+    * @brief Initializes the complete initial condition class with the given input classes.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param material_manager Instance providing initialized material data.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized InititalCondition class.
     */
    InitialCondition InitializeInitialCondition( InputReader const& input_reader,
                                                 TopologyManager const& topology_manager,

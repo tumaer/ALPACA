@@ -87,12 +87,12 @@ StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> cons
 
 
 /**
- * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| )
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
+ * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| ).
+ * @param density The density used for the computation.
+ * @param momentum_x The momentum in x-direction used for the computation.
+ * @param momentum_y The momentum in y-direction used for the computation.
+ * @param momentum_z The momentum in z-direction used for the computation.
+ * @param energy The energy used for the computation.
  * @return Pressure according to stiffened-gas equation of state.
  */
 double StiffenedGasSafe::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
@@ -105,11 +105,11 @@ double StiffenedGasSafe::DoGetPressure( double const density, double const momen
 /**
 
  * @brief Computes enthalpy as ( E + p ) / rho.
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param energy .
+ * @param density The density used for the computation.
+ * @param momentum_x The momentum in x-direction used for the computation.
+ * @param momentum_y The momentum in y-direction used for the computation.
+ * @param momentum_z The momentum in z-direction used for the computation.
+ * @param energy The energy used for the computation.
  * @return Enthalpy value.
  */
 double StiffenedGasSafe::DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
@@ -117,12 +117,12 @@ double StiffenedGasSafe::DoGetEnthalpy( double const density, double const momen
 }
 
 /**
- * @brief Computes Energy from inputs as ( p + gamma * B ) / ( gamma - 1 ) + 0.5 * rho * ||v^2||
- * @param density .
- * @param momentum_x .
- * @param momentum_y .
- * @param momentum_z .
- * @param pressure .
+ * @brief Computes Energy from inputs as ( p + gamma * B ) / ( gamma - 1 ) + 0.5 * rho * ||v^2||.
+ * @param density The density used for the computation.
+ * @param momentum_x The momentum in x-direction used for the computation.
+ * @param momentum_y The momentum in y-direction used for the computation.
+ * @param momentum_z The momentum in z-direction used for the computation.
+ * @param pressure The pressure used for the computation.
  * @return Energy according to stiffened-gas equation of state.
  */
 double StiffenedGasSafe::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
@@ -131,7 +131,7 @@ double StiffenedGasSafe::DoGetEnergy( double const density, double const momentu
 }
 
 /**
- * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state
+ * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
  * @return Gruneisen coefficient according to stiffened-gas equation of state.
  */
 double StiffenedGasSafe::DoGetGruneisen() const {
@@ -139,8 +139,8 @@ double StiffenedGasSafe::DoGetGruneisen() const {
 }
 
 /**
- * @brief Computes psi from inputs as ( p + gamma * B ) / rho
- * @param pressure .
+ * @brief Computes psi from inputs as ( p + gamma * B ) / rho.
+ * @param pressure The pressure used for the computation.
  * @param one_density ( devision by zero is already avoided before ) .
  * @return Psi according to stiffened-gas equation of state.
  */
@@ -149,9 +149,9 @@ double StiffenedGasSafe::DoGetPsi( double const pressure, double const one_densi
 }
 
 /**
- * @brief Computes Speed of Sound from inputs as sqrt( gamma * ( p + B ) ) / rho
- * @param density .
- * @param pressure .
+ * @brief Computes Speed of Sound from inputs as sqrt( gamma * ( p + B ) ) / rho.
+ * @param density The density used for the computation.
+ * @param pressure The pressure used for the computation.
  * @return Speed of sound according to stiffened-gas equation of state.
  */
 double StiffenedGasSafe::DoGetSpeedOfSound( double const density, double const pressure ) const {
@@ -160,7 +160,7 @@ double StiffenedGasSafe::DoGetSpeedOfSound( double const density, double const p
 }
 
 /**
- * @brief Returns Gamma
+ * @brief Returns Gamma.
  * @return Gamma.
  */
 double StiffenedGasSafe::DoGetGamma() const {
@@ -168,7 +168,7 @@ double StiffenedGasSafe::DoGetGamma() const {
 }
 
 /**
- * @brief Returns B
+ * @brief Returns B.
  * @return B.
  */
 double StiffenedGasSafe::DoGetB() const {

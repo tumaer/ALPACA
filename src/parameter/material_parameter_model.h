@@ -66,24 +66,24 @@
 *                                                                                        *
 *****************************************************************************************/
 #ifndef MATERIAL_PARAMETER_MODEL_H
-#define MATERIAL_PARAMETER_MODEL_H 
+#define MATERIAL_PARAMETER_MODEL_H
 
 #include "block_definitions/block.h"
 #include "materials/material_definitions.h"
 
 /**
  * @brief The MaterialPropertyModel class defines an interface for different discretizations of a model to compute material and material pairing parameters
- *        depending on other materials or physical parameter. It works a proxy to define specific models for different material properties. 
+ *        depending on other materials or physical parameter. It works a proxy to define specific models for different material properties.
  */
 class MaterialParameterModel {
 
-protected: 
+protected:
 
-   // required functions needed in derived classes 
+   // required functions needed in derived classes
    virtual void DoUpdateParameter( Block & block, double const cell_size ) const = 0;
-   virtual void DoUpdateParameter( Block & block, 
-                                   double const cell_size, 
-                                   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], 
+   virtual void DoUpdateParameter( Block & block,
+                                   double const cell_size,
+                                   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
                                    std::int8_t const material_sign ) const = 0;
 
    // protected default constructor (can only be called from derived classes)
@@ -97,26 +97,26 @@ public:
    MaterialParameterModel& operator=( MaterialParameterModel&& ) = delete;
 
    /**
-    * @brief Computes the desired parameter based on the given parameter for a complete block
-    * @param block Block on which parameters are calculated (indirect return)
-    * @param cell_size Size of the cell of given block
+    * @brief Computes the desired parameter based on the given parameter for a complete block.
+    * @param block Block on which parameters are calculated (indirect return).
+    * @param cell_size Size of the cell of given block.
     */
    void UpdateParameter( Block & block, double const cell_size ) const {
       DoUpdateParameter( block, cell_size );
    }
 
    /**
-    * @brief Computes the desired parameter based on the given parameter of an interface-containing block
-    * @param mat_block Pair of MaterialName and corresponding block on which parameters are computed (indirect return)
-    * @param cell_size Size of the cell of given block 
-    * @param interface_tags Interface tags to specify location of the interface on the given block 
-    * @param material_sign Sign of the material for identification on interface tags 
+    * @brief Computes the desired parameter based on the given parameter of an interface-containing block.
+    * @param mat_block Pair of MaterialName and corresponding block on which parameters are computed (indirect return).
+    * @param cell_size Size of the cell of given block.
+    * @param interface_tags Interface tags to specify location of the interface on the given block.
+    * @param material_sign Sign of the material for identification on interface tags.
     */
-   void UpdateParameter( Block & block, 
-                         double const cell_size, 
-                         std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], 
+   void UpdateParameter( Block & block,
+                         double const cell_size,
+                         std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
                          std::int8_t const material_sign ) const {
-      DoUpdateParameter( block, cell_size, interface_tags, material_sign );                          
+      DoUpdateParameter( block, cell_size, interface_tags, material_sign );
    }
 };
 

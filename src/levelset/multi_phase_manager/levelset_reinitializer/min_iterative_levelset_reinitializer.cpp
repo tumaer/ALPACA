@@ -172,8 +172,8 @@ double GetSubcellFixNegative(double const (&levelset)[CC::TCX()][CC::TCY()][CC::
 }
 
 /**
- * @brief Reinitializes the levelset field of a node as described in \cite Min2010 .
- * @param node The levelset block which has to be reinitialized.
+ * @brief Reinitializes the levelset field of a node as described in \cite Min2010.
+ * @param node The node with levelset block which has to be reinitialized.
  * @return The residuum for the current node.
  */
 double MinIterativeLevelsetReinitializer::ReinitializeSingleNodeImplementation(Node& node, bool const ) const {

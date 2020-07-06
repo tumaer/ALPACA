@@ -128,7 +128,7 @@ void GetLevelsetAtCellCorners(double (&cell_corner_levelset)[cell_box_size_x][ce
 
 /**
 * @brief Calculates the level-set values at the corners of all subcells which appear when the parent cell gets refined once, i.e.
-* at the center of this cell, its corners, and the the center of each patch and edge. Calculations are based on linear interpolations.
+*        at the center of this cell, its corners, and the the center of each patch and edge. Calculations are based on linear interpolations.
 * @param corner_levelset The array in which to store the level-set values at the corners of the subcells. Indirect return parameter.
 * @param levelset The level-set field.
 * @param i Index i of the cell of interest.
@@ -343,7 +343,7 @@ bool IsCutCell<CutCellCriteria::ValueBased>(double const (&levelset)[CC::TCX()][
 
 /**
  * @brief Calculates the cell-normal vector, which is the gradient of the level-set field. It is computed with a second-order
- * central scheme.
+ *        central scheme.
  * @param levelset The level-set field.
  * @param i Index i of the cell of interest.
  * @param j Index j of the cell of interest.

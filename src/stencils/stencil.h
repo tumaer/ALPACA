@@ -112,7 +112,7 @@ public:
    static constexpr StencilType GetStencilType() {return DerivedStencil::stencil_type_;}
 
    /**
-    * @brief Applies the SpatialReconstructionStencil to the provided Array
+    * @brief Applies the SpatialReconstructionStencil to the provided Array.
     * @tparam P The manner in which the stencil is applied (UpwindLeft, UpwindRight or Central).
     * @param array The array on which to apply the spatial reconstruction stencil.
     * @param cell_size The cell size of the corresponding block.

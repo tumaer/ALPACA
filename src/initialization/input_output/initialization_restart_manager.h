@@ -74,13 +74,13 @@
 #include "input_output/restart_manager.h"
 
 /**
- * @brief Defines all initialization functions required for the restart manager 
+ * @brief Defines all initialization functions required for the restart manager.
  */
 namespace Initialization {
 
    // Initialization function for the input_output manager
-   RestartManager InitializeRestartManager( TopologyManager & topology_manager, 
-                                            Tree & tree, 
+   RestartManager InitializeRestartManager( TopologyManager & topology_manager,
+                                            Tree & tree,
                                             UnitHandler const& unit_handler );
 }
 

@@ -74,16 +74,16 @@
 
 /**
  * @brief The MaterialFieldOutputQuantity class handles the output to the filesystem in Xdmf+HDF5 file format for ParaView. MaterialFieldOutputQuantity must not change any data.
- * 
- * This quantity is used to write all material fields to the hdf5/xdmf file if desired. For activating different fields use the "output_constants.h" file. If a new 
- * material field needs to be added, refer to the "material_field_quantity_definitions.h". Here, nothing has to be changed. 
+ *
+ *        This quantity is used to write all material fields to the hdf5/xdmf file if desired. For activating different fields use the "output_constants.h" file. If a new
+ *        material field needs to be added, refer to the "material_field_quantity_definitions.h". Here, nothing has to be changed.
  */
 class MaterialFieldQuantity : public OutputQuantity {
 
-private: 
-   // struct containing all data required for the output 
+private:
+   // struct containing all data required for the output
    MaterialFieldQuantityData const quantity_data_;
-   // Conservative buffer type 
+   // Conservative buffer type
    ConservativeBufferType const buffer_type_;
 
    // Append functions required from base class
@@ -92,11 +92,11 @@ private:
 
 public:
    MaterialFieldQuantity() = delete;
-   explicit MaterialFieldQuantity( UnitHandler const& unit_handler, 
-                                   MaterialManager const& material_manager, 
+   explicit MaterialFieldQuantity( UnitHandler const& unit_handler,
+                                   MaterialManager const& material_manager,
                                    std::string const& quantity_name,
-                                   std::array<bool, 3> const output_flags, 
-                                   MaterialFieldQuantityData const& quantity_data, 
+                                   std::array<bool, 3> const output_flags,
+                                   MaterialFieldQuantityData const& quantity_data,
                                    ConservativeBufferType const buffer_type = ConservativeBufferType::Average );
    virtual ~MaterialFieldQuantity() = default;
    MaterialFieldQuantity( MaterialFieldQuantity const& ) = delete;

@@ -72,17 +72,12 @@
 #include "stencils/stencil_utilities.h"
 
 /**
- * Calculates the right-hand side to solve the level-set advection equation with a derivative stencil as proposed in \cite Nourgaliev2007.
+ * @brief Calculates the right-hand side to solve the level-set advection equation with a derivative stencil as proposed in \cite Nourgaliev2007.
  * @param node See base class.
- * @param stage See base class.
  */
-void DerivativeStencilSingleLevelsetAdvector::AdvectImplementation(Node& node, unsigned int const stage) const {
+void DerivativeStencilSingleLevelsetAdvector::AdvectImplementation( Node& node ) const {
 
    using DerivativeStencil = DerivativeStencilSetup::Concretize<derivative_stencil>::type;
-
-#ifndef PERFORMANCE
-   (void) stage; // Avoid compiler warning
-#endif
 
    InterfaceBlock& interface_block = node.GetInterfaceBlock();
    double const cell_size = node.GetCellSize();

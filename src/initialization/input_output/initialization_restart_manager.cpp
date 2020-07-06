@@ -70,17 +70,17 @@
 namespace Initialization {
 
    /**
-    * @brief Initializes the complete restart manager class with the given input classes
-    * @param topology_manager Class providing global (on all ranks) node information 
-    * @param tree Tree class providing local (on current rank) node information 
-    * @param unit_handler Instance to provide (non-)dimensionalization of values 
-    * @return The fully initialized RestartManager class as pointer (allows movements of it)
+    * @brief Initializes the complete restart manager class with the given input classes.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully initialized RestartManager class as pointer (allows movements of it).
     */
-   RestartManager InitializeRestartManager( TopologyManager & topology_manager, 
-                                            Tree & tree, 
+   RestartManager InitializeRestartManager( TopologyManager & topology_manager,
+                                            Tree & tree,
                                             UnitHandler const& unit_handler ) {
 
-      // return the fully initialied restart manager                                             
+      // return the fully initialied restart manager
       return RestartManager( unit_handler, topology_manager, tree, topology_manager.GetMaximumLevel() );
    }
 } // namespace Initialization

@@ -176,7 +176,7 @@ void CommunicationTypes::FreeTypes(){
 /**
  * @brief Gives the MPI Datatype to send data into in an internal no-jump exchange.
  * @param location The direction of the halo to be sent into.
- * @param datatype Mpi Datatype that should be received
+ * @param datatype Mpi Datatype that should be received.
  * @return The Datatype needed to send into the right sub_array.
  */
 MPI_Datatype CommunicationTypes::RecvDatatype(BoundaryLocation const location, DatatypeForMpi const datatype) const {
@@ -184,9 +184,9 @@ MPI_Datatype CommunicationTypes::RecvDatatype(BoundaryLocation const location, D
 }
 
 /**
- * @brief Gives the MPI Datatype to send data from in an internal cell
+ * @brief Gives the MPI Datatype to send data from in an internal cell.
  * @param location The direction of the halo to be sent from.
- * @param datatype Mpi Datatype that should be sent
+ * @param datatype Mpi Datatype that should be sent.
  * @return The Datatype needed to send from the right sub_array.
  */
 MPI_Datatype CommunicationTypes::SendDatatype(BoundaryLocation const location, DatatypeForMpi const datatype) const {
@@ -195,7 +195,7 @@ MPI_Datatype CommunicationTypes::SendDatatype(BoundaryLocation const location, D
 
 /**
  * @brief Gives a MPI Datatype to send the full set of conservatives.
- * @return .
+ * @return The datatype for conservative buffer communication.
  */
 MPI_Datatype CommunicationTypes::ConservativesDatatype() const {
    return single_conservatives_;
@@ -203,7 +203,7 @@ MPI_Datatype CommunicationTypes::ConservativesDatatype() const {
 
 /**
  * @brief Gives a MPI Datatype to send the full set of jump buffers.
- * @return .
+ * @return The datatype for jump surface buffer communication.
  */
 MPI_Datatype CommunicationTypes::JumpSurfaceDatatype() const {
    return single_boundary_jump_;
@@ -212,7 +212,7 @@ MPI_Datatype CommunicationTypes::JumpSurfaceDatatype() const {
 /**
  * @brief Gives the MPI Datatype to send the tags from a child into a parent.
  * @param child_position The position of the child among the siblings. See Node class for more details.
- * @param datatype Mpi Datatype that should be sent
+ * @param datatype Mpi Datatype that should be sent.
  * @return The subarray into which the data is to be averaged.
  */
 MPI_Datatype CommunicationTypes::AveragingSendDatatype(unsigned int const child_position, DatatypeForMpi const datatype) const {
@@ -224,7 +224,7 @@ MPI_Datatype CommunicationTypes::AveragingSendDatatype(unsigned int const child_
 
 /**
  * @brief Gives the correct datatype for a jump boundary at the given location.
- * @param location .
+ * @param location The location identifier.
  * @return The correct MPI_Datatype.
  */
 MPI_Datatype CommunicationTypes::JumpPlaneSendDatatype(BoundaryLocation const location) const {

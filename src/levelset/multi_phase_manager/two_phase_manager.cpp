@@ -89,15 +89,14 @@ TwoPhaseManager::TwoPhaseManager( MaterialManager const& material_manager, HaloM
 /**
  * @brief Allow cut-cell mixing for a single level-set field satisfying the signed-distance property. See also base class.
  * @param nodes See base class.
- * @param stage See base class.
  */
-void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
+void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 
    // TODO-19 JW: If integration is done on total cells, this halo update can possibly be left out
    halo_manager_.MaterialHaloUpdateOnLmax( MaterialFieldType::Conservatives );
 
    for( Node& node: nodes ) {
-      cut_cell_mixer_.Mix( node, stage );
+      cut_cell_mixer_.Mix( node );
       buffer_handler_.TransformToVolumeAveragedConservatives( node );
    }
 
@@ -117,14 +116,13 @@ void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node
 /**
  * @brief Ensures a well-resolved single-level set field satisfying the signed-distance property. Therefore, scale-separation and reinitialization are performed.
  * @param nodes See base class.
- * @param stage See base class.
  * @param is_last_stage See base class.
  */
-void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, bool const is_last_stage) const {
+void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
    if( CC::ScaleSeparationActive() && is_last_stage ) {
-      scale_separator_.SeparateScales( nodes, stage );
+      scale_separator_.SeparateScales( nodes );
       /**
-       * JW: Since we also want to reinitialize scale-separated cells we cannot update the interface tags at this place.
+       * Since we also want to reinitialize scale-separated cells we cannot update the interface tags at this place.
        * We have to do it after the reinitialization.
        */
    }
@@ -155,7 +153,6 @@ void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::ve
 /**
  * @brief Allows to extend material states to ghost cells.
  * @param node See base class.
- * @param stage See base class.
  */
 void TwoPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 
@@ -180,7 +177,7 @@ void TwoPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::referenc
 
 /**
  * @brief Extends interface parameter into narrow band.
- * @param node See base class.
+ * @param nodes See base class.
  */
 void TwoPhaseManager::ExtendInterfaceStatesImplementation( std::vector< std::reference_wrapper<Node> > const& nodes) const {
 
@@ -195,7 +192,7 @@ void TwoPhaseManager::ExtendInterfaceStatesImplementation( std::vector< std::ref
 
 /**
  * @brief Calculates the volume fractions for the positive material on the inner cells of a given node and saves them in the volume-fraction buffer.
- * The volume fractions are calculated using the reinitialized levelset buffer.
+ *        The volume fractions are calculated using the reinitialized levelset buffer.
  * @param node The node for which the volume fraction buffer is set.
  */
 void TwoPhaseManager::SetVolumeFractionBuffer( Node& node ) const {
@@ -224,13 +221,8 @@ void TwoPhaseManager::SetVolumeFractionBuffer( Node& node ) const {
 /**
  * See base class.
  * @param nodes See base class.
- * @param stage See base class.
  */
-void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) const {
-
-#ifndef PERFORMANCE
-   (void) stage; //Avoid compiler warning
-#endif
+void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 
    /***
     * At this point in the algorithm time integration of the level-set field is already done. To fully propagate the level-set field,
