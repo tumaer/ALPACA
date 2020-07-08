@@ -35,7 +35,10 @@ def parseArguments():
     parser.add_argument( "--basefolder", help = "The path where the src folder is located", default = "../../" )
     parser.add_argument( "--ninja", action = "store_true", help = "If set, the ninja generator is used instead of the default (make)" )
     parser.add_argument( "--verbose", action = "store_true", help = "If set, more verbose output is written" )
+    parser.add_argument( "--clean-executables", action = "store_true", help = "If set, the created executables will be removed", dest="clean_executables" )
     parser.add_argument( "inputfile", help = "Configuration file" )
+    # Set the default values for the arguments that do not require a string
+    parser.set_defaults(clean_executables=False)
     arguments = parser.parse_args()
 
     return arguments
@@ -495,7 +498,7 @@ def main():
                                                                                        flux_splitting_scheme = flux_split, reconstruction_stencil = rec_stencil,
                                                                                        derivative_stencil = derivative_stencil, levelset_reinitializer = reinit,
                                                                                        levelset_advector = lsadvect, interface_riemann_solver = interfaceriemann,
-                                                                                       build_root_directory = testPath, executables_directory = "Utilities/Executables",
+                                                                                       build_root_directory = testPath, executables_directory = execPath,
                                                                                        dimension = dim, number_of_internal_cells = ic, number_of_halo_cells = hs,
                                                                                        executable_name = exe_name, use_ninja = options.ninja,
                                                                                        number_of_cores_for_compilation = compile_cores, log_and_error_file = True )
@@ -514,7 +517,7 @@ def main():
                                            reconstruction_stencil = phystestsetup.reconstructionstencil_list[0], derivative_stencil = phystestsetup.derivativestencil_list[0],
                                            levelset_reinitializer =  phystestsetup.reinit_list[0], levelset_advector = phystestsetup.lsadvect_list[0],
                                            interface_riemann_solver =  phystestsetup.interfaceriemann_list[0], build_root_directory = testPath,
-                                           executables_directory = "Utilities/Executables/", dimension = 2, number_of_internal_cells = 16,
+                                           executables_directory = execPath, dimension = 2, number_of_internal_cells = 16,
                                            number_of_halo_cells = phystestsetup.halo_list[0], executable_name = exe_name, use_ninja = options.ninja,
                                            number_of_cores_for_compilation = compile_cores, log_and_error_file = True, build_physics_test = True )
             writeOKlog()
@@ -1180,6 +1183,11 @@ def main():
 
 
     writeLog(" ")
+    if options.clean_executables:
+        writeLog( "Remove all executables from " + execPath )
+        writeLog( " " )
+        su.rmtree( execPath )
+
     logStars()
 
 if __name__ == "__main__":
