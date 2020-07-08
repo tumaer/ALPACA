@@ -156,10 +156,71 @@ class WENO7 : public Stencil<WENO7> {
    static constexpr unsigned int stencil_size_            = 8;
    static constexpr unsigned int downstream_stencil_size_ = 3;
 
-   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const;
+   /**
+    * @brief Evaluates the stencil according to a WENO-7 scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const ) const {
+      // Assign values to v_i to make it easier to read
+      double const v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 3 * evaluation_properties[1]];
+      double const v2 = array[downstream_stencil_size_ + evaluation_properties[0] - 2 * evaluation_properties[1]];
+      double const v3 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+      double const v4 = array[downstream_stencil_size_ + evaluation_properties[0]];
+      double const v5 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+      double const v6 = array[downstream_stencil_size_ + evaluation_properties[0] + 2 * evaluation_properties[1]];
+      double const v7 = array[downstream_stencil_size_ + evaluation_properties[0] + 3 * evaluation_properties[1]];
+
+      // Compute smoothness indicators s_i
+      double const s11 = coef_smoothness_0_01_ * v1 + coef_smoothness_0_02_ * v2 + coef_smoothness_0_03_ * v3 + coef_smoothness_0_04_ * v4;
+      double const s12 = coef_smoothness_0_06_ * v2 + coef_smoothness_0_07_ * v3 + coef_smoothness_0_08_ * v4;
+      double const s13 = coef_smoothness_0_10_ * v3 + coef_smoothness_0_11_ * v4;
+      double const s14 = coef_smoothness_0_13_ * v4;
+
+      double const s1 = (v1*s11 + v2*s12 + v3*s13 + v4*s14) + epsilon_weno7_;
+
+      double const s21 = coef_smoothness_1_01_ * v2 + coef_smoothness_1_02_ * v3 + coef_smoothness_1_03_ * v4 + coef_smoothness_1_04_ * v5;
+      double const s22 = coef_smoothness_1_06_ * v3 + coef_smoothness_1_07_ * v4 + coef_smoothness_1_08_ * v5;
+      double const s23 = coef_smoothness_1_10_ * v4 + coef_smoothness_1_11_ * v5;
+      double const s24 = coef_smoothness_1_13_ * v5;
+
+      double const s2 = (v2*s21 + v3*s22 + v4*s23 + v5*s24) + epsilon_weno7_;
+
+      double const s31 = coef_smoothness_2_01_ * v3 + coef_smoothness_2_02_ * v4 + coef_smoothness_2_03_ * v5 + coef_smoothness_2_04_ * v6;
+      double const s32 = coef_smoothness_2_06_ * v4 + coef_smoothness_2_07_ * v5 + coef_smoothness_2_08_ * v6;
+      double const s33 = coef_smoothness_2_10_ * v5 + coef_smoothness_2_11_ * v6;
+      double const s34 = coef_smoothness_2_13_ * v6;
+
+      double const s3 = (v3*s31 + v4*s32 + v5*s33 + v6*s34) + epsilon_weno7_;
+
+      double const s41 = coef_smoothness_3_01_ * v4 + coef_smoothness_3_02_ * v5 + coef_smoothness_3_03_ * v6 + coef_smoothness_3_04_ * v7;
+      double const s42 = coef_smoothness_3_06_ * v5 + coef_smoothness_3_07_ * v6 + coef_smoothness_3_08_ * v7;
+      double const s43 = coef_smoothness_3_10_ * v6 + coef_smoothness_3_11_ * v7;
+      double const s44 = coef_smoothness_3_13_ * v7;
+
+      double const s4 = (v4*s41 + v5*s42 + v6*s43 + v7*s44) + epsilon_weno7_;
+
+      // Compute weights
+      double const a1 = coef_weights_1_ / (s1 * s1);
+      double const a2 = coef_weights_2_ / (s2 * s2);
+      double const a3 = coef_weights_3_ / (s3 * s3);
+      double const a4 = coef_weights_4_ / (s4 * s4);
+
+      double const one_a_sum = 1.0 / (a1 + a2 + a3 + a4);
+
+      double const w1 = a1 * one_a_sum;
+      double const w2 = a2 * one_a_sum;
+      double const w3 = a3 * one_a_sum;
+      double const w4 = a4 * one_a_sum;
+
+      // Return weighted average
+      return  w1 * (coef_stencils_1_  * v1 + coef_stencils_2_  * v2 + coef_stencils_3_  * v3 + coef_stencils_4_  * v4 )
+            + w2 * (coef_stencils_6_  * v2 + coef_stencils_7_  * v3 + coef_stencils_8_  * v4 + coef_stencils_9_  * v5 )
+            + w3 * (coef_stencils_11_ * v3 + coef_stencils_12_ * v4 + coef_stencils_13_ * v5 + coef_stencils_14_ * v6 )
+            + w4 * (coef_stencils_16_ * v4 + coef_stencils_17_ * v5 + coef_stencils_18_ * v6 + coef_stencils_19_ * v7 );
+   }
 
 public:
-   explicit WENO7() = default;
+   explicit constexpr WENO7() = default;
    ~WENO7() = default;
    WENO7( WENO7 const& ) = delete;
    WENO7& operator=( WENO7 const& ) = delete;

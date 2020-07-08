@@ -102,10 +102,39 @@ class WENO3 : public Stencil<WENO3> {
    static constexpr unsigned int stencil_size_            = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const;
+   /**
+    * @brief Evaluates the stencil according to a WENO-3 scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const ) const {
+      // Assign values to v_i to make it easier to read
+      double const v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+      double const v2 = array[downstream_stencil_size_ + evaluation_properties[0]];
+      double const v3 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+
+      // Compute smoothness indicators s_i
+      double const s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2;
+      double const s1  = s11 * s11 + epsilon_;
+
+      double const s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3;
+      double const s2  = s21 * s21 + epsilon_;
+
+      // Compute weights
+      double const a1 = coef_weights_1_ / (s1 * s1);
+      double const a2 = coef_weights_2_ / (s2 * s2);
+
+      double const one_a_sum = 1.0 / (a1 + a2);
+
+      double const w1 = a1 * one_a_sum;
+      double const w2 = a2 * one_a_sum;
+
+      // Return weighted average
+      return  w1 * (coef_stencils_1_ * v1 + coef_stencils_2_ * v2)
+            + w2 * (coef_stencils_3_ * v2 + coef_stencils_4_ * v3);
+   }
 
 public:
-   explicit WENO3() = default;
+   explicit constexpr WENO3() = default;
    ~WENO3() = default;
    WENO3( WENO3 const& ) = delete;
    WENO3& operator=( WENO3 const& ) = delete;

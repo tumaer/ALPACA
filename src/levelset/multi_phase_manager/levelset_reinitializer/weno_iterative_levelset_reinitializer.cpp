@@ -75,7 +75,7 @@
  * @param levelset The levelset-value.
  * @return The advection velocity.
  */
-constexpr double ComputeAdvectionVelocity( double const levelset ) {
+inline double ComputeAdvectionVelocity( double const levelset ) {
    constexpr double epsilon = 1.0;
    return levelset / std::sqrt(levelset * levelset + (epsilon * epsilon));
 }

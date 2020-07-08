@@ -71,6 +71,9 @@
 
 #include "stencils/stencil.h"
 
+/**
+ * @brief Discretization of the SpatialDerivativeStencil class to evaluate the stencil with a 2nd order central differencing scheme. See also base class.
+ */
 class CentralDifference : public Stencil<CentralDifference> {
 
    friend Stencil;
@@ -80,10 +83,16 @@ class CentralDifference : public Stencil<CentralDifference> {
    static constexpr unsigned int stencil_size_ = 3;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const;
+   /**
+    * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const cell_size ) const {
+      return 0.5 * (array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ - 1]) / cell_size;
+   }
 
 public:
-   explicit CentralDifference() = default;
+   explicit constexpr CentralDifference() = default;
    ~CentralDifference() = default;
 
 };
