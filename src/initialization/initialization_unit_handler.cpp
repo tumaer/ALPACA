@@ -84,7 +84,7 @@ namespace Initialization {
       double const reference_temperature = input_reader.GetDimensionalizationReader().ReadReferenceTemperature();
 
       // Log data
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Dimensionalization parameter:" );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Density reference    : " + StringOperations::ToScientificNotationString( reference_density, 9 ) );
@@ -96,4 +96,4 @@ namespace Initialization {
       // Initialize the unit handler
       return UnitHandler( reference_density, reference_velocity, reference_length, reference_temperature );
    }
-}
+}// namespace Initialization

@@ -91,11 +91,11 @@ class XmlInitialConditionReader : public InitialConditionReader {
 public:
    XmlInitialConditionReader() = delete;
    explicit XmlInitialConditionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlInitialConditionReader() = default;
+   ~XmlInitialConditionReader()                                  = default;
    XmlInitialConditionReader( XmlInitialConditionReader const& ) = delete;
    XmlInitialConditionReader& operator=( XmlInitialConditionReader const& ) = delete;
-   XmlInitialConditionReader( XmlInitialConditionReader&& ) = delete;
+   XmlInitialConditionReader( XmlInitialConditionReader&& )                 = delete;
    XmlInitialConditionReader& operator=( XmlInitialConditionReader&& ) = delete;
 };
 
-#endif // XML_INITIAL_CONDITION_READER_H
+#endif// XML_INITIAL_CONDITION_READER_H

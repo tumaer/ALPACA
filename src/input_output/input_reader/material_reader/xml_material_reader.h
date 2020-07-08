@@ -83,7 +83,7 @@ class XmlMaterialReader : public MaterialReader {
    // The already openend xml input file (must be shared pointer to distribute input file on different readers)
    std::shared_ptr<tinyxml2::XMLDocument const> const xml_input_file_;
 
-   // Functions that are required from base class 
+   // Functions that are required from base class
    int DoReadNumberOfMaterials() const override;
    std::string DoReadEquationOfStateName( unsigned int const material_index ) const override;
    std::unordered_map<std::string, double> DoReadEquationOfStateData( unsigned int const material_index ) const override;
@@ -94,11 +94,11 @@ class XmlMaterialReader : public MaterialReader {
 public:
    XmlMaterialReader() = delete;
    explicit XmlMaterialReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlMaterialReader() = default;
+   ~XmlMaterialReader()                          = default;
    XmlMaterialReader( XmlMaterialReader const& ) = delete;
    XmlMaterialReader& operator=( XmlMaterialReader const& ) = delete;
-   XmlMaterialReader( XmlMaterialReader&& ) = delete;
+   XmlMaterialReader( XmlMaterialReader&& )                 = delete;
    XmlMaterialReader& operator=( XmlMaterialReader&& ) = delete;
 };
 
-#endif // XML_MATERIAL_READER_H
+#endif// XML_MATERIAL_READER_H

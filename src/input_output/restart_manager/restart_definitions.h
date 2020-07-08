@@ -75,7 +75,9 @@
 /**
  * @brief Identifier for the restore mode used at startup.
  */
-enum class RestoreMode { Off, Soft, Forced };
+enum class RestoreMode { Off,
+                         Soft,
+                         Forced };
 
 /**
  * @brief The OutputTimesType enum defines the type of the output times to be used for the output.
@@ -84,7 +86,10 @@ enum class RestoreMode { Off, Soft, Forced };
  *        (Stamps: A file is written for time stamps)
  *        (IntervalStamps: A file is written for interval and time stamps)
  */
-enum class SnapshotTimesType { Off, Interval, Stamps, IntervalStamps };
+enum class SnapshotTimesType { Off,
+                               Interval,
+                               Stamps,
+                               IntervalStamps };
 
 /**
  * @brief Gives the proper OutputWriter type for a given string.
@@ -97,14 +102,11 @@ inline RestoreMode StringToRestoreMode( std::string const& type ) {
    // switch statements cannot be used with strings
    if( type_upper_case == "OFF" ) {
       return RestoreMode::Off;
-   }
-   else if( type_upper_case == "SOFT" ) {
+   } else if( type_upper_case == "SOFT" ) {
       return RestoreMode::Soft;
-   }
-   else if( type_upper_case == "FORCED" ) {
+   } else if( type_upper_case == "FORCED" ) {
       return RestoreMode::Forced;
-   }
-   else {
+   } else {
       throw std::logic_error( "Restore mode '" + type_upper_case + "' not known!" );
    }
 }
@@ -120,19 +122,15 @@ inline SnapshotTimesType StringToSnapshotTimesType( std::string const& times_typ
    // switch statements cannot be used with strings
    if( type_upper_case == "OFF" ) {
       return SnapshotTimesType::Off;
-   }
-   else if( type_upper_case == "INTERVAL" ) {
+   } else if( type_upper_case == "INTERVAL" ) {
       return SnapshotTimesType::Interval;
-   }
-   else if( type_upper_case == "STAMPS" ) {
+   } else if( type_upper_case == "STAMPS" ) {
       return SnapshotTimesType::Stamps;
-   }
-   else if( type_upper_case == "INTERVALSTAMPS" ) {
+   } else if( type_upper_case == "INTERVALSTAMPS" ) {
       return SnapshotTimesType::IntervalStamps;
-   }
-   else {
+   } else {
       throw std::logic_error( "Restart snaposhot times type '" + type_upper_case + "' not known!" );
    }
 }
 
-#endif // RESTART_DEFINITIONS_H
+#endif// RESTART_DEFINITIONS_H

@@ -73,10 +73,9 @@
  * @brief A constructor for the InterfaceStateCalculator.
  * @param material_manager A material manager giving information about the materials present in the simulation.
  */
-InterfaceStateCalculator::InterfaceStateCalculator(MaterialManager const& material_manager) :
-   interface_velocity_pressure_calculator_(material_manager),
-   capillary_pressure_calculator_(material_manager) {
-  // Empty besides initializer list.
+InterfaceStateCalculator::InterfaceStateCalculator( MaterialManager const& material_manager ) : interface_velocity_pressure_calculator_( material_manager ),
+                                                                                                capillary_pressure_calculator_( material_manager ) {
+   // Empty besides initializer list.
 }
 
 /**
@@ -85,20 +84,19 @@ InterfaceStateCalculator::InterfaceStateCalculator(MaterialManager const& materi
  * @note This function should only be called for multi-phase nodes
  * that have a level-set block. Sanity check whether the input is a multi-phase node is not done!
  */
-void InterfaceStateCalculator::ObtainInterfaceStates(Node& node) const {
+void InterfaceStateCalculator::ObtainInterfaceStates( Node& node ) const {
 
-  double pressure_difference[CC::TCX()][CC::TCY()][CC::TCZ()];
-  for( unsigned int i = 0; i < CC::TCX(); ++i ){
-    for( unsigned int j = 0; j < CC::TCY(); ++j ){
-      for( unsigned int k = 0; k < CC::TCZ(); ++k ){
-        pressure_difference[i][j][k] = 0.0;
+   double pressure_difference[CC::TCX()][CC::TCY()][CC::TCZ()];
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+            pressure_difference[i][j][k] = 0.0;
+         }
       }
-    }
-  }
+   }
 
-  if( CC::CapillaryForcesActive() && CC::DIM() != Dimension::One ) {
-    capillary_pressure_calculator_.ComputePressureDifference( node, pressure_difference );
-  }
-  interface_velocity_pressure_calculator_.FillInterfaceVelocityAndPressureBuffer( node, pressure_difference );
-
+   if( CC::CapillaryForcesActive() && CC::DIM() != Dimension::One ) {
+      capillary_pressure_calculator_.ComputePressureDifference( node, pressure_difference );
+   }
+   interface_velocity_pressure_calculator_.FillInterfaceVelocityAndPressureBuffer( node, pressure_difference );
 }

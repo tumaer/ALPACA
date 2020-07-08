@@ -85,10 +85,10 @@ private:
 public:
    Averager() = delete;
    explicit Averager( TopologyManager const& topology, CommunicationManager& communicator, Tree& tree );
-   ~Averager() = default;
+   ~Averager()                 = default;
    Averager( Averager const& ) = delete;
    Averager& operator=( Averager const& ) = delete;
-   Averager( Averager&& ) = delete;
+   Averager( Averager&& )                 = delete;
    Averager& operator=( Averager&& ) = delete;
 
    void AverageMaterial( std::vector<unsigned int> const& child_levels_descending ) const;
@@ -98,4 +98,4 @@ public:
    void AverageInterfaceTags( std::vector<unsigned int> const& levels_with_updated_parents_descending ) const;
 };
 
-#endif //AVERAGER_H
+#endif//AVERAGER_H

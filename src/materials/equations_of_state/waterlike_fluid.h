@@ -85,9 +85,9 @@ class WaterlikeFluid : public EquationOfState {
    double const rho0_;
 
    // functions required from base class
-   double DoGetPressure   ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnthalpy   ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnergy     ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
+   double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
    double DoGetGruneisen() const override;
    double DoGetPsi( double const pressure, double const one_density ) const override;
    double DoGetSpeedOfSound( double const density, double const pressure ) const override;
@@ -95,14 +95,14 @@ class WaterlikeFluid : public EquationOfState {
 public:
    WaterlikeFluid() = delete;
    explicit WaterlikeFluid( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler );
-   virtual ~WaterlikeFluid() = default;
+   virtual ~WaterlikeFluid()               = default;
    WaterlikeFluid( WaterlikeFluid const& ) = delete;
    WaterlikeFluid& operator=( WaterlikeFluid const& ) = delete;
-   WaterlikeFluid( WaterlikeFluid&& ) = delete;
+   WaterlikeFluid( WaterlikeFluid&& )                 = delete;
    WaterlikeFluid& operator=( WaterlikeFluid&& ) = delete;
 
    // function for logging
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // WATERLIKE_FLUID_H
+#endif// WATERLIKE_FLUID_H

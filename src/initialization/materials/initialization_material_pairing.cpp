@@ -84,14 +84,14 @@ namespace Initialization {
                                                                                             std::unordered_map<std::string, double> const& model_data,
                                                                                             UnitHandler const& unit_handler ) {
       // logger
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // switch between different surface tension coefficient models
       switch( model_name ) {
-         case MaterialPropertyModelName::NotUsed : {
+         case MaterialPropertyModelName::NotUsed: {
             return nullptr;
          }
-         case MaterialPropertyModelName::SurfaceTensionCoefficientConstant : {
+         case MaterialPropertyModelName::SurfaceTensionCoefficientConstant: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<ConstantSurfaceTensionCoefficientModel const> model( std::make_unique<ConstantSurfaceTensionCoefficientModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
@@ -119,9 +119,9 @@ namespace Initialization {
 
       // Read all data from input file
       // Declare all variables that can be filled (use default values)
-      double surface_tension_coefficient_fixed_value = -1.0;
-      MaterialPropertyModelName surface_tension_coefficient_model_name = MaterialPropertyModelName::NotUsed;
-      std::unordered_map<std::string, double> surface_tension_coefficient_model_data = {};
+      double surface_tension_coefficient_fixed_value                                   = -1.0;
+      MaterialPropertyModelName surface_tension_coefficient_model_name                 = MaterialPropertyModelName::NotUsed;
+      std::unordered_map<std::string, double> surface_tension_coefficient_model_data   = {};
       std::unique_ptr<InterfaceParameterModel const> surface_tension_coefficient_model = nullptr;
 
       // Surface tension coefficient only if needed
@@ -138,7 +138,7 @@ namespace Initialization {
 
       // Create final data (eos + modles) and log information
       // logger
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Material pairing " + std::to_string( material_indices[0] ) + " <-> " + std::to_string( material_indices[1] ) + ":" );
 
@@ -163,4 +163,4 @@ namespace Initialization {
       return MaterialPairing( surface_tension_coefficient_fixed_value, std::move( surface_tension_coefficient_model ), unit_handler );
    }
 
-} // namespace initialization
+}// namespace Initialization

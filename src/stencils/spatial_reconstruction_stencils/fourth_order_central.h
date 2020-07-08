@@ -79,7 +79,7 @@ class FourthOrderCentral : public Stencil<FourthOrderCentral> {
 
    static constexpr StencilType stencil_type_ = StencilType::Reconstruction;
 
-   static constexpr double one_sixteenth_  = 1.0/16.0;
+   static constexpr double one_sixteenth_ = 1.0 / 16.0;
 
    // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 4;
@@ -89,15 +89,14 @@ class FourthOrderCentral : public Stencil<FourthOrderCentral> {
     * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
     * @note Hotpath function.
     */
-   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const ) const {
-      double const result = 9.0 * (array[downstream_stencil_size_ - 0] + array[downstream_stencil_size_ + 1]) - 1.0 * (array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ + 2]);
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const, double const ) const {
+      double const result = 9.0 * ( array[downstream_stencil_size_ - 0] + array[downstream_stencil_size_ + 1] ) - 1.0 * ( array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ + 2] );
       return result * one_sixteenth_;
    }
 
 public:
    explicit constexpr FourthOrderCentral() = default;
-   ~FourthOrderCentral() = default;
-
+   ~FourthOrderCentral()                   = default;
 };
 
-#endif // STENCIL_FOURTH_ORDER_CENTRAL_H
+#endif// STENCIL_FOURTH_ORDER_CENTRAL_H

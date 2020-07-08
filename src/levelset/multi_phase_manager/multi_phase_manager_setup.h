@@ -100,6 +100,6 @@ namespace MultiPhaseManagerSetup {
       typedef NumerousPhaseManager type;
    };
 
-}
+}// namespace MultiPhaseManagerSetup
 
-#endif // MULTI_PHASE_MANAGER_SETUP_H
+#endif// MULTI_PHASE_MANAGER_SETUP_H

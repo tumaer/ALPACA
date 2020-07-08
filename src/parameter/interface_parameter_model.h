@@ -77,27 +77,26 @@
 class InterfaceParameterModel {
 
 protected:
-
    // required functions needed in derived classes
-   virtual void DoUpdateParameter( Node & node  ) const = 0;
+   virtual void DoUpdateParameter( Node& node ) const = 0;
 
    // protected default constructor (can only be called from derived classes)
    explicit InterfaceParameterModel() = default;
 
 public:
-   virtual ~InterfaceParameterModel() = default;
+   virtual ~InterfaceParameterModel()                        = default;
    InterfaceParameterModel( InterfaceParameterModel const& ) = delete;
    InterfaceParameterModel& operator=( InterfaceParameterModel const& ) = delete;
-   InterfaceParameterModel( InterfaceParameterModel&& ) = delete;
+   InterfaceParameterModel( InterfaceParameterModel&& )                 = delete;
    InterfaceParameterModel& operator=( InterfaceParameterModel&& ) = delete;
 
    /**
     * @brief Computes the desired parameter based on the given parameter of an interface-containing block.
     * @param node Node on which the parameter is calculated.
     */
-   void UpdateParameter( Node & node ) const {
+   void UpdateParameter( Node& node ) const {
       DoUpdateParameter( node );
    }
 };
 
-#endif //INTERFACE_PARAMETER_MODEL_H
+#endif//INTERFACE_PARAMETER_MODEL_H

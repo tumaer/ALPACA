@@ -94,11 +94,11 @@ class FirstOrder : public Stencil<FirstOrder> {
 
 public:
    explicit constexpr FirstOrder() = default;
-   ~FirstOrder() = default;
+   ~FirstOrder()                   = default;
    FirstOrder( FirstOrder const& ) = delete;
-   FirstOrder& operator=( FirstOrder const&) = delete;
-   FirstOrder( FirstOrder&& ) = delete;
+   FirstOrder& operator=( FirstOrder const& ) = delete;
+   FirstOrder( FirstOrder&& )                 = delete;
    FirstOrder& operator=( FirstOrder&& ) = delete;
 };
 
-#endif // STENCIL_FIRST_ORDER_H
+#endif// STENCIL_FIRST_ORDER_H

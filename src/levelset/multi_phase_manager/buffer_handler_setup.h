@@ -71,7 +71,6 @@
 #include "user_specifications/numerical_setup.h"
 #include "two_phase_buffer_handler.h"
 
-
 /**
  * @brief A namespace to get a BufferHandler type based on a specified constexpr.
  */
@@ -93,6 +92,6 @@ namespace BufferHandlerSetup {
       typedef TwoPhaseBufferHandler type;
    };
 
-}
+}// namespace BufferHandlerSetup
 
-#endif // BUFFER_HANDLER_SETUP_H
+#endif// BUFFER_HANDLER_SETUP_H

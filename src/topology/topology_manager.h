@@ -90,10 +90,10 @@ class TopologyManager {
    std::vector<std::uint64_t> local_refine_list_;
 
    // use tuples of vectors ( instead of the more intuitive vector of tuples ) to ease the use in MPI communication
-   std::tuple<std::vector<std::uint64_t>,std::vector<MaterialName>> local_added_materials_list_; //List holds id and added materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
-   std::tuple<std::vector<std::uint64_t>,std::vector<MaterialName>> local_removed_materials_list_; //List holds id and removed materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
+   std::tuple<std::vector<std::uint64_t>, std::vector<MaterialName>> local_added_materials_list_;  //List holds id and added materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
+   std::tuple<std::vector<std::uint64_t>, std::vector<MaterialName>> local_removed_materials_list_;//List holds id and removed materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
 
-   std::vector<TopologyNode> forest_; // A collection of ( root ) trees is a forest
+   std::vector<TopologyNode> forest_;// A collection of ( root ) trees is a forest
 
    unsigned int coarsenings_since_load_balance_;
    unsigned int refinements_since_load_balance_;
@@ -107,10 +107,10 @@ class TopologyManager {
 
 public:
    explicit TopologyManager( std::array<unsigned int, 3> level_zero_blocks = { 1, 1, 1 }, unsigned int const maximum_level = 0, unsigned int active_periodic_locations = 0 );
-   ~TopologyManager() = default;
+   ~TopologyManager()                        = default;
    TopologyManager( TopologyManager const& ) = delete;
    TopologyManager& operator=( TopologyManager const& ) = delete;
-   TopologyManager( TopologyManager&& ) = delete;
+   TopologyManager( TopologyManager&& )                 = delete;
    TopologyManager& operator=( TopologyManager&& ) = delete;
 
    /**
@@ -194,7 +194,7 @@ public:
    * @param location Direction in which the neighbor is located.
    * @return Id of the neighbor.
    */
-   inline std::uint64_t GetTopologyNeighborId( std::uint64_t const id, BoundaryLocation const location ) const{
+   inline std::uint64_t GetTopologyNeighborId( std::uint64_t const id, BoundaryLocation const location ) const {
       return GetPeriodicNeighborId( id, location, number_of_nodes_on_level_zero_, active_periodic_locations_ );
    }
 
@@ -206,9 +206,9 @@ public:
     * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
     * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations ( e. g. NOT Top in 1D ).
     */
-   inline bool IsExternalTopologyBoundary( BoundaryLocation const location, std::uint64_t const id )  const {
+   inline bool IsExternalTopologyBoundary( BoundaryLocation const location, std::uint64_t const id ) const {
       return PeriodicIsExternalBoundary( location, id, number_of_nodes_on_level_zero_, active_periodic_locations_ );
    }
 };
 
-#endif // TOPOLOGY_MANAGER_H
+#endif// TOPOLOGY_MANAGER_H

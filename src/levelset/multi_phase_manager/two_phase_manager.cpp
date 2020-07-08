@@ -77,9 +77,7 @@
  * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
  * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
  */
-TwoPhaseManager::TwoPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-   MultiPhaseManager( material_manager, halo_manager )
-{
+TwoPhaseManager::TwoPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager ) : MultiPhaseManager( material_manager, halo_manager ) {
 #ifndef PERFORMANCE
    // NH I think != 2 would block degeneration to single phase, but I'm not sure.
    if( material_manager.GetNumberOfMaterials() > 2 ) { throw std::logic_error( "Do not use TwoPhaseManager for more than two materials" ); }
@@ -95,7 +93,7 @@ void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node
    // TODO-19 JW: If integration is done on total cells, this halo update can possibly be left out
    halo_manager_.MaterialHaloUpdateOnLmax( MaterialFieldType::Conservatives );
 
-   for( Node& node: nodes ) {
+   for( Node& node : nodes ) {
       cut_cell_mixer_.Mix( node );
       buffer_handler_.TransformToVolumeAveragedConservatives( node );
    }
@@ -110,7 +108,6 @@ void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node
    for( Node& node : nodes ) {
       buffer_handler_.CalculatePrimesFromIntegratedConservatives( node );
    }
-
 }
 
 /**
@@ -118,7 +115,7 @@ void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node
  * @param nodes See base class.
  * @param is_last_stage See base class.
  */
-void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
+void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
    if( CC::ScaleSeparationActive() && is_last_stage ) {
       scale_separator_.SeparateScales( nodes );
       /**
@@ -169,7 +166,7 @@ void TwoPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::referenc
     * Other cells (Non-real material or narrow band cells): 0.0. */
    for( Node& node : nodes ) {
       buffer_handler_.CalculateConservativesFromExtendedPrimes( node );
-   } //nodes
+   }//nodes
 
    /** To have integrated and extended conservatives also in the halo cells, we have to do a Halo Update on the right-hand side buffer. */
    halo_manager_.MaterialHaloUpdateOnLmax( MaterialFieldType::Conservatives );
@@ -179,7 +176,7 @@ void TwoPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::referenc
  * @brief Extends interface parameter into narrow band.
  * @param nodes See base class.
  */
-void TwoPhaseManager::ExtendInterfaceStatesImplementation( std::vector< std::reference_wrapper<Node> > const& nodes) const {
+void TwoPhaseManager::ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 
    // Calls the extension method
    // halo update of the interface quantities to extend (extender acts on interface states)
@@ -197,25 +194,25 @@ void TwoPhaseManager::ExtendInterfaceStatesImplementation( std::vector< std::ref
  */
 void TwoPhaseManager::SetVolumeFractionBuffer( Node& node ) const {
 
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
-   InterfaceBlock& interface_block = node.GetInterfaceBlock();
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
-   double (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   InterfaceBlock& interface_block                             = node.GetInterfaceBlock();
+   double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]  = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
+   double( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer( InterfaceDescription::VolumeFraction );
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
       for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
          for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-            if( std::abs(interface_tags[i][j][k]) <= ITTI( IT::NewCutCell ) ) { // volume fraction calculation only makes sense for old or new cut cells, for non-cut cells it is trivial.
+            if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) ) {// volume fraction calculation only makes sense for old or new cut cells, for non-cut cells it is trivial.
                volume_fraction[i][j][k] = geometry_calculator_.ComputeVolumeFraction( levelset, i, j, k );
             } else if( interface_tags[i][j][k] > ITTI( IT::NewCutCell ) ) {
                volume_fraction[i][j][k] = 1.0;
             } else {
                volume_fraction[i][j][k] = 0.0;
             }
-         } //k
-      } //j
-   } //i
+         }//k
+      }   //j
+   }      //i
 }
 
 /**
@@ -259,7 +256,7 @@ void TwoPhaseManager::InitializeVolumeFractionBufferImplementation( std::vector<
 void TwoPhaseManager::UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 
    for( Node& node : nodes ) {
-      InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset), node.GetInterfaceTags() );
+      InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), node.GetInterfaceTags() );
    }
    halo_manager_.InterfaceTagHaloUpdateOnLmax();
 
@@ -273,9 +270,9 @@ void TwoPhaseManager::UpdateInterfaceTagsOnFinestLevel( std::vector<std::referen
  * @brief See base class.
  * @param nodes See base class.
  */
-void TwoPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states) const {
+void TwoPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states ) const {
    if( reset_interface_states ) {
-      for( Node & node : nodes ) {
+      for( Node& node : nodes ) {
          BO::SetFieldBuffer( node.GetInterfaceBlock().GetInterfaceStateBuffer(), 0.0 );
       }
    }

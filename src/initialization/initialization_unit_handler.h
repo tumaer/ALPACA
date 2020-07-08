@@ -78,6 +78,6 @@ namespace Initialization {
 
    // Initialization function of the unit handler
    UnitHandler InitializeUnitHandler( InputReader const& input_reader );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_UNIT_HANDLER_H
+#endif// INITIALIZATION_UNIT_HANDLER_H

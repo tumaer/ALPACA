@@ -78,7 +78,7 @@
 #include "utilities/buffer_operations.h"
 
 namespace {
-  /**
+   /**
    * @brief Function that checks two parameter of the same type on consistency, i.e. that they are the same.
    * @param first_value,second_value The two values that should be checked on consistency.
    * @param error_name The name that is used in the error message, if both values are not the same.
@@ -88,10 +88,10 @@ namespace {
    template<typename T>
    void CheckConsistency( T const& first_value, T const& second_value, std::string const& error_name ) {
       if( first_value != second_value ) {
-        throw std::logic_error( error_name + " of input and restart file do not match (" + std::to_string( first_value ) + " vs " + std::to_string( second_value ) + ")!" );
+         throw std::logic_error( error_name + " of input and restart file do not match (" + std::to_string( first_value ) + " vs " + std::to_string( second_value ) + ")!" );
       }
    }
-}
+}// namespace
 
 /**
  * @brief Constructs the manager for writing and reading restart snapshots.
@@ -100,17 +100,16 @@ namespace {
  * @param topology The topology to get and set information about the global structure of the simulation. It is only modified if the simulation is restored from a snapshot.
  * @param maximum_level The maximum level of the simulation.
  */
-RestartManager::RestartManager( UnitHandler const& unit_handler, TopologyManager & topology_manager, Tree & tree, unsigned int const maximum_level ) :
-   // Start initializer list
-   tree_( tree ),
-   topology_( topology_manager ),
-   logger_( LogWriter::Instance() ),
-   hdf5_manager_( Hdf5Manager::Instance() ),
-   maximum_level_( maximum_level ),
-   length_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Length ) ),
-   density_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Density ) ),
-   temperature_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Temperature ) ),
-   velocity_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Velocity ) ) {
+RestartManager::RestartManager( UnitHandler const& unit_handler, TopologyManager& topology_manager, Tree& tree, unsigned int const maximum_level ) :// Start initializer list
+                                                                                                                                                     tree_( tree ),
+                                                                                                                                                     topology_( topology_manager ),
+                                                                                                                                                     logger_( LogWriter::Instance() ),
+                                                                                                                                                     hdf5_manager_( Hdf5Manager::Instance() ),
+                                                                                                                                                     maximum_level_( maximum_level ),
+                                                                                                                                                     length_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Length ) ),
+                                                                                                                                                     density_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Density ) ),
+                                                                                                                                                     temperature_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Temperature ) ),
+                                                                                                                                                     velocity_reference_( unit_handler.DimensionalizeValue( 1.0, UnitType::Velocity ) ) {
    /** Empty besides initializer list */
 }
 
@@ -186,7 +185,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
    std::vector<unsigned short> number_of_materials( global_number_of_nodes );
    hdf5_manager_.ReadFullDataset( "NumberOfMaterials", number_of_materials.data(), H5T_NATIVE_USHORT );
 
-   std::vector<unsigned short> materials( std::accumulate( number_of_materials.begin(), number_of_materials.end(), 0) );
+   std::vector<unsigned short> materials( std::accumulate( number_of_materials.begin(), number_of_materials.end(), 0 ) );
    hdf5_manager_.ReadFullDataset( "Materials", materials.data(), H5T_NATIVE_USHORT );
 
    std::vector<unsigned short> number_of_interface_blocks( global_number_of_nodes );
@@ -256,7 +255,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
       // Read the conservative and prime state data
       for( unsigned int material_index = 0; material_index < number_of_materials[node_index]; ++material_index ) {
          MaterialName const material = ITM( materials[material_block_offset + material_index] );
-         Block& material_block = new_node.GetPhaseByMaterial(material);
+         Block& material_block       = new_node.GetPhaseByMaterial( material );
 
          hsize_t const reading_offset = material_block_offset + material_index;
 
@@ -289,16 +288,16 @@ std::string RestartManager::WriteRestartFile( double const timestep, std::string
    std::pair<unsigned int, unsigned int> const nodes_blocks_global = topology_.NodeAndBlockCount();
 
    // Deduce variables for better readability
-   unsigned int const global_number_of_nodes = nodes_blocks_global.first;
-   unsigned int const local_nodes_offset = nodes_blocks_offset.first;
+   unsigned int const global_number_of_nodes           = nodes_blocks_global.first;
+   unsigned int const local_nodes_offset               = nodes_blocks_offset.first;
    unsigned int const global_number_of_material_blocks = nodes_blocks_global.second;
-   unsigned int const local_material_blocks_offset = nodes_blocks_offset.second;
+   unsigned int const local_material_blocks_offset     = nodes_blocks_offset.second;
 
    // interface block data (So far nodes can have only one levelset, so this way of counting is fine).
    unsigned int const local_number_of_interface_blocks = tree_.NodesWithLevelset().size();
    std::vector<unsigned int> number_of_interface_blocks_per_rank( MpiUtilities::NumberOfRanks() );
    MPI_Allgather( &local_number_of_interface_blocks, 1, MPI_UNSIGNED, number_of_interface_blocks_per_rank.data(), 1, MPI_UNSIGNED, MPI_COMM_WORLD );
-   unsigned int const local_interface_block_offset = std::accumulate( number_of_interface_blocks_per_rank.begin(), number_of_interface_blocks_per_rank.begin() + my_rank, 0u );
+   unsigned int const local_interface_block_offset      = std::accumulate( number_of_interface_blocks_per_rank.begin(), number_of_interface_blocks_per_rank.begin() + my_rank, 0u );
    unsigned int const global_number_of_interface_blocks = std::accumulate( number_of_interface_blocks_per_rank.begin() + my_rank, number_of_interface_blocks_per_rank.end(), local_interface_block_offset );
 
    /** Define the dimensions for the different values and datasets that are written to the restart file */
@@ -337,10 +336,10 @@ std::string RestartManager::WriteRestartFile( double const timestep, std::string
 
    /** Write all node data to the file */
    for( auto const& level : tree_.FullNodeList() ) {
-      for( auto const& [id, node]: level) {
+      for( auto const& [id, node] : level ) {
          /** Write general node info data */
          std::unordered_map<MaterialName, Block> const& phases( node.GetPhases() );
-         unsigned short const number_of_materials = phases.size();
+         unsigned short const number_of_materials        = phases.size();
          unsigned short const number_of_interface_blocks = node.HasLevelset() ? 1 : 0;
 
          // Write the info data
@@ -355,9 +354,9 @@ std::string RestartManager::WriteRestartFile( double const timestep, std::string
          /** Write the actual cell data */
          // Write material/block data (conservatives and prime states)
          for( auto const& mat_block : phases ) {
-           // Write conservatives and prime states
-           hdf5_manager_.WriteDataset( "Conservatives", &mat_block.second.GetAverageBuffer() );
-           hdf5_manager_.WriteDataset( "PrimeStates", &mat_block.second.GetPrimeStateBuffer() );
+            // Write conservatives and prime states
+            hdf5_manager_.WriteDataset( "Conservatives", &mat_block.second.GetAverageBuffer() );
+            hdf5_manager_.WriteDataset( "PrimeStates", &mat_block.second.GetPrimeStateBuffer() );
          }
          // write interface data (levelset and interface tags)
          if( node.HasLevelset() ) {

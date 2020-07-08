@@ -92,11 +92,11 @@ class XmlOutputReader : public OutputReader {
 public:
    XmlOutputReader() = delete;
    explicit XmlOutputReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlOutputReader() = default;
+   ~XmlOutputReader()                        = default;
    XmlOutputReader( XmlOutputReader const& ) = delete;
    XmlOutputReader& operator=( XmlOutputReader const& ) = delete;
-   XmlOutputReader( XmlOutputReader&& ) = delete;
+   XmlOutputReader( XmlOutputReader&& )                 = delete;
    XmlOutputReader& operator=( XmlOutputReader&& ) = delete;
 };
 
-#endif // XML_OUTPUT_READER_H
+#endif// XML_OUTPUT_READER_H

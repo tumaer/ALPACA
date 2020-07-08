@@ -128,34 +128,30 @@ namespace Initialization {
                                                                                    UnitHandler const& unit_handler,
                                                                                    MaterialManager const& material_manager ) {
       // Create logger for input logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // Obtain the correct material boundary type from the reader
       MaterialBoundaryType const material_boundary_type( bc_reader.ReadMaterialBoundaryType( LOC ) );
 
       //Switch with return do not need break.
       switch( material_boundary_type ) {
-         case MaterialBoundaryType::ZeroGradient : {
+         case MaterialBoundaryType::ZeroGradient: {
             // 1. Create the boundary condition, 2. Log its information, 3. return it
             std::unique_ptr<ZeroGradientBoundaryCondition<LOC> const> boundary_condition( std::make_unique<ZeroGradientBoundaryCondition<LOC> const>() );
 
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Zero-gradient" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Zero-gradient" );
 
             return boundary_condition;
          }
-         case MaterialBoundaryType::Symmetry : {
+         case MaterialBoundaryType::Symmetry: {
             // 1. Create the boundary condition, 2. Log its information, 3. return it
             std::unique_ptr<SymmetryBoundaryCondition<LOC> const> boundary_condition( std::make_unique<SymmetryBoundaryCondition<LOC> const>() );
 
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Symmetry" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Symmetry" );
 
             return boundary_condition;
          }
-         case MaterialBoundaryType::FixedValue : {
+         case MaterialBoundaryType::FixedValue: {
             // NOTE: Approach:
             //        1. take the (potentially reduced) set of prime states defined by the user in the input file
             //        2. Convert the reduced set into a full set of conservatives
@@ -165,42 +161,36 @@ namespace Initialization {
             std::array<double, MF::ANOP()> const input_fixed_prime_states( bc_reader.ReadMaterialFixedValueBoundaryConditions( LOC ) );
             // Compute the fixed value conservatives from the reduced set
             std::vector<std::array<double, MF::ANOE()>> const fixed_value_conservatives(
-               ConvertInputToConservatives( input_fixed_prime_states, unit_handler, material_manager ) );
+                  ConvertInputToConservatives( input_fixed_prime_states, unit_handler, material_manager ) );
             // Compute the full set of fixed value prime states
             std::vector<std::array<double, MF::ANOP()>> const fixed_value_prime_states(
-               ConvertConservativesToPrimeStates( fixed_value_conservatives, material_manager ) );
+                  ConvertConservativesToPrimeStates( fixed_value_conservatives, material_manager ) );
 
             // 1. Create the fixed boundary condition, 2. Log its information, 3. return it
             std::unique_ptr<FixedValueBoundaryCondition<LOC> const> boundary_condition(
-               std::make_unique<FixedValueBoundaryCondition<LOC> const>( fixed_value_conservatives, fixed_value_prime_states ) );
+                  std::make_unique<FixedValueBoundaryCondition<LOC> const>( fixed_value_conservatives, fixed_value_prime_states ) );
 
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Fixed value" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Fixed value" );
             logger.LogMessage( " " );
             logger.LogLinebreakMessage( LogFixedValueData( 4, fixed_value_prime_states, unit_handler ) );
 
             return boundary_condition;
          }
-         case MaterialBoundaryType::Wall : {
+         case MaterialBoundaryType::Wall: {
             // 1. Create the boundary condition, 2. Log its information, 3. return it
             std::unique_ptr<WallBoundaryCondition<LOC> const> boundary_condition( std::make_unique<WallBoundaryCondition<LOC> const>() );
 
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Wall" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Wall" );
 
             return boundary_condition;
          }
-         case MaterialBoundaryType::Periodic : {
+         case MaterialBoundaryType::Periodic: {
             // Not handled here. Simply log it
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Periodic" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Periodic" );
 
             return nullptr;
          }
-         case MaterialBoundaryType::Internal : {
+         case MaterialBoundaryType::Internal: {
             throw std::logic_error( "Internals Halos are not managed by the ExternalHaloManager!" );
          }
          default:
@@ -218,49 +208,43 @@ namespace Initialization {
    inline std::unique_ptr<LevelsetBoundaryCondition const> CreateLevelsetBoundary( BoundaryConditionReader const& bc_reader ) {
 
       // Create logger for input logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // Obtain the correct levelset boundary type from the reader
       LevelSetBoundaryType const levelset_boundary_type( bc_reader.ReadLevelsetBoundaryType( LOC ) );
 
       //Switch with return do not need break.
       switch( levelset_boundary_type ) {
-         case LevelSetBoundaryType::ZeroGradient : {
+         case LevelSetBoundaryType::ZeroGradient: {
             // 1. Create the boundary condition, 2. Log its information, 3. return it
             std::unique_ptr<ZeroGradientBoundaryCondition<LOC> const> boundary_condition( std::make_unique<ZeroGradientBoundaryCondition<LOC> const>() );
 
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Zero-gradient" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Zero-gradient" );
 
             return boundary_condition;
          }
-         case LevelSetBoundaryType::Symmetry : {
+         case LevelSetBoundaryType::Symmetry: {
             // 1. Create the boundary condition, 2. Log its information, 3. return it
             std::unique_ptr<SymmetryBoundaryCondition<LOC> const> boundary_condition( std::make_unique<SymmetryBoundaryCondition<LOC> const>() );
 
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Symmetry" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Symmetry" );
 
             return boundary_condition;
          }
-         case LevelSetBoundaryType::Periodic : {
+         case LevelSetBoundaryType::Periodic: {
             // Not handled here. Simply log it
-            logger.LogMessage(  StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true )
-                              + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' )
-                              + ": Periodic" );
+            logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Periodic" );
 
             return nullptr;
          }
-         case LevelSetBoundaryType::Internal : {
+         case LevelSetBoundaryType::Internal: {
             throw std::logic_error( "Internals Halos are not managed by the ExternalHaloManager!" );
          }
-         default : {
+         default: {
             throw std::invalid_argument( "No such Levelset Boundary Condition exists" );
          }
       }
    }
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_EXTERNAL_HALO_MANAGER_H
+#endif// INITIALIZATION_EXTERNAL_HALO_MANAGER_H

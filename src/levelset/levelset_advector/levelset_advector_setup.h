@@ -74,7 +74,6 @@
 #include "hj_reconstruction_stencil_single_levelset_advector.h"
 #include "hj_derivative_stencil_single_levelset_advector.h"
 
-
 /**
  * @brief A namespace to get a LevelsetAdvector type based on a specified constexpr.
  */
@@ -117,6 +116,6 @@ namespace LevelsetAdvectorSetup {
       typedef HjDerivativeStencilSingleLevelsetAdvector type;
    };
 
-}
+}// namespace LevelsetAdvectorSetup
 
-#endif // LEVELSET_ADVECTOR_SETUP_H
+#endif// LEVELSET_ADVECTOR_SETUP_H

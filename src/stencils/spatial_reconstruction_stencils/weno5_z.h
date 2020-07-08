@@ -81,42 +81,42 @@ class WENO5Z : public Stencil<WENO5Z> {
    static constexpr StencilType stencil_type_ = StencilType::Reconstruction;
 
    // Coefficients for WENO5Z scheme
-   static constexpr double coef_smoothness_1_  = 13.0/12.0;
-   static constexpr double coef_smoothness_2_  = 0.25;
+   static constexpr double coef_smoothness_1_ = 13.0 / 12.0;
+   static constexpr double coef_smoothness_2_ = 0.25;
 
-   static constexpr double coef_smoothness_11_ =  1.0;
+   static constexpr double coef_smoothness_11_ = 1.0;
    static constexpr double coef_smoothness_12_ = -2.0;
-   static constexpr double coef_smoothness_13_ =  1.0;
-   static constexpr double coef_smoothness_14_ =  1.0;
+   static constexpr double coef_smoothness_13_ = 1.0;
+   static constexpr double coef_smoothness_14_ = 1.0;
    static constexpr double coef_smoothness_15_ = -4.0;
-   static constexpr double coef_smoothness_16_ =  3.0;
+   static constexpr double coef_smoothness_16_ = 3.0;
 
-   static constexpr double coef_smoothness_21_ =  1.0;
+   static constexpr double coef_smoothness_21_ = 1.0;
    static constexpr double coef_smoothness_22_ = -2.0;
-   static constexpr double coef_smoothness_23_ =  1.0;
-   static constexpr double coef_smoothness_24_ =  1.0;
+   static constexpr double coef_smoothness_23_ = 1.0;
+   static constexpr double coef_smoothness_24_ = 1.0;
    static constexpr double coef_smoothness_25_ = -1.0;
 
-   static constexpr double coef_smoothness_31_ =  1.0;
+   static constexpr double coef_smoothness_31_ = 1.0;
    static constexpr double coef_smoothness_32_ = -2.0;
-   static constexpr double coef_smoothness_33_ =  1.0;
-   static constexpr double coef_smoothness_34_ =  3.0;
+   static constexpr double coef_smoothness_33_ = 1.0;
+   static constexpr double coef_smoothness_34_ = 3.0;
    static constexpr double coef_smoothness_35_ = -4.0;
-   static constexpr double coef_smoothness_36_ =  1.0;
+   static constexpr double coef_smoothness_36_ = 1.0;
 
    static constexpr double coef_weights_1_ = 0.1;
    static constexpr double coef_weights_2_ = 0.6;
    static constexpr double coef_weights_3_ = 0.3;
 
-   static constexpr double coef_stencils_1_ =  2.0/6.0;
-   static constexpr double coef_stencils_2_ = -7.0/6.0;
-   static constexpr double coef_stencils_3_ = 11.0/6.0;
-   static constexpr double coef_stencils_4_ = -1.0/6.0;
-   static constexpr double coef_stencils_5_ =  5.0/6.0;
-   static constexpr double coef_stencils_6_ =  2.0/6.0;
-   static constexpr double coef_stencils_7_ =  2.0/6.0;
-   static constexpr double coef_stencils_8_ =  5.0/6.0;
-   static constexpr double coef_stencils_9_ = -1.0/6.0;
+   static constexpr double coef_stencils_1_ = 2.0 / 6.0;
+   static constexpr double coef_stencils_2_ = -7.0 / 6.0;
+   static constexpr double coef_stencils_3_ = 11.0 / 6.0;
+   static constexpr double coef_stencils_4_ = -1.0 / 6.0;
+   static constexpr double coef_stencils_5_ = 5.0 / 6.0;
+   static constexpr double coef_stencils_6_ = 2.0 / 6.0;
+   static constexpr double coef_stencils_7_ = 2.0 / 6.0;
+   static constexpr double coef_stencils_8_ = 5.0 / 6.0;
+   static constexpr double coef_stencils_9_ = -1.0 / 6.0;
 
    // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 6;
@@ -152,29 +152,27 @@ class WENO5Z : public Stencil<WENO5Z> {
 
       // Compute weights Note: Borges et al. suggest an epsilon value of 1e-40 to minimize the influence. We use machine precision instead.
       double const tau = Abs( s1 - s3 );
-      double const a1 = coef_weights_1_ * ( 1.0 + tau / (s1 + epsilon_) );
-      double const a2 = coef_weights_2_ * ( 1.0 + tau / (s2 + epsilon_) );
-      double const a3 = coef_weights_3_ * ( 1.0 + tau / (s3 + epsilon_) );
+      double const a1  = coef_weights_1_ * ( 1.0 + tau / ( s1 + epsilon_ ) );
+      double const a2  = coef_weights_2_ * ( 1.0 + tau / ( s2 + epsilon_ ) );
+      double const a3  = coef_weights_3_ * ( 1.0 + tau / ( s3 + epsilon_ ) );
 
-      double const one_a_sum = 1.0 / (a1 + a2 + a3);
+      double const one_a_sum = 1.0 / ( a1 + a2 + a3 );
 
       double const w1 = a1 * one_a_sum;
       double const w2 = a2 * one_a_sum;
       double const w3 = a3 * one_a_sum;
 
       // Return weighted average
-      return  w1 * (coef_stencils_1_ * v1 + coef_stencils_2_ * v2 + coef_stencils_3_ * v3)
-            + w2 * (coef_stencils_4_ * v2 + coef_stencils_5_ * v3 + coef_stencils_6_ * v4)
-            + w3 * (coef_stencils_7_ * v3 + coef_stencils_8_ * v4 + coef_stencils_9_ * v5);
+      return w1 * ( coef_stencils_1_ * v1 + coef_stencils_2_ * v2 + coef_stencils_3_ * v3 ) + w2 * ( coef_stencils_4_ * v2 + coef_stencils_5_ * v3 + coef_stencils_6_ * v4 ) + w3 * ( coef_stencils_7_ * v3 + coef_stencils_8_ * v4 + coef_stencils_9_ * v5 );
    }
 
 public:
    explicit constexpr WENO5Z() = default;
-   ~WENO5Z() = default;
-   WENO5Z( WENO5Z const& ) = delete;
+   ~WENO5Z()                   = default;
+   WENO5Z( WENO5Z const& )     = delete;
    WENO5Z& operator=( WENO5Z const& ) = delete;
-   WENO5Z( WENO5Z&& ) = delete;
+   WENO5Z( WENO5Z&& )                 = delete;
    WENO5Z& operator=( WENO5Z&& ) = delete;
 };
 
-#endif // STENCIL_WENO5Z_H
+#endif// STENCIL_WENO5Z_H

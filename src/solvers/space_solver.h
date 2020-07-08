@@ -79,7 +79,7 @@
 #include "levelset/levelset_advector/levelset_advector_setup.h"
 #include "solvers/riemann_solvers/riemann_solver_setup.h"
 
-using RiemannSolverConcretization = RiemannSolverSetup::Concretize<riemann_solver>::type;
+using RiemannSolverConcretization    = RiemannSolverSetup::Concretize<riemann_solver>::type;
 using LevelsetAdvectorConcretization = LevelsetAdvectorSetup::Concretize<levelset_advector>::type;
 
 /**
@@ -95,16 +95,16 @@ class SpaceSolver {
 
 public:
    SpaceSolver() = delete;
-   explicit SpaceSolver( MaterialManager const& material_manager, std::array<double, 3> gravity);
-   ~SpaceSolver() = default;
+   explicit SpaceSolver( MaterialManager const& material_manager, std::array<double, 3> gravity );
+   ~SpaceSolver()                    = default;
    SpaceSolver( SpaceSolver const& ) = delete;
    SpaceSolver& operator=( SpaceSolver const& ) = delete;
-   SpaceSolver( SpaceSolver&& ) = delete;
+   SpaceSolver( SpaceSolver&& )                 = delete;
    SpaceSolver& operator=( SpaceSolver&& ) = delete;
 
    void UpdateFluxes( Node& node ) const;
-   void ComputeMaxEigenvaluesForPhase( std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
-   void SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()] ) const;
+   void ComputeMaxEigenvaluesForPhase( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
+   void SetFluxFunctionGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
 };
 
-#endif // SPACE_SOLVER_H
+#endif// SPACE_SOLVER_H

@@ -80,20 +80,18 @@ using InterfaceRiemannSolverConcretization = InterfaceRiemannSolverSetup::Concre
 class InterfaceVelocityPressureCalculator {
 
 private:
-
    InterfaceRiemannSolverConcretization const interface_riemann_solver_;
 
 public:
    InterfaceVelocityPressureCalculator() = delete;
    explicit InterfaceVelocityPressureCalculator( MaterialManager const& material_manager );
-   ~InterfaceVelocityPressureCalculator() = default;
+   ~InterfaceVelocityPressureCalculator()                                            = default;
    InterfaceVelocityPressureCalculator( InterfaceVelocityPressureCalculator const& ) = delete;
    InterfaceVelocityPressureCalculator& operator=( InterfaceVelocityPressureCalculator const& ) = delete;
-   InterfaceVelocityPressureCalculator( InterfaceVelocityPressureCalculator&& ) = delete;
+   InterfaceVelocityPressureCalculator( InterfaceVelocityPressureCalculator&& )                 = delete;
    InterfaceVelocityPressureCalculator& operator=( InterfaceVelocityPressureCalculator&& ) = delete;
 
-   void FillInterfaceVelocityAndPressureBuffer( Node& node, double (&pressure_difference)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   void FillInterfaceVelocityAndPressureBuffer( Node& node, double ( &pressure_difference )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
 };
 
-
-#endif //INTERFACE_VELOCITY_PRESSURE_CALCULATOR_H
+#endif//INTERFACE_VELOCITY_PRESSURE_CALCULATOR_H

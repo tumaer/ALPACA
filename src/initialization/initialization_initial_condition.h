@@ -90,6 +90,6 @@ namespace Initialization {
                                                 Tree const& tree,
                                                 MaterialManager const& material_manager,
                                                 UnitHandler const& unit_handler );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_INITIAL_CONDITION_H
+#endif// INITIALIZATION_INITIAL_CONDITION_H

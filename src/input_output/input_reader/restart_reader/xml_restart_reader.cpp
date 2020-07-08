@@ -74,9 +74,8 @@
  * @brief Default constructor for the restart reader for xml-type input files.
  * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
-XmlRestartReader::XmlRestartReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   RestartReader(),
-   xml_input_file_( std::move( inputfile ) ) {
+XmlRestartReader::XmlRestartReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : RestartReader(),
+                                                                                         xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
@@ -88,7 +87,6 @@ std::string XmlRestartReader::DoReadRestoreMode() const {
    tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "restart", "restore", "mode" } );
    return XmlUtilities::ReadString( node );
 }
-
 
 /**
  * @brief See base class definition.

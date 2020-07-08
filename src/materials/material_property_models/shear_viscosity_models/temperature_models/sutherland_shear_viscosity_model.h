@@ -100,14 +100,14 @@ public:
    SutherlandShearViscosityModel() = delete;
    explicit SutherlandShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                            UnitHandler const& unit_handler );
-   virtual ~SutherlandShearViscosityModel() = default;
+   virtual ~SutherlandShearViscosityModel()                              = default;
    SutherlandShearViscosityModel( const SutherlandShearViscosityModel& ) = delete;
    SutherlandShearViscosityModel& operator=( const SutherlandShearViscosityModel& ) = delete;
-   SutherlandShearViscosityModel( SutherlandShearViscosityModel&& ) = delete;
+   SutherlandShearViscosityModel( SutherlandShearViscosityModel&& )                 = delete;
    SutherlandShearViscosityModel& operator=( SutherlandShearViscosityModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // SUTHERLAND_SHEAR_SHEAR_VISCOSITY_MODEL_H
+#endif// SUTHERLAND_SHEAR_SHEAR_VISCOSITY_MODEL_H

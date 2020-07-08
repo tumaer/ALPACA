@@ -89,7 +89,7 @@ class GhostFluidExtender {
 private:
    // member classes
    MaterialManager const& material_manager_;
-   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager& halo_manager_;// TODO-19 NH Think about making it const (rats tail)
    LogWriter& logger_;
 
    // private variables required for definition on which material field type the extender works (static required for array definition)
@@ -106,36 +106,36 @@ private:
     * @param node The node for which the maximum material fields are determined.
     * @param convergence_tracking_quantities An array holding information about the convergence status of the iterative extension method.
     */
-   void DetermineMaximumValueOfQuantitiesToExtend( Node const& node, double (&convergence_tracking_quantities)[2][number_of_convergence_tracking_quantities_] ) const {
+   void DetermineMaximumValueOfQuantitiesToExtend( Node const& node, double ( &convergence_tracking_quantities )[2][number_of_convergence_tracking_quantities_] ) const {
 
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+      double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]        = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
 
       // Loop through all materials on the node
       for( auto const& phase : node.GetPhases() ) {
          // Define the material specific parameter
-         std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial( phase.first );
-         unsigned int const material_index = phase.first == MaterialSignCapsule::PositiveMaterial() ? 0 : 1;
+         std::int8_t const material_sign        = MaterialSignCapsule::SignOfMaterial( phase.first );
+         unsigned int const material_index      = phase.first == MaterialSignCapsule::PositiveMaterial() ? 0 : 1;
          double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
-         double const material_sign_double = double( material_sign );
+         double const material_sign_double      = double( material_sign );
          // Loop through all fields of the given field_Type
-         for( unsigned int field_index = 0; field_index < MF::ANOF(field_type_); field_index++ ) {
-            double const (&extension_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
+         for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
+            double const( &extension_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
             // Loop through all internal cells of the block
-            for(unsigned int i = CC::FICX(); i <= CC::LICX(); ++i) {
-               for(unsigned int j = CC::FICY(); j <= CC::LICY(); ++j) {
-                  for(unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
+            for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+               for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+                  for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                      double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
                      // Change the convergence of each field
                      if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( material_sign * levelset_reinitialized[i][j][k] < 0.0 || cell_volume_fraction < CC::MITH() ) ) {
                         convergence_tracking_quantities[material_index][field_index] = std::max( convergence_tracking_quantities[material_index][field_index], std::abs( extension_buffer[i][j][k] ) );
                      }
-                  } // k
-               } // j
-            } // i
-         } // extension_buffer
-      } // phases
+                  }// k
+               }   // j
+            }      // i
+         }         // extension_buffer
+      }            // phases
    }
 
    /**
@@ -143,19 +143,18 @@ private:
     * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit GhostFluidExtender( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-      material_manager_( material_manager ),
-      halo_manager_( halo_manager ),
-      logger_( LogWriter::Instance() ) {
+   explicit GhostFluidExtender( MaterialManager const& material_manager, HaloManager& halo_manager ) : material_manager_( material_manager ),
+                                                                                                       halo_manager_( halo_manager ),
+                                                                                                       logger_( LogWriter::Instance() ) {
       /** Empty besides initializer list */
    }
 
 public:
-   GhostFluidExtender() = delete;
-   ~GhostFluidExtender() = default;
+   GhostFluidExtender()                            = delete;
+   ~GhostFluidExtender()                           = default;
    GhostFluidExtender( GhostFluidExtender const& ) = delete;
    GhostFluidExtender& operator=( GhostFluidExtender const& ) = delete;
-   GhostFluidExtender( GhostFluidExtender&& ) = delete;
+   GhostFluidExtender( GhostFluidExtender&& )                 = delete;
    GhostFluidExtender operator=( GhostFluidExtender&& ) = delete;
 
    /**
@@ -168,7 +167,7 @@ public:
       double convergence_tracking_quantities[2][number_of_convergence_tracking_quantities_];
       // Initialize the array with zeros
       for( unsigned int material_index = 0; material_index < 2; ++material_index ) {
-         for( unsigned int field_index = 0; field_index <= MF::ANOF(field_type_); ++field_index ) {
+         for( unsigned int field_index = 0; field_index <= MF::ANOF( field_type_ ); ++field_index ) {
             convergence_tracking_quantities[material_index][field_index] = 0.0;
          }
       }
@@ -179,7 +178,7 @@ public:
          if constexpr( ExtensionConstants::TrackConvergence ) {
             // Reset tracking quantities
             for( unsigned int material_index = 0; material_index < 2; ++material_index ) {
-               for( unsigned int field_index = 0; field_index < MF::ANOF(field_type_); ++field_index ) {
+               for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); ++field_index ) {
                   convergence_tracking_quantities[material_index][field_index] = 0.0;
                }
             }
@@ -206,8 +205,8 @@ public:
 
          //iterative extension on field buffer (static derived extender)
          for( Node& node : nodes ) {
-            static_cast<DerivedGhostFluidExtender const&>( *this ).IterativeExtension( node, convergence_tracking_quantities);
-         } //nodes
+            static_cast<DerivedGhostFluidExtender const&>( *this ).IterativeExtension( node, convergence_tracking_quantities );
+         }//nodes
 
          // Update the halos after each iterative step
          halo_manager_.MaterialHaloUpdateOnLmaxMultis( field_type_ );
@@ -215,5 +214,4 @@ public:
    };
 };
 
-
-#endif //GHOST_FLUID_EXTENDER_H
+#endif//GHOST_FLUID_EXTENDER_H

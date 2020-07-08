@@ -74,19 +74,19 @@
 #include "log_writer.h"
 #include "enums/unit_type.h"
 
- /**
+/**
  * @brief The UnitHandler class takes care of the conversions between unitless and non-unitless representations of quantities.
  *        Within the Simulation Kernel only non-dimensional quantities are used. In the user input and output,
  *        however, values are given in unit representation.
  */
 class UnitHandler {
    // Input file reference values and SI units
-   double const density_reference_; // input file
-   double const velocity_reference_;// input file
-   double const length_reference_; // inputfile + SI unit [m]
-   double const temperature_reference_; // input file + SI unit [K]
-   double const time_reference_; // SI unit [s]
-   double const mass_reference_; // SI unit [kg]
+   double const density_reference_;    // input file
+   double const velocity_reference_;   // input file
+   double const length_reference_;     // inputfile + SI unit [m]
+   double const temperature_reference_;// input file + SI unit [K]
+   double const time_reference_;       // SI unit [s]
+   double const mass_reference_;       // SI unit [kg]
    // derived reference values for each exisitng unit type
    double const momentum_reference_;
    double const pressure_reference_;
@@ -95,13 +95,13 @@ class UnitHandler {
    double const thermal_conductivity_reference_;
    double const surface_tension_coefficient_reference_;
 
-public :
+public:
    UnitHandler() = delete;
    explicit UnitHandler( double const density_reference, double const velocity_reference, double const length_reference, double const temperature_reference );
-   ~UnitHandler() = default;
+   ~UnitHandler()                    = default;
    UnitHandler( UnitHandler const& ) = delete;
    UnitHandler& operator=( UnitHandler const& ) = delete;
-   UnitHandler( UnitHandler&& ) = delete;
+   UnitHandler( UnitHandler&& )                 = delete;
    UnitHandler& operator=( UnitHandler&& ) = delete;
 
    // Dimensionalization and non-dimensionalization functions for a single unit type
@@ -112,4 +112,4 @@ public :
    double DimensionalizeValue( double const value, std::vector<UnitType> const& nominator_units, std::vector<UnitType> const& denominator_units ) const;
 };
 
-#endif // UNIT_HANDLER_H
+#endif// UNIT_HANDLER_H

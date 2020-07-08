@@ -88,18 +88,18 @@ class TemperatureInterfaceParameterModel : public InterfaceParameterModel {
     * @brief Executes the actual parameter calculation on the complete block.
     * @param node Node for which the parameter is computed.
     */
-   void DoUpdateParameter( Node & node  ) const override {
+   void DoUpdateParameter( Node& node ) const override {
 
       // extract the temperature from the block
-      double const (&T_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
-      double const (&T_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
+      double const( &T_positive )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
+      double const( &T_negative )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
 
       // extract the parameter from the block, which should be computed
-      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedTemperatureInterfaceParameterModel::parameter_buffer_type_ );
+      double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedTemperatureInterfaceParameterModel::parameter_buffer_type_ );
 
       // Obtain the interface tags and volume fraction
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( Levelset::VolumeFraction );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( Levelset::VolumeFraction );
 
       // Compute the parameter based on constan values
       for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
@@ -108,14 +108,14 @@ class TemperatureInterfaceParameterModel : public InterfaceParameterModel {
 
                // Only compute the parameter for cut cells. Average quantities based on the volume fraction
                if( interface_tags[i][j][k] == ITTI( IT::OldCutCell ) ) {
-                  double const averaged_T = volume_fraction[i][j][k] * T_positive[i][j][k] + ( 1.0 - volume_fraction[i][j][k] ) * T_negative[i][j][k];
-                  parameter_buffer[i][j][k] = static_cast< DerivedTemperatureInterfaceParameterModel const& >( *this ).ComputeParameter( averaged_T );
+                  double const averaged_T   = volume_fraction[i][j][k] * T_positive[i][j][k] + ( 1.0 - volume_fraction[i][j][k] ) * T_negative[i][j][k];
+                  parameter_buffer[i][j][k] = static_cast<DerivedTemperatureInterfaceParameterModel const&>( *this ).ComputeParameter( averaged_T );
                } else {
                   parameter_buffer[i][j][k] = 0.0;
                }
-            } //k
-         } //j
-      }//i
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
@@ -127,12 +127,11 @@ class TemperatureInterfaceParameterModel : public InterfaceParameterModel {
    }
 
 public:
-   virtual ~TemperatureInterfaceParameterModel() = default;
+   virtual ~TemperatureInterfaceParameterModel()                                   = default;
    TemperatureInterfaceParameterModel( TemperatureInterfaceParameterModel const& ) = delete;
    TemperatureInterfaceParameterModel& operator=( TemperatureInterfaceParameterModel const& ) = delete;
-   TemperatureInterfaceParameterModel( TemperatureInterfaceParameterModel&& ) = delete;
+   TemperatureInterfaceParameterModel( TemperatureInterfaceParameterModel&& )                 = delete;
    TemperatureInterfaceParameterModel& operator=( TemperatureInterfaceParameterModel&& ) = delete;
-
 };
 
-#endif // TEMPERATURE_INTERFACE_PARAMETER_MODEL_H
+#endif// TEMPERATURE_INTERFACE_PARAMETER_MODEL_H

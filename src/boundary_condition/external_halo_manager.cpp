@@ -76,9 +76,8 @@
  * @note In case of 1D and 2D simulations the array still has its maximum size, but the not used conditions are nullptr.
  */
 ExternalHaloManager::ExternalHaloManager( std::array<std::unique_ptr<MaterialBoundaryCondition const>, 6> material_boundary_conditions,
-                                          std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> levelset_boundary_conditions ) :
-   material_boundary_conditions_( std::move( material_boundary_conditions ) ),
-   levelset_boundary_conditions_( std::move( levelset_boundary_conditions ) ) {
+                                          std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> levelset_boundary_conditions ) : material_boundary_conditions_( std::move( material_boundary_conditions ) ),
+                                                                                                                                           levelset_boundary_conditions_( std::move( levelset_boundary_conditions ) ) {
    /** Empty beside initializer list */
 }
 

@@ -80,13 +80,12 @@ OutputQuantity::OutputQuantity( UnitHandler const& unit_handler,
                                 MaterialManager const& material_manager,
                                 std::string const& quantity_name,
                                 std::array<bool, 3> const& output_flags,
-                                std::array<unsigned int,2> const& dimensions ) :
-   // Start initializer list
-   unit_handler_( unit_handler ),
-   material_manager_( material_manager ),
-   output_flags_( output_flags ),
-   quantity_name_( quantity_name ),
-   dimensions_( dimensions ) {
+                                std::array<unsigned int, 2> const& dimensions ) :// Start initializer list
+                                                                                  unit_handler_( unit_handler ),
+                                                                                  material_manager_( material_manager ),
+                                                                                  output_flags_( output_flags ),
+                                                                                  quantity_name_( quantity_name ),
+                                                                                  dimensions_( dimensions ) {
    /** Empty constructor besides initializer list */
 }
 
@@ -126,7 +125,7 @@ bool OutputQuantity::IsActive( OutputType const output_type ) const {
 std::string OutputQuantity::GetXdmfAttributeString( std::string const& hdf5_filename, std::string const& group_name, hsize_t const number_of_global_cells, std::string const prefix ) const {
    // Get the data item
    std::string const data_item( XdmfUtilities::DataItemString( hdf5_filename, group_name + "/" + prefix + quantity_name_, number_of_global_cells, dimensions_ ) );
-   if( dimensions_.back() > 1 || dimensions_.front() > DTI( CC::DIM() ) ) { // multidimensional (second component dimension larger than one or first larger than the current dimension)
+   if( dimensions_.back() > 1 || dimensions_.front() > DTI( CC::DIM() ) ) {// multidimensional (second component dimension larger than one or first larger than the current dimension)
       // Both components are equal (nxn) and smaller or equal the dimension -> Assumption that it is a tensor
       // This is not relevant for the reading, but allows sometimes special computations in ParaView
       if( dimensions_.back() == dimensions_.front() && dimensions_.back() <= DTI( CC::DIM() ) ) {
@@ -134,9 +133,9 @@ std::string OutputQuantity::GetXdmfAttributeString( std::string const& hdf5_file
       } else {
          return XdmfUtilities::MatrixAttributeString( prefix + quantity_name_, data_item );
       }
-   } else if( dimensions_.front() > 1 ) { // vectorial (first component dimension larger than one and implicitly smaller than current dimension)
+   } else if( dimensions_.front() > 1 ) {// vectorial (first component dimension larger than one and implicitly smaller than current dimension)
       return XdmfUtilities::VectorAttributeString( prefix + quantity_name_, data_item );
-   } else { // scalar (both dimensions are one)
+   } else {// scalar (both dimensions are one)
       return XdmfUtilities::ScalarAttributeString( prefix + quantity_name_, data_item );
    }
 }

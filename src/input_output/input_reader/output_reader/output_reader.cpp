@@ -114,7 +114,7 @@ std::vector<double> OutputReader::ReadOutputTimeStamps( OutputType const output_
    // Obtain the time stamps and sort them before return
    std::vector<double> time_stamps( DoReadOutputTimeStamps( output_type ) );
    // If negative elements are present throw error
-   if( std::any_of( time_stamps.begin(), time_stamps.end(), [] ( double const timestamp ) { return timestamp < 0.0; } ) ) {
+   if( std::any_of( time_stamps.begin(), time_stamps.end(), []( double const timestamp ) { return timestamp < 0.0; } ) ) {
       throw std::invalid_argument( "All time stamps for the " + OutputTypeToString( output_type ) + " output must be positive or zero!" );
    }
    // Sort the time stamps

@@ -77,25 +77,25 @@
  *        It serves as a proxy class for different restart reader types (xml,...) that only read the actual data. 
  *        Here, consistency checks are done that all read data are valid.  
  */
-class RestartReader{
+class RestartReader {
 
 protected:
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit RestartReader() = default;
 
    // Functions that must be implemented by the derived classes
-   virtual std::string DoReadRestoreMode() const = 0;
-   virtual std::string DoReadRestoreFilename() const = 0;
-   virtual std::string DoReadSnapshotTimesType() const = 0;
-   virtual int DoReadSnapshotIntervalsToKeep() const = 0;
-   virtual int DoReadSnapshotInterval() const = 0;
+   virtual std::string DoReadRestoreMode() const                = 0;
+   virtual std::string DoReadRestoreFilename() const            = 0;
+   virtual std::string DoReadSnapshotTimesType() const          = 0;
+   virtual int DoReadSnapshotIntervalsToKeep() const            = 0;
+   virtual int DoReadSnapshotInterval() const                   = 0;
    virtual std::vector<double> DoReadSnapshotTimeStamps() const = 0;
 
 public:
-   virtual ~RestartReader() = default;
+   virtual ~RestartReader()              = default;
    RestartReader( RestartReader const& ) = delete;
    RestartReader& operator=( RestartReader const& ) = delete;
-   RestartReader( RestartReader&& ) = delete;
+   RestartReader( RestartReader&& )                 = delete;
    RestartReader& operator=( RestartReader&& ) = delete;
 
    // Return functions wiht included consistency checks
@@ -107,4 +107,4 @@ public:
    std::vector<double> ReadSnapshotTimeStamps() const;
 };
 
-#endif // RESTART_READER_H
+#endif// RESTART_READER_H

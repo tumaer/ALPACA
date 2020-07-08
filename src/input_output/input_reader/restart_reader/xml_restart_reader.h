@@ -94,11 +94,11 @@ class XmlRestartReader : public RestartReader {
 public:
    XmlRestartReader() = delete;
    explicit XmlRestartReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlRestartReader() = default;
+   ~XmlRestartReader()                         = default;
    XmlRestartReader( XmlRestartReader const& ) = delete;
    XmlRestartReader& operator=( XmlRestartReader const& ) = delete;
-   XmlRestartReader( XmlRestartReader&& ) = delete;
+   XmlRestartReader( XmlRestartReader&& )                 = delete;
    XmlRestartReader& operator=( XmlRestartReader&& ) = delete;
 };
 
-#endif // XML_RESTART_READER_H
+#endif// XML_RESTART_READER_H

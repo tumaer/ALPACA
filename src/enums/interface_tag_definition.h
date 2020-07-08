@@ -99,13 +99,13 @@
  *        > 10 for operations acting on these enums. Values for extension and reinitialization are used as they give the currently used values for
  *        extension and reinitialization (3 and 4) by a bit-shift to the right. If this needs to be changed, it can be done here.
  */
-enum class InterfaceTag : std::int8_t { OldCutCell           = 0,    //this cell was a cut-cell in the last iteration and still is
-                                        NewCutCell           = 1,    //this cell is now a cut-cell, but was not before
-                                        CutCellNeighbor      = 3,    //this cell has a cut-cell neighbor, i.e. its levelset is advected but not reinitialized
-                                        ExtensionBand        = 7,    //the ghost material of these cells needs to be filled by extension
-                                        ReinitializationBand = 8,    //the level set of these cells needs to be reinitialized
-                                        BulkPhase            = 10,   //these are cells far away from the interface
-                                        ScaleSeparatedCell   = 50 }; //these cells were changed during the scale-separation algorithm
+enum class InterfaceTag : std::int8_t { OldCutCell           = 0, //this cell was a cut-cell in the last iteration and still is
+                                        NewCutCell           = 1, //this cell is now a cut-cell, but was not before
+                                        CutCellNeighbor      = 3, //this cell has a cut-cell neighbor, i.e. its levelset is advected but not reinitialized
+                                        ExtensionBand        = 7, //the ghost material of these cells needs to be filled by extension
+                                        ReinitializationBand = 8, //the level set of these cells needs to be reinitialized
+                                        BulkPhase            = 10,//these are cells far away from the interface
+                                        ScaleSeparatedCell   = 50 };//these cells were changed during the scale-separation algorithm
 
 /**
  * @brief Converts an interface-tag identifier to a (C++11 standard compliant, i. e. positive) array index. "ITTI = Interface tag To Index"
@@ -114,6 +114,6 @@ enum class InterfaceTag : std::int8_t { OldCutCell           = 0,    //this cell
  */
 constexpr std::underlying_type<InterfaceTag>::type ITTI( InterfaceTag const it ) { return static_cast<typename std::underlying_type<InterfaceTag>::type>( it ); }
 
-using IT =  InterfaceTag;
+using IT = InterfaceTag;
 
-#endif // INTERFACE_TAG_DEFINITION_H
+#endif// INTERFACE_TAG_DEFINITION_H

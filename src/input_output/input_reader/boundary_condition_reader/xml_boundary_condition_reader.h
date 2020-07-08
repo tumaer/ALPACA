@@ -83,7 +83,7 @@ class XmlBoundaryConditionReader : public BoundaryConditionReader {
    // The already openend xml input file (must be shared pointer to distribute input file on different readers)
    std::shared_ptr<tinyxml2::XMLDocument const> const xml_input_file_;
 
-   // Functions that are required from base class 
+   // Functions that are required from base class
    std::string DoReadMaterialBoundaryType( BoundaryLocation const location ) const override;
    std::string DoReadLevelSetBoundaryType( BoundaryLocation const location ) const override;
    double DoReadMaterialFixedValueBoundaryCondition( BoundaryLocation const location, std::string const& variable ) const override;
@@ -91,11 +91,11 @@ class XmlBoundaryConditionReader : public BoundaryConditionReader {
 public:
    XmlBoundaryConditionReader() = delete;
    explicit XmlBoundaryConditionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlBoundaryConditionReader() = default;
+   ~XmlBoundaryConditionReader()                                   = default;
    XmlBoundaryConditionReader( XmlBoundaryConditionReader const& ) = delete;
    XmlBoundaryConditionReader& operator=( XmlBoundaryConditionReader const& ) = delete;
-   XmlBoundaryConditionReader( XmlBoundaryConditionReader&& ) = delete;
+   XmlBoundaryConditionReader( XmlBoundaryConditionReader&& )                 = delete;
    XmlBoundaryConditionReader& operator=( XmlBoundaryConditionReader&& ) = delete;
 };
 
-#endif // XML_BOUNDARY_CONDITION_READER_H
+#endif// XML_BOUNDARY_CONDITION_READER_H

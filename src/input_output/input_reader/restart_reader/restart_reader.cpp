@@ -131,7 +131,7 @@ std::vector<double> RestartReader::ReadSnapshotTimeStamps() const {
    // Obtain the time stamps and sort them before return
    std::vector<double> time_stamps( DoReadSnapshotTimeStamps() );
    // If negative elements are present throw error
-   if( std::any_of( time_stamps.begin(), time_stamps.end(), [] ( double const timestamp ) { return timestamp < 0.0; } ) ) {
+   if( std::any_of( time_stamps.begin(), time_stamps.end(), []( double const timestamp ) { return timestamp < 0.0; } ) ) {
       throw std::invalid_argument( "All time stamps for the restart snapshots must be positive or zero!" );
    }
    // Sort the time stamps

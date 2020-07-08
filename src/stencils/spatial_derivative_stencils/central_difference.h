@@ -68,7 +68,6 @@
 #ifndef CENTRAL_DIFFERENCE_H
 #define CENTRAL_DIFFERENCE_H
 
-
 #include "stencils/stencil.h"
 
 /**
@@ -80,22 +79,20 @@ class CentralDifference : public Stencil<CentralDifference> {
 
    static constexpr StencilType stencil_type_ = StencilType::Derivative;
 
-   static constexpr unsigned int stencil_size_ = 3;
+   static constexpr unsigned int stencil_size_            = 3;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
    /**
     * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
     * @note Hotpath function.
     */
-   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const cell_size ) const {
-      return 0.5 * (array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ - 1]) / cell_size;
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const, double const cell_size ) const {
+      return 0.5 * ( array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ - 1] ) / cell_size;
    }
 
 public:
    explicit constexpr CentralDifference() = default;
-   ~CentralDifference() = default;
-
+   ~CentralDifference()                   = default;
 };
 
-
-#endif //CENTRAL_DIFFERENCE_H
+#endif//CENTRAL_DIFFERENCE_H

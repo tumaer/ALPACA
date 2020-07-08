@@ -136,9 +136,15 @@ class InputOutputManager {
     */
    inline std::string OutputSubfolderName( OutputType const output_type ) const {
       switch( output_type ) {
-         case OutputType::Debug     : { return "/debug"; }
-         case OutputType::Interface : { return "/interface"; }
-         default                    : { return "/domain"; } // standard output
+         case OutputType::Debug: {
+            return "/debug";
+         }
+         case OutputType::Interface: {
+            return "/interface";
+         }
+         default: {
+            return "/domain";
+         }// standard output
       }
    }
 
@@ -149,9 +155,15 @@ class InputOutputManager {
     */
    inline std::string OutputFileName( OutputType const output_type ) const {
       switch( output_type ) {
-         case OutputType::Debug     : { return output_folder_name_ + OutputSubfolderName( OutputType::Debug) + "/debug_"; }
-         case OutputType::Interface : { return output_folder_name_ + OutputSubfolderName( OutputType::Interface) + "/interface_"; }
-         default                    : { return output_folder_name_ + OutputSubfolderName( OutputType::Standard) + "/data_"; } // standard output
+         case OutputType::Debug: {
+            return output_folder_name_ + OutputSubfolderName( OutputType::Debug ) + "/debug_";
+         }
+         case OutputType::Interface: {
+            return output_folder_name_ + OutputSubfolderName( OutputType::Interface ) + "/interface_";
+         }
+         default: {
+            return output_folder_name_ + OutputSubfolderName( OutputType::Standard ) + "/data_";
+         }// standard output
       }
    }
 
@@ -205,7 +217,7 @@ public:
    ~InputOutputManager();
    InputOutputManager( InputOutputManager const& ) = delete;
    InputOutputManager& operator=( InputOutputManager const& ) = delete;
-   InputOutputManager( InputOutputManager&& ) = delete;
+   InputOutputManager( InputOutputManager&& )                 = delete;
    InputOutputManager& operator=( InputOutputManager&& ) = delete;
 
    /**
@@ -224,4 +236,4 @@ public:
    double RestoreSimulationFromSnapshot();
 };
 
-#endif // INPUT_OUTPUT_MANAGER_H
+#endif// INPUT_OUTPUT_MANAGER_H

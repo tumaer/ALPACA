@@ -87,20 +87,20 @@ class MatrixTensorMaterialOutput : public OutputQuantity {
 
 private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    MatrixTensorMaterialOutput() = delete;
    explicit MatrixTensorMaterialOutput( UnitHandler const& unit_handler,
-                                     MaterialManager const& material_manager,
-                                     std::string const& quantity_name,
-                                     std::array<bool, 3> const output_flags );
-   virtual ~MatrixTensorMaterialOutput() = default;
+                                        MaterialManager const& material_manager,
+                                        std::string const& quantity_name,
+                                        std::array<bool, 3> const output_flags );
+   virtual ~MatrixTensorMaterialOutput()                           = default;
    MatrixTensorMaterialOutput( MatrixTensorMaterialOutput const& ) = delete;
    MatrixTensorMaterialOutput& operator=( MatrixTensorMaterialOutput const& ) = delete;
-   MatrixTensorMaterialOutput( MatrixTensorMaterialOutput&& ) = delete;
+   MatrixTensorMaterialOutput( MatrixTensorMaterialOutput&& )                 = delete;
    MatrixTensorMaterialOutput& operator=( MatrixTensorMaterialOutput&& ) = delete;
 };
 
-#endif // MATRIX_TENSOR_MATERIAL_OUTPUT_H
+#endif// MATRIX_TENSOR_MATERIAL_OUTPUT_H

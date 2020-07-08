@@ -68,7 +68,6 @@
 #ifndef LEVELSET_REINITIALIZER_H
 #define LEVELSET_REINITIALIZER_H
 
-
 #include "halo_manager.h"
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator.h"
@@ -85,26 +84,24 @@ class LevelsetReinitializer {
    friend DerivedLevelsetReinitializer;
 
 protected:
-   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager& halo_manager_;// TODO-19 NH Think about making it const (rats tail)
    LogWriter& logger_;
 
    /**
     * @brief The default constructor for a LevelsetReinitializer object.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit LevelsetReinitializer( HaloManager & halo_manager ) :
-       halo_manager_( halo_manager ),
-       logger_( LogWriter::Instance() )
-   {
+   explicit LevelsetReinitializer( HaloManager& halo_manager ) : halo_manager_( halo_manager ),
+                                                                 logger_( LogWriter::Instance() ) {
       // Empty Constructor, besides initializer list.
    }
 
 public:
-   LevelsetReinitializer() = delete;
-   ~LevelsetReinitializer() = default;
+   LevelsetReinitializer()                               = delete;
+   ~LevelsetReinitializer()                              = default;
    LevelsetReinitializer( LevelsetReinitializer const& ) = delete;
    LevelsetReinitializer& operator=( LevelsetReinitializer const& ) = delete;
-   LevelsetReinitializer( LevelsetReinitializer&& ) = delete;
+   LevelsetReinitializer( LevelsetReinitializer&& )                 = delete;
    LevelsetReinitializer& operator=( LevelsetReinitializer&& ) = delete;
 
    /**
@@ -112,10 +109,9 @@ public:
     * @param nodes The nodes for which the level-set field is reinitialized.
     * @param is_last_stage Flag if the method is called for the last stage of the applied Runge-Kutta method.
     */
-   void Reinitialize(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
-      static_cast<DerivedLevelsetReinitializer const&>(*this).ReinitializeImplementation(nodes, is_last_stage);
+   void Reinitialize( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
+      static_cast<DerivedLevelsetReinitializer const&>( *this ).ReinitializeImplementation( nodes, is_last_stage );
    }
 };
 
-
-#endif //LEVELSET_REINITIALIZER_H
+#endif//LEVELSET_REINITIALIZER_H

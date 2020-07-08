@@ -68,7 +68,6 @@
 #ifndef MULTI_PHASE_MANAGER_H
 #define MULTI_PHASE_MANAGER_H
 
-
 #include "user_specifications/numerical_setup.h"
 #include "communication/communication_manager.h"
 #include "materials/material_manager.h"
@@ -82,13 +81,13 @@
 #include "ghost_fluid_extender/ghost_fluid_extender_setup.h"
 #include "interface_extender/interface_extender_setup.h"
 
-using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize< geometry_calculator >::type;
-using BufferHandlerConcretization = BufferHandlerSetup::Concretize< buffer_handler >::type;
-using CutCellMixerConcretization = CutCellMixerSetup::Concretize< cut_cell_mixer >::type;
-using LevelsetReinitializerConcretization = LevelsetReinitializerSetup::Concretize< levelset_reinitializer >::type;
-using ScaleSeparatorConcretization = ScaleSeparatorSetup::Concretize< scale_separator >::type;
-using GhostFluidExtenderConcretization = GhostFluidExtenderSetup::Concretize< extender >::type_primestates;
-using InterfaceExtenderConcretization = InterfaceExtenderSetup::Concretize< interface_extender >::type_states;
+using GeometryCalculatorConcretization    = GeometryCalculatorSetup::Concretize<geometry_calculator>::type;
+using BufferHandlerConcretization         = BufferHandlerSetup::Concretize<buffer_handler>::type;
+using CutCellMixerConcretization          = CutCellMixerSetup::Concretize<cut_cell_mixer>::type;
+using LevelsetReinitializerConcretization = LevelsetReinitializerSetup::Concretize<levelset_reinitializer>::type;
+using ScaleSeparatorConcretization        = ScaleSeparatorSetup::Concretize<scale_separator>::type;
+using GhostFluidExtenderConcretization    = GhostFluidExtenderSetup::Concretize<extender>::type_primestates;
+using InterfaceExtenderConcretization     = InterfaceExtenderSetup::Concretize<interface_extender>::type_states;
 
 /**
  * @brief The MultiPhaseManager provides functionality to simulate multi-phase flows. It allows to propagate a level-set field in time, to perform cut-cell mixing
@@ -101,7 +100,7 @@ class MultiPhaseManager {
    friend DerivedMultiPhaseManager;
    // general classes without concretization
    MaterialManager const& material_manager_;
-   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager& halo_manager_;// TODO-19 NH Think about making it const (rats tail)
    // class concretization use
    GeometryCalculatorConcretization const geometry_calculator_;
    BufferHandlerConcretization const buffer_handler_;
@@ -117,26 +116,25 @@ class MultiPhaseManager {
     * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit MultiPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-      material_manager_( material_manager ),
-      halo_manager_( halo_manager ),
-      geometry_calculator_(),
-      buffer_handler_( material_manager_ ),
-      interface_state_calculator_( material_manager_ ),
-      cut_cell_mixer_( halo_manager ),
-      levelset_reinitializer_( halo_manager ),
-      scale_separator_( material_manager_, halo_manager ),
-      ghost_fluid_extender_( material_manager_, halo_manager ),
-      interface_extender_( halo_manager ) {
+   explicit MultiPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager ) : material_manager_( material_manager ),
+                                                                                                      halo_manager_( halo_manager ),
+                                                                                                      geometry_calculator_(),
+                                                                                                      buffer_handler_( material_manager_ ),
+                                                                                                      interface_state_calculator_( material_manager_ ),
+                                                                                                      cut_cell_mixer_( halo_manager ),
+                                                                                                      levelset_reinitializer_( halo_manager ),
+                                                                                                      scale_separator_( material_manager_, halo_manager ),
+                                                                                                      ghost_fluid_extender_( material_manager_, halo_manager ),
+                                                                                                      interface_extender_( halo_manager ) {
       /** Empty Constructor, besides initializer list. */
    }
 
 public:
-   MultiPhaseManager() = delete;
-   ~MultiPhaseManager() = default;
+   MultiPhaseManager()                           = delete;
+   ~MultiPhaseManager()                          = default;
    MultiPhaseManager( MultiPhaseManager const& ) = delete;
    MultiPhaseManager& operator=( MultiPhaseManager const& ) = delete;
-   MultiPhaseManager( MultiPhaseManager&& ) = delete;
+   MultiPhaseManager( MultiPhaseManager&& )                 = delete;
    MultiPhaseManager& operator=( MultiPhaseManager&& ) = delete;
 
    /**
@@ -204,10 +202,9 @@ public:
     * @brief Transform given volume averaged conservatives to conservatives. This is done by a multiplication with the volume fraction.
     * @param node The node for which conservatives are calculated.
     */
-   void TransformToConservatives( Node &node ) const {
+   void TransformToConservatives( Node& node ) const {
       buffer_handler_.TransformToConservatives( node );
    }
 };
 
-
-#endif //MULTI_PHASE_MANAGER_H
+#endif//MULTI_PHASE_MANAGER_H

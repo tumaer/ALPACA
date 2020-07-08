@@ -83,7 +83,7 @@ class XmlDimensionalizationReader : public DimensionalizationReader {
    // The already openend xml input file (must be shared pointer to distribute input file on different readers)
    std::shared_ptr<tinyxml2::XMLDocument const> const xml_input_file_;
 
-   // Functions that are required from base class 
+   // Functions that are required from base class
    double DoReadReferenceLength() const override;
    double DoReadReferenceVelocity() const override;
    double DoReadReferenceDensity() const override;
@@ -92,11 +92,11 @@ class XmlDimensionalizationReader : public DimensionalizationReader {
 public:
    XmlDimensionalizationReader() = delete;
    explicit XmlDimensionalizationReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlDimensionalizationReader() = default;
+   ~XmlDimensionalizationReader()                                    = default;
    XmlDimensionalizationReader( XmlDimensionalizationReader const& ) = delete;
    XmlDimensionalizationReader& operator=( XmlDimensionalizationReader const& ) = delete;
-   XmlDimensionalizationReader( XmlDimensionalizationReader&& ) = delete;
+   XmlDimensionalizationReader( XmlDimensionalizationReader&& )                 = delete;
    XmlDimensionalizationReader& operator=( XmlDimensionalizationReader&& ) = delete;
 };
 
-#endif // XML_DIMENSIONALIZATION_READER_H
+#endif// XML_DIMENSIONALIZATION_READER_H

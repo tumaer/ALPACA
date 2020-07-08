@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output/output_writer/output_quantities/custom_material_quantities/helicity_output.h"
 
-#include <algorithm> //lower_bound, sort
+#include <algorithm>//lower_bound, sort
 #include "utilities/mathematical_functions.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
@@ -84,18 +84,17 @@
 HelicityOutput::HelicityOutput( UnitHandler const& unit_handler,
                                 MaterialManager const& material_manager,
                                 std::string const& quantity_name,
-                                std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
+                                std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
    // define derivative stencils for derivative computations
    constexpr DerivativeStencils derivative_stencil = DerivativeStencils::FourthOrderCentralDifference;
-   using DerivativeStencil = DerivativeStencilSetup::Concretize<derivative_stencil>::type;
+   using DerivativeStencil                         = DerivativeStencilSetup::Concretize<derivative_stencil>::type;
 
    // Obtain the factor used for dimensionalization unit: [m/s^2]
    double const dimensionalization_factor = unit_handler_.DimensionalizeValue( 1.0, { UnitType::Length }, { UnitType::Time, UnitType::Time } );
@@ -104,7 +103,7 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>&  
    double const cell_size = node.GetCellSize();
 
    if( node.HasLevelset() ) {
-       std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
       PrimeStates const& positive_prime_states = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer();
       PrimeStates const& negative_prime_states = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer();
@@ -132,14 +131,14 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>&  
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                std::array<double, 3> const curl = SU::Curl<DerivativeStencil>( real_velocity_x, real_velocity_y, real_velocity_z, i, j, k, cell_size );
-                cell_data[cell_data_counter++] = L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
+               cell_data[cell_data_counter++]   = L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
             }
          }
       }
    } else {
       // No interface node -> interface tags/material is the same everywhere
-      MaterialName const material = node.GetSinglePhaseMaterial();
-      Block const& block = node.GetPhaseByMaterial( material );
+      MaterialName const material     = node.GetSinglePhaseMaterial();
+      Block const& block              = node.GetPhaseByMaterial( material );
       PrimeStates const& prime_states = block.GetPrimeStateBuffer();
       double real_velocity_x[CC::TCX()][CC::TCY()][CC::TCZ()];
       double real_velocity_y[CC::TCX()][CC::TCY()][CC::TCZ()];
@@ -159,7 +158,7 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>&  
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                std::array<double, 3> const curl = SU::Curl<DerivativeStencil>( real_velocity_x, real_velocity_y, real_velocity_z, i, j, k, cell_size );
-                cell_data[cell_data_counter++] = L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
+               cell_data[cell_data_counter++]   = L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
             }
          }
       }
@@ -172,14 +171,14 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>&  
  * @note Attention: In case prime state, parameter  variables are used, pay attention that they only exist on leave nodes. In case a division is made on non-leave nodes
  *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes.
  */
-void HelicityOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
+void HelicityOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const {
 
    /** Now the actual assinging of to the hdf5 written data vector is done depending on the given material */
    if( node.ContainsMaterial( material ) ) {
       for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-                cell_data[cell_data_counter++] = 1.0;
+               cell_data[cell_data_counter++] = 1.0;
             }
          }
       }
@@ -188,7 +187,7 @@ void HelicityOutput::DoComputeDebugCellData( Node const& node, std::vector<doubl
       for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-                cell_data[cell_data_counter++] = -1.0;
+               cell_data[cell_data_counter++] = -1.0;
             }
          }
       }

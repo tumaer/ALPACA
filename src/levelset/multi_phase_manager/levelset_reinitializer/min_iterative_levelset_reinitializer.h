@@ -68,7 +68,6 @@
 #ifndef MIN_ITERATIVE_LEVELSET_REINITIALIZER_H
 #define MIN_ITERATIVE_LEVELSET_REINITIALIZER_H
 
-
 #include "iterative_levelset_reinitializer_base.h"
 
 /**
@@ -84,18 +83,16 @@ class MinIterativeLevelsetReinitializer : public IterativeLevelsetReinitializerB
    static constexpr bool subcell_fix_active_ = false;
 
 protected:
-
-   double ReinitializeSingleNodeImplementation(Node& node, bool const ) const;
+   double ReinitializeSingleNodeImplementation( Node& node, bool const ) const;
 
 public:
    MinIterativeLevelsetReinitializer() = delete;
-   explicit MinIterativeLevelsetReinitializer( HaloManager & halo_manager );
-   ~MinIterativeLevelsetReinitializer() = default;
+   explicit MinIterativeLevelsetReinitializer( HaloManager& halo_manager );
+   ~MinIterativeLevelsetReinitializer()                                          = default;
    MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer const& ) = delete;
    MinIterativeLevelsetReinitializer& operator=( MinIterativeLevelsetReinitializer const& ) = delete;
-   MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer&& ) = delete;
+   MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer&& )                 = delete;
    MinIterativeLevelsetReinitializer& operator=( MinIterativeLevelsetReinitializer&& ) = delete;
 };
 
-
-#endif //MIN_ITERATIVE_LEVELSET_REINITIALIZER_H
+#endif//MIN_ITERATIVE_LEVELSET_REINITIALIZER_H

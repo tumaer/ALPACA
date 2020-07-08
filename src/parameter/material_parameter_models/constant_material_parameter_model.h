@@ -89,16 +89,16 @@ class ConstantMaterialParameterModel : public MaterialParameterModel {
     * @brief Executes the actual parameter calculation on the complete block.
     * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
     */
-   void DoUpdateParameter( Block & block, double const ) const override {
+   void DoUpdateParameter( Block& block, double const ) const override {
 
       // extract the parameter from the block, which should be computed
-      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedConstantMaterialParameterModel::parameter_buffer_type_ );
+      double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedConstantMaterialParameterModel::parameter_buffer_type_ );
 
       // Compute the parameter based on constant values
       for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-               parameter_buffer[i][j][k] = static_cast< DerivedConstantMaterialParameterModel const& >( *this ).ComputeParameter();
+               parameter_buffer[i][j][k] = static_cast<DerivedConstantMaterialParameterModel const&>( *this ).ComputeParameter();
             }
          }
       }
@@ -110,13 +110,13 @@ class ConstantMaterialParameterModel : public MaterialParameterModel {
     * @param interface_tags Tags describing the interface position.
     * @param material_sign Sign of the material for identification on interface tags.
     */
-   void DoUpdateParameter( Block & block,
+   void DoUpdateParameter( Block& block,
                            double const,
-                           std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
+                           std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
                            std::int8_t const material_sign ) const override {
 
       // extract the parameter from the block, which should be computed
-      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedConstantMaterialParameterModel::parameter_buffer_type_ );
+      double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedConstantMaterialParameterModel::parameter_buffer_type_ );
 
       // Compute the parameter based on constan values
       for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
@@ -124,10 +124,11 @@ class ConstantMaterialParameterModel : public MaterialParameterModel {
             for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
 
                parameter_buffer[i][j][k] = interface_tags[i][j][k] * material_sign >= 0 ?
-                                           static_cast< DerivedConstantMaterialParameterModel const& >( *this ).ComputeParameter() : 0.0;
-            } //k
-         } //j
-      }//i
+                                                 static_cast<DerivedConstantMaterialParameterModel const&>( *this ).ComputeParameter() :
+                                                 0.0;
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
@@ -139,12 +140,11 @@ class ConstantMaterialParameterModel : public MaterialParameterModel {
    }
 
 public:
-   virtual ~ConstantMaterialParameterModel() = default;
+   virtual ~ConstantMaterialParameterModel()                               = default;
    ConstantMaterialParameterModel( ConstantMaterialParameterModel const& ) = delete;
    ConstantMaterialParameterModel& operator=( ConstantMaterialParameterModel const& ) = delete;
-   ConstantMaterialParameterModel( ConstantMaterialParameterModel&& ) = delete;
+   ConstantMaterialParameterModel( ConstantMaterialParameterModel&& )                 = delete;
    ConstantMaterialParameterModel& operator=( ConstantMaterialParameterModel&& ) = delete;
-
 };
 
-#endif // CONSTANT_MATERIAL_PARAMETER_MODEL_H
+#endif// CONSTANT_MATERIAL_PARAMETER_MODEL_H

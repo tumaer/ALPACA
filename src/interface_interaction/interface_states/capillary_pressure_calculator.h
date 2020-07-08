@@ -68,7 +68,6 @@
 #ifndef CAPILLARY_PRESSURE_CALCULATOR_H
 #define CAPILLARY_PRESSURE_CALCULATOR_H
 
-
 #include "topology/node.h"
 #include "materials/material_manager.h"
 
@@ -78,7 +77,6 @@
 class CapillaryPressureCalculator {
 
 private:
-
    /**
     * @brief The surface tension coefficient. Based on it, the capillary pressure is calculated.
     */
@@ -87,14 +85,13 @@ private:
 public:
    CapillaryPressureCalculator() = delete;
    explicit CapillaryPressureCalculator( MaterialManager const& material_manager );
-   ~CapillaryPressureCalculator() = default;
+   ~CapillaryPressureCalculator()                                    = default;
    CapillaryPressureCalculator( CapillaryPressureCalculator const& ) = delete;
    CapillaryPressureCalculator& operator=( CapillaryPressureCalculator const& ) = delete;
-   CapillaryPressureCalculator( CapillaryPressureCalculator&& ) = delete;
+   CapillaryPressureCalculator( CapillaryPressureCalculator&& )                 = delete;
    CapillaryPressureCalculator& operator=( CapillaryPressureCalculator&& ) = delete;
 
-   void ComputePressureDifference( Node const& node, double (&pressure_difference)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   void ComputePressureDifference( Node const& node, double ( &pressure_difference )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
 };
 
-
-#endif //CAPILLARY_PRESSURE_CALCULATOR_H
+#endif//CAPILLARY_PRESSURE_CALCULATOR_H

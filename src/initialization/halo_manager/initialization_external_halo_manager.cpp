@@ -160,7 +160,7 @@ namespace Initialization {
       }
 
       // Create logger for input logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       logger.LogMessage( " " );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Materials:" );
@@ -200,10 +200,10 @@ namespace Initialization {
       }
 
       // Create logger for input logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       logger.LogMessage( " " );
-      logger.LogMessage( StringOperations::Indent( 2 ) +  "Levelset:" );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Levelset:" );
 
       // x- direction
       levelset_boundary_conditions[LTI( BoundaryLocation::East )] = CreateLevelsetBoundary<BoundaryLocation::East>( bc_reader );
@@ -236,7 +236,7 @@ namespace Initialization {
                                                       MaterialManager const& material_manager ) {
 
       // Create logger for input logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       logger.LogMessage( " " );
       logger.LogMessage( "External boundary conditions:" );
@@ -253,7 +253,6 @@ namespace Initialization {
       // Note: Here, ownership transfer takes place. First initialized pointers are now nullptrs
       return ExternalHaloManager( std::move( material_boundaries ), std::move( levelset_boundaries ) );
    }
-
 
    /**
     * @brief Provides a proper string for the data of the fixed value boundary condition.
@@ -288,12 +287,10 @@ namespace Initialization {
          tmp_string += StringOperations::Indent( indent + 2 ) + "Material " + std::to_string( mat_index + 1 ) + "\n";
          // Add all dimensionalized values of the primestates
          for( PrimeState const& prime : MF::ASOP() ) {
-            tmp_string +=   StringOperations::Indent( indent + 4 ) + prime_names[PTI( prime )] + std::string( maximum_size - prime_names[PTI( prime )].size(), ' ' ) + ": "
-                          + StringOperations::ToScientificNotationString(
-                              unit_handler.DimensionalizeValue( fixed_prime_states[mat_index][PTI( prime )], MF::FieldUnit( prime ) ), 9, true ) + "\n";
+            tmp_string += StringOperations::Indent( indent + 4 ) + prime_names[PTI( prime )] + std::string( maximum_size - prime_names[PTI( prime )].size(), ' ' ) + ": " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( fixed_prime_states[mat_index][PTI( prime )], MF::FieldUnit( prime ) ), 9, true ) + "\n";
          }
          tmp_string += " \n";
       }
       return tmp_string;
    }
-}
+}// namespace Initialization

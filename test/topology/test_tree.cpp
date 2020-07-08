@@ -72,8 +72,8 @@
 
 SCENARIO( "Retriving nodes from a tree with a different number of nodes on two levels", "[1rank]" ) {
    GIVEN( "A topology, a geometric size and a maximum level" ) {
-      TopologyManager const topology = TopologyManager();
-      constexpr double geometric_size = 1.0;
+      TopologyManager const topology       = TopologyManager();
+      constexpr double geometric_size      = 1.0;
       constexpr unsigned int maximum_level = 1;
       WHEN( "An empty tree is created with these inputs" ) {
          Tree const tree = Tree( topology, geometric_size, maximum_level );

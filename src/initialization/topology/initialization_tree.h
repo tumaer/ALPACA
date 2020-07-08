@@ -78,7 +78,7 @@
 namespace Initialization {
 
    // Initialization function of the tree
-   Tree InitializeTree( InputReader const& input_reader, TopologyManager & topology_manager, UnitHandler const& unit_handler );
-}
+   Tree InitializeTree( InputReader const& input_reader, TopologyManager& topology_manager, UnitHandler const& unit_handler );
+}// namespace Initialization
 
-#endif // INITIALIZATION_TREE_H
+#endif// INITIALIZATION_TREE_H

@@ -101,6 +101,6 @@ namespace TimeIntegratorSetup {
       typedef RungeKutta3TVD type;
    };
 
-}
+}// namespace TimeIntegratorSetup
 
-#endif // TIME_INTEGRATOR_SETUP_H
+#endif// TIME_INTEGRATOR_SETUP_H

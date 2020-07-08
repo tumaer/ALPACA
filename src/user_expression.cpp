@@ -70,20 +70,17 @@
 #include <string>
 #include <vector>
 
-
 /**
  * @brief Creates a new UserExpression object from an expression and several input and output variables.
  * @param expression_string The expression to be compiled.
  * @param variables_in The input variable names and references to their values.
  * @param variables_out The out variable names.
  */
-UserExpression::UserExpression( std::string const expression_string, std::vector<std::tuple<std::string,double&>> const variables_in, std::vector<std::string> const variables_out ) :
-   random_number_expression_()
-{
-   symbol_table_.add_function("rand", random_number_expression_);
+UserExpression::UserExpression( std::string const expression_string, std::vector<std::tuple<std::string, double&>> const variables_in, std::vector<std::string> const variables_out ) : random_number_expression_() {
+   symbol_table_.add_function( "rand", random_number_expression_ );
 
    for( auto& var : variables_in ) {
-      symbol_table_.add_variable( std::get<0>(var), std::get<1>(var) );
+      symbol_table_.add_variable( std::get<0>( var ), std::get<1>( var ) );
    }
 
    for( auto& var : variables_out ) {
@@ -98,7 +95,7 @@ UserExpression::UserExpression( std::string const expression_string, std::vector
    // there might be variables in the expression that are not registered (e.g. z velocity in 2D cases) and should be resolved automatically
    parser.enable_unknown_symbol_resolver();
    if( !parser.compile( expression_string, expression_ ) ) {
-      throw std::logic_error( "Error in expression: "  + parser.error() + " Expression: " + expression_string );
+      throw std::logic_error( "Error in expression: " + parser.error() + " Expression: " + expression_string );
    }
 }
 

@@ -76,20 +76,17 @@
 #include "utilities/random_number_generator.h"
 
 template<typename T>
-struct random_number_expression : public exprtk::ifunction<T>
-{
+struct random_number_expression : public exprtk::ifunction<T> {
 
-    RandomNumberGenerator& generator_;
+   RandomNumberGenerator& generator_;
 
 public:
+   random_number_expression() : exprtk::ifunction<T>( 0 ), generator_( RandomNumberGenerator::Instance() ) {}
+   virtual ~random_number_expression() {}
 
-    random_number_expression() : exprtk::ifunction<T>(0), generator_(RandomNumberGenerator::Instance()) {}
-    virtual ~random_number_expression() {}
-
-    inline T operator()()
-    {
-        return generator_.GiveRandomNumber();
-    }
+   inline T operator()() {
+      return generator_.GiveRandomNumber();
+   }
 };
 
 /**
@@ -103,14 +100,14 @@ class UserExpression {
 
 public:
    UserExpression() = delete;
-   explicit UserExpression( std::string const expression_string, std::vector<std::tuple<std::string,double&>> const variables_in, std::vector<std::string> const variables_out );
-   ~UserExpression() = default;
+   explicit UserExpression( std::string const expression_string, std::vector<std::tuple<std::string, double&>> const variables_in, std::vector<std::string> const variables_out );
+   ~UserExpression()                       = default;
    UserExpression( UserExpression const& ) = delete;
    UserExpression& operator=( UserExpression const& ) = delete;
-   UserExpression( UserExpression&& ) = delete;
+   UserExpression( UserExpression&& )                 = delete;
    UserExpression& operator=( UserExpression&& ) = delete;
 
    double GetValue( std::string const variable ) const;
 };
 
-#endif // USER_EXPRESSION_H
+#endif// USER_EXPRESSION_H

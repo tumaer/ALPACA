@@ -68,7 +68,6 @@
 #ifndef APERTURE_CUT_CELL_MIXER_H
 #define APERTURE_CUT_CELL_MIXER_H
 
-
 #include "two_phase_cut_cell_mixer.h"
 
 /**
@@ -78,17 +77,16 @@ class ApertureCutCellMixer : public TwoPhaseCutCellMixer<ApertureCutCellMixer> {
 
    friend TwoPhaseCutCellMixer;
 
-   void CalculateMixingContributionsImplementation(Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const;
+   void CalculateMixingContributionsImplementation( Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int, 6>>, std::vector<std::array<double, 2>>>>& mixing_contributions ) const;
 
 public:
    ApertureCutCellMixer() = delete;
-   explicit ApertureCutCellMixer( HaloManager & halo_manager );
-   ~ApertureCutCellMixer() = default;
+   explicit ApertureCutCellMixer( HaloManager& halo_manager );
+   ~ApertureCutCellMixer()                             = default;
    ApertureCutCellMixer( ApertureCutCellMixer const& ) = delete;
    ApertureCutCellMixer& operator=( ApertureCutCellMixer const& ) = delete;
-   ApertureCutCellMixer( ApertureCutCellMixer&& ) = delete;
+   ApertureCutCellMixer( ApertureCutCellMixer&& )                 = delete;
    ApertureCutCellMixer& operator=( ApertureCutCellMixer&& ) = delete;
 };
 
-
-#endif //APERTURE_CUT_CELL_MIXER_H
+#endif//APERTURE_CUT_CELL_MIXER_H

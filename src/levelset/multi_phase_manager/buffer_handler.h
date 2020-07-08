@@ -68,7 +68,6 @@
 #ifndef BUFFER_HANDLER_H
 #define BUFFER_HANDLER_H
 
-
 #include "materials/material_manager.h"
 #include "topology/node.h"
 
@@ -88,14 +87,14 @@ class BufferHandler {
     * @brief Constructor for the buffer handler for level-set simulations.
     * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
     */
-   explicit BufferHandler( MaterialManager const& material_manager) : material_manager_(material_manager) { }
+   explicit BufferHandler( MaterialManager const& material_manager ) : material_manager_( material_manager ) {}
 
 public:
-   BufferHandler() = delete;
-   ~BufferHandler() = default;
+   BufferHandler()                       = delete;
+   ~BufferHandler()                      = default;
    BufferHandler( BufferHandler const& ) = delete;
-   BufferHandler& operator=( BufferHandler const& )= delete;
-   BufferHandler( BufferHandler&& ) = delete;
+   BufferHandler& operator=( BufferHandler const& ) = delete;
+   BufferHandler( BufferHandler&& )                 = delete;
    BufferHandler& operator=( BufferHandler&& ) = delete;
 
    /**
@@ -129,7 +128,7 @@ public:
     * @param node The node for which we calculate the prime states.
     */
    void CalculatePrimesFromIntegratedConservatives( Node& node ) const {
-      static_cast<DerivedBufferHandler const&>( *this ).CalculatePrimesFromIntegratedConservativesImplementation( node) ;
+      static_cast<DerivedBufferHandler const&>( *this ).CalculatePrimesFromIntegratedConservativesImplementation( node );
    }
 
    /**
@@ -142,5 +141,4 @@ public:
    }
 };
 
-
-#endif //BUFFER_HANDLER_H
+#endif//BUFFER_HANDLER_H

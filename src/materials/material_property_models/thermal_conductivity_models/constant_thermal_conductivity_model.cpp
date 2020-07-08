@@ -77,13 +77,11 @@
  * @note Runtime a check is done that all required parameters are present. Furthermore, pre-calculations are done for simpler access during compute call.
  */
 ConstantThermalConductivityModel::ConstantThermalConductivityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
-                                                                    UnitHandler const& unit_handler ) :
-   // Start initializer list
-   ConstantMaterialParameterModel<ConstantThermalConductivityModel>(),
-   lambda_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "lambdaConstant", "ConstantThermalConductivityModel" ), UnitType::ThermalConductivity ) ) {
+                                                                    UnitHandler const& unit_handler ) :// Start initializer list
+                                                                                                        ConstantMaterialParameterModel<ConstantThermalConductivityModel>(),
+                                                                                                        lambda_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "lambdaConstant", "ConstantThermalConductivityModel" ), UnitType::ThermalConductivity ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
-
 
 /**
  * @brief Provides logging information of the given model.
@@ -96,8 +94,7 @@ std::string ConstantThermalConductivityModel::GetLogData( unsigned int const ind
    std::string log_string;
    // Add data
    log_string += StringOperations::Indent( indent ) + "Model type  : Constant \n";
-   log_string += StringOperations::Indent( indent ) + "lambda_const: " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( lambda_constant_, UnitType::ThermalConductivity ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "lambda_const: " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( lambda_constant_, UnitType::ThermalConductivity ), 9 ) + "\n";
 
    return log_string;
 }

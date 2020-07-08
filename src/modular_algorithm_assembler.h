@@ -80,7 +80,7 @@
 #include "multiresolution/multiresolution.h"
 #include "multiresolution/averager.h"
 
-using TimeIntegratorConcretization = TimeIntegratorSetup::Concretize<time_integrator>::type;
+using TimeIntegratorConcretization    = TimeIntegratorSetup::Concretize<time_integrator>::type;
 using MultiPhaseManagerConcretization = MultiPhaseManagerSetup::Concretize<phase_manager>::type;
 using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
 
@@ -100,7 +100,7 @@ class ModularAlgorithmAssembler {
    double const cfl_number_;
    double const cell_size_on_maximum_level_;
    // source term variables (time computation)
-   std::array<double,3> const gravity_;
+   std::array<double, 3> const gravity_;
    // multiresolution variables
    std::vector<unsigned int> const all_levels_;
 
@@ -111,7 +111,7 @@ class ModularAlgorithmAssembler {
 
    Tree& tree_;
    TopologyManager& topology_;
-   HaloManager & halo_manager_;
+   HaloManager& halo_manager_;
    CommunicationManager& communicator_;
 
    MaterialManager const& material_manager_;
@@ -121,7 +121,7 @@ class ModularAlgorithmAssembler {
    Multiresolution const& multiresolution_;
    Averager const averager_;
 
-   MultiPhaseManagerConcretization const multi_phase_manager_;  //TODO-19 NH make const
+   MultiPhaseManagerConcretization const multi_phase_manager_;//TODO-19 NH make const
 
    PrimeStateHandlerConcretization const prime_state_handler_;
 
@@ -138,7 +138,7 @@ class ModularAlgorithmAssembler {
    void ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const print_this_step, unsigned int& debug_key ) const;
    void LogElapsedTimeSinceInProfileRuns( double const start_time, std::string const message );
 
-   void ComputeRightHandSide( std::vector<unsigned int> const levels,unsigned int const stage );
+   void ComputeRightHandSide( std::vector<unsigned int> const levels, unsigned int const stage );
    void SwapBuffers( std::vector<unsigned int> const updated_levels, unsigned int const stage ) const;
    void Integrate( std::vector<unsigned int> const updated_levels, unsigned int const stage );
    void JumpFluxAdjustment( std::vector<unsigned int> const finished_levels_descending ) const;
@@ -188,22 +188,22 @@ public:
    explicit ModularAlgorithmAssembler( double const start_time,
                                        double const end_time,
                                        double const cfl_number,
-                                       std::array<double,3> const gravity,
+                                       std::array<double, 3> const gravity,
                                        std::vector<unsigned int> all_levels,
                                        double const cell_size_on_maximum_level,
                                        UnitHandler const& unit_handler,
                                        InitialCondition const& initial_condition,
-                                       Tree & tree,
-                                       TopologyManager & topology,
-                                       HaloManager & halo_manager,
-                                       CommunicationManager & communication,
+                                       Tree& tree,
+                                       TopologyManager& topology,
+                                       HaloManager& halo_manager,
+                                       CommunicationManager& communication,
                                        Multiresolution const& multiresolution,
                                        MaterialManager const& material_manager,
-                                       InputOutputManager & input_output );
-   ~ModularAlgorithmAssembler() = default;
+                                       InputOutputManager& input_output );
+   ~ModularAlgorithmAssembler()                                  = default;
    ModularAlgorithmAssembler( ModularAlgorithmAssembler const& ) = delete;
    ModularAlgorithmAssembler& operator=( ModularAlgorithmAssembler const& ) = delete;
-   ModularAlgorithmAssembler( ModularAlgorithmAssembler&& ) = delete;
+   ModularAlgorithmAssembler( ModularAlgorithmAssembler&& )                 = delete;
    ModularAlgorithmAssembler& operator=( ModularAlgorithmAssembler&& ) = delete;
 
    void ComputeLoop();
@@ -211,4 +211,4 @@ public:
    void Initialization();
 };
 
-#endif // MODULAR_ALGORITHM_ASSEMBLER_H
+#endif// MODULAR_ALGORITHM_ASSEMBLER_H

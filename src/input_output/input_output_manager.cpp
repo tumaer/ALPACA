@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output_manager.h"
 
-#include <cstdio> // needed for file deletion
+#include <cstdio>// needed for file deletion
 #include <fstream>
 #include <unistd.h>
 #include <algorithm>
@@ -86,11 +86,10 @@ namespace {
     * @param time_stamps The vector holding all time stamps.
     * @param maximum_value The maximum value allowed in the time stamp vector (includint the value).
     */
-   inline void RemoveTimeStamps( std::vector<double> & time_stamps, double const maximum_value ) {
-      time_stamps.erase( time_stamps.begin(), std::find_if_not(time_stamps.begin(), time_stamps.end(), [&maximum_value]( double const timestamp )
-                                                               { return timestamp <= maximum_value; } ) );
+   inline void RemoveTimeStamps( std::vector<double>& time_stamps, double const maximum_value ) {
+      time_stamps.erase( time_stamps.begin(), std::find_if_not( time_stamps.begin(), time_stamps.end(), [&maximum_value]( double const timestamp ) { return timestamp <= maximum_value; } ) );
    }
-}
+}// namespace
 
 /**
  * @brief Default constructor using the inputs from the operating system.
@@ -120,28 +119,26 @@ InputOutputManager::InputOutputManager( std::string const& input_file,
                                         std::string const& restore_filename,
                                         std::vector<double> const& restart_snapshot_timestamps,
                                         int const restart_snapshot_interval,
-                                        unsigned int const restart_intervals_to_keep ) :
-   // Start initializer list
-   unit_handler_( unit_handler ),
-   logger_( LogWriter::Instance() ),
-   output_writer_( output_writer ),
-   restart_manager_( restart_manager ),
-   output_folder_name_( output_folder ),
-   time_naming_factor_( time_naming_factor ),
-   standard_output_enabled_( !standard_output_timestamps.empty() ),
-   standard_output_timestamps_( standard_output_timestamps ),
-   interface_output_enabled_( !interface_output_timestamps.empty() ),
-   interface_output_timestamps_( interface_output_timestamps ),
-   restore_mode_( restore_mode ),
-   restore_filename_( restore_filename ),
-   restart_snapshot_timestamps_( restart_snapshot_timestamps ),
-   restart_snapshot_interval_( restart_snapshot_interval ),
-   restart_files_to_keep_( restart_intervals_to_keep ),
-   symlink_latest_restart_name_( output_folder_name_ + RestartSubfolderName() + LatestSnapshotName() ),
-   wall_time_of_last_restart_file_( std::chrono::system_clock::now() )
-{
+                                        unsigned int const restart_intervals_to_keep ) :// Start initializer list
+                                                                                         unit_handler_( unit_handler ),
+                                                                                         logger_( LogWriter::Instance() ),
+                                                                                         output_writer_( output_writer ),
+                                                                                         restart_manager_( restart_manager ),
+                                                                                         output_folder_name_( output_folder ),
+                                                                                         time_naming_factor_( time_naming_factor ),
+                                                                                         standard_output_enabled_( !standard_output_timestamps.empty() ),
+                                                                                         standard_output_timestamps_( standard_output_timestamps ),
+                                                                                         interface_output_enabled_( !interface_output_timestamps.empty() ),
+                                                                                         interface_output_timestamps_( interface_output_timestamps ),
+                                                                                         restore_mode_( restore_mode ),
+                                                                                         restore_filename_( restore_filename ),
+                                                                                         restart_snapshot_timestamps_( restart_snapshot_timestamps ),
+                                                                                         restart_snapshot_interval_( restart_snapshot_interval ),
+                                                                                         restart_files_to_keep_( restart_intervals_to_keep ),
+                                                                                         symlink_latest_restart_name_( output_folder_name_ + RestartSubfolderName() + LatestSnapshotName() ),
+                                                                                         wall_time_of_last_restart_file_( std::chrono::system_clock::now() ) {
    // This Barrier is needed, otherwise we get inconsistent folder names across the ranks.
-   MPI_Barrier(MPI_COMM_WORLD);
+   MPI_Barrier( MPI_COMM_WORLD );
    // Only Master-rank is setting up the folders...
    if( MpiUtilities::MyRankId() == 0 ) {
       // create output folder and subfolders
@@ -163,15 +160,15 @@ InputOutputManager::InputOutputManager( std::string const& input_file,
       // If the time output times stamps vectors are empty no output is desired
       std::string time_series_filename;
       if( !standard_output_timestamps_.empty() ) {
-         time_series_filename = OutputFileName( OutputType::Standard) + TimeSeriesSuffix();
+         time_series_filename = OutputFileName( OutputType::Standard ) + TimeSeriesSuffix();
          output_writer_.InitializeTimeSeriesFile( time_series_filename );
       }
       if( !interface_output_timestamps_.empty() ) {
-         time_series_filename = OutputFileName( OutputType::Interface) + TimeSeriesSuffix();
+         time_series_filename = OutputFileName( OutputType::Interface ) + TimeSeriesSuffix();
          output_writer_.InitializeTimeSeriesFile( time_series_filename );
       }
       if constexpr( DP::DebugOutput() ) {
-         time_series_filename = OutputFileName( OutputType::Debug) + TimeSeriesSuffix();
+         time_series_filename = OutputFileName( OutputType::Debug ) + TimeSeriesSuffix();
          output_writer_.InitializeTimeSeriesFile( time_series_filename );
       }
    }
@@ -185,15 +182,15 @@ InputOutputManager::~InputOutputManager() {
    // Finalizes the time series files
    std::string time_series_filename;
    if( standard_output_enabled_ ) {
-      time_series_filename = OutputFileName( OutputType::Standard) + TimeSeriesSuffix();
+      time_series_filename = OutputFileName( OutputType::Standard ) + TimeSeriesSuffix();
       output_writer_.FinalizeTimeSeriesFile( time_series_filename );
    }
    if( interface_output_enabled_ ) {
-      time_series_filename = OutputFileName( OutputType::Interface) + TimeSeriesSuffix();
+      time_series_filename = OutputFileName( OutputType::Interface ) + TimeSeriesSuffix();
       output_writer_.FinalizeTimeSeriesFile( time_series_filename );
    }
    if constexpr( DP::DebugOutput() ) {
-      time_series_filename = OutputFileName( OutputType::Debug) + TimeSeriesSuffix();
+      time_series_filename = OutputFileName( OutputType::Debug ) + TimeSeriesSuffix();
       output_writer_.FinalizeTimeSeriesFile( time_series_filename );
    }
 }
@@ -232,7 +229,7 @@ void InputOutputManager::CreateOutputFolder() const {
  * @brief Writes all micro timestep sizes performed during the last macro timestep.
  * @param timesteps_on_finest_level Sizes of the micro timesteps.
  */
-void InputOutputManager::WriteTimestepFile(  std::vector<double> const& timesteps_on_finest_level ) const {
+void InputOutputManager::WriteTimestepFile( std::vector<double> const& timesteps_on_finest_level ) const {
    // can only be done for rank 0 to avoid parallel writing
    if( MpiUtilities::MyRankId() == 0 ) {
       // Create the string with all time steps
@@ -275,8 +272,8 @@ bool InputOutputManager::WriteFullOutput( double const timestep, bool const forc
          RemoveTimeStamps( standard_output_timestamps_, timestep );
 
          // Write output with logging information for standard and debug output
-         std::string const output_filename( OutputFileName( OutputType::Standard) + time_name );
-         std::string const time_series_filename( OutputFileName( OutputType::Standard) + TimeSeriesSuffix() );
+         std::string const output_filename( OutputFileName( OutputType::Standard ) + time_name );
+         std::string const time_series_filename( OutputFileName( OutputType::Standard ) + TimeSeriesSuffix() );
          WriteOutput( OutputType::Standard, dimensionalized_time, output_filename, time_series_filename );
 
          // Set flag to true
@@ -293,8 +290,8 @@ bool InputOutputManager::WriteFullOutput( double const timestep, bool const forc
          RemoveTimeStamps( interface_output_timestamps_, timestep );
 
          // call the output functions with the dimensionalized time
-         std::string const output_filename( OutputFileName( OutputType::Interface) + time_name );
-         std::string const time_series_filename( OutputFileName( OutputType::Interface) + TimeSeriesSuffix() );
+         std::string const output_filename( OutputFileName( OutputType::Interface ) + time_name );
+         std::string const time_series_filename( OutputFileName( OutputType::Interface ) + TimeSeriesSuffix() );
          WriteOutput( OutputType::Interface, dimensionalized_time, output_filename, time_series_filename );
 
          // Set flag to true
@@ -304,8 +301,8 @@ bool InputOutputManager::WriteFullOutput( double const timestep, bool const forc
 
    // Always write debug output if activated
    if constexpr( DP::DebugOutput() ) {
-      std::string const output_filename( OutputFileName( OutputType::Debug) + time_name );
-      std::string const time_series_filename( OutputFileName( OutputType::Debug) + TimeSeriesSuffix() );
+      std::string const output_filename( OutputFileName( OutputType::Debug ) + time_name );
+      std::string const time_series_filename( OutputFileName( OutputType::Debug ) + TimeSeriesSuffix() );
       WriteOutput( OutputType::Debug, dimensionalized_time, output_filename, time_series_filename );
 
       // Set flag to true
@@ -327,11 +324,11 @@ bool InputOutputManager::WriteFullOutput( double const timestep, bool const forc
  * @param output_type Output type identifier that is used (standard, interface, debug). Default: Debug.
  */
 void InputOutputManager::WriteSingleOutput( unsigned int const output_key, OutputType const output_type ) const {
-  // correct file naming
-  std::string const time_name( std::to_string( double( output_key ) ) );
-  std::string const output_filename( OutputFileName( output_type ) + time_name );
-  // Call the output function
-  WriteOutput( output_type, double( output_key ), output_filename, "" );
+   // correct file naming
+   std::string const time_name( std::to_string( double( output_key ) ) );
+   std::string const output_filename( OutputFileName( output_type ) + time_name );
+   // Call the output function
+   WriteOutput( output_type, double( output_key ), output_filename, "" );
 }
 
 /**
@@ -353,8 +350,7 @@ void InputOutputManager::WriteOutput( OutputType const output_type,
    output_writer_.WriteOutput( output_type, output_time, filename_without_extension, time_series_filename_without_extension );
 
    // Final logging
-   logger_.LogMessage(  OutputTypeToString( output_type ) + " output file written at t = "
-                        + StringOperations::ToScientificNotationString( output_time, 9 ), true, true );
+   logger_.LogMessage( OutputTypeToString( output_type ) + " output file written at t = " + StringOperations::ToScientificNotationString( output_time, 9 ), true, true );
 
    // Debug loggin information for full writing process
    if( DP::Profile() ) {
@@ -366,8 +362,8 @@ void InputOutputManager::WriteOutput( OutputType const output_type,
       MPI_Allgather( &seconds_elapsed, 1, MPI_DOUBLE, all_times.data(), 1, MPI_DOUBLE, MPI_COMM_WORLD );
       std::vector<double>::iterator max_time = std::max_element( all_times.begin(), all_times.end() );
       std::vector<double>::iterator min_time = std::min_element( all_times.begin(), all_times.end() );
-      double const avg_time = std::accumulate( all_times.begin(), all_times.end(), 0.0 ) / number_of_ranks;
-      std::string message = "Writing " + OutputTypeToString( output_type ) + " output: avg/max(rank)/min(rank) ";
+      double const avg_time                  = std::accumulate( all_times.begin(), all_times.end(), 0.0 ) / number_of_ranks;
+      std::string message                    = "Writing " + OutputTypeToString( output_type ) + " output: avg/max(rank)/min(rank) ";
       message.append( std::to_string( avg_time ) + "/" );
       message.append( std::to_string( *max_time ) + "(" + std::to_string( distance( all_times.begin(), max_time ) ) + ")/" );
       message.append( std::to_string( *min_time ) + "(" + std::to_string( distance( all_times.begin(), min_time ) ) + ")/" );
@@ -382,7 +378,7 @@ void InputOutputManager::WriteOutput( OutputType const output_type,
  * @param timestep The current timestep.
  * @param force_output A flag indicating whether output should be forced.
  */
-void InputOutputManager::WriteRestartFile( double const timestep, bool const force_output) {
+void InputOutputManager::WriteRestartFile( double const timestep, bool const force_output ) {
    // Check restart trigger on wall clock interval
    bool snapshot_interval_triggered = false;
    // only consider interval-based snapshots if the interval is greater zero
@@ -390,10 +386,10 @@ void InputOutputManager::WriteRestartFile( double const timestep, bool const for
       // only carry out for rank zero
       if( MpiUtilities::MyRankId() == 0 ) {
          std::chrono::time_point<std::chrono::system_clock> const current_wall_time = std::chrono::system_clock::now();
-         int const wall_seconds_since_snapshot = std::chrono::duration_cast<std::chrono::seconds>( current_wall_time - wall_time_of_last_restart_file_ ).count();
+         int const wall_seconds_since_snapshot                                      = std::chrono::duration_cast<std::chrono::seconds>( current_wall_time - wall_time_of_last_restart_file_ ).count();
          if( restart_snapshot_interval_ <= wall_seconds_since_snapshot ) {
             wall_time_of_last_restart_file_ = current_wall_time;
-            snapshot_interval_triggered = true;
+            snapshot_interval_triggered     = true;
          }
       }
       // distribute restart decision among all ranks
@@ -450,12 +446,11 @@ double InputOutputManager::RestoreSimulationFromSnapshot() {
    logger_.LogMessage( " " );
    // Change behavior dependent on given restore mode
    switch( restore_mode_ ) {
-      case RestoreMode::Off : {
+      case RestoreMode::Off: {
          logger_.LogMessage( "Restore from snapshot disabled!" );
          restart_time = -1.0;
-      }
-      break;
-      case RestoreMode::Soft : {
+      } break;
+      case RestoreMode::Soft: {
          logger_.LogMessage( "Soft restore enabled: " );
          if( CheckIfRestoreFileExists() ) {
             logger_.LogMessage( "Initializing simulation from restart file: " + restore_filename_ );
@@ -464,18 +459,16 @@ double InputOutputManager::RestoreSimulationFromSnapshot() {
             logger_.LogMessage( "WARNING: restart file specified in the input file does not exist!" );
             restart_time = -1.0;
          }
-      }
-      break;
-      case RestoreMode::Forced : {
+      } break;
+      case RestoreMode::Forced: {
          if( !CheckIfRestoreFileExists() ) {
             throw std::runtime_error( "Force restore not possible: restart file specified in the input file does not exist" );
          }
 
          logger_.LogMessage( "Initializing simulation from restart file: " + restore_filename_ );
          restart_time = restart_manager_.RestoreSimulation( restore_filename_ );
-      }
-      break;
-      default :
+      } break;
+      default:
          // as this method is only called once at startup, we don't need to make use of the PERFORMANCE flag
          throw std::invalid_argument( "This restore mode is not known!" );
    }

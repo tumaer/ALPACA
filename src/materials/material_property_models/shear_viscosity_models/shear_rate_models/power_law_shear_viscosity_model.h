@@ -81,15 +81,14 @@ class PowerLawShearViscosityModel : public ShearRateMaterialParameterModel<Power
    friend ShearRateMaterialParameterModel;
 
    // Definition of parameters needed in the base class for the computations
-   static constexpr Parameter parameter_buffer_type_ = Parameter::ShearViscosity; // buffer that is modified by the model
-   static constexpr DerivativeStencils derivative_stencil_ = viscous_fluxes_derivative_stencil_cell_center; // stencil required for the shear rate
+   static constexpr Parameter parameter_buffer_type_       = Parameter::ShearViscosity;                    // buffer that is modified by the model
+   static constexpr DerivativeStencils derivative_stencil_ = viscous_fluxes_derivative_stencil_cell_center;// stencil required for the shear rate
 
    // member variables needed for the model calculation
    double const consistency_factor_;
    double const power_law_exponent_;
    // derived model parameter (to avoid multiple computations)
    double const exponent_;
-
 
    // Actual computation of shear viscosity
    double ComputeParameter( double const shear_rate ) const;
@@ -98,14 +97,14 @@ public:
    PowerLawShearViscosityModel() = delete;
    explicit PowerLawShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                          UnitHandler const& unit_handler );
-   virtual ~PowerLawShearViscosityModel() = default;
+   virtual ~PowerLawShearViscosityModel()                            = default;
    PowerLawShearViscosityModel( const PowerLawShearViscosityModel& ) = delete;
    PowerLawShearViscosityModel& operator=( const PowerLawShearViscosityModel& ) = delete;
-   PowerLawShearViscosityModel( PowerLawShearViscosityModel&& ) = delete;
+   PowerLawShearViscosityModel( PowerLawShearViscosityModel&& )                 = delete;
    PowerLawShearViscosityModel& operator=( PowerLawShearViscosityModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // POWER_LAW_SHEAR_VISCOSITY_MODEL_H
+#endif// POWER_LAW_SHEAR_VISCOSITY_MODEL_H

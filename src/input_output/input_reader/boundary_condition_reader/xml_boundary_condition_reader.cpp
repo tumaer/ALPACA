@@ -73,9 +73,8 @@
  * @brief Default constructor for the boundary condition reader for xml-type input files.
  * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
-XmlBoundaryConditionReader::XmlBoundaryConditionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   BoundaryConditionReader(),
-   xml_input_file_( std::move( inputfile ) ) {
+XmlBoundaryConditionReader::XmlBoundaryConditionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : BoundaryConditionReader(),
+                                                                                                             xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 

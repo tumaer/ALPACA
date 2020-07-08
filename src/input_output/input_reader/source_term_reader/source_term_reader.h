@@ -77,24 +77,24 @@
  *        It serves as a proxy class for different source term reader types (xml,...) that only read the actual data. 
  *        Here, consistency checks are done that all read data are valid.  
  */
-class SourceTermReader{
+class SourceTermReader {
 
 protected:
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit SourceTermReader() = default;
 
    // Functions that must be implemented by the derived classes
    virtual double DoReadGravity( Direction const direction ) const = 0;
 
 public:
-   virtual ~SourceTermReader() = default;
+   virtual ~SourceTermReader()                 = default;
    SourceTermReader( SourceTermReader const& ) = delete;
    SourceTermReader& operator=( SourceTermReader const& ) = delete;
-   SourceTermReader( SourceTermReader&& ) = delete;
+   SourceTermReader( SourceTermReader&& )                 = delete;
    SourceTermReader& operator=( SourceTermReader&& ) = delete;
 
-   // return function of the reader 
+   // return function of the reader
    double ReadGravity( Direction const direction ) const;
 };
 
-#endif // SOURCE_TERM_READER_H
+#endif// SOURCE_TERM_READER_H

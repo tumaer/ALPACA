@@ -86,10 +86,10 @@ enum class InputType { Xml };
 inline std::string InputTypeToString( InputType const type ) {
 
    switch( type ) {
-      case InputType::Xml : {
+      case InputType::Xml: {
          return "Xml";
       }
-      default : {
+      default: {
          throw std::logic_error( "Input type is not known!" );
       }
    }
@@ -112,4 +112,4 @@ inline InputType StringToInputType( std::string const& type ) {
    }
 }
 
-#endif // INPUT_DEFINITIONS_H
+#endif// INPUT_DEFINITIONS_H

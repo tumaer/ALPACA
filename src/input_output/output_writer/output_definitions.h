@@ -80,13 +80,18 @@
  *        (Stamps: A file is written for time stamps).
  *        (IntervalStamps: A file is written for the given intervals and period).
  */
-enum class OutputTimesType { Off, Interval, Stamps, IntervalStamps };
+enum class OutputTimesType { Off,
+                             Interval,
+                             Stamps,
+                             IntervalStamps };
 
 /**
  * @brief The OutputType defines the type of output which is written (standard, interface and debug).
  */
 // AB 2020-03-23 Do not change underlying type and indices. Used for mapping of correct array position.
-enum class OutputType : unsigned short { Standard = 0, Interface = 1, Debug = 2 };
+enum class OutputType : unsigned short { Standard  = 0,
+                                         Interface = 1,
+                                         Debug     = 2 };
 
 /**
  * @brief Converts an output type identifier to a (C++11 standard compliant, i. e. positive) array index. "OTTI = Output Type To Index"
@@ -103,16 +108,16 @@ constexpr std::underlying_type<OutputType>::type OTTI( OutputType const ot ) { r
 inline std::string OutputTypeToString( OutputType const type ) {
 
    switch( type ) {
-      case OutputType::Standard : {
+      case OutputType::Standard: {
          return "Standard";
       }
-      case OutputType::Interface : {
+      case OutputType::Interface: {
          return "Interface";
       }
-      case OutputType::Debug : {
+      case OutputType::Debug: {
          return "Debug";
       }
-      default : {
+      default: {
          throw std::logic_error( "Output type is not known!" );
       }
    }
@@ -129,19 +134,15 @@ inline OutputTimesType StringToOutputTimesType( std::string const& times_type ) 
    // switch statements cannot be used with strings
    if( type_upper_case == "OFF" ) {
       return OutputTimesType::Off;
-   }
-   else if( type_upper_case == "INTERVAL" ) {
+   } else if( type_upper_case == "INTERVAL" ) {
       return OutputTimesType::Interval;
-   }
-   else if( type_upper_case == "STAMPS" ) {
+   } else if( type_upper_case == "STAMPS" ) {
       return OutputTimesType::Stamps;
-   }
-   else if( type_upper_case == "INTERVALSTAMPS" || type_upper_case == "STAMPSINTERVAL" ) {
+   } else if( type_upper_case == "INTERVALSTAMPS" || type_upper_case == "STAMPSINTERVAL" ) {
       return OutputTimesType::IntervalStamps;
-   }
-   else {
+   } else {
       throw std::logic_error( "Output times type '" + type_upper_case + "' not known!" );
    }
 }
 
-#endif // OUTPUT_DEFINITIONS_H
+#endif// OUTPUT_DEFINITIONS_H

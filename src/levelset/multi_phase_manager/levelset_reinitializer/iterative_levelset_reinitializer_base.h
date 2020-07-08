@@ -91,9 +91,7 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     * @brief The default constructor for a LevelsetReinitializer object.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit IterativeLevelsetReinitializerBase( HaloManager & halo_manager ) :
-      LevelsetReinitializer<DerivedIterativeLevelsetReinitializer>( halo_manager )
-   {
+   explicit IterativeLevelsetReinitializerBase( HaloManager& halo_manager ) : LevelsetReinitializer<DerivedIterativeLevelsetReinitializer>( halo_manager ) {
       // Empty Constructor, besides initializer list.
    }
 
@@ -101,22 +99,22 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     * @brief Sets the cut-off in the levelset field of a node.
     * @param node The node with levelset block which has to be reinitialized.
     */
-   void CutOffSingleNode(Node& node) const {
+   void CutOffSingleNode( Node& node ) const {
 
-      InterfaceBlock& interface_block = node.GetInterfaceBlock();
-      double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer(InterfaceDescription::Levelset);
+      InterfaceBlock& interface_block                      = node.GetInterfaceBlock();
+      double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
 
       // Cells which have a levelset value greater than the cutoff value are set to cutoff.
       double const cutoff = CC::LSCOF();
-      for(unsigned int i = 0; i < CC::TCX(); ++i){
-         for(unsigned int j = 0; j < CC::TCY(); ++j){
-            for(unsigned int k = 0; k < CC::TCZ(); ++k){
-               if(std::abs(levelset[i][j][k]) > cutoff) {
-                  levelset[i][j][k] = Signum(levelset[i][j][k]) * cutoff;
+      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+               if( std::abs( levelset[i][j][k] ) > cutoff ) {
+                  levelset[i][j][k] = Signum( levelset[i][j][k] ) * cutoff;
                }
-            } //k
-         } //j
-      } //i
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
@@ -124,55 +122,53 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     * @param nodes Vector holding all nodes that have to be updated.
     * @param Return whether it's the last RK stage or not.
     */
-   void ReinitializeImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage) const {
+   void ReinitializeImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
 
       // Store the original levelset field in the right-hand side buffer to have a reference during reinitialization
       BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
 
       // Carry out the actual reinitialization procedure
       double residuum = 0.0;
-      for(unsigned int iteration_number = 0; iteration_number < ReinitializationConstants::MaximumNumberOfIterations; ++iteration_number){
+      for( unsigned int iteration_number = 0; iteration_number < ReinitializationConstants::MaximumNumberOfIterations; ++iteration_number ) {
 
-
-         if constexpr(ReinitializationConstants::TrackConvergence) {
+         if constexpr( ReinitializationConstants::TrackConvergence ) {
             residuum = 0.0;
          }
-         for(auto& node : nodes) {
-            residuum = std::max(residuum, static_cast<DerivedIterativeLevelsetReinitializer const&>(*this).ReinitializeSingleNodeImplementation(node, is_last_stage));
+         for( auto& node : nodes ) {
+            residuum = std::max( residuum, static_cast<DerivedIterativeLevelsetReinitializer const&>( *this ).ReinitializeSingleNodeImplementation( node, is_last_stage ) );
          }
 
          //halo update
          halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetReinitialized );
-         if constexpr(ReinitializationConstants::TrackConvergence) {
-            MPI_Allreduce(MPI_IN_PLACE, &residuum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         if constexpr( ReinitializationConstants::TrackConvergence ) {
+            MPI_Allreduce( MPI_IN_PLACE, &residuum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
 
-            if(residuum < ReinitializationConstants::MaximumResiduum) {
-               if constexpr(GeneralTwoPhaseSettings::LogConvergenceInformation) {
-                  logger_.AppendDelayedLog("Reinit: " + std::to_string(static_cast<int>(iteration_number)) + " ");
+            if( residuum < ReinitializationConstants::MaximumResiduum ) {
+               if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
+                  logger_.AppendDelayedLog( "Reinit: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
                }
                break;
-            } else if(iteration_number == ReinitializationConstants::MaximumNumberOfIterations - 1) {
-               if constexpr(GeneralTwoPhaseSettings::LogConvergenceInformation) {
-                  logger_.AppendDelayedLog("Reinit: nc   !!!   ");
+            } else if( iteration_number == ReinitializationConstants::MaximumNumberOfIterations - 1 ) {
+               if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
+                  logger_.AppendDelayedLog( "Reinit: nc   !!!   " );
                }
             }
          }
       }
 
-      for(auto& node : nodes) {
+      for( auto& node : nodes ) {
          CutOffSingleNode( node );
       }
-      halo_manager_.InterfaceHaloUpdateOnLmax(InterfaceBlockBufferType::LevelsetReinitialized);
+      halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetReinitialized );
    }
 
 public:
-   IterativeLevelsetReinitializerBase() = delete;
-   virtual ~IterativeLevelsetReinitializerBase() = default;
+   IterativeLevelsetReinitializerBase()                                            = delete;
+   virtual ~IterativeLevelsetReinitializerBase()                                   = default;
    IterativeLevelsetReinitializerBase( IterativeLevelsetReinitializerBase const& ) = delete;
    IterativeLevelsetReinitializerBase& operator=( IterativeLevelsetReinitializerBase const& ) = delete;
-   IterativeLevelsetReinitializerBase( IterativeLevelsetReinitializerBase&& ) = delete;
+   IterativeLevelsetReinitializerBase( IterativeLevelsetReinitializerBase&& )                 = delete;
    IterativeLevelsetReinitializerBase& operator=( IterativeLevelsetReinitializerBase&& ) = delete;
 };
 
-
-#endif //ITERATIVE_LEVELSET_REINITIALIZER_BASE_H
+#endif//ITERATIVE_LEVELSET_REINITIALIZER_BASE_H

@@ -151,7 +151,6 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       }
    }
 
-
    GIVEN( "A stiffened gas complete safe" ) {
 
       WHEN( "All parameters are set to zero" ) {
@@ -326,7 +325,6 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       }
    }
 
-
    GIVEN( "A waterlike fluid" ) {
 
       WHEN( "All parameters are set to zero" ) {
@@ -409,8 +407,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "All parameters are set to zero" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "covolume", 0.0 }, { "pressureConstant", 0.0 }, { "energyConstant", 0.0 },
-                                                                    { "entropyConstant", 0.0 }, { "specificHeatCapacity", 0.0 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 0.0 }, { "covolume", 0.0 }, { "pressureConstant", 0.0 }, { "energyConstant", 0.0 }, { "entropyConstant", 0.0 }, { "specificHeatCapacity", 0.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<NobleAbelStiffenedGas const>( eos_data, unit_handler ) );
 
          THEN( "The gruneisen is" ) {
@@ -429,8 +426,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
       WHEN( "The parameters contain reasonable values" ) {
 
          // Define material properties and initialize material and subclasses properly
-         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "covolume", 0.04 }, { "pressureConstant", 4.3 }, { "energyConstant", 2.0 },
-                                                                    { "entropyConstant", 3.0 }, { "specificHeatCapacity", 4.0 } };
+         std::unordered_map<std::string, double> const eos_data = { { "gamma", 6.1 }, { "covolume", 0.04 }, { "pressureConstant", 4.3 }, { "energyConstant", 2.0 }, { "entropyConstant", 3.0 }, { "specificHeatCapacity", 4.0 } };
          std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<NobleAbelStiffenedGas const>( eos_data, unit_handler ) );
 
          THEN( "The pressure is" ) {
@@ -458,7 +454,7 @@ SCENARIO( "Equations of state are constructed and their properties are queried",
          }
 
          THEN( "The gamma is" ) {
-            REQUIRE( equation_of_state->GetGamma() == 6.1);
+            REQUIRE( equation_of_state->GetGamma() == 6.1 );
          }
 
          THEN( "The background pressure is" ) {

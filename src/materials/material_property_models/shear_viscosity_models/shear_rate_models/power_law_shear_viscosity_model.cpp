@@ -82,12 +82,11 @@
  * @note Runtime a check is done that all required parameters are present. Furthermore, pre-calculations are done for simpler access during compute call
  */
 PowerLawShearViscosityModel::PowerLawShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
-                                                          UnitHandler const& unit_handler ) :
-   // Start initializer list
-   ShearRateMaterialParameterModel<PowerLawShearViscosityModel>(),
-   consistency_factor_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "consistencyFactor", "PowerLawShearViscosityModel" ), UnitType::Viscosity ) ),
-   power_law_exponent_( GetCheckedParameter(  dimensional_parameter_map, "powerLawExponent", "PowerLawShearViscosityModel" ) ),
-   exponent_( power_law_exponent_ - 1.0 ) {
+                                                          UnitHandler const& unit_handler ) :// Start initializer list
+                                                                                              ShearRateMaterialParameterModel<PowerLawShearViscosityModel>(),
+                                                                                              consistency_factor_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "consistencyFactor", "PowerLawShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                              power_law_exponent_( GetCheckedParameter( dimensional_parameter_map, "powerLawExponent", "PowerLawShearViscosityModel" ) ),
+                                                                                              exponent_( power_law_exponent_ - 1.0 ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 
@@ -102,10 +101,8 @@ std::string PowerLawShearViscosityModel::GetLogData( unsigned int const indent, 
    std::string log_string;
    // Add data
    log_string += StringOperations::Indent( indent ) + "Model type: Power-law \n";
-   log_string += StringOperations::Indent( indent ) + "factor    : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( consistency_factor_, UnitType::Viscosity ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "n         : " + StringOperations::ToScientificNotationString(
-                     power_law_exponent_, 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "factor    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( consistency_factor_, UnitType::Viscosity ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "n         : " + StringOperations::ToScientificNotationString( power_law_exponent_, 9 ) + "\n";
 
    return log_string;
 }

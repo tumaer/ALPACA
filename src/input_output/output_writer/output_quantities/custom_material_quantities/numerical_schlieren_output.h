@@ -77,22 +77,22 @@
  */
 class NumericalSchlierenOutput : public OutputQuantity {
 
-private: 
+private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;   
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    NumericalSchlierenOutput() = delete;
-   explicit NumericalSchlierenOutput( UnitHandler const& unit_handler, 
-                                      MaterialManager const& material_manager, 
+   explicit NumericalSchlierenOutput( UnitHandler const& unit_handler,
+                                      MaterialManager const& material_manager,
                                       std::string const& quantity_name,
                                       std::array<bool, 3> const output_flags );
-   virtual ~NumericalSchlierenOutput() = default;
+   virtual ~NumericalSchlierenOutput()                         = default;
    NumericalSchlierenOutput( NumericalSchlierenOutput const& ) = delete;
    NumericalSchlierenOutput& operator=( NumericalSchlierenOutput const& ) = delete;
-   NumericalSchlierenOutput( NumericalSchlierenOutput&& ) = delete;
+   NumericalSchlierenOutput( NumericalSchlierenOutput&& )                 = delete;
    NumericalSchlierenOutput& operator=( NumericalSchlierenOutput&& ) = delete;
 };
 
-#endif // NUMERICAL_SCHLIEREN_OUTPUT_H
+#endif// NUMERICAL_SCHLIEREN_OUTPUT_H

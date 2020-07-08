@@ -95,12 +95,12 @@ namespace Simulation {
       LogWriter& logger = LogWriter::Instance();
 
       int number_of_ranks = -1;
-      MPI_Comm_size(MPI_COMM_WORLD,&number_of_ranks);
-      logger.LogMessage("Number of MPI ranks : " + std::to_string(number_of_ranks));
+      MPI_Comm_size( MPI_COMM_WORLD, &number_of_ranks );
+      logger.LogMessage( "Number of MPI ranks : " + std::to_string( number_of_ranks ) );
 #ifdef HILBERT
-      logger.LogMessage("Load balancing      : Hilbert-Curve");
+      logger.LogMessage( "Load balancing      : Hilbert-Curve" );
 #else
-      logger.LogMessage("Load Balancing      : Z-Curve");
+      logger.LogMessage( "Load Balancing      : Z-Curve" );
 #endif
       logger.AddBreakLine( true );
 
@@ -153,6 +153,6 @@ namespace Simulation {
       logger.Flush();
    }
 
-}
+}// namespace Simulation
 
-#endif // SIMULATION_RUNNER_H
+#endif// SIMULATION_RUNNER_H

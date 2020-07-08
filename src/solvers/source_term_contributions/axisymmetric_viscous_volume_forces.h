@@ -80,26 +80,21 @@ class AxisymmetricViscousVolumeForces {
 
 private:
    MaterialManager const& material_manager_;
-   static constexpr unsigned int dim_ = 2; //only sane configuration; enables unit testing
+   static constexpr unsigned int dim_ = 2;//only sane configuration; enables unit testing
 
-   void ComputeVelocityGradient( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                               , double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                               , double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                               , double const cell_size
-                               , double (&velocity_gradient)[CC::TCX()][CC::TCY()][dim_][dim_] ) const;
+   void ComputeVelocityGradient( double const ( &u )[CC::TCX()][CC::TCY()][CC::TCZ()], double const ( &v )[CC::TCX()][CC::TCY()][CC::TCZ()], double const ( &w )[CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size, double ( &velocity_gradient )[CC::TCX()][CC::TCY()][dim_][dim_] ) const;
 
 public:
    AxisymmetricViscousVolumeForces() = delete;
    explicit AxisymmetricViscousVolumeForces( MaterialManager const& material_manager );
-   ~AxisymmetricViscousVolumeForces() = default;
+   ~AxisymmetricViscousVolumeForces()                                        = default;
    AxisymmetricViscousVolumeForces( AxisymmetricViscousVolumeForces const& ) = delete;
-   AxisymmetricViscousVolumeForces( AxisymmetricViscousVolumeForces&& ) = delete;
+   AxisymmetricViscousVolumeForces( AxisymmetricViscousVolumeForces&& )      = delete;
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces const& ) = delete;
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces&& ) = delete;
 
-   void ComputeForces( std::pair<MaterialName const, Block> const& mat_block, double (&axisymmetric_viscous_volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
+   void ComputeForces( std::pair<MaterialName const, Block> const& mat_block, double ( &axisymmetric_viscous_volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
                        double const cell_size, double const node_origin_x ) const;
-
 };
 
-#endif //AXISYMMETRIC_VISCOUS_VOLUME_FORCES_H
+#endif//AXISYMMETRIC_VISCOUS_VOLUME_FORCES_H

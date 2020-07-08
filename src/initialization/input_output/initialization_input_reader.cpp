@@ -98,10 +98,10 @@ namespace Initialization {
       }
 
       // Determine the input type
-      InputType const input_type( StringToInputType( FileOperations::GetFileExtension( input_filename) ) );
+      InputType const input_type( StringToInputType( FileOperations::GetFileExtension( input_filename ) ) );
       // Instantiate correct reader
       switch( input_type ) {
-         case InputType::Xml : {
+         case InputType::Xml: {
             // Open the file (here std::make_shared not possible)
             // shared pinter required to distribute the open input file on different reader
             std::shared_ptr<tinyxml2::XMLDocument> input_file( new tinyxml2::XMLDocument );
@@ -123,9 +123,9 @@ namespace Initialization {
                                 std::make_unique<XmlTimeControlReader const>( input_file ) );
          }
 
-         default : {
+         default: {
             throw std::invalid_argument( "Input file extension not known! Cannot choose correct reader!" );
          }
       }
    }
-}
+}// namespace Initialization

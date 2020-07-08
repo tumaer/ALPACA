@@ -81,56 +81,56 @@ namespace MaterialFieldOutputSettings {
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Mass = { false, false, false };
-   static std::string const  MassName = "mass";
+   static std::string const MassName  = "mass";
    /**
     * Indicates whether the Momentum should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Momentum = { false, false, false };
-   static std::string const  MomentumName = "momentum";
+   static std::string const MomentumName  = "momentum";
    /**
     * Indicates whether the Energy should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Energy = { false, false, false };
-   static std::string const  EnergyName = "energy";
+   static std::string const EnergyName  = "energy";
    /**
     * Indicates whether the Velocity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Velocity = { true, false, false };
-   static std::string const  VelocityName = "velocity";
+   static std::string const VelocityName  = "velocity";
    /**
     * Indicates whether the Temperature should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Temperature = { false, false, false };
-   static std::string const  TemperatureName = "temperature";
+   static std::string const TemperatureName  = "temperature";
    /**
     * Indicates whether the Pressure should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Pressure = { true, false, false };
-   static std::string const  PressureName = "pressure";
+   static std::string const PressureName  = "pressure";
    /**
     * Indicates whether the Density should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Density = { true, false, false };
-   static std::string const  DensityName = "density";
+   static std::string const DensityName  = "density";
    /**
     * Indicates whether the ShearViscosity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> ShearViscosity = { false, false, false };
-   static std::string const  ShearViscosityName = "shear_viscosity";
+   static std::string const ShearViscosityName  = "shear_viscosity";
    /**
     * Indicates whether the ThermalConductivity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> ThermalConductivity = { false, false, false };
-   static std::string const  ThermalConductivityName = "thermal_conductivity";
-}
+   static std::string const ThermalConductivityName  = "thermal_conductivity";
+}// namespace MaterialFieldOutputSettings
 
 namespace InterfaceFieldOutputSettings {
    /**
@@ -143,38 +143,38 @@ namespace InterfaceFieldOutputSettings {
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Levelset = { true, false, false };
-   static std::string const  LevelsetName = "levelset";
+   static std::string const LevelsetName  = "levelset";
    /**
     * Indicates whether the VolumeFraction should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> VolumeFraction = { false, false, false };
-   static std::string const  VolumeFractionName = "volume_fraction";
+   static std::string const VolumeFractionName  = "volume_fraction";
    /**
     * Indicates whether the InterfaceVelocity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> InterfaceVelocity = { true, false, false };
-   static std::string const  InterfaceVelocityName = "interface_velocity";
+   static std::string const InterfaceVelocityName  = "interface_velocity";
    /**
     * Indicates whether the PressurePositive should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> PressurePositive = { false, false, false };
-   static std::string const  PressurePositiveName = "pressure_positive";
+   static std::string const PressurePositiveName  = "pressure_positive";
    /**
     * Indicates whether the PressureNegative should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> PressureNegative = { false, false, false };
-   static std::string const  PressureNegativeName = "pressure_negative";
+   static std::string const PressureNegativeName  = "pressure_negative";
    /**
     * Indicates whether the SurfaceTensionCoefficient should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> SurfaceTensionCoefficient = { false, false, false };
-   static std::string const  SurfaceTensionCoefficientName = "surface_tension_coefficient";
-}
+   static std::string const SurfaceTensionCoefficientName  = "surface_tension_coefficient";
+}// namespace InterfaceFieldOutputSettings
 
 namespace CustomOutputSettings {
    /**
@@ -182,49 +182,49 @@ namespace CustomOutputSettings {
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Partition = { false, false, false };
-   static std::string const  PartitionName = "partition";
+   static std::string const PartitionName  = "partition";
    /**
     * Indicates whether the MachNumber should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> MachNumber = { false, false, false };
-   static std::string const  MachNumberName = "Mach number";
+   static std::string const MachNumberName  = "Mach number";
    /**
     * Indicates whether the NumericalSchlieren should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> NumericalSchlieren = { false, false, false };
-   static std::string const  NumericalSchlierenName = "schlieren";
+   static std::string const NumericalSchlierenName  = "schlieren";
    /**
     * Indicates whether the Vorticity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> VorticityAbsolute = { false, false, false };
-   static std::string const  VorticityAbsoluteName = "vorticity";
+   static std::string const VorticityAbsoluteName  = "vorticity";
    /**
     * Indicates whether the Helicity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Helicity = { false, false, false };
-   static std::string const  HelicityName = "helicity";
+   static std::string const HelicityName  = "helicity";
    /**
     * Indicates whether the Baroclinicity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> Baroclinicity = { false, false, false };
-   static std::string const  BaroclinicityName = "baroclinicity";
+   static std::string const BaroclinicityName  = "baroclinicity";
    /**
     * Indicates whether the VortexDilatation should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> VortexDilatation = { false, false, false };
-   static std::string const  VortexDilatationName = "vortex_dilatation";
+   static std::string const VortexDilatationName  = "vortex_dilatation";
    /**
     * Indicates whether the VortexStretching should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
    constexpr std::array<bool, 3> VortexStretching = { false, false, false };
-   static std::string const  VortexStretchingName = "vortex_stretching";
-}
+   static std::string const VortexStretchingName  = "vortex_stretching";
+}// namespace CustomOutputSettings
 
-#endif // OUTPUT_CONSTANTS_H
+#endif// OUTPUT_CONSTANTS_H

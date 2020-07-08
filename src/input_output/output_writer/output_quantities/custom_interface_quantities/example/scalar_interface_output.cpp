@@ -80,15 +80,14 @@
 ScalarInterfaceOutput::ScalarInterfaceOutput( UnitHandler const& unit_handler,
                                               MaterialManager const& material_manager,
                                               std::string const& quantity_name,
-                                              std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
+                                              std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void ScalarInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void ScalarInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
@@ -125,7 +124,6 @@ void ScalarInterfaceOutput::DoComputeCellData( Node const& node, std::vector<dou
                 */
                // Use data from the negative material buffer
                cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
-
             }
          }
       }
@@ -151,7 +149,7 @@ void ScalarInterfaceOutput::DoComputeCellData( Node const& node, std::vector<dou
 /**
  * @brief see base class definition.
  */
-void ScalarInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
+void ScalarInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const ) const {
 
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
@@ -176,7 +174,7 @@ void ScalarInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vecto
                /**
                 * Add the value to the data vector (with further operations)
                 */
-                cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
+               cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
             }
          }
       }
@@ -184,14 +182,14 @@ void ScalarInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vecto
    } else {
       // Add default value for non-interface blocks
       for( unsigned int k = 0; k <= CC::TCZ(); ++k ) {
-        for( unsigned int j = 0; j <= CC::TCY(); ++j ) {
-           for( unsigned int i = 0; i <= CC::TCX(); ++i ) {
+         for( unsigned int j = 0; j <= CC::TCY(); ++j ) {
+            for( unsigned int i = 0; i <= CC::TCX(); ++i ) {
                /**
                 * Add the default value to the output data
                 */
-                cell_data[cell_data_counter++] = -1.0;
-           }
-        }
+               cell_data[cell_data_counter++] = -1.0;
+            }
+         }
       }
    }
 }

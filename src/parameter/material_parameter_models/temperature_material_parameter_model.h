@@ -87,19 +87,19 @@ class TemperatureMaterialParameterModel : public MaterialParameterModel {
     * @brief Executes the actual parameter calculation on the complete block.
     * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
     */
-   void DoUpdateParameter( Block & block, double const ) const override {
+   void DoUpdateParameter( Block& block, double const ) const override {
 
       // extract the temperature from the block
-      double const (&T)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Temperature );
+      double const( &T )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Temperature );
 
       // extract the paramerer from the block, which should be computed
-      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedTemperatureMaterialParameterModel::parameter_to_calculate_ );
+      double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedTemperatureMaterialParameterModel::parameter_to_calculate_ );
 
       // Compute the parameter based on the temperature
       for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-               parameter_buffer[i][j][k] = static_cast< DerivedTemperatureMaterialParameterModel const& >( *this ).ComputeParameter( T[i][j][k] );
+               parameter_buffer[i][j][k] = static_cast<DerivedTemperatureMaterialParameterModel const&>( *this ).ComputeParameter( T[i][j][k] );
             }
          }
       }
@@ -111,16 +111,16 @@ class TemperatureMaterialParameterModel : public MaterialParameterModel {
     * @param interface_tags Tags describing the interface position.
     * @param material_sign Sign of the material for identification on interface tags.
     */
-   void DoUpdateParameter( Block & block,
+   void DoUpdateParameter( Block& block,
                            double const,
-                           std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
+                           std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
                            std::int8_t const material_sign ) const override {
 
       // extract the temperature from the block
-      double const (&T)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Temperature );
+      double const( &T )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Temperature );
 
       // extract the parameter from the block, which should be computed
-      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedTemperatureMaterialParameterModel::parameter_to_calculate_ );
+      double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetParameterBuffer( DerivedTemperatureMaterialParameterModel::parameter_to_calculate_ );
 
       // Compute the parameter based on the shear rate
       for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
@@ -129,11 +129,12 @@ class TemperatureMaterialParameterModel : public MaterialParameterModel {
 
                // Note: Volume fraction can be used to average temperature
                parameter_buffer[i][j][k] = interface_tags[i][j][k] * material_sign >= 0 ?
-                                           static_cast< DerivedTemperatureMaterialParameterModel const& >( *this ).ComputeParameter( T[i][j][k] ) : 0.0;
+                                                 static_cast<DerivedTemperatureMaterialParameterModel const&>( *this ).ComputeParameter( T[i][j][k] ) :
+                                                 0.0;
 
-            } //k
-         } //j
-      }//i
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
@@ -145,12 +146,11 @@ class TemperatureMaterialParameterModel : public MaterialParameterModel {
    }
 
 public:
-   virtual ~TemperatureMaterialParameterModel() = default;
+   virtual ~TemperatureMaterialParameterModel()                                  = default;
    TemperatureMaterialParameterModel( TemperatureMaterialParameterModel const& ) = delete;
    TemperatureMaterialParameterModel& operator=( TemperatureMaterialParameterModel const& ) = delete;
-   TemperatureMaterialParameterModel( TemperatureMaterialParameterModel&& ) = delete;
+   TemperatureMaterialParameterModel( TemperatureMaterialParameterModel&& )                 = delete;
    TemperatureMaterialParameterModel& operator=( TemperatureMaterialParameterModel&& ) = delete;
-
 };
 
-#endif // TEMPERATURE_MATERIAL_PARAMETER_MODEL_H
+#endif// TEMPERATURE_MATERIAL_PARAMETER_MODEL_H

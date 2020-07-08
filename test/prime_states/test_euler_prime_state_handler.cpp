@@ -82,9 +82,9 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
    std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
 
    // Define material properties and initialize material
-   double const shear_viscosity = 1.0;
-   double const bulk_viscosity = 2.0;
-   double const specific_heat_capacity = 3.0;
+   double const shear_viscosity           = 1.0;
+   double const bulk_viscosity            = 2.0;
+   double const specific_heat_capacity    = 3.0;
    double const thermal_heat_conductivity = 4.0;
 
    // Instantiate material
@@ -95,13 +95,13 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
    // Instantiate material pairing
    std::vector<MaterialPairing> material_pairings;
 
-   auto const material_manager = MaterialManager( std::move( materials ), std::move( material_pairings ) );
+   auto const material_manager          = MaterialManager( std::move( materials ), std::move( material_pairings ) );
    auto const euler_prime_state_handler = EulerPrimeStateHandler( material_manager );
 
    GIVEN( "A set of prime states" ) {
       std::array<double, MF::ANOP()> prime_states;
       for( unsigned int p = 0; p < MF::ANOP(); ++p ) {
-         prime_states[p] = double(p + 1);
+         prime_states[p] = double( p + 1 );
       }
 
       // Obtain the material name of the single initialized material
@@ -111,13 +111,13 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
          std::array<double, MF::ANOE()> conservatives;
          euler_prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
          THEN( "Momenta equal the product of density and velocity" ) {
-            for( unsigned int m = 0; m < DTI(CC::DIM()); ++m ) {
-               REQUIRE( conservatives[ETI(MF::AME()[m])] == Approx( prime_states[PTI(PrimeState::Density)] * prime_states[PTI(MF::AV()[m])] ) );
+            for( unsigned int m = 0; m < DTI( CC::DIM() ); ++m ) {
+               REQUIRE( conservatives[ETI( MF::AME()[m] )] == Approx( prime_states[PTI( PrimeState::Density )] * prime_states[PTI( MF::AV()[m] )] ) );
             }
          }
 
          THEN( "Density equals mass" ) {
-            REQUIRE( conservatives[ETI(Equation::Mass)] == Approx( prime_states[PTI(PrimeState::Density)] ) );
+            REQUIRE( conservatives[ETI( Equation::Mass )] == Approx( prime_states[PTI( PrimeState::Density )] ) );
          }
 
          // Energy is not suitable to be checked since it depends on the used equation of state

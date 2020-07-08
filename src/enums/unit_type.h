@@ -72,24 +72,23 @@
  * @brief Identifier for unit types used in (non-)dimensionalization of physical quantities.
  */
 enum class UnitType {
-   Unitless, 
-   // SI units 
-   Length, 
-   Time, 
-   Temperature, 
+   Unitless,
+   // SI units
+   Length,
+   Time,
+   Temperature,
    Mass,
    // conservatives/prime states
-   Density, 
-   Velocity, 
-   Momentum, 
-   Energy, 
-   Pressure, 
+   Density,
+   Velocity,
+   Momentum,
+   Energy,
+   Pressure,
    // material parameter
    Viscosity,
-   ThermalConductivity, 
+   ThermalConductivity,
    // interface parameter
    SurfaceTensionCoefficient
 };
 
-
-#endif // UNIT_TYPE_H
+#endif// UNIT_TYPE_H

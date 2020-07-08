@@ -79,22 +79,22 @@
  *        It serves as a proxy class for different boundary condition reader types (xml,...) that only read the actual data.
  *        Here, consistency checks are done that all read data are valid.
  */
-class BoundaryConditionReader{
+class BoundaryConditionReader {
 
 protected:
    // constructor can only be called from derived classes
    explicit BoundaryConditionReader() = default;
 
    // Functions that must be implemented by the derived classes
-   virtual std::string DoReadMaterialBoundaryType( BoundaryLocation const location ) const = 0;
-   virtual std::string DoReadLevelSetBoundaryType( BoundaryLocation const location ) const = 0;
+   virtual std::string DoReadMaterialBoundaryType( BoundaryLocation const location ) const                                        = 0;
+   virtual std::string DoReadLevelSetBoundaryType( BoundaryLocation const location ) const                                        = 0;
    virtual double DoReadMaterialFixedValueBoundaryCondition( BoundaryLocation const location, std::string const& variable ) const = 0;
 
 public:
-   virtual ~BoundaryConditionReader() = default;
+   virtual ~BoundaryConditionReader()                        = default;
    BoundaryConditionReader( BoundaryConditionReader const& ) = delete;
    BoundaryConditionReader& operator=( BoundaryConditionReader const& ) = delete;
-   BoundaryConditionReader( BoundaryConditionReader&& ) = delete;
+   BoundaryConditionReader( BoundaryConditionReader&& )                 = delete;
    BoundaryConditionReader& operator=( BoundaryConditionReader&& ) = delete;
 
    // Functions that must be implemented by the derived classes
@@ -103,4 +103,4 @@ public:
    std::array<double, MF::ANOP()> ReadMaterialFixedValueBoundaryConditions( BoundaryLocation const location ) const;
 };
 
-#endif // BOUNDARY_CONDITION_READER_H
+#endif// BOUNDARY_CONDITION_READER_H

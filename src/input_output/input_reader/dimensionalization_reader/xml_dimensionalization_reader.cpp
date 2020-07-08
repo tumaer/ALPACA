@@ -73,9 +73,8 @@
  * @brief Default constructor for the dimensionalization reader for xml-type input files.
  * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
-XmlDimensionalizationReader::XmlDimensionalizationReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   DimensionalizationReader(),
-   xml_input_file_( std::move( inputfile ) ) {
+XmlDimensionalizationReader::XmlDimensionalizationReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : DimensionalizationReader(),
+                                                                                                               xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
@@ -102,7 +101,7 @@ double XmlDimensionalizationReader::DoReadReferenceDensity() const {
  */
 double XmlDimensionalizationReader::DoReadReferenceVelocity() const {
    // Obtain correct node
-   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization",  "velocityReference" } );
+   tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "dimensionalization", "velocityReference" } );
    return XmlUtilities::ReadDouble( node );
 }
 

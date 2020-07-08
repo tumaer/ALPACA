@@ -82,13 +82,13 @@
 class InterfaceMeshGenerator : public MeshGenerator {
 
    // Variable specification from the base class
+   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
    using MeshGenerator::topology_;
    using MeshGenerator::tree_;
-   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
 
    // virtual functions required from the base class to compute data to hdf5 file
-   void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
+   void DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const override;
+   void DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const override;
 
    // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
@@ -102,11 +102,11 @@ class InterfaceMeshGenerator : public MeshGenerator {
 public:
    InterfaceMeshGenerator() = delete;
    explicit InterfaceMeshGenerator( TopologyManager const& topology, Tree const& flower, double const dimensionalized_node_size_on_level_zero );
-   virtual ~InterfaceMeshGenerator() = default;
+   virtual ~InterfaceMeshGenerator()                       = default;
    InterfaceMeshGenerator( InterfaceMeshGenerator const& ) = delete;
    InterfaceMeshGenerator& operator=( InterfaceMeshGenerator const& ) = delete;
-   InterfaceMeshGenerator( InterfaceMeshGenerator&& ) = delete;
+   InterfaceMeshGenerator( InterfaceMeshGenerator&& )                 = delete;
    InterfaceMeshGenerator& operator=( InterfaceMeshGenerator&& ) = delete;
 };
 
-#endif // INTERFACE_MESH_GENERATOR_H
+#endif// INTERFACE_MESH_GENERATOR_H

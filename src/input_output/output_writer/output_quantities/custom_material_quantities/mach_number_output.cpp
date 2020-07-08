@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output/output_writer/output_quantities/custom_material_quantities/mach_number_output.h"
 
-#include <algorithm> //lower_bound, sort
+#include <algorithm>//lower_bound, sort
 #include "utilities/mathematical_functions.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
@@ -84,18 +84,17 @@
 MachNumberOutput::MachNumberOutput( UnitHandler const& unit_handler,
                                     MaterialManager const& material_manager,
                                     std::string const& quantity_name,
-                                    std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
+                                    std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
    if( node.HasLevelset() ) {
-       std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
       PrimeStates const& positive_prime_states = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer();
       PrimeStates const& negative_prime_states = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer();
@@ -107,29 +106,32 @@ void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                if( interface_tags[i][j][k] > 0 ) {
-                   cell_data[cell_data_counter++] = L2Norm( { positive_prime_states[PrimeState::VelocityX][i][j][k],
-                                                              CC::DIM() != Dimension::One ?   positive_prime_states[PrimeState::VelocityY][i][j][k] : 0.0 ,
-                                                              CC::DIM() == Dimension::Three ? positive_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) / positive_material_eos.GetSpeedOfSound( positive_prime_states[PrimeState::Density][i][j][k], positive_prime_states[PrimeState::Pressure][i][j][k] );
+                  cell_data[cell_data_counter++] = L2Norm( { positive_prime_states[PrimeState::VelocityX][i][j][k],
+                                                             CC::DIM() != Dimension::One ? positive_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
+                                                             CC::DIM() == Dimension::Three ? positive_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
+                                                   positive_material_eos.GetSpeedOfSound( positive_prime_states[PrimeState::Density][i][j][k], positive_prime_states[PrimeState::Pressure][i][j][k] );
                } else {
-                   cell_data[cell_data_counter++] = L2Norm( { negative_prime_states[PrimeState::VelocityX][i][j][k],
-                                                              CC::DIM() != Dimension::One ? negative_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
-                                                              CC::DIM() == Dimension::Three ? negative_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) / negative_material_eos.GetSpeedOfSound( negative_prime_states[PrimeState::Density][i][j][k], negative_prime_states[PrimeState::Pressure][i][j][k] );
+                  cell_data[cell_data_counter++] = L2Norm( { negative_prime_states[PrimeState::VelocityX][i][j][k],
+                                                             CC::DIM() != Dimension::One ? negative_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
+                                                             CC::DIM() == Dimension::Three ? negative_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
+                                                   negative_material_eos.GetSpeedOfSound( negative_prime_states[PrimeState::Density][i][j][k], negative_prime_states[PrimeState::Pressure][i][j][k] );
                }
             }
          }
       }
    } else {
       // No interface node -> interface tags/material is the same everywhere
-      MaterialName const material = node.GetSinglePhaseMaterial();
-      PrimeStates const& prime_states = node.GetPhaseByMaterial( material ).GetPrimeStateBuffer();
+      MaterialName const material         = node.GetSinglePhaseMaterial();
+      PrimeStates const& prime_states     = node.GetPhaseByMaterial( material ).GetPrimeStateBuffer();
       EquationOfState const& material_eos = material_manager_.GetMaterial( material ).GetEquationOfState();
 
       for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-                cell_data[cell_data_counter++] = L2Norm( { prime_states[PrimeState::VelocityX][i][j][k],
-                                                           CC::DIM() != Dimension::One ? prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
-                                                           CC::DIM() == Dimension::Three ? prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) / material_eos.GetSpeedOfSound( prime_states[PrimeState::Density][i][j][k], prime_states[PrimeState::Pressure][i][j][k] );
+               cell_data[cell_data_counter++] = L2Norm( { prime_states[PrimeState::VelocityX][i][j][k],
+                                                          CC::DIM() != Dimension::One ? prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
+                                                          CC::DIM() == Dimension::Three ? prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
+                                                material_eos.GetSpeedOfSound( prime_states[PrimeState::Density][i][j][k], prime_states[PrimeState::Pressure][i][j][k] );
             }
          }
       }
@@ -142,14 +144,14 @@ void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&
  * @note Attention: In case prime state, parameter  variables are used, pay attention that they only exist on leave nodes. In case a division is made on non-leave nodes
  *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes.
  */
-void MachNumberOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
+void MachNumberOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const {
 
    // Compute the real value only for nodes that contain the material
    if( node.ContainsMaterial( material ) ) {
       for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-                cell_data[cell_data_counter++] = 1.0;
+               cell_data[cell_data_counter++] = 1.0;
             }
          }
       }
@@ -158,7 +160,7 @@ void MachNumberOutput::DoComputeDebugCellData( Node const& node, std::vector<dou
       for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-                cell_data[cell_data_counter++] = -1.0;
+               cell_data[cell_data_counter++] = -1.0;
             }
          }
       }

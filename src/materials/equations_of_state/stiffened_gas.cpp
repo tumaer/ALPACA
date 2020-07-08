@@ -81,9 +81,8 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) :
-   gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
-   background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
+StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
+                                                                                                                                     background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
    /* Empty besides initializer list*/
 }
 
@@ -97,10 +96,7 @@ StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimen
  * @return Pressure according to stiffened-gas equation of state.
  */
 double StiffenedGas::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return -gamma_ * background_pressure_ + ( gamma_ - 1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x,
-                                                                                                                    momentum_y * momentum_y,
-                                                                                                                    momentum_z * momentum_z )
-                                                                / density );
+   return -gamma_ * background_pressure_ + ( gamma_ - 1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / density );
 }
 
 /**
@@ -125,9 +121,8 @@ double StiffenedGas::DoGetEnthalpy( double const density, double const momentum_
  * @param pressure The pressure used for the computation.
  * @return Energy according to stiffened-gas equation of state.
  */
-double StiffenedGas::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const{
-   return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ -1.0 )
-          + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / density );
+double StiffenedGas::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
+   return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ - 1.0 ) + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / density );
 }
 
 /**
@@ -170,8 +165,8 @@ double StiffenedGas::DoGetPsi( double const pressure, double const one_density )
  * @param pressure The pressure used for the computation.
  * @return Speed of sound according to stiffened-gas equation of state.
  */
-double StiffenedGas::DoGetSpeedOfSound( double const density, double const pressure ) const{
-   return std::sqrt( gamma_*( pressure + background_pressure_ ) / density );
+double StiffenedGas::DoGetSpeedOfSound( double const density, double const pressure ) const {
+   return std::sqrt( gamma_ * ( pressure + background_pressure_ ) / density );
 }
 
 /**
@@ -186,11 +181,8 @@ std::string StiffenedGas::GetLogData( unsigned int const indent, UnitHandler con
    // Name of the equation of state
    log_string += StringOperations::Indent( indent ) + "Type                 : Stiffened gas\n";
    // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString(
-                   DoGetGruneisen(), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString(
-                   gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString(
-                   unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( DoGetGruneisen(), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
    return log_string;
 }

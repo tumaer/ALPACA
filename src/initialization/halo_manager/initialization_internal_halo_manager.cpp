@@ -77,11 +77,11 @@ namespace Initialization {
     * @param material_manager material_manager Instance providing initialized material data.
     * @return The fully initialized InternalHaloManager class.
     */
-   InternalHaloManager InitializeInternalHaloManager( TopologyManager & topology_manager,
-                                                      Tree & tree,
-                                                      CommunicationManager & communication_manager,
+   InternalHaloManager InitializeInternalHaloManager( TopologyManager& topology_manager,
+                                                      Tree& tree,
+                                                      CommunicationManager& communication_manager,
                                                       MaterialManager const& material_manager ) {
 
       return InternalHaloManager( tree, topology_manager, communication_manager, material_manager.GetNumberOfMaterials() );
    }
-}
+}// namespace Initialization

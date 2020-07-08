@@ -79,8 +79,8 @@ class HelicityOutput : public OutputQuantity {
 
 private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    HelicityOutput() = delete;
@@ -88,11 +88,11 @@ public:
                             MaterialManager const& material_manager,
                             std::string const& quantity_name,
                             std::array<bool, 3> const output_flags );
-   virtual ~HelicityOutput() = default;
+   virtual ~HelicityOutput()               = default;
    HelicityOutput( HelicityOutput const& ) = delete;
    HelicityOutput& operator=( HelicityOutput const& ) = delete;
-   HelicityOutput( HelicityOutput&& ) = delete;
+   HelicityOutput( HelicityOutput&& )                 = delete;
    HelicityOutput& operator=( HelicityOutput&& ) = delete;
 };
 
-#endif // HELICITY_OUTPUT_H
+#endif// HELICITY_OUTPUT_H

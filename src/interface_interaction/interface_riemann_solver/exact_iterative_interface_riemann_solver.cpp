@@ -83,13 +83,13 @@
  * @return     The shock/rarefaction relation and its derivative.
  */
 std::array<double, 2> ExactIterativeInterfaceRiemannSolver::ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-   double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
+                                                                                                       double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
 
    if( initial_root > p ) {
-      return {ShockRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B ),
-              ShockRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B )};
+      return { ShockRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B ),
+               ShockRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B ) };
    } else {
-      return {RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
-              RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D )};
+      return { RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
+               RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ) };
    }
 }

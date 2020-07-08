@@ -82,7 +82,7 @@ namespace Initialization {
                                                           unsigned int const number_of_materials,
                                                           std::vector<std::string> const& variable_names_prime_states ) {
       // logger for warning logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // Vector that is returned
       std::vector<std::string> material_initial_conditions( number_of_materials );
@@ -95,8 +95,7 @@ namespace Initialization {
             if( !variable_name.empty() ) {
                if( material_initial_conditions[material_index].find( variable_name ) == std::string::npos ) {
                   logger.LogMessage( " " );
-                  logger.LogMessage(   "Warning!! The variable name '" + variable_name + "' is not contained in the initial condition string for material "
-                                     + std::to_string( material_index + 1 ) + "!" );
+                  logger.LogMessage( "Warning!! The variable name '" + variable_name + "' is not contained in the initial condition string for material " + std::to_string( material_index + 1 ) + "!" );
                   logger.LogMessage( " " );
                }
             }
@@ -122,7 +121,7 @@ namespace Initialization {
       }
 
       // logger for warning logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // Vector that is returned (one element less than number of materials since all levelset initial conditions are referred to material 1)
       std::vector<std::string> levelset_initial_conditions( number_of_materials - 1 );
@@ -132,8 +131,7 @@ namespace Initialization {
          // Check if levelset variables is given in the string. Otherwise throw a warning
          if( levelset_initial_conditions[levelset_index].find( variable_name_levelset ) == std::string::npos ) {
             logger.LogMessage( " " );
-            logger.LogMessage(   "Warning!! The levelset variable name '" + variable_name_levelset + "' is not contained in the initial condition string for levelset "
-                               + std::to_string( levelset_index + 1 ) + "!" );
+            logger.LogMessage( "Warning!! The levelset variable name '" + variable_name_levelset + "' is not contained in the initial condition string for levelset " + std::to_string( levelset_index + 1 ) + "!" );
             logger.LogMessage( " " );
          }
       }
@@ -184,4 +182,4 @@ namespace Initialization {
                                unit_handler );
    }
 
-} // namespace Initialization
+}// namespace Initialization

@@ -89,27 +89,27 @@ protected:
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
 
 public:
-   ~Stencil() = default;
+   ~Stencil()                = default;
    Stencil( Stencil const& ) = delete;
    Stencil& operator=( Stencil const& ) = delete;
-   Stencil( Stencil&& ) = delete;
+   Stencil( Stencil&& )                 = delete;
    Stencil& operator=( Stencil&& ) = delete;
 
    /**
     * @brief Gives the number of cells needed for a single stencil evaluation.
     * @return Size of the stencil, i.e. number of data cells the stencil works on.
     */
-   static constexpr unsigned int StencilSize() {return DerivedStencil::stencil_size_;}
+   static constexpr unsigned int StencilSize() { return DerivedStencil::stencil_size_; }
    /**
     * @brief Gives the size of the stencil in down stream direction.
     * @return Size of the stencil arm reaching down stream, i.e. number of data cells that lay down stream the stencil works on.
     */
-   static constexpr unsigned int DownstreamStencilSize() {return DerivedStencil::downstream_stencil_size_;}
+   static constexpr unsigned int DownstreamStencilSize() { return DerivedStencil::downstream_stencil_size_; }
    /**
     * @brief Return the type of a stencil.
     * @return The type of a stencil.
     */
-   static constexpr StencilType GetStencilType() {return DerivedStencil::stencil_type_;}
+   static constexpr StencilType GetStencilType() { return DerivedStencil::stencil_type_; }
 
    /**
     * @brief Applies the SpatialReconstructionStencil to the provided Array.
@@ -121,10 +121,9 @@ public:
     * @note The stencil template is used to instantiate the stencil on the fly.
     */
    template<typename S>
-   constexpr double Apply(std::array<double, S::StencilSize()> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
-      return static_cast<DerivedStencil const&>(*this).ApplyImplementation(array, evaluation_properties, cell_size);
+   constexpr double Apply( std::array<double, S::StencilSize()> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size ) const {
+      return static_cast<DerivedStencil const&>( *this ).ApplyImplementation( array, evaluation_properties, cell_size );
    }
-
 };
 
-#endif // SPATIAL_RECONSTRUCTION_STENCIL_H
+#endif// SPATIAL_RECONSTRUCTION_STENCIL_H

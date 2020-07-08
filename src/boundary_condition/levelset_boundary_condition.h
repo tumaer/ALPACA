@@ -79,11 +79,11 @@
 class LevelsetBoundaryCondition {
 
 public:
-   LevelsetBoundaryCondition() = default;
-   virtual ~LevelsetBoundaryCondition() = default;
+   LevelsetBoundaryCondition()                                   = default;
+   virtual ~LevelsetBoundaryCondition()                          = default;
    LevelsetBoundaryCondition( LevelsetBoundaryCondition const& ) = delete;
    LevelsetBoundaryCondition& operator=( LevelsetBoundaryCondition const& ) = delete;
-   LevelsetBoundaryCondition( LevelsetBoundaryCondition&& ) = delete;
+   LevelsetBoundaryCondition( LevelsetBoundaryCondition&& )                 = delete;
    LevelsetBoundaryCondition& operator=( LevelsetBoundaryCondition&& ) = delete;
 
    /**
@@ -100,4 +100,4 @@ public:
    virtual void UpdateInterfaceTagExternal( Node& node ) const = 0;
 };
 
-#endif // LEVELSET_BOUNDARY_CONDITION_H
+#endif// LEVELSET_BOUNDARY_CONDITION_H

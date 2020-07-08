@@ -99,6 +99,6 @@ namespace Initialization {
    Material InitializeMaterial( unsigned int const material_index,
                                 MaterialReader const& material_reader,
                                 UnitHandler const& unit_handler );
-} // namespace initialization
+}// namespace Initialization
 
-#endif // INITIALIZATION_MATERIAL_H
+#endif// INITIALIZATION_MATERIAL_H

@@ -119,7 +119,7 @@ namespace Initialization {
       }
 
       // Timestamps times type
-      if( times_type == OutputTimesType::Stamps || times_type == OutputTimesType::IntervalStamps )  {
+      if( times_type == OutputTimesType::Stamps || times_type == OutputTimesType::IntervalStamps ) {
          // Possible that both options are used. Therefore, first create local and then add them to the final timestamps vector
          std::vector<double> output_times_tmp;
 
@@ -130,16 +130,17 @@ namespace Initialization {
                         [&unit_handler]( double& timestamp ) { timestamp = unit_handler.NonDimensionalizeValue( timestamp, UnitType::Time ); } );
          // Remove values smaller equal than start time
          output_times_tmp.erase( std::remove_if( output_times_tmp.begin(), output_times_tmp.end(),
-                                             [&start_time]( double const& timestamp ) { return timestamp <= start_time; } ), output_times_tmp.end() );
+                                                 [&start_time]( double const& timestamp ) { return timestamp <= start_time; } ),
+                                 output_times_tmp.end() );
          // Remove values larger equal than end time
          output_times_tmp.erase( std::remove_if( output_times_tmp.begin(), output_times_tmp.end(),
-                                             [&end_time]( double const& timestamp ) { return timestamp >= end_time; } ), output_times_tmp.end() );
+                                                 [&end_time]( double const& timestamp ) { return timestamp >= end_time; } ),
+                                 output_times_tmp.end() );
 
          // Append all time stamps to the global vector and sort them
          output_times.reserve( output_times.size() + output_times_tmp.size() );
          output_times.insert( output_times.end(), output_times_tmp.begin(), output_times_tmp.end() );
          std::sort( output_times.begin(), output_times.end() );
-
       }
 
       // now add the exact end_time as final timestamp
@@ -158,7 +159,6 @@ namespace Initialization {
 
       return output_times;
    }
-
 
    /**
     * @brief Computes the restart time stamps to write a certain restart snapshot file.
@@ -183,10 +183,12 @@ namespace Initialization {
          std::for_each( snapshot_times.begin(), snapshot_times.end(), [&unit_handler]( double& timestamp ) { timestamp = unit_handler.NonDimensionalizeValue( timestamp, UnitType::Time ); } );
          // Remove all time stamps that are smaller than the start time
          snapshot_times.erase( std::remove_if( snapshot_times.begin(), snapshot_times.end(),
-                                              [&start_time]( double const& timestamp ) { return timestamp < start_time; } ), snapshot_times.end() );
+                                               [&start_time]( double const& timestamp ) { return timestamp < start_time; } ),
+                               snapshot_times.end() );
          // Remove all time stamps that are larger than the end time
          snapshot_times.erase( std::remove_if( snapshot_times.begin(), snapshot_times.end(),
-                                              [&end_time]( double const& timestamp ) { return timestamp > end_time;  } ), snapshot_times.end() );
+                                               [&end_time]( double const& timestamp ) { return timestamp > end_time; } ),
+                               snapshot_times.end() );
          // Add the exact end time explicitly
          snapshot_times.push_back( end_time );
 
@@ -226,28 +228,30 @@ namespace Initialization {
 
       // Read all data that is required
       // Input
-      InputType const input_type = input_reader.GetInputType();
+      InputType const input_type   = input_reader.GetInputType();
       std::string const input_file = input_reader.GetInputFile();
       // Output
-      std::string output_folder_name = FileOperations::AddUnusedNumberToPath( FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) );
+      std::string output_folder_name                        = FileOperations::AddUnusedNumberToPath( FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) );
       std::vector<double> const standard_output_timestamps  = ComputeOutputTimes( output_reader, time_control_reader, unit_handler, OutputType::Standard );
       std::vector<double> const interface_output_timestamps = ComputeOutputTimes( output_reader, time_control_reader, unit_handler, OutputType::Interface );
-      double const time_naming_factor = output_reader.ReadTimeNamingFactor();
+      double const time_naming_factor                       = output_reader.ReadTimeNamingFactor();
       // Restart
-      RestoreMode const restore_mode = restart_reader.ReadRestoreMode();
-      std::string const restart_file = restore_mode != RestoreMode::Off ? restart_reader.ReadRestoreFilename() : "";
+      RestoreMode const restore_mode              = restart_reader.ReadRestoreMode();
+      std::string const restart_file              = restore_mode != RestoreMode::Off ? restart_reader.ReadRestoreFilename() : "";
       SnapshotTimesType const snapshot_times_type = restart_reader.ReadSnapshotTimesType();
-      std::vector<double> snapshot_timestamps = ComputeSnapshotTimes( restart_reader, time_control_reader, unit_handler );
-      unsigned int const snapshot_interval = ( snapshot_times_type == SnapshotTimesType::Interval || snapshot_times_type == SnapshotTimesType::IntervalStamps ) ?
-                                             restart_reader.ReadSnapshotInterval() : 0;
+      std::vector<double> snapshot_timestamps     = ComputeSnapshotTimes( restart_reader, time_control_reader, unit_handler );
+      unsigned int const snapshot_interval        = ( snapshot_times_type == SnapshotTimesType::Interval || snapshot_times_type == SnapshotTimesType::IntervalStamps ) ?
+                                                   restart_reader.ReadSnapshotInterval() :
+                                                   0;
       unsigned int const snapshots_to_keep = ( snapshot_times_type == SnapshotTimesType::Interval || snapshot_times_type == SnapshotTimesType::IntervalStamps ) ?
-                                             restart_reader.ReadSnapshotIntervalsToKeep() : 0;
+                                                   restart_reader.ReadSnapshotIntervalsToKeep() :
+                                                   0;
 
       // logging
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       // input data
-      logger.LogMessage( "File/Folder information: ");
+      logger.LogMessage( "File/Folder information: " );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Input type        : " + InputTypeToString( input_type ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Simulation Name   : " + FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Output Folder     : " + output_folder_name );
@@ -261,22 +265,16 @@ namespace Initialization {
       // output time stamps
       if( !standard_output_timestamps.empty() || !interface_output_timestamps.empty() ) {
          if( !standard_output_timestamps.empty() ) {
-            logger.LogMessage( "Standard output time stamps :    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( standard_output_timestamps.front(), UnitType::Time ), 6 ) + "  "
-                                                                   + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( standard_output_timestamps.back(), UnitType::Time ), 6 ) + "    "
-                                                                   + std::to_string( standard_output_timestamps.size() ) );
+            logger.LogMessage( "Standard output time stamps :    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( standard_output_timestamps.front(), UnitType::Time ), 6 ) + "  " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( standard_output_timestamps.back(), UnitType::Time ), 6 ) + "    " + std::to_string( standard_output_timestamps.size() ) );
          }
          if( !interface_output_timestamps.empty() ) {
-            logger.LogMessage( "Interface output time stamps:    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "  "
-                                                                   + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "    "
-                                                                   + std::to_string( interface_output_timestamps.size() ) );
+            logger.LogMessage( "Interface output time stamps:    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "  " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "    " + std::to_string( interface_output_timestamps.size() ) );
          }
       }
       // restart time stamps
       logger.LogMessage( " " );
       if( !snapshot_timestamps.empty() ) {
-         logger.LogMessage( "Snapshot time stamps        :    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( snapshot_timestamps.front(), UnitType::Time ), 6 ) + "  "
-                                                                + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( snapshot_timestamps.back(), UnitType::Time ), 6 ) + "    "
-                                                                + std::to_string( snapshot_timestamps.size() ) );
+         logger.LogMessage( "Snapshot time stamps        :    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( snapshot_timestamps.front(), UnitType::Time ), 6 ) + "  " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( snapshot_timestamps.back(), UnitType::Time ), 6 ) + "    " + std::to_string( snapshot_timestamps.size() ) );
       }
       if( snapshot_interval > 0 ) {
          logger.LogMessage( "Restart snapshot interval   : " + std::to_string( snapshot_interval ) );
@@ -311,4 +309,4 @@ namespace Initialization {
                                  snapshots_to_keep );
    }
 
-} // namespace Initialization
+}// namespace Initialization

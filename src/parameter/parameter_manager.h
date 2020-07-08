@@ -88,11 +88,11 @@ class ParameterManager {
 
 public:
    ParameterManager() = delete;
-   explicit ParameterManager( MaterialManager const& material_manager, HaloManager & halo_manager );
-   ~ParameterManager() = default;
+   explicit ParameterManager( MaterialManager const& material_manager, HaloManager& halo_manager );
+   ~ParameterManager()                         = default;
    ParameterManager( ParameterManager const& ) = delete;
    ParameterManager& operator=( ParameterManager const& ) = delete;
-   ParameterManager( ParameterManager&& ) = delete;
+   ParameterManager( ParameterManager&& )                 = delete;
    ParameterManager& operator=( ParameterManager&& ) = delete;
 
    // Update functions for all parameters
@@ -101,4 +101,4 @@ public:
    void ExtendParameters( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
 };
 
-#endif // PARAMETER_MANAGER_H
+#endif// PARAMETER_MANAGER_H

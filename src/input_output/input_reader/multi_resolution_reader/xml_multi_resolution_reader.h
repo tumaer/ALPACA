@@ -83,7 +83,7 @@ class XmlMultiResolutionReader : public MultiResolutionReader {
    // The already openend xml input file (must be shared pointer to distribute input file on different readers)
    std::shared_ptr<tinyxml2::XMLDocument const> const xml_input_file_;
 
-   // Functions that are required from base class 
+   // Functions that are required from base class
    double DoReadNodeSizeOnLevelZero() const override;
    int DoReadNumberOfNodes( Direction const direction ) const override;
    int DoReadMaximumLevel() const override;
@@ -93,11 +93,11 @@ class XmlMultiResolutionReader : public MultiResolutionReader {
 public:
    XmlMultiResolutionReader() = delete;
    explicit XmlMultiResolutionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlMultiResolutionReader() = default;
+   ~XmlMultiResolutionReader()                                 = default;
    XmlMultiResolutionReader( XmlMultiResolutionReader const& ) = delete;
    XmlMultiResolutionReader& operator=( XmlMultiResolutionReader const& ) = delete;
-   XmlMultiResolutionReader( XmlMultiResolutionReader&& ) = delete;
+   XmlMultiResolutionReader( XmlMultiResolutionReader&& )                 = delete;
    XmlMultiResolutionReader& operator=( XmlMultiResolutionReader&& ) = delete;
 };
 
-#endif // XML_MULTI_RESOLUTION_READER_H
+#endif// XML_MULTI_RESOLUTION_READER_H

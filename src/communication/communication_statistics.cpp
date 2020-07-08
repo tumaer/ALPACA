@@ -71,10 +71,10 @@
 
 long CommunicationStatistics::no_jump_halos_recv_ = 0;
 long CommunicationStatistics::no_jump_halos_send_ = 0;
-long CommunicationStatistics::jump_halos_recv_ = 0;
-long CommunicationStatistics::jump_halos_send_ = 0;
-long CommunicationStatistics::balance_send_ = 0;
-long CommunicationStatistics::balance_recv_ = 0;
+long CommunicationStatistics::jump_halos_recv_    = 0;
+long CommunicationStatistics::jump_halos_send_    = 0;
+long CommunicationStatistics::balance_send_       = 0;
+long CommunicationStatistics::balance_recv_       = 0;
 long CommunicationStatistics::average_level_send_ = 0;
 long CommunicationStatistics::average_level_recv_ = 0;
 
@@ -86,7 +86,7 @@ std::string SummedCommunicationStatisticsString() {
 
    //Logging Stats
    std::string statistics;
-   statistics.append( " Ranks: " + std::to_string(MpiUtilities::NumberOfRanks()) + " | " );
+   statistics.append( " Ranks: " + std::to_string( MpiUtilities::NumberOfRanks() ) + " | " );
 
    long global_statistic;
    MPI_Allreduce( &CommunicationStatistics::balance_send_, &global_statistic, 1, MPI_LONG, MPI_SUM, MPI_COMM_WORLD );

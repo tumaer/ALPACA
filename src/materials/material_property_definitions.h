@@ -97,22 +97,22 @@ enum class MaterialProperty {
 inline std::string MaterialPropertyToString( MaterialProperty const property, bool const first_capitalized = false ) {
 
    switch( property ) {
-      case MaterialProperty::SpecificHeatCapacity : {
+      case MaterialProperty::SpecificHeatCapacity: {
          return first_capitalized ? "SpecificHeatCapacity" : "specificHeatCapacity";
       }
-      case MaterialProperty::ThermalConductivity : {
+      case MaterialProperty::ThermalConductivity: {
          return first_capitalized ? "ThermalConductivity" : "thermalConductivity";
       }
-      case MaterialProperty::ShearViscosity : {
+      case MaterialProperty::ShearViscosity: {
          return first_capitalized ? "ShearViscosity" : "shearViscosity";
       }
-      case MaterialProperty::BulkViscosity : {
+      case MaterialProperty::BulkViscosity: {
          return first_capitalized ? "BulkViscosity" : "bulkViscosity";
       }
-      case MaterialProperty::SurfaceTensionCoefficient : {
+      case MaterialProperty::SurfaceTensionCoefficient: {
          return first_capitalized ? "SurfaceTensionCoefficient" : "surfaceTensionCoefficient";
       }
-      default : {
+      default: {
          // if nothing matches throw error
          throw std::logic_error( "Material property not known!" );
       }
@@ -129,23 +129,23 @@ enum class MaterialPropertyModelName {
    // Default name if model is not used
    NotUsed,
    // viscosity models
-      // constant model
-      ShearViscosityConstant,
-      // Shear rate models
-      ShearViscosityPowerLaw,
-      ShearViscosityCross,
-      ShearViscosityCarreauYasuda,
+   // constant model
+   ShearViscosityConstant,
+   // Shear rate models
+   ShearViscosityPowerLaw,
+   ShearViscosityCross,
+   ShearViscosityCarreauYasuda,
 
-      // Temperature models
-      ShearViscositySutherland,
+   // Temperature models
+   ShearViscositySutherland,
 
    // Thermal conductivity models
-      // constant model
-      ThermalConductivityConstant,
+   // constant model
+   ThermalConductivityConstant,
 
    // Surface tension coefficient models
-      // constant model
-      SurfaceTensionCoefficientConstant
+   // constant model
+   SurfaceTensionCoefficientConstant
 };
 
 /**
@@ -161,22 +161,30 @@ inline MaterialPropertyModelName StringToMaterialPropertyModel( MaterialProperty
    // constant
    if( name_upper_case == "SHEARVISCOSITYCONSTANT" ) { return MaterialPropertyModelName::ShearViscosityConstant; }
    // shear rate models
-   else if( name_upper_case == "SHEARVISCOSITYPOWERLAW" ) { return MaterialPropertyModelName::ShearViscosityPowerLaw; }
-   else if( name_upper_case == "SHEARVISCOSITYCROSS" ) { return MaterialPropertyModelName::ShearViscosityCross; }
-   else if( name_upper_case == "SHEARVISCOSITYCARREAUYASUDA" ) { return MaterialPropertyModelName::ShearViscosityCarreauYasuda; }
+   else if( name_upper_case == "SHEARVISCOSITYPOWERLAW" ) {
+      return MaterialPropertyModelName::ShearViscosityPowerLaw;
+   } else if( name_upper_case == "SHEARVISCOSITYCROSS" ) {
+      return MaterialPropertyModelName::ShearViscosityCross;
+   } else if( name_upper_case == "SHEARVISCOSITYCARREAUYASUDA" ) {
+      return MaterialPropertyModelName::ShearViscosityCarreauYasuda;
+   }
    // temperature models
    else if( name_upper_case == "SHEARVISCOSITYSUTHERLAND" ) { return MaterialPropertyModelName::ShearViscositySutherland; }
 
    // conductivity models
    // constant
-   else if( name_upper_case == "THERMALCONDUCTIVITYCONSTANT" ) { return MaterialPropertyModelName::ThermalConductivityConstant; }
+   else if( name_upper_case == "THERMALCONDUCTIVITYCONSTANT" ) {
+      return MaterialPropertyModelName::ThermalConductivityConstant;
+   }
 
    // surface tension coefficient models
    // constant
    else if( name_upper_case == "SURFACETENSIONCOEFFICIENTCONSTANT" ) { return MaterialPropertyModelName::SurfaceTensionCoefficientConstant; }
 
    // default behavior if nothing is known
-   else { throw std::logic_error( "Material property model is not known!" ); }
+   else {
+      throw std::logic_error( "Material property model is not known!" );
+   }
 }
 
 /**
@@ -188,29 +196,29 @@ inline std::string MaterialPropertyModelToString( MaterialPropertyModelName cons
 
    switch( name ) {
       // All constant models
-      case MaterialPropertyModelName::ShearViscosityConstant :
-      case MaterialPropertyModelName::ThermalConductivityConstant :
-      case MaterialPropertyModelName::SurfaceTensionCoefficientConstant : {
+      case MaterialPropertyModelName::ShearViscosityConstant:
+      case MaterialPropertyModelName::ThermalConductivityConstant:
+      case MaterialPropertyModelName::SurfaceTensionCoefficientConstant: {
          return "Constant";
       }
       // All specific models
-      case MaterialPropertyModelName::ShearViscosityPowerLaw : {
+      case MaterialPropertyModelName::ShearViscosityPowerLaw: {
          return "PowerLaw";
       }
-      case MaterialPropertyModelName::ShearViscosityCross : {
+      case MaterialPropertyModelName::ShearViscosityCross: {
          return "Cross";
       }
-      case MaterialPropertyModelName::ShearViscosityCarreauYasuda : {
+      case MaterialPropertyModelName::ShearViscosityCarreauYasuda: {
          return "CarreauYasuda";
       }
-      case MaterialPropertyModelName::ShearViscositySutherland : {
+      case MaterialPropertyModelName::ShearViscositySutherland: {
          return "Sutherland";
       }
       // Default model not used
-      default : {
+      default: {
          return "Not Used";
       }
    }
 }
 
-#endif // MATERIAL_PROPERTY_DEFINITIONS_H
+#endif// MATERIAL_PROPERTY_DEFINITIONS_H

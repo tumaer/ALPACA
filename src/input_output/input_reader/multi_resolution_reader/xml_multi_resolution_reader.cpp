@@ -74,9 +74,8 @@
  * @brief Default constructor for the multiresolution reader for xml-type input files.
  * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
-XmlMultiResolutionReader::XmlMultiResolutionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   MultiResolutionReader(),
-   xml_input_file_( std::move( inputfile ) ) {
+XmlMultiResolutionReader::XmlMultiResolutionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : MultiResolutionReader(),
+                                                                                                         xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
@@ -95,8 +94,8 @@ double XmlMultiResolutionReader::DoReadNodeSizeOnLevelZero() const {
 int XmlMultiResolutionReader::DoReadNumberOfNodes( Direction const direction ) const {
    // Get the correct component name
    std::string const component = direction == Direction::X ? "x" :
-                                 direction == Direction::Y ? "y" :
-                                                             "z";
+                                                             direction == Direction::Y ? "y" :
+                                                                                         "z";
    // obtain correct node
    tinyxml2::XMLElement const* node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "nodeRatio", component } );
    return XmlUtilities::ReadInt( node );

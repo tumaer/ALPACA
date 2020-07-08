@@ -85,32 +85,32 @@ class LogWriter {
    std::string delayed_log_;
 
    //Singleton has only privat Constructor
-   explicit LogWriter(bool const save_all_ranks);
-   std::vector<std::string> FormatMessage(std::string const& message) const;
+   explicit LogWriter( bool const save_all_ranks );
+   std::vector<std::string> FormatMessage( std::string const& message ) const;
 
    int ForwardRankId() const;
 
 public:
    //Singelton "Constructor":
-   static LogWriter& Instance(bool const save_all_ranks = false);
+   static LogWriter& Instance( bool const save_all_ranks = false );
 
    //Singeltons may never call these methods.
-   LogWriter() = delete;
-   ~LogWriter() = default;
-   LogWriter( LogWriter const&) = delete;
-   LogWriter& operator=( LogWriter const&) = delete;
-   LogWriter( LogWriter&& ) = delete;
+   LogWriter()                   = delete;
+   ~LogWriter()                  = default;
+   LogWriter( LogWriter const& ) = delete;
+   LogWriter& operator=( LogWriter const& ) = delete;
+   LogWriter( LogWriter&& )                 = delete;
    LogWriter& operator=( LogWriter&& ) = delete;
 
-   void SetLogfileName(std::string const name);
+   void SetLogfileName( std::string const name );
    void LogMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
    void LogLinebreakMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
-   void AddBreakLine(bool const print_to_terminal = false);
+   void AddBreakLine( bool const print_to_terminal = false );
    void FlushWelcomeMessage();
    void Flush();
-   void FlushAlpaca(double const percentage, bool const fast_forward = false);
-   void AppendDelayedLog(std::string const delayed_log);
-   void DelayedLogMessage(bool const print_to_terminal = true, bool const save_in_logfile = true);
+   void FlushAlpaca( double const percentage, bool const fast_forward = false );
+   void AppendDelayedLog( std::string const delayed_log );
+   void DelayedLogMessage( bool const print_to_terminal = true, bool const save_in_logfile = true );
 };
 
-#endif // LOG_WRITER_H
+#endif// LOG_WRITER_H

@@ -87,6 +87,6 @@ namespace Initialization {
                                               MaterialReader const& material_reader,
                                               UnitHandler const& unit_handler );
 
-} // namespace initialization
+}// namespace Initialization
 
-#endif // INITIALIZATION_MATERIAL_PAIRING_H
+#endif// INITIALIZATION_MATERIAL_PAIRING_H

@@ -83,15 +83,15 @@ namespace XdmfUtilities {
        * @return the string.
        */
       template<typename T>
-      std::string DimensionsToString( std::array<T,2> const& dimensions ) {
+      std::string DimensionsToString( std::array<T, 2> const& dimensions ) {
          // If dimensions is empty return also an empty string
          if( dimensions.empty() ) {
             return "";
-         } else if ( dimensions.front() == 1 && dimensions.back() == 1 ) { // scalar quantity also return empty string
+         } else if( dimensions.front() == 1 && dimensions.back() == 1 ) {// scalar quantity also return empty string
             return "";
-         } else if ( dimensions.back() == 1 && dimensions.front() <= 3 ) { // vectorial (up to three components) return only the first
+         } else if( dimensions.back() == 1 && dimensions.front() <= 3 ) {// vectorial (up to three components) return only the first
             return " " + std::to_string( dimensions.front() );
-         }else { // multi-dimensional return all
+         } else {// multi-dimensional return all
             std::string dimensions_string;
             for( auto const& element : dimensions ) {
                dimensions_string += " " + std::to_string( element );
@@ -99,7 +99,7 @@ namespace XdmfUtilities {
             return dimensions_string;
          }
       }
-   }
+   }// namespace
 
    /**
     * @brief Generates a properly formated string for the DataItem node for the temporal information in the Xdmf file.
@@ -107,7 +107,7 @@ namespace XdmfUtilities {
     * @return string for the time data item.
     */
    inline std::string TimeDataItem( double const output_time ) {
-      return  StringOperations::Indent( 6 ) + "<Time TimeType=\"Single\" Value=\"" + StringOperations::ToScientificNotationString( output_time ) + "\" />\n";
+      return StringOperations::Indent( 6 ) + "<Time TimeType=\"Single\" Value=\"" + StringOperations::ToScientificNotationString( output_time ) + "\" />\n";
    }
 
    /**
@@ -118,11 +118,9 @@ namespace XdmfUtilities {
     * @param dimensions Dimensions the data item consists of ({1,1} : scalar, {3,1} : vector, {n,m} : matrix/tensor).
     * @return string for data item item.
     */
-   inline std::string DataItemString( std::string const& hdf5_filename, std::string const& item_name, unsigned long long int const number_of_cells, std::array<unsigned int,2> const& dimensions ) {
+   inline std::string DataItemString( std::string const& hdf5_filename, std::string const& item_name, unsigned long long int const number_of_cells, std::array<unsigned int, 2> const& dimensions ) {
 
-      return   "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\"" + std::to_string( number_of_cells ) + DimensionsToString( dimensions ) + "\"> "
-             + hdf5_filename + ":/" + item_name
-             + " </DataItem>\n";
+      return "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\"" + std::to_string( number_of_cells ) + DimensionsToString( dimensions ) + "\"> " + hdf5_filename + ":/" + item_name + " </DataItem>\n";
    }
 
    /**
@@ -136,9 +134,7 @@ namespace XdmfUtilities {
     * @return Attribute string for the topology.
     */
    inline std::string TopologyString( std::string const& data_item, unsigned long long int const number_of_cells ) {
-      return   StringOperations::Indent( 6 ) + "<Topology TopologyType=\"Hexahedron\" NumberOfElements=\"" + std::to_string( number_of_cells ) + "\">\n"
-             + StringOperations::Indent( 8 ) + data_item
-             + StringOperations::Indent( 6 ) + "</Topology>\n";
+      return StringOperations::Indent( 6 ) + "<Topology TopologyType=\"Hexahedron\" NumberOfElements=\"" + std::to_string( number_of_cells ) + "\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Topology>\n";
    }
 
    /**
@@ -152,9 +148,7 @@ namespace XdmfUtilities {
     * @return Attribute string for the geometry.
     */
    inline std::string GeometryString( std::string const& data_item, unsigned long long int const number_of_vertices ) {
-      return   StringOperations::Indent( 6 ) + "<Geometry name=\"geometry\" GeometryType=\"XYZ\" NumberOfElements=\"" + std::to_string( number_of_vertices ) + "\">\n"
-             + StringOperations::Indent( 8 ) + data_item
-             + StringOperations::Indent( 6 ) + "</Geometry>\n";
+      return StringOperations::Indent( 6 ) + "<Geometry name=\"geometry\" GeometryType=\"XYZ\" NumberOfElements=\"" + std::to_string( number_of_vertices ) + "\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Geometry>\n";
    }
 
    /**
@@ -164,9 +158,7 @@ namespace XdmfUtilities {
     * @return the complete attribute string.
     */
    inline std::string ScalarAttributeString( std::string const& attribute_name, std::string const& data_item ) {
-      return   StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Scalar\" Center=\"Cell\">\n"
-             + StringOperations::Indent( 8 ) + data_item
-             + StringOperations::Indent( 6 ) + "</Attribute>\n";
+      return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Scalar\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
    /**
@@ -176,9 +168,7 @@ namespace XdmfUtilities {
     * @return the complete attribute string.
     */
    inline std::string VectorAttributeString( std::string const& attribute_name, std::string const& data_item ) {
-      return   StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Vector\" Center=\"Cell\">\n"
-             + StringOperations::Indent( 8 ) + data_item
-             + StringOperations::Indent( 6 ) + "</Attribute>\n";
+      return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Vector\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
    /**
@@ -188,9 +178,7 @@ namespace XdmfUtilities {
     * @return the complete attribute string.
     */
    inline std::string MatrixAttributeString( std::string const& attribute_name, std::string const& data_item ) {
-      return   StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Matrix\" Center=\"Cell\">\n"
-             + StringOperations::Indent( 8 ) + data_item
-             + StringOperations::Indent( 6 ) + "</Attribute>\n";
+      return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Matrix\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
    /**
@@ -200,9 +188,7 @@ namespace XdmfUtilities {
     * @return the complete attribute string.
     */
    inline std::string TensorAttributeString( std::string const& attribute_name, std::string const& data_item ) {
-      return   StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Tensor\" Center=\"Cell\">\n"
-             + StringOperations::Indent( 8 ) + data_item
-             + StringOperations::Indent( 6 ) + "</Attribute>\n";
+      return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Tensor\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
    /**
@@ -212,11 +198,8 @@ namespace XdmfUtilities {
     * @return Complete formatted spatial data string.
     */
    inline std::string SpatialDataInformation( std::string const& spatial_data_name, std::string const& spatial_data_information ) {
-      return   StringOperations::Indent( 4 ) + "<Grid Name=\"" + spatial_data_name + "\" GridType=\"Uniform\">\n"
-             + spatial_data_information
-             + StringOperations::Indent( 4 ) + "</Grid>\n";
+      return StringOperations::Indent( 4 ) + "<Grid Name=\"" + spatial_data_name + "\" GridType=\"Uniform\">\n" + spatial_data_information + StringOperations::Indent( 4 ) + "</Grid>\n";
    }
-
 
    /**
    * @brief Gives a properly formatted string for the XDMF file header.
@@ -224,10 +207,7 @@ namespace XdmfUtilities {
    * @return string with header information.
    */
    inline std::string HeaderInformation( std::string const& data_name ) {
-      return   StringOperations::Indent( 0 ) + "<?xml version=\"1.0\" ?>\n<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n"
-             + StringOperations::Indent( 0 ) + "<Xdmf Version=\"3.0\">\n"
-             + StringOperations::Indent( 1 ) + "<Domain>\n"
-             + StringOperations::Indent( 2 ) + "<Grid Name=\"" + data_name + "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
+      return StringOperations::Indent( 0 ) + "<?xml version=\"1.0\" ?>\n<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n" + StringOperations::Indent( 0 ) + "<Xdmf Version=\"3.0\">\n" + StringOperations::Indent( 1 ) + "<Domain>\n" + StringOperations::Indent( 2 ) + "<Grid Name=\"" + data_name + "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
    }
 
    /**
@@ -235,10 +215,8 @@ namespace XdmfUtilities {
    * @return The footer string.
    */
    inline std::string FooterInformation() {
-      return   StringOperations::Indent( 2 ) + "</Grid>\n"
-             + StringOperations::Indent( 1 ) + "</Domain>\n"
-             + StringOperations::Indent( 0 ) + "</Xdmf>";
+      return StringOperations::Indent( 2 ) + "</Grid>\n" + StringOperations::Indent( 1 ) + "</Domain>\n" + StringOperations::Indent( 0 ) + "</Xdmf>";
    }
-}
+}// namespace XdmfUtilities
 
-#endif // Xdmf_UTILITIES_H
+#endif// Xdmf_UTILITIES_H

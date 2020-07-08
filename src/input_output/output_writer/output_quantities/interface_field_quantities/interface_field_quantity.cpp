@@ -83,18 +83,17 @@ InterfaceFieldQuantity::InterfaceFieldQuantity( UnitHandler const& unit_handler,
                                                 std::string const& quantity_name,
                                                 std::array<bool, 3> const output_flags,
                                                 InterfaceFieldQuantityData const& quantity_data,
-                                                InterfaceDescriptionBufferType const buffer_type ) :
-   // Start initializer list
-   OutputQuantity( unit_handler, material_manager, quantity_name + SuffixOfInterfaceDescriptionBufferType( buffer_type ), output_flags, quantity_data.GetDimensions() ),
-   quantity_data_( quantity_data ),
-   buffer_type_( buffer_type ) {
+                                                InterfaceDescriptionBufferType const buffer_type ) :// Start initializer list
+                                                                                                     OutputQuantity( unit_handler, material_manager, quantity_name + SuffixOfInterfaceDescriptionBufferType( buffer_type ), output_flags, quantity_data.GetDimensions() ),
+                                                                                                     quantity_data_( quantity_data ),
+                                                                                                     buffer_type_( buffer_type ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
 /**
  * @brief See base class definition.
  */
-void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
    // extract the correct field type for shorter access
    InterfaceFieldType const field_type = quantity_data_.field_type_;
@@ -109,7 +108,7 @@ void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<do
          // Get the correct field index
          unsigned int const field_index = quantity_data_.field_indices_[component];
          // Get buffers of the quantity
-         double const (&field_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type, field_index, buffer_type_ );
+         double const( &field_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type, field_index, buffer_type_ );
          // Dimensionalization factor for re-dimensionalization of variables
          double const dimensionalization_factor = unit_handler_.DimensionalizeValue( 1.0, IF::FieldUnit( field_type, field_index ) );
 
@@ -120,7 +119,7 @@ void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<do
          for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-                   cell_data[local_counter] = field_buffer[i][j][k] * dimensionalization_factor;
+                  cell_data[local_counter] = field_buffer[i][j][k] * dimensionalization_factor;
 
                   local_counter += quantity_data_.field_indices_.size();
                }
@@ -129,19 +128,19 @@ void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<do
       }
    } else {
       // If interface tags are included the signum is taken from the corner interface tag
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const pre_factor = quantity_data_.use_interface_tags_for_default_ ? Signum( interface_tags[0][0][0] ) : 1.0;
-      double const default_value = pre_factor * quantity_data_.default_value_;
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const pre_factor                                               = quantity_data_.use_interface_tags_for_default_ ? Signum( interface_tags[0][0][0] ) : 1.0;
+      double const default_value                                            = pre_factor * quantity_data_.default_value_;
 
       // Add default value for non-interface blocks
       //Loop through all components
       for( std::size_t component = 0; component < quantity_data_.field_indices_.size(); component++ ) {
          for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-           for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
-              for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+            for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+               for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                   cell_data[cell_data_counter++] = default_value;
-              }
-           }
+               }
+            }
          }
       }
    }
@@ -150,7 +149,7 @@ void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<do
 /**
  * @brief See base class definition.
  */
-void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
+void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const ) const {
 
    // extract the correct field type, field index and unit for shorter access
    InterfaceFieldType const field_type = quantity_data_.field_type_;
@@ -165,7 +164,7 @@ void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vect
          // Get the correct field index
          unsigned int const field_index = quantity_data_.field_indices_[component];
          // Get buffers of the quantity
-         double const (&field_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type, field_index, buffer_type_ );
+         double const( &field_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type, field_index, buffer_type_ );
          // Dimensionalization factor for re-dimensionalization of variables
          double const dimensionalization_factor = unit_handler_.DimensionalizeValue( 1.0, IF::FieldUnit( field_type, field_index ) );
 
@@ -183,10 +182,9 @@ void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vect
             }
          }
       }
-   }
-   else {
+   } else {
       // If interface tags are included the signum is taken from the corner interface tag
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
       // Add default value for non-interface blocks
       //Loop through all components
@@ -194,10 +192,10 @@ void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vect
          for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-                  double const pre_factor = quantity_data_.use_interface_tags_for_default_ ? double( interface_tags[i][j][k] ) : 1.0;
+                  double const pre_factor        = quantity_data_.use_interface_tags_for_default_ ? double( interface_tags[i][j][k] ) : 1.0;
                   cell_data[cell_data_counter++] = pre_factor * quantity_data_.default_value_;
-              }
-           }
+               }
+            }
          }
       }
    }

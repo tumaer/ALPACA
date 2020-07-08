@@ -75,7 +75,8 @@
 /**
  * @brief Enum class for the different access options of the hdf5 file.
  */
-enum class Hdf5Access { Read, Write };
+enum class Hdf5Access { Read,
+                        Write };
 
 /**
  * @brief Struct that provides all information required for accessing (reading/writing) data from/to the hdf5 file. It provides all information that is required
@@ -101,12 +102,12 @@ struct Hdf5Dataset {
    std::vector<hsize_t> chunk_;
    std::vector<hsize_t> count_;
    // Identifier for opened and/or created datasets
-   hid_t datatype_ = -1;
-   hid_t properties_create_ = -1;
-   hid_t dataspace_id_ = -1;
-   hid_t dataset_id_ = -1;
+   hid_t datatype_           = -1;
+   hid_t properties_create_  = -1;
+   hid_t dataspace_id_       = -1;
+   hid_t dataset_id_         = -1;
    hid_t local_memory_space_ = -1;
-   hid_t local_hyperslab_ = -1;
+   hid_t local_hyperslab_    = -1;
 
    void Close() {
       if( properties_create_ != -1 ) H5Pclose( properties_create_ );
@@ -121,7 +122,7 @@ struct Hdf5Dataset {
  * @brief Struct holding the information that is required to open/create groups in the hdf5 file.
  */
 struct Hdf5Group {
-   hid_t id_ = -1;
+   hid_t id_         = -1;
    hid_t properties_ = -1;
 
    void Close() {
@@ -148,4 +149,4 @@ struct Hdf5File {
    }
 };
 
-#endif // HDF5_DEFINITIONS_H
+#endif// HDF5_DEFINITIONS_H

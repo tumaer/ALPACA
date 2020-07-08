@@ -71,15 +71,15 @@
 #include "user_specifications/compile_time_constants.h"
 
 namespace {
-/**
+   /**
  * Gives the initial id for the most bottom-south-west node on all levels (number must equal maximum number of allowed levels CC::AMNL())
  */
-// NH: DO NOT TOUCH UNLESS YOU HAVE MY WRITTEN PERMISSION!
-constexpr std::array<std::uint64_t, CC::AMNL()> headbits =
-                                                   {{0x1400000,           0xA000000,          0x50000000,         0x280000000,        0x1400000000,       0xA000000000,
-                                                       0x50000000000,       0x280000000000,     0x1400000000000,    0xA000000000000,    0x50000000000000,   0x280000000000000,
-                                                       0x1400000000000000,  0xA000000000000000 }};
-}
+   // NH: DO NOT TOUCH UNLESS YOU HAVE MY WRITTEN PERMISSION!
+   constexpr std::array<std::uint64_t, CC::AMNL()> headbits =
+         { { 0x1400000, 0xA000000, 0x50000000, 0x280000000, 0x1400000000, 0xA000000000,
+             0x50000000000, 0x280000000000, 0x1400000000000, 0xA000000000000, 0x50000000000000, 0x280000000000000,
+             0x1400000000000000, 0xA000000000000000 } };
+}// namespace
 
 /**
  * @brief Gives the inital id seed. I. e. the id of the most bottom-south-west node on level zero.
@@ -95,7 +95,7 @@ std::uint64_t IdSeed() {
  * @param level Level on which the node lies.
  * @return Morton Id.
  */
-std::uint64_t CutHeadBit(std::uint64_t const id, unsigned int const level) {
+std::uint64_t CutHeadBit( std::uint64_t const id, unsigned int const level ) {
    return id - headbits[level];
 }
 
@@ -105,7 +105,7 @@ std::uint64_t CutHeadBit(std::uint64_t const id, unsigned int const level) {
  * @param level Level on which the node lies.
  * @return ALPACA Id.
  */
-std::uint64_t AddHeadBit(std::uint64_t const id, unsigned int const level) {
+std::uint64_t AddHeadBit( std::uint64_t const id, unsigned int const level ) {
    return id + headbits[level];
 }
 
@@ -114,19 +114,19 @@ std::uint64_t AddHeadBit(std::uint64_t const id, unsigned int const level) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of eastern neighbor.
  */
-std::uint64_t EastNeighborOfNodeWithId(std::uint64_t const id) {
+std::uint64_t EastNeighborOfNodeWithId( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode(id);
+   unsigned int const level = LevelOfNode( id );
 
    std::bitset<1> indicator = 0;
-   std::bitset<64> working_id(CutHeadBit(id, level));
+   std::bitset<64> working_id( CutHeadBit( id, level ) );
 
-   for(std::uint8_t i= 0; i < 60; i+=3) {
-      working_id[i] = ( (~working_id[i] & ~indicator[0]) | (working_id[i] & indicator[0]) );
-      indicator[0] = (working_id[i] | indicator[0]);
+   for( std::uint8_t i = 0; i < 60; i += 3 ) {
+      working_id[i] = ( ( ~working_id[i] & ~indicator[0] ) | ( working_id[i] & indicator[0] ) );
+      indicator[0]  = ( working_id[i] | indicator[0] );
    }
 
-   return AddHeadBit(working_id.to_ullong(), level);
+   return AddHeadBit( working_id.to_ullong(), level );
 }
 
 /**
@@ -134,19 +134,19 @@ std::uint64_t EastNeighborOfNodeWithId(std::uint64_t const id) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of western neighbor.
  */
-std::uint64_t WestNeighborOfNodeWithId(std::uint64_t const id) {
+std::uint64_t WestNeighborOfNodeWithId( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode(id);
+   unsigned int const level = LevelOfNode( id );
 
    std::bitset<1> indicator = 0;
-   std::bitset<64> working_id(CutHeadBit(id, level));
+   std::bitset<64> working_id( CutHeadBit( id, level ) );
 
-   for(std::uint8_t i= 0; i < 60; i+=3) {
-      working_id[i] = ( (~working_id[i] & ~indicator[0]) | (working_id[i] & indicator[0]) );
-      indicator[0] = (~working_id[i] | indicator[0]);
+   for( std::uint8_t i = 0; i < 60; i += 3 ) {
+      working_id[i] = ( ( ~working_id[i] & ~indicator[0] ) | ( working_id[i] & indicator[0] ) );
+      indicator[0]  = ( ~working_id[i] | indicator[0] );
    }
 
-   return AddHeadBit(working_id.to_ullong(), level);
+   return AddHeadBit( working_id.to_ullong(), level );
 }
 
 /**
@@ -154,19 +154,19 @@ std::uint64_t WestNeighborOfNodeWithId(std::uint64_t const id) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of northern neighbor.
  */
-std::uint64_t NorthNeighborOfNodeWithId(std::uint64_t const id) {
+std::uint64_t NorthNeighborOfNodeWithId( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode(id);
+   unsigned int const level = LevelOfNode( id );
 
    std::bitset<1> indicator = 0;
-   std::bitset<64> working_id(CutHeadBit(id,level));
+   std::bitset<64> working_id( CutHeadBit( id, level ) );
 
-   for(std::uint8_t i= 1; i < 60; i+=3) {
-      working_id[i] = ( (~working_id[i] & ~indicator[0]) | (working_id[i] & indicator[0]) );
-      indicator[0] = (working_id[i] | indicator[0]);
+   for( std::uint8_t i = 1; i < 60; i += 3 ) {
+      working_id[i] = ( ( ~working_id[i] & ~indicator[0] ) | ( working_id[i] & indicator[0] ) );
+      indicator[0]  = ( working_id[i] | indicator[0] );
    }
 
-   return AddHeadBit(working_id.to_ullong(), level);
+   return AddHeadBit( working_id.to_ullong(), level );
 }
 
 /**
@@ -174,19 +174,19 @@ std::uint64_t NorthNeighborOfNodeWithId(std::uint64_t const id) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of southern neighbor.
  */
-std::uint64_t SouthNeighborOfNodeWithId(std::uint64_t const id) {
+std::uint64_t SouthNeighborOfNodeWithId( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode(id);
+   unsigned int const level = LevelOfNode( id );
 
    std::bitset<1> indicator = 0;
-   std::bitset<64> working_id(CutHeadBit(id, level));
+   std::bitset<64> working_id( CutHeadBit( id, level ) );
 
-   for(std::uint8_t i= 1; i < 60; i+=3) {
-      working_id[i] = ( (~working_id[i] & ~indicator[0]) | (working_id[i] & indicator[0]) );
-      indicator[0] = (~working_id[i] | indicator[0]);
+   for( std::uint8_t i = 1; i < 60; i += 3 ) {
+      working_id[i] = ( ( ~working_id[i] & ~indicator[0] ) | ( working_id[i] & indicator[0] ) );
+      indicator[0]  = ( ~working_id[i] | indicator[0] );
    }
 
-   return AddHeadBit(working_id.to_ullong(), level);
+   return AddHeadBit( working_id.to_ullong(), level );
 }
 
 /**
@@ -194,19 +194,19 @@ std::uint64_t SouthNeighborOfNodeWithId(std::uint64_t const id) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of top neighbor.
  */
-std::uint64_t TopNeighborOfNodeWithId(std::uint64_t const id) {
+std::uint64_t TopNeighborOfNodeWithId( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode(id);
+   unsigned int const level = LevelOfNode( id );
 
    std::bitset<1> indicator = 0;
-   std::bitset<64> working_id(CutHeadBit(id, level));
+   std::bitset<64> working_id( CutHeadBit( id, level ) );
 
-   for(std::uint8_t i= 2; i < 60; i+=3) {
-      working_id[i] = ( (~working_id[i] & ~indicator[0]) | (working_id[i] & indicator[0]) );
-      indicator[0] = (working_id[i] | indicator[0]);
+   for( std::uint8_t i = 2; i < 60; i += 3 ) {
+      working_id[i] = ( ( ~working_id[i] & ~indicator[0] ) | ( working_id[i] & indicator[0] ) );
+      indicator[0]  = ( working_id[i] | indicator[0] );
    }
 
-   return AddHeadBit(working_id.to_ullong(), level);
+   return AddHeadBit( working_id.to_ullong(), level );
 }
 
 /**
@@ -214,19 +214,19 @@ std::uint64_t TopNeighborOfNodeWithId(std::uint64_t const id) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of bottom neighbor.
  */
-std::uint64_t BottomNeighborOfNodeWithId(std::uint64_t const id) {
+std::uint64_t BottomNeighborOfNodeWithId( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode(id);
+   unsigned int const level = LevelOfNode( id );
 
    std::bitset<1> indicator = 0;
-   std::bitset<64> working_id(CutHeadBit(id,level));
+   std::bitset<64> working_id( CutHeadBit( id, level ) );
 
-   for(std::uint8_t i= 2; i < 60; i+=3) {
-      working_id[i] = ( (~working_id[i] & ~indicator[0]) | (working_id[i] & indicator[0]) );
-      indicator[0] = (~working_id[i] | indicator[0]);
+   for( std::uint8_t i = 2; i < 60; i += 3 ) {
+      working_id[i] = ( ( ~working_id[i] & ~indicator[0] ) | ( working_id[i] & indicator[0] ) );
+      indicator[0]  = ( ~working_id[i] | indicator[0] );
    }
 
-   return AddHeadBit(working_id.to_ullong(), level);
+   return AddHeadBit( working_id.to_ullong(), level );
 }
 
 /**
@@ -235,74 +235,74 @@ std::uint64_t BottomNeighborOfNodeWithId(std::uint64_t const id) {
  * @param location Direction in which the neighbor is located.
  * @return Id of the neighbor.
  */
-std::uint64_t GetNeighborId(std::uint64_t const id, BoundaryLocation const location) {
+std::uint64_t GetNeighborId( std::uint64_t const id, BoundaryLocation const location ) {
 
-   switch(location) {
+   switch( location ) {
       // Natural (planes)
       case BoundaryLocation::East:
-         return EastNeighborOfNodeWithId(id);
+         return EastNeighborOfNodeWithId( id );
       case BoundaryLocation::West:
-         return WestNeighborOfNodeWithId(id);
+         return WestNeighborOfNodeWithId( id );
       case BoundaryLocation::North:
-         return NorthNeighborOfNodeWithId(id);
+         return NorthNeighborOfNodeWithId( id );
       case BoundaryLocation::South:
-         return SouthNeighborOfNodeWithId(id);
+         return SouthNeighborOfNodeWithId( id );
       case BoundaryLocation::Top:
-         return TopNeighborOfNodeWithId(id);
+         return TopNeighborOfNodeWithId( id );
       case BoundaryLocation::Bottom:
-         return BottomNeighborOfNodeWithId(id);
+         return BottomNeighborOfNodeWithId( id );
 
       // Sticks
       case BoundaryLocation::BottomNorth:
-         return BottomNeighborOfNodeWithId( NorthNeighborOfNodeWithId(id));
+         return BottomNeighborOfNodeWithId( NorthNeighborOfNodeWithId( id ) );
       case BoundaryLocation::BottomSouth:
-         return BottomNeighborOfNodeWithId( SouthNeighborOfNodeWithId(id));
+         return BottomNeighborOfNodeWithId( SouthNeighborOfNodeWithId( id ) );
       case BoundaryLocation::TopNorth:
-         return TopNeighborOfNodeWithId( NorthNeighborOfNodeWithId(id));
+         return TopNeighborOfNodeWithId( NorthNeighborOfNodeWithId( id ) );
       case BoundaryLocation::TopSouth:
-         return TopNeighborOfNodeWithId( SouthNeighborOfNodeWithId(id));
+         return TopNeighborOfNodeWithId( SouthNeighborOfNodeWithId( id ) );
 
       case BoundaryLocation::BottomEast:
-         return BottomNeighborOfNodeWithId( EastNeighborOfNodeWithId(id));
+         return BottomNeighborOfNodeWithId( EastNeighborOfNodeWithId( id ) );
       case BoundaryLocation::BottomWest:
-         return BottomNeighborOfNodeWithId( WestNeighborOfNodeWithId(id));
+         return BottomNeighborOfNodeWithId( WestNeighborOfNodeWithId( id ) );
       case BoundaryLocation::TopEast:
-         return TopNeighborOfNodeWithId( EastNeighborOfNodeWithId(id));
+         return TopNeighborOfNodeWithId( EastNeighborOfNodeWithId( id ) );
       case BoundaryLocation::TopWest:
-         return TopNeighborOfNodeWithId( WestNeighborOfNodeWithId(id));
+         return TopNeighborOfNodeWithId( WestNeighborOfNodeWithId( id ) );
 
       case BoundaryLocation::NorthEast:
-         return NorthNeighborOfNodeWithId( EastNeighborOfNodeWithId(id));
+         return NorthNeighborOfNodeWithId( EastNeighborOfNodeWithId( id ) );
       case BoundaryLocation::NorthWest:
-         return NorthNeighborOfNodeWithId( WestNeighborOfNodeWithId(id));
+         return NorthNeighborOfNodeWithId( WestNeighborOfNodeWithId( id ) );
       case BoundaryLocation::SouthEast:
-         return SouthNeighborOfNodeWithId( EastNeighborOfNodeWithId(id));
+         return SouthNeighborOfNodeWithId( EastNeighborOfNodeWithId( id ) );
       case BoundaryLocation::SouthWest:
-         return SouthNeighborOfNodeWithId( WestNeighborOfNodeWithId(id));
+         return SouthNeighborOfNodeWithId( WestNeighborOfNodeWithId( id ) );
       // Cubes
       case BoundaryLocation::EastNorthTop:
-         return EastNeighborOfNodeWithId( NorthNeighborOfNodeWithId( TopNeighborOfNodeWithId(id)));
+         return EastNeighborOfNodeWithId( NorthNeighborOfNodeWithId( TopNeighborOfNodeWithId( id ) ) );
       case BoundaryLocation::EastNorthBottom:
-         return EastNeighborOfNodeWithId( NorthNeighborOfNodeWithId( BottomNeighborOfNodeWithId(id)));
+         return EastNeighborOfNodeWithId( NorthNeighborOfNodeWithId( BottomNeighborOfNodeWithId( id ) ) );
       case BoundaryLocation::EastSouthTop:
-         return EastNeighborOfNodeWithId( SouthNeighborOfNodeWithId( TopNeighborOfNodeWithId(id)));
+         return EastNeighborOfNodeWithId( SouthNeighborOfNodeWithId( TopNeighborOfNodeWithId( id ) ) );
       case BoundaryLocation::EastSouthBottom:
-         return EastNeighborOfNodeWithId( SouthNeighborOfNodeWithId( BottomNeighborOfNodeWithId(id)));
+         return EastNeighborOfNodeWithId( SouthNeighborOfNodeWithId( BottomNeighborOfNodeWithId( id ) ) );
 
       case BoundaryLocation::WestNorthTop:
-         return WestNeighborOfNodeWithId( NorthNeighborOfNodeWithId( TopNeighborOfNodeWithId(id)));
+         return WestNeighborOfNodeWithId( NorthNeighborOfNodeWithId( TopNeighborOfNodeWithId( id ) ) );
       case BoundaryLocation::WestNorthBottom:
-         return WestNeighborOfNodeWithId( NorthNeighborOfNodeWithId( BottomNeighborOfNodeWithId(id)));
+         return WestNeighborOfNodeWithId( NorthNeighborOfNodeWithId( BottomNeighborOfNodeWithId( id ) ) );
       case BoundaryLocation::WestSouthTop:
-         return WestNeighborOfNodeWithId( SouthNeighborOfNodeWithId( TopNeighborOfNodeWithId(id)));
+         return WestNeighborOfNodeWithId( SouthNeighborOfNodeWithId( TopNeighborOfNodeWithId( id ) ) );
 #ifndef PERFORMANCE
       case BoundaryLocation::WestSouthBottom:
-         return WestNeighborOfNodeWithId( SouthNeighborOfNodeWithId( BottomNeighborOfNodeWithId(id)));
+         return WestNeighborOfNodeWithId( SouthNeighborOfNodeWithId( BottomNeighborOfNodeWithId( id ) ) );
       default:
-         throw std::invalid_argument("Boundary Location not Found in Node::GetNeighborId() - Impossible Error");
+         throw std::invalid_argument( "Boundary Location not Found in Node::GetNeighborId() - Impossible Error" );
 #else
       default: /* BoundaryLocation::WestSouthBottom */
-         return WestNeighborOfNodeWithId( SouthNeighborOfNodeWithId( BottomNeighborOfNodeWithId(id)));
+         return WestNeighborOfNodeWithId( SouthNeighborOfNodeWithId( BottomNeighborOfNodeWithId( id ) ) );
 #endif
    }
 }
@@ -317,89 +317,86 @@ std::uint64_t GetNeighborId(std::uint64_t const id, BoundaryLocation const locat
  */
 bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
 
-   std::bitset<64> input(CutHeadBit(id, LevelOfNode(id)));
+   std::bitset<64> input( CutHeadBit( id, LevelOfNode( id ) ) );
 
-   switch(location) {
-      case BoundaryLocation::West : {
-         std::bitset<64> west_mask(0x249249249249249);
+   switch( location ) {
+      case BoundaryLocation::West: {
+         std::bitset<64> west_mask( 0x249249249249249 );
          std::bitset<64> result;
          result = input & west_mask;
-         if(!result.to_ullong()) {
+         if( !result.to_ullong() ) {
             return true;
          }
-      }
-      break;
-      case BoundaryLocation::South : {
-         std::bitset<64> south_mask(0x492492492492492);
+      } break;
+      case BoundaryLocation::South: {
+         std::bitset<64> south_mask( 0x492492492492492 );
          std::bitset<64> result;
          result = input & south_mask;
-         if(!result.to_ullong()) {
+         if( !result.to_ullong() ) {
             return true;
          }
-      }
-      break;
-      case BoundaryLocation::Bottom : {
-         std::bitset<64> bottom_mask(0x924924924924924);
+      } break;
+      case BoundaryLocation::Bottom: {
+         std::bitset<64> bottom_mask( 0x924924924924924 );
          std::bitset<64> result;
          result = input & bottom_mask;
-         if(!result.to_ullong()) {
+         if( !result.to_ullong() ) {
             return true;
          }
-      }
-      break;
-      case BoundaryLocation::East : {
-         std::bitset<1> indicator(1);
+      } break;
+      case BoundaryLocation::East: {
+         std::bitset<1> indicator( 1 );
          std::uint32_t tows_exponent = 1;
-         tows_exponent <<= LevelOfNode(id);
+         tows_exponent <<= LevelOfNode( id );
          std::bitset<20> east_mask( ( number_of_nodes_on_level_zero[0] * tows_exponent ) - 1 );
-         for(unsigned int i = 0; i < 20; ++i) {
-            indicator[0] = ( ~(input[i*3] ^ east_mask[i]) & indicator[0] );
+         for( unsigned int i = 0; i < 20; ++i ) {
+            indicator[0] = ( ~( input[i * 3] ^ east_mask[i] ) & indicator[0] );
          }
-         if(indicator[0]) {
+         if( indicator[0] ) {
             return true;
          }
-      }
-      break;
-      case BoundaryLocation::North : {
-         std::bitset<1> indicator(1);
+      } break;
+      case BoundaryLocation::North: {
+         std::bitset<1> indicator( 1 );
          std::uint32_t tows_exponent = 1;
-         tows_exponent <<= LevelOfNode(id);;
+         tows_exponent <<= LevelOfNode( id );
+         ;
          std::bitset<20> north_mask( ( number_of_nodes_on_level_zero[1] * tows_exponent ) - 1 );
-         for(unsigned int i = 0; i < 20; ++i) {
-            indicator[0] = ( ~(input[(i*3)+1] ^ north_mask[i]) & indicator[0] );
+         for( unsigned int i = 0; i < 20; ++i ) {
+            indicator[0] = ( ~( input[( i * 3 ) + 1] ^ north_mask[i] ) & indicator[0] );
          }
-         if(indicator[0]) {
+         if( indicator[0] ) {
             return true;
          }
-      }
-      break;
+      } break;
 #ifndef PERFORMANCE
-      case BoundaryLocation::Top : {
-         std::bitset<1> indicator(1);
+      case BoundaryLocation::Top: {
+         std::bitset<1> indicator( 1 );
          std::uint32_t tows_exponent = 1;
-         tows_exponent <<= LevelOfNode(id);;
+         tows_exponent <<= LevelOfNode( id );
+         ;
          std::bitset<20> top_mask( ( number_of_nodes_on_level_zero[2] * tows_exponent ) - 1 );
-         for(unsigned int i = 0; i < 20; ++i) {
-            indicator[0] = ( ~(input[(i*3)+2] ^ top_mask[i]) & indicator[0] );
+         for( unsigned int i = 0; i < 20; ++i ) {
+            indicator[0] = ( ~( input[( i * 3 ) + 2] ^ top_mask[i] ) & indicator[0] );
          }
-         if(indicator[0]) {
+         if( indicator[0] ) {
             return true;
          }
-      }
-      break;
+      } break;
       default: {
-         throw std::invalid_argument("Boundary Type in IsExternal does not exist");
+         throw std::invalid_argument( "Boundary Type in IsExternal does not exist" );
       }
 #else
       default: /* BoundaryLocation::Top */ {
-         std::bitset<1> indicator(1);
+         std::bitset<1> indicator( 1 );
          std::uint32_t tows_exponent = 1;
-         tows_exponent <<= LevelOfNode(id);;
+         tows_exponent <<= LevelOfNode( id );
+         ;
          std::bitset<20> top_mask( ( number_of_nodes_on_level_zero[2] * tows_exponent ) - 1 );
-         for(unsigned int i = 0; i < 20; ++i) {
-            indicator[0] = ( ~(input[(i*3)+2] ^ top_mask[i]) & indicator[0] );
+         for( unsigned int i = 0; i < 20; ++i ) {
+            indicator[0] = ( ~( input[( i * 3 ) + 2] ^ top_mask[i] ) & indicator[0] );
          }
-         if(indicator[0]) {
+         if( indicator[0] ) {
             return true;
          }
       }
@@ -417,95 +414,95 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
  * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
  * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations (e. g. NOT Top in 1D).
  */
-bool IsExternalBoundary(BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
+bool IsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
    //natural | NH Such comparison are okay by (enforced) definiton of BoundaryLocation
-   if(LTI(location) <= LTI(BoundaryLocation::Bottom)){
-      return IsNaturalExternalBoundary(location, id, number_of_nodes_on_level_zero);
+   if( LTI( location ) <= LTI( BoundaryLocation::Bottom ) ) {
+      return IsNaturalExternalBoundary( location, id, number_of_nodes_on_level_zero );
    }
 
-   switch (location) {
+   switch( location ) {
       // Sticks
       case BoundaryLocation::BottomNorth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::BottomSouth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::TopNorth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::TopSouth:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) );
 
       case BoundaryLocation::BottomEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::East,   id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::BottomWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::West,   id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::TopEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::East, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::TopWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::Top,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::West, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) );
 
       case BoundaryLocation::NorthEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::NorthWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::SouthEast:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::SouthWest:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) );
 
       // Cubes
       case BoundaryLocation::EastNorthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::EastNorthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::EastSouthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::EastSouthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::East,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::East, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) );
 
       case BoundaryLocation::WestNorthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::North, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::WestNorthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::North,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::North, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) );
       case BoundaryLocation::WestSouthTop:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South, id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Top,   id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Top, id, number_of_nodes_on_level_zero ) );
 #ifndef PERFORMANCE
       case BoundaryLocation::WestSouthBottom:
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,   id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) );
       default:
-         throw std::invalid_argument("Boundary Location not Found in GetNeighborId() - Impossible Error");
+         throw std::invalid_argument( "Boundary Location not Found in GetNeighborId() - Impossible Error" );
 #else
       default: /* BoundaryLocation::WestSouthBottom */
-         return ( IsNaturalExternalBoundary(BoundaryLocation::West,   id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::South,  id, number_of_nodes_on_level_zero) ||
-                  IsNaturalExternalBoundary(BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero) );
+         return ( IsNaturalExternalBoundary( BoundaryLocation::West, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::South, id, number_of_nodes_on_level_zero ) ||
+                  IsNaturalExternalBoundary( BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero ) );
 #endif
    }
 }

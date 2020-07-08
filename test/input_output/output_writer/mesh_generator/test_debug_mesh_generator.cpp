@@ -73,7 +73,7 @@
 
 /********************************************************************************************************************************************/
 /*                                              TEST OF VERTEX COORDINATES                                                                  */
-/********************************************************************************************************************************************/ 
+/********************************************************************************************************************************************/
 /***********************************/
 /* 1. Global dimensions check      */
 /***********************************/
@@ -87,7 +87,7 @@ SCENARIO( "Debug mesh generator: Dimension of global vertex coordinates vector i
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consists of just one node" ) {
-         
+
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
 
          THEN( "The global vertex coordinates dimension vector has two entries with the first being equal the number of vertices and the second being three" ) {
@@ -124,7 +124,7 @@ SCENARIO( "Debug mesh generator: Vertex Coordinates local dimensions to write ar
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consists of just one node" ) {
-         
+
          THEN( "The local vertex coordinates dimension vector has two entries with the first being equal the number of vertices and the second being three" ) {
             std::vector<hsize_t> const local_vertex_coordinates_dimensions = mesh_generator->GetLocalDimensionsOfVertexCoordinates();
             REQUIRE( local_vertex_coordinates_dimensions.size() == 2 );
@@ -159,15 +159,15 @@ SCENARIO( "Debug mesh generator: Vertex Coordinates start index to write is corr
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consists of just one node" ) {
-         
+
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
-         
+
          THEN( "The local vertex coordinates start index is only value with entry 0" ) {
             hsize_t const local_vertex_coordinates_start_index = mesh_generator->GetLocalVertexCoordinatesStartIndex();
             REQUIRE( local_vertex_coordinates_start_index == 0 );
          }
       }
-   
+
       WHEN( "The node in the topology is refined" ) {
          TestUtilities::RefineFirstNodeInTopology( topology );
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 9, 8 ) );
@@ -191,11 +191,9 @@ SCENARIO( "Debug mesh generator: Vertex coordinates node corner points are corre
       Tree tree( topology, 1, 1.0 );
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
-      // Parameters to define the node counter for the three corners that are checked 
+      // Parameters to define the node counter for the three corners that are checked
       // 1: (x_max,0,0), 2: (xmax,ymax,0), 3: (xmax.ymax,zmax)
-      std::array<unsigned long long int, 3> const corner_indices = { {  ( CC::TCX() + 1 ) * 3 - 3
-                                                                      , ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * 3 - 3
-                                                                      , ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * ( CC::TCZ() + 1 ) * 3 - 3 } };
+      std::array<unsigned long long int, 3> const corner_indices = { { ( CC::TCX() + 1 ) * 3 - 3, ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * 3 - 3, ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * ( CC::TCZ() + 1 ) * 3 - 3 } };
 
       WHEN( "The node in the topology is refined" ) {
          TestUtilities::RefineFirstNodeInTopology( topology );
@@ -204,38 +202,38 @@ SCENARIO( "Debug mesh generator: Vertex coordinates node corner points are corre
          std::vector<double> coordinates;
          mesh_generator->ComputeVertexCoordinates( coordinates );
 
-         THEN( "The coordinates vector has 3 * #of Leaves * #vertices * 8 #nodes and depending on the first coordinate of each node check corner points" ) {           
+         THEN( "The coordinates vector has 3 * #of Leaves * #vertices * 8 #nodes and depending on the first coordinate of each node check corner points" ) {
             REQUIRE( coordinates.size() == 9 * MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock() * 3 );
 
             // Define the cell size ( for the different levels the cell size differs)
             double const cell_size_lv0 = 1.0 / double( CC::TCX() + 1 );
             double const cell_size_lv1 = cell_size_lv0 / 2;
 
-            // Loop through all node start positions and check the coordinates at the corner positions depending on that 
+            // Loop through all node start positions and check the coordinates at the corner positions depending on that
             for( unsigned int node_start = 0; node_start < 9; node_start++ ) {
 
                // INdex of the node origin
                unsigned int const origin_idx = ( CC::TCX() + 1 ) * ( CC::TCY() + 1 ) * ( CC::TCZ() + 1 ) * 3 * node_start;
-               // Origin of the node (not checked) 
+               // Origin of the node (not checked)
                std::array<double, 3> const origin = { { coordinates[origin_idx], coordinates[origin_idx + 1], coordinates[origin_idx + 2] } };
 
-               // Check the corner points 
-               REQUIRE( ( coordinates[origin_idx + corner_indices[0]    ] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv0 ) || 
-                          coordinates[origin_idx + corner_indices[0]    ] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv1 ) ) );
-               REQUIRE(   coordinates[origin_idx + corner_indices[0] + 1] == Approx( origin[1] ) );
-               REQUIRE(   coordinates[origin_idx + corner_indices[0] + 2] == Approx( origin[2] ) );
+               // Check the corner points
+               REQUIRE( ( coordinates[origin_idx + corner_indices[0]] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv0 ) ||
+                          coordinates[origin_idx + corner_indices[0]] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv1 ) ) );
+               REQUIRE( coordinates[origin_idx + corner_indices[0] + 1] == Approx( origin[1] ) );
+               REQUIRE( coordinates[origin_idx + corner_indices[0] + 2] == Approx( origin[2] ) );
 
                if constexpr( CC::DIM() != Dimension::One ) {
-                  REQUIRE( ( coordinates[origin_idx + corner_indices[1]    ] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv0 ) || 
-                             coordinates[origin_idx + corner_indices[0]    ] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv1 ) ) );
+                  REQUIRE( ( coordinates[origin_idx + corner_indices[1]] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv0 ) ||
+                             coordinates[origin_idx + corner_indices[0]] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv1 ) ) );
                   REQUIRE( ( coordinates[origin_idx + corner_indices[1] + 1] == Approx( origin[1] + double( CC::TCY() ) * cell_size_lv0 ) ||
                              coordinates[origin_idx + corner_indices[1] + 1] == Approx( origin[1] + double( CC::TCY() ) * cell_size_lv1 ) ) );
-                  REQUIRE(   coordinates[origin_idx + corner_indices[1] + 2] == Approx( origin[2] ) );
+                  REQUIRE( coordinates[origin_idx + corner_indices[1] + 2] == Approx( origin[2] ) );
                }
 
                if constexpr( CC::DIM() == Dimension::Three ) {
-                  REQUIRE( ( coordinates[origin_idx + corner_indices[2]    ] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv0 ) ||
-                             coordinates[origin_idx + corner_indices[2]    ] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv1 ) ) );
+                  REQUIRE( ( coordinates[origin_idx + corner_indices[2]] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv0 ) ||
+                             coordinates[origin_idx + corner_indices[2]] == Approx( origin[0] + double( CC::TCX() ) * cell_size_lv1 ) ) );
                   REQUIRE( ( coordinates[origin_idx + corner_indices[2] + 1] == Approx( origin[1] + double( CC::TCY() ) * cell_size_lv0 ) ||
                              coordinates[origin_idx + corner_indices[2] + 1] == Approx( origin[1] + double( CC::TCY() ) * cell_size_lv1 ) ) );
                   REQUIRE( ( coordinates[origin_idx + corner_indices[2] + 2] == Approx( origin[2] + double( CC::TCZ() ) * cell_size_lv0 ) ||
@@ -249,7 +247,7 @@ SCENARIO( "Debug mesh generator: Vertex coordinates node corner points are corre
 
 /********************************************************************************************************************************************/
 /*                                                  TEST OF VERTEX IDs                                                                      */
-/********************************************************************************************************************************************/ 
+/********************************************************************************************************************************************/
 /***********************************/
 /* 1. Global Dimension check       */
 /***********************************/
@@ -263,9 +261,9 @@ SCENARIO( "Debug mesh generator: Dimension of global vertex IDs vector is correc
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consists of just one node" ) {
-         
+
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
-         
+
          THEN( "The global vertex coordinates dimension vector has two entries with the first being equal the number of vertices and the second being three" ) {
             std::vector<hsize_t> const global_vertex_IDs_dimensions = mesh_generator->GetGlobalDimensionsOfVertexIDs();
             REQUIRE( global_vertex_IDs_dimensions.size() == 2 );
@@ -300,9 +298,9 @@ SCENARIO( "Debug mesh generator: Vertex IDs local dimensions to write are correc
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consists of just one node" ) {
-         
+
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
-         
+
          THEN( "The local vertex IDs dimension vector has two entries with the first being equal the number of vertices and the second being three" ) {
             std::vector<hsize_t> const local_vertex_IDs_dimensions = mesh_generator->GetLocalDimensionsOfVertexIDs();
             REQUIRE( local_vertex_IDs_dimensions.size() == 2 );
@@ -337,9 +335,9 @@ SCENARIO( "Debug mesh generator: Vertex IDs start index to write is correctly de
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consists of just one node" ) {
-         
+
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
-         
+
          THEN( "The local vertex IDs start index is only value with entry 0" ) {
             hsize_t const local_vertex_IDs_start_index = mesh_generator->GetLocalVertexIDsStartIndex();
             REQUIRE( local_vertex_IDs_start_index == 0 );
@@ -360,7 +358,7 @@ SCENARIO( "Debug mesh generator: Vertex IDs start index to write is correctly de
 
 /********************************************************************************************************************************************/
 /*                                             TEST COMBINATION VERTEX IDs AND COORDINATES                                               */
-/********************************************************************************************************************************************/ 
+/********************************************************************************************************************************************/
 SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are computed properly in combination", "[1rank]" ) {
 
    GIVEN( "Underlying topology with Lmax being one" ) {
@@ -370,9 +368,9 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
       std::unique_ptr<MeshGenerator const> mesh_generator = std::make_unique<DebugMeshGenerator const>( topology, tree, 1.0, 1 );
 
       WHEN( "The topology consist of just one node" ) {
-         
+
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
-         
+
          std::vector<double> coordinates;
          mesh_generator->ComputeVertexCoordinates( coordinates );
          std::vector<unsigned long long int> vertex_ids;
@@ -380,7 +378,7 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
 
          // Check the total size of both vectors
          REQUIRE( coordinates.size() == MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock() * 3 );
-         REQUIRE( vertex_ids.size()  == MeshGeneratorUtilities::NumberOfTotalCellsPerBlock() * 8 );
+         REQUIRE( vertex_ids.size() == MeshGeneratorUtilities::NumberOfTotalCellsPerBlock() * 8 );
          // Check that the largest index in the vertex ids is not larger than the size of the coordinates vector
          REQUIRE( *std::max_element( vertex_ids.begin(), vertex_ids.end() ) < coordinates.size() );
 
@@ -397,29 +395,29 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
              *  ^ /         | /     | /
              *  |/          |/      |/
              *  --> x       0-------1
-             */ 
+             */
             for( unsigned int cell = 0; cell < MeshGeneratorUtilities::NumberOfTotalCellsPerBlock(); cell++ ) {
-               // Check that the x-coordinates of vertices are consistent 
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3] >  coordinates[vertex_ids[cell * 8    ] * 3] );
+               // Check that the x-coordinates of vertices are consistent
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3] > coordinates[vertex_ids[cell * 8] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3] == coordinates[vertex_ids[cell * 8 + 1] * 3] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3] == coordinates[vertex_ids[cell * 8    ] * 3] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3] == coordinates[vertex_ids[cell * 8    ] * 3] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3] == coordinates[vertex_ids[cell * 8] * 3] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3] == coordinates[vertex_ids[cell * 8] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 5] * 3] == coordinates[vertex_ids[cell * 8 + 1] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 6] * 3] == coordinates[vertex_ids[cell * 8 + 2] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 7] * 3] == coordinates[vertex_ids[cell * 8 + 3] * 3] );
-               // Check that the y-coordinates of vertices are consistent 
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] == coordinates[vertex_ids[cell * 8    ] * 3 + 1] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] >  coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] );
+               // Check that the y-coordinates of vertices are consistent
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] == coordinates[vertex_ids[cell * 8] * 3 + 1] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] > coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 1] == coordinates[vertex_ids[cell * 8    ] * 3 + 1] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 1] == coordinates[vertex_ids[cell * 8] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 5] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 4] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 6] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 7] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 3] * 3 + 1] );
-               // Check that the z-coordinates of vertices are consistent 
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 2] == coordinates[vertex_ids[cell * 8    ] * 3 + 2] );
+               // Check that the z-coordinates of vertices are consistent
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 2] == coordinates[vertex_ids[cell * 8] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 1] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 2] * 3 + 2] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 2] >  coordinates[vertex_ids[cell * 8    ] * 3 + 2] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 2] > coordinates[vertex_ids[cell * 8] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 5] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 4] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 6] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 5] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 7] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 6] * 3 + 2] );
@@ -438,7 +436,7 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
 
          // Check the total size of both vectors
          REQUIRE( coordinates.size() == 9 * MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock() * 3 );
-         REQUIRE( vertex_ids.size()  == 9 * MeshGeneratorUtilities::NumberOfTotalCellsPerBlock() * 8 );
+         REQUIRE( vertex_ids.size() == 9 * MeshGeneratorUtilities::NumberOfTotalCellsPerBlock() * 8 );
          // Check that the largest index in the vertex ids is not larger than the size of the coordinates vector
          REQUIRE( *std::max_element( vertex_ids.begin(), vertex_ids.end() ) < coordinates.size() );
 
@@ -455,29 +453,29 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
              *  ^ /         | /     | /
              *  |/          |/      |/
              *  --> x       0-------1
-             */  
+             */
             for( unsigned int cell = 0; cell < 9 * MeshGeneratorUtilities::NumberOfTotalCellsPerBlock(); cell++ ) {
-               // Check that the x-coordinates of vertices are consistent 
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3] >  coordinates[vertex_ids[cell * 8    ] * 3] );
+               // Check that the x-coordinates of vertices are consistent
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3] > coordinates[vertex_ids[cell * 8] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3] == coordinates[vertex_ids[cell * 8 + 1] * 3] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3] == coordinates[vertex_ids[cell * 8    ] * 3] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3] == coordinates[vertex_ids[cell * 8    ] * 3] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3] == coordinates[vertex_ids[cell * 8] * 3] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3] == coordinates[vertex_ids[cell * 8] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 5] * 3] == coordinates[vertex_ids[cell * 8 + 1] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 6] * 3] == coordinates[vertex_ids[cell * 8 + 2] * 3] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 7] * 3] == coordinates[vertex_ids[cell * 8 + 3] * 3] );
-               // Check that the y-coordinates of vertices are consistent 
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] == coordinates[vertex_ids[cell * 8    ] * 3 + 1] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] >  coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] );
+               // Check that the y-coordinates of vertices are consistent
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] == coordinates[vertex_ids[cell * 8] * 3 + 1] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] > coordinates[vertex_ids[cell * 8 + 1] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 1] == coordinates[vertex_ids[cell * 8    ] * 3 + 1] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 1] == coordinates[vertex_ids[cell * 8] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 5] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 4] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 6] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 2] * 3 + 1] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 7] * 3 + 1] == coordinates[vertex_ids[cell * 8 + 3] * 3 + 1] );
-               // Check that the z-coordinates of vertices are consistent 
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 2] == coordinates[vertex_ids[cell * 8    ] * 3 + 2] );
+               // Check that the z-coordinates of vertices are consistent
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 1] * 3 + 2] == coordinates[vertex_ids[cell * 8] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 2] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 1] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 3] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 2] * 3 + 2] );
-               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 2] >  coordinates[vertex_ids[cell * 8    ] * 3 + 2] );
+               REQUIRE( coordinates[vertex_ids[cell * 8 + 4] * 3 + 2] > coordinates[vertex_ids[cell * 8] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 5] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 4] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 6] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 5] * 3 + 2] );
                REQUIRE( coordinates[vertex_ids[cell * 8 + 7] * 3 + 2] == coordinates[vertex_ids[cell * 8 + 6] * 3 + 2] );

@@ -105,8 +105,7 @@ void Hdf5Manager::OpenFile( std::string const& filename, Hdf5Access const file_a
    file_.properties_ = H5Pcreate( H5P_FILE_ACCESS );
    H5Pset_fapl_mpio( file_.properties_, MPI_COMM_WORLD, MPI_INFO_NULL );
    // Opens the file
-   file_.id_ = file_.access_type_ == Hdf5Access::Read ? H5Fopen( filename.c_str(), H5F_ACC_RDONLY, file_.properties_ )
-                                                      : H5Fcreate( filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, file_.properties_ );
+   file_.id_ = file_.access_type_ == Hdf5Access::Read ? H5Fopen( filename.c_str(), H5F_ACC_RDONLY, file_.properties_ ) : H5Fcreate( filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, file_.properties_ );
    // Set flag that file is open
    file_.is_open_ = true;
 }
@@ -125,15 +124,14 @@ void Hdf5Manager::OpenGroup( std::string const& group_name ) {
       throw std::runtime_error( "Error opening group. No file is open!" );
    }
    // Check if the group already exists
-   if( groups_.find( group_name ) != groups_.end() )  {
+   if( groups_.find( group_name ) != groups_.end() ) {
       throw std::runtime_error( "Error opening group. The group already exists!" );
    }
 #endif
    // Create locally the struct holding all group information
    Hdf5Group group;
    // open the group and properties used for accessing/writing datasets of/into the group
-   group.id_ = file_.access_type_ == Hdf5Access::Read ? H5Gopen2( file_.id_, group_name.c_str(), H5P_DEFAULT )
-                                                      : H5Gcreate2( file_.id_, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+   group.id_         = file_.access_type_ == Hdf5Access::Read ? H5Gopen2( file_.id_, group_name.c_str(), H5P_DEFAULT ) : H5Gcreate2( file_.id_, group_name.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
    group.properties_ = H5Pcreate( H5P_DATASET_XFER );
    H5Pset_dxpl_mpio( group.properties_, H5FD_MPIO_INDEPENDENT );
    // Add the new group to the map
@@ -172,7 +170,7 @@ hsize_t Hdf5Manager::GetDatasetExtent( std::string const& dataset_name ) const {
    Hdf5Group const& group = groups_.at( active_group_ );
 
    /** Open the dataset for reading information from it */
-   hid_t const dataset_id = H5Dopen2( group.id_, dataset_name.c_str(), H5P_DEFAULT );
+   hid_t const dataset_id      = H5Dopen2( group.id_, dataset_name.c_str(), H5P_DEFAULT );
    hid_t const local_hyperslab = H5Dget_space( dataset_id );
    // read the data from file and store it in the contiguous buffer (cannot be returned directly, since data needs to be closed afterwards)
    hsize_t const dataset_extent = H5Sget_simple_extent_npoints( local_hyperslab );
@@ -206,7 +204,7 @@ void Hdf5Manager::OpenDatasetForWriting( std::string const& dataset_name, std::v
    if( active_group_.empty() ) {
       throw std::runtime_error( "Before opening a dataset for writing, a group must be active!" );
    }
-   if( datasets_.find( dataset_name ) != datasets_.end() )  {
+   if( datasets_.find( dataset_name ) != datasets_.end() ) {
       throw std::runtime_error( "Error opening dataset for writing. The dataset already exists!" );
    }
 #endif
@@ -214,21 +212,21 @@ void Hdf5Manager::OpenDatasetForWriting( std::string const& dataset_name, std::v
    Hdf5Dataset dataset;
 
    /** Link the current active group to the dataset */
-   dataset.group_name_ = active_group_;
+   dataset.group_name_    = active_group_;
    Hdf5Group const& group = groups_[dataset.group_name_];
 
    /** Copy and define the dimensional information about the dataset (done to have all information collectively stored in the struct) */
    dataset.total_dimensions_ = dataspace_total_dimensions;
    dataset.local_dimensions_ = dataset_local_dimensions;
    // Only the first start index is defined (represents the node, block, buffer position). All other are set to zero, since always a full local buffer is written.
-   dataset.start_indices_ = std::vector<hsize_t>( dataset.local_dimensions_.size(), 0 );
+   dataset.start_indices_         = std::vector<hsize_t>( dataset.local_dimensions_.size(), 0 );
    dataset.start_indices_.front() = local_elements_start_index;
-   dataset.datatype_ = datatype_id;
+   dataset.datatype_              = datatype_id;
 
    /** Define the chunk that is written at once and the proeprties used to create the dataset */
    // Define the chunk that is created at once (The same as local dimensions, but only one node/block/buffer is written once )
-   dataset.chunk_ = dataset.total_dimensions_;
-   dataset.chunk_.front() = 1;
+   dataset.chunk_             = dataset.total_dimensions_;
+   dataset.chunk_.front()     = 1;
    dataset.properties_create_ = H5Pcreate( H5P_DATASET_CREATE );
    H5Pset_chunk( dataset.properties_create_, dataset.chunk_.size(), dataset.chunk_.data() );
 
@@ -242,7 +240,7 @@ void Hdf5Manager::OpenDatasetForWriting( std::string const& dataset_name, std::v
    dataset.dataset_id_ = H5Dcreate2( group.id_, dataset_name.c_str(), dataset.datatype_, dataset.dataspace_id_, H5P_DEFAULT, dataset.properties_create_, H5P_DEFAULT );
    // Create the local memory and hyperslab space (NULL marks that dataset cannot grow until it is closed)
    dataset.local_memory_space_ = H5Screate_simple( dataset.local_dimensions_.size(), dataset.local_dimensions_.data(), NULL );
-   dataset.local_hyperslab_ = H5Dget_space( dataset.dataset_id_ );
+   dataset.local_hyperslab_    = H5Dget_space( dataset.dataset_id_ );
 
    /** Add the new dataset to the map */
    datasets_[dataset_name] = dataset;
@@ -266,7 +264,7 @@ void Hdf5Manager::OpenDatasetForReading( std::string const& dataset_name, std::v
    if( active_group_.empty() ) {
       throw std::runtime_error( "Before opening a dataset for reading, a group must be active!" );
    }
-   if( datasets_.find( dataset_name ) != datasets_.end() )  {
+   if( datasets_.find( dataset_name ) != datasets_.end() ) {
       throw std::runtime_error( "Error opening dataset for reading. The dataset already exists!" );
    }
 #endif
@@ -274,7 +272,7 @@ void Hdf5Manager::OpenDatasetForReading( std::string const& dataset_name, std::v
    Hdf5Dataset dataset;
 
    /** Link the current active group to the dataset */
-   dataset.group_name_ = active_group_;
+   dataset.group_name_    = active_group_;
    Hdf5Group const& group = groups_[dataset.group_name_];
 
    /** Copy and define the dimensional information about the dataset */
@@ -294,7 +292,7 @@ void Hdf5Manager::OpenDatasetForReading( std::string const& dataset_name, std::v
    dataset.dataset_id_ = H5Dopen2( group.id_, dataset_name.c_str(), H5P_DEFAULT );
    // Create the local memory and hyperslab space required for writing the data (NULL marks that dataset cannot grow until it is closed)
    dataset.local_memory_space_ = H5Screate_simple( dataset.local_dimensions_.size(), dataset.local_dimensions_.data(), NULL );
-   dataset.local_hyperslab_ = H5Dget_space( dataset.dataset_id_ );
+   dataset.local_hyperslab_    = H5Dget_space( dataset.dataset_id_ );
 
    /** Add the new dataset to the map */
    datasets_[dataset_name] = dataset;
@@ -323,7 +321,7 @@ void Hdf5Manager::ReserveDataspace( std::string const& dataspace_name, std::vect
    if( active_group_.empty() ) {
       throw std::runtime_error( "Error reserving dataspace. No group is active!" );
    }
-   if( datasets_.find( dataspace_name ) != datasets_.end() )  {
+   if( datasets_.find( dataspace_name ) != datasets_.end() ) {
       throw std::runtime_error( "Error reserving dataspace. The dataspace already exists!" );
    }
 #endif
@@ -338,7 +336,7 @@ void Hdf5Manager::ReserveDataspace( std::string const& dataspace_name, std::vect
    // Defines the local dimensions that are written to the global dataset dataspace
    dataset.local_dimensions_ = dataset_local_dimensions;
    // Defines the start indices for the local dimensions in the global dimensions matrix ( only the cell position is non-zero)
-   dataset.start_indices_ = std::vector<hsize_t>( dataset_local_dimensions.size(), 0 );
+   dataset.start_indices_         = std::vector<hsize_t>( dataset_local_dimensions.size(), 0 );
    dataset.start_indices_.front() = local_elements_start_index;
 
    // Specific creation type for all datasets that are written with the created dataspace
@@ -362,7 +360,7 @@ void Hdf5Manager::CloseDataset( std::string const& name ) {
    if( name.empty() ) {
       // No range-based loop possible here, since we are deleting elements during the loop
       for( auto it = datasets_.begin(); it != datasets_.end(); ) {
-         (*it).second.Close();
+         ( *it ).second.Close();
          it = datasets_.erase( it );
       }
    } else {
@@ -391,7 +389,7 @@ void Hdf5Manager::CloseGroup( std::string const& group_name ) {
       // No range-based loop possible here, since we are deleting elements during the loop
       for( auto it = groups_.begin(); it != groups_.end(); ) {
          // erase group from map (calls destructor that closes everything)
-         (*it).second.Close();
+         ( *it ).second.Close();
          it = groups_.erase( it );
       }
    } else {
@@ -403,8 +401,8 @@ void Hdf5Manager::CloseGroup( std::string const& group_name ) {
 #endif
       // Check if any dataset/dataspace has been opened in that group and close them
       for( auto it = datasets_.begin(); it != datasets_.end(); ) {
-         if( (*it).second.group_name_ == group_name ) {
-            (*it).second.Close();
+         if( ( *it ).second.group_name_ == group_name ) {
+            ( *it ).second.Close();
             it = datasets_.erase( it );
          }
       }

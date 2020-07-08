@@ -104,8 +104,8 @@ public:
                       std::unique_ptr<MaterialParameterModel const> shear_viscosity_model,
                       std::unique_ptr<MaterialParameterModel const> thermal_conductivity_model,
                       UnitHandler const& unit_handler );
-   Material() = delete;
-   ~Material() = default;
+   Material()                  = delete;
+   ~Material()                 = default;
    Material( Material const& ) = delete;
    Material& operator=( Material const& ) = delete;
    // Non-deleted move constructor

@@ -84,9 +84,9 @@ class ZeroGradientBoundaryCondition : public MaterialBoundaryCondition, public L
     * @param host_buffer Reference of the buffer that is to be updated.
     */
    template<class T>
-   inline void UpdateZeroGradient( T (&host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
+   inline void UpdateZeroGradient( T ( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
       auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
-      auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
+      auto end_indices   = BoundaryConstants<LOC>::HaloEndIndices();
 
       for( unsigned int i = start_indices[0]; i < end_indices[0]; ++i ) {
          for( unsigned int j = start_indices[1]; j < end_indices[1]; ++j ) {
@@ -98,11 +98,11 @@ class ZeroGradientBoundaryCondition : public MaterialBoundaryCondition, public L
    }
 
 public:
-   ZeroGradientBoundaryCondition() = default;
-   ~ZeroGradientBoundaryCondition() = default;
+   ZeroGradientBoundaryCondition()                                       = default;
+   ~ZeroGradientBoundaryCondition()                                      = default;
    ZeroGradientBoundaryCondition( ZeroGradientBoundaryCondition const& ) = delete;
    ZeroGradientBoundaryCondition& operator=( ZeroGradientBoundaryCondition const& ) = delete;
-   ZeroGradientBoundaryCondition( ZeroGradientBoundaryCondition&& ) = delete;
+   ZeroGradientBoundaryCondition( ZeroGradientBoundaryCondition&& )                 = delete;
    ZeroGradientBoundaryCondition&& operator=( ZeroGradientBoundaryCondition&& ) = delete;
 
    /**
@@ -112,21 +112,21 @@ public:
       unsigned int const number_of_fields = MF::ANOF( field_type );
       for( auto& host_mat_block : node.GetPhases() ) {
          for( unsigned int field_index = 0; field_index < number_of_fields; ++field_index ) {
-            double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
+            double( &cells )[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
             UpdateZeroGradient( cells );
-          }
+         }
       }
    }
 
    /**
     * @brief See base class. Adjusted to zero-gradient condition.
     */
-   void UpdateLevelsetExternal(Node& node, InterfaceBlockBufferType const buffer_type) const override {
+   void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type ) const override {
       /*  NH TODO this if construct should be avoided, therefore different neighbor relations
        *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
        */
       if( node.HasLevelset() ) {
-         double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
+         double( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
          UpdateZeroGradient( buffer );
       }
    }
@@ -135,7 +135,7 @@ public:
     * @brief See base class. Adjusted to zero-gradient condition.
     */
    void UpdateInterfaceTagExternal( Node& node ) const override {
-      std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
       UpdateZeroGradient( interface_tags );
    }
 
@@ -148,4 +148,4 @@ public:
    }
 };
 
-#endif // ZERO_GRADIENT_BOUNDARY_CONDITION_H
+#endif// ZERO_GRADIENT_BOUNDARY_CONDITION_H

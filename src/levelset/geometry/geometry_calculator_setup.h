@@ -71,7 +71,6 @@
 #include "user_specifications/numerical_setup.h"
 #include "geometry_calculator_marching_cubes.h"
 
-
 /**
  * @brief A namespace to get a GeometryCalculator type based on a specified constexpr.
  */
@@ -93,6 +92,6 @@ namespace GeometryCalculatorSetup {
       typedef GeometryCalculatorMarchingCubes type;
    };
 
-}
+}// namespace GeometryCalculatorSetup
 
-#endif // GEOMETRY_CALCULATOR_SETUP_H
+#endif// GEOMETRY_CALCULATOR_SETUP_H

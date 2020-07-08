@@ -93,7 +93,7 @@ namespace {
          time = MPI_Wtime();
       }
    }
-}
+}// namespace
 
 /**
  * @brief Default constructor. Creates an instance to advance the simulation with the specified spatial solver and temporal integrator.
@@ -107,41 +107,39 @@ namespace {
 ModularAlgorithmAssembler::ModularAlgorithmAssembler( double const start_time,
                                                       double const end_time,
                                                       double const cfl_number,
-                                                      std::array<double,3> const gravity,
+                                                      std::array<double, 3> const gravity,
                                                       std::vector<unsigned int> all_levels,
                                                       double const cell_size_on_maximum_level,
                                                       UnitHandler const& unit_handler,
                                                       InitialCondition const& initial_condition,
-                                                      Tree & tree,
-                                                      TopologyManager & topology,
-                                                      HaloManager & halo_manager,
-                                                      CommunicationManager & communication,
+                                                      Tree& tree,
+                                                      TopologyManager& topology,
+                                                      HaloManager& halo_manager,
+                                                      CommunicationManager& communication,
                                                       Multiresolution const& multiresolution,
                                                       MaterialManager const& material_manager,
-                                                      InputOutputManager & input_output ) :
-   start_time_( start_time ),
-   end_time_( end_time ),
-   cfl_number_( cfl_number ),
-   cell_size_on_maximum_level_( cell_size_on_maximum_level ),
-   gravity_( gravity ),
-   all_levels_( all_levels ),
-   initial_condition_( initial_condition ),
-   time_integrator_( start_time_ ),
-   tree_( tree ),
-   topology_( topology ),
-   halo_manager_( halo_manager ),
-   communicator_( communication ),
-   material_manager_( material_manager ),
-   unit_handler_( unit_handler ),
-   input_output_( input_output ),
-   multiresolution_( multiresolution ),
-   averager_( topology_, communicator_, tree_ ),
-   multi_phase_manager_( material_manager_, halo_manager_ ),
-   prime_state_handler_( material_manager ),
-   parameter_manager_( material_manager_, halo_manager_ ),
-   space_solver_( material_manager_, gravity ),
-   logger_( LogWriter::Instance() )
-{
+                                                      InputOutputManager& input_output ) : start_time_( start_time ),
+                                                                                           end_time_( end_time ),
+                                                                                           cfl_number_( cfl_number ),
+                                                                                           cell_size_on_maximum_level_( cell_size_on_maximum_level ),
+                                                                                           gravity_( gravity ),
+                                                                                           all_levels_( all_levels ),
+                                                                                           initial_condition_( initial_condition ),
+                                                                                           time_integrator_( start_time_ ),
+                                                                                           tree_( tree ),
+                                                                                           topology_( topology ),
+                                                                                           halo_manager_( halo_manager ),
+                                                                                           communicator_( communication ),
+                                                                                           material_manager_( material_manager ),
+                                                                                           unit_handler_( unit_handler ),
+                                                                                           input_output_( input_output ),
+                                                                                           multiresolution_( multiresolution ),
+                                                                                           averager_( topology_, communicator_, tree_ ),
+                                                                                           multi_phase_manager_( material_manager_, halo_manager_ ),
+                                                                                           prime_state_handler_( material_manager ),
+                                                                                           parameter_manager_( material_manager_, halo_manager_ ),
+                                                                                           space_solver_( material_manager_, gravity ),
+                                                                                           logger_( LogWriter::Instance() ) {
    /* Empty besides initializer list*/
 }
 
@@ -164,20 +162,19 @@ void ModularAlgorithmAssembler::ComputeLoop() {
     * We have to catch divison by zero in case only the initalization should be performed, i. e. start and end time are set to zero
     */
    double const flush_percentage = end_time_ == start_time_ ? 0.0 : ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ );
-   logger_.FlushAlpaca( flush_percentage , current_simulation_time > start_time_ );
+   logger_.FlushAlpaca( flush_percentage, current_simulation_time > start_time_ );
 
    while( current_simulation_time < end_time_ && ( !time_step_size_too_small ) ) {
-      MPI_Barrier( MPI_COMM_WORLD ); //For Time measurement
+      MPI_Barrier( MPI_COMM_WORLD );//For Time measurement
       time_measurement_start = MPI_Wtime();
-      Advance(); // This is the heart of the Simulation, the advancement in Time over the different levels
+      Advance();// This is the heart of the Simulation, the advancement in Time over the different levels
       ResetAllJumpBuffers();
-      MPI_Barrier( MPI_COMM_WORLD ); // For Time measurement
+      MPI_Barrier( MPI_COMM_WORLD );// For Time measurement
       time_measurement_end = MPI_Wtime();
       loop_times.push_back( time_measurement_end - time_measurement_start );
       // Information Logging
       LogNodeNumbers();
       LogPerformanceNumbers( loop_times );
-
 
       if constexpr( CC::WTL() ) {
          input_output_.WriteTimestepFile( time_integrator_.MicroTimestepSizes() );
@@ -193,7 +190,7 @@ void ModularAlgorithmAssembler::ComputeLoop() {
       input_output_.WriteRestartFile( current_simulation_time, time_step_size_too_small );
       if( input_output_.WriteFullOutput( current_simulation_time, time_step_size_too_small ) ) {
          // if output has been written this timestep, we also write profiling information
-         if constexpr( DP::Profile() ) {logger_.LogMessage( topology_.LeafRankDistribution( MpiUtilities::NumberOfRanks() ) );}
+         if constexpr( DP::Profile() ) { logger_.LogMessage( topology_.LeafRankDistribution( MpiUtilities::NumberOfRanks() ) ); }
       }
    }
 
@@ -213,7 +210,7 @@ void ModularAlgorithmAssembler::Initialization() {
    if( restart_time < 0.0 ) {
       CreateNewSimulation();
       logger_.LogMessage( "Initializing new simulation" );
-   } else { //otherwise finalize the restart
+   } else {//otherwise finalize the restart
       FinalizeSimulationRestart( restart_time );
    }
    logger_.LogMessage( "Simulation successfully initialized" );
@@ -224,7 +221,7 @@ void ModularAlgorithmAssembler::Initialization() {
    // initial output
    double const run_time = time_integrator_.CurrentRunTime();
    input_output_.WriteFullOutput( run_time, true );
-   input_output_.WriteRestartFile( run_time ); // Does only trigger writing of restart file if requested by user input ( =inputfile ).
+   input_output_.WriteRestartFile( run_time );// Does only trigger writing of restart file if requested by user input ( =inputfile ).
 }
 
 /**
@@ -238,12 +235,12 @@ void ModularAlgorithmAssembler::FinalizeSimulationRestart( double const restart_
    // project interface tags to make sure that cut cell tags are present on lower levels
    std::vector<unsigned int> child_levels_descending( all_levels_ );
    std::reverse( child_levels_descending.begin(), child_levels_descending.end() );
-   child_levels_descending.pop_back(); // remove level 0
+   child_levels_descending.pop_back();// remove level 0
    UpdateInterfaceTags( child_levels_descending );
 
    // initialize volume fractions if necessary
    std::vector<std::reference_wrapper<Node>> const nodes_needing_multiphase_treatment = tree_.NodesWithLevelset();
-   bool globaly_existing_multi_phase_nodes = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
+   bool globaly_existing_multi_phase_nodes                                            = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
    if( globaly_existing_multi_phase_nodes ) {
       multi_phase_manager_.InitializeVolumeFractionBuffer( nodes_needing_multiphase_treatment );
       multi_phase_manager_.ObtainInterfaceStates( nodes_needing_multiphase_treatment );
@@ -267,19 +264,19 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
    std::vector<std::uint64_t> coarsable_list;
    std::vector<std::uint64_t> globally_coarsable;
    std::vector<std::uint64_t> parents_of_coarsable;
-   std::vector<std::uint64_t> refinement_list; //This list is only need as stub in this function.
+   std::vector<std::uint64_t> refinement_list;//This list is only need as stub in this function.
 
    int const my_rank = communicator_.MyRankId();
    for( unsigned int level = 0; level <= all_levels_.back(); ++level ) {
       if( level > 0 ) {
-         for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level - 1, my_rank ) ) { //We refine the parent to get the level we want to work on
+         for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level - 1, my_rank ) ) {//We refine the parent to get the level we want to work on
             topology_.RefineNodeWithId( node_id );
          }
          UpdateTopology();
       }
       for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
          std::uint64_t parent_id = ParentIdOfNode( node_id );
-         if( level == 0 || topology_.IsNodeMultiPhase( parent_id ) ) { //Evaluated left to right, makes it safe on level zero
+         if( level == 0 || topology_.IsNodeMultiPhase( parent_id ) ) {//Evaluated left to right, makes it safe on level zero
             // get the materials that initially exists in this node ( this is determined on the finest level to avoid losing structures that are unresolved by this node )
             initial_materials = initial_condition_.GetInitialMaterials( node_id );
             if( initial_materials.size() > 1 ) {
@@ -298,12 +295,12 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
                   }
                }
             }
-            if( level == all_levels_.back() && initial_materials.size() > 1 ) { // multi and leaf
+            if( level == all_levels_.back() && initial_materials.size() > 1 ) {// multi and leaf
                tree_.CreateNode( node_id, initial_materials, initial_interface_tags, std::make_unique<InterfaceBlock>( levelset_temp ) );
-            } else { // either single or non-leaf multi
+            } else {// either single or non-leaf multi
                tree_.CreateNode( node_id, initial_materials, initial_interface_tags );
             }
-         } else { // parent is single material
+         } else {// parent is single material
             initial_materials = topology_.GetMaterialsOfNode( parent_id );
             // copying tags of parent is sufficient as they are the same ( single material )
             tree_.CreateNode( node_id, initial_materials, tree_.GetNodeWithId( parent_id ).GetInterfaceTags() );
@@ -329,15 +326,15 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags() );
       }
       halo_manager_.InterfaceTagHaloUpdateOnLevelList( { level } );
-      SenseApproachingInterface( {level}, false ); // setting refine=false might cause an ill-defined tree afterwards which is corrected in next loop ( ++level )
+      SenseApproachingInterface( { level }, false );// setting refine=false might cause an ill-defined tree afterwards which is corrected in next loop ( ++level )
       ImposeInitialCondition( level );
       halo_manager_.MaterialHaloUpdateOnLevel( level, MaterialFieldType::Conservatives );
       if( level == all_levels_.back() ) {
          halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
       }
-      if( level > 1 ) { // Level One may never be coarsened.
+      if( level > 1 ) {// Level One may never be coarsened.
          coarsable_list.clear();
-         DetermineRemeshingNodes( {level - 1}, coarsable_list, refinement_list ); //Called on parent level
+         DetermineRemeshingNodes( { level - 1 }, coarsable_list, refinement_list );//Called on parent level
 
          MpiUtilities::LocalToGlobalData( coarsable_list, MPI_LONG_LONG_INT, MpiUtilities::NumberOfRanks(), globally_coarsable );
 
@@ -365,14 +362,14 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          std::swap( levelset_node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), levelset_node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset ) );
       }
       LoadBalancing( all_levels_, true );
-   } // loop: level
+   }// loop: level
 
    UpdateTopology();
 
    // project interface tags to make sure that cut cell tags are present on lower levels which underresolve the initial levelset
    std::vector<unsigned int> child_levels_descending( all_levels_ );
    std::reverse( child_levels_descending.begin(), child_levels_descending.end() );
-   child_levels_descending.pop_back(); // remove level 0
+   child_levels_descending.pop_back();// remove level 0
 
    /** At this place, the prescribed initial conditions are imposed.
     *  The prescribed level-set field is in levelset_rhs
@@ -381,7 +378,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
     *  Based on the reinitialized level-set buffer, the volume fractions have to be calculated.
     *  Based on the reinitialized level-set field and the volume fractions, the extension can be done. */
    std::vector<std::reference_wrapper<Node>> const nodes_needing_multiphase_treatment = tree_.NodesWithLevelset();
-   bool const exist_multi_nodes_global = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
+   bool const exist_multi_nodes_global                                                = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
    if( exist_multi_nodes_global ) {
 
       // Obtain all nodes that are on the current rank on the given level
@@ -394,21 +391,21 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
        */
       BO::Material::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
 
-      ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( {all_levels_.back()} );
+      ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( { all_levels_.back() } );
       multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, true );
       multi_phase_manager_.InitializeVolumeFractionBuffer( nodes_needing_multiphase_treatment );
       UpdateInterfaceTags( child_levels_descending );
 
       BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes_needing_multiphase_treatment );
 
-      ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( {all_levels_.back()} );
+      ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( { all_levels_.back() } );
 
       // Swap buffers again to be conform for consecutive operations
       BO::Material::SwapConservativeBuffersForNodeList<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( nodes_on_level );
 
       // Extend all quantities in the reinitialization band
       multi_phase_manager_.Extend( nodes_needing_multiphase_treatment );
-   } //if multi nodes exist
+   }//if multi nodes exist
 
    // So far everything happened in the RHS buffer - now we swap for proper start.
    SwapBuffers( all_levels_, 0 );
@@ -422,7 +419,6 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
       std::reverse( levels_to_update.begin(), levels_to_update.end() );
       UpdateParameters( levels_to_update, exist_multi_nodes_global, nodes_needing_multiphase_treatment );
    }
-
 
    if( exist_multi_nodes_global ) {
       multi_phase_manager_.ObtainInterfaceStates( nodes_needing_multiphase_treatment );
@@ -440,8 +436,8 @@ void ModularAlgorithmAssembler::Advance() {
 
    // These variables are only for debugging. Allow fine tuned debug output. see below.
    unsigned int debug_key = 0;
-   bool plot_this_step = false;
-   bool print_this_step = false;
+   bool plot_this_step    = false;
+   bool print_this_step   = false;
 
    // These variables are only for profiling
    double function_timer = 0.0;
@@ -457,17 +453,17 @@ void ModularAlgorithmAssembler::Advance() {
    std::vector<unsigned int> levels_to_update_ascending;
    std::vector<unsigned int> levels_with_updated_parents_descending;
    std::vector<std::reference_wrapper<Node>> nodes_needing_multiphase_treatment = tree_.NodesWithLevelset();
-   bool exist_multi_nodes_global = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
+   bool exist_multi_nodes_global                                                = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
 
    double time_measurement_start = 0.0;
-   double time_measurement_end = 0.0;
+   double time_measurement_end   = 0.0;
 
    //Run enough timesteps on the maximum level to run one timestep on level 0
    for( unsigned int timestep = 0; timestep < number_of_timesteps_on_finest_level; ++timestep ) {
 
       SetTimeInProfileRuns( function_timer );
       if constexpr( DP::Profile() ) {
-         MPI_Barrier( MPI_COMM_WORLD ); //For Time measurement
+         MPI_Barrier( MPI_COMM_WORLD );//For Time measurement
          time_measurement_start = MPI_Wtime();
       }
 
@@ -495,7 +491,6 @@ void ModularAlgorithmAssembler::Advance() {
          ComputeRightHandSide( levels_to_update_descending, stage );
          LogElapsedTimeSinceInProfileRuns( function_timer, "ComputeRightHandSide               " );
          ProvideDebugInformation( "ComputeRightHandSide - Done ", plot_this_step, print_this_step, debug_key );
-
 
          //Flux averaging from levels which run this timestep down to the lowest neighbor level or parent
          SetTimeInProfileRuns( function_timer );
@@ -568,7 +563,7 @@ void ModularAlgorithmAssembler::Advance() {
             LogElapsedTimeSinceInProfileRuns( function_timer, "Remesh                             " );
             ProvideDebugInformation( "Remesh - Done ", plot_this_step, print_this_step, debug_key );
 
-            if( exist_multi_nodes_global ) { // TODO-19 JW and NH: Think of removing this if statement in case of a newly created interface ( phase change... )
+            if( exist_multi_nodes_global ) {// TODO-19 JW and NH: Think of removing this if statement in case of a newly created interface ( phase change... )
                SetTimeInProfileRuns( function_timer );
                SenseApproachingInterface( levels_to_update_ascending );
                LogElapsedTimeSinceInProfileRuns( function_timer, "SenseApproachingInterface          " );
@@ -580,14 +575,14 @@ void ModularAlgorithmAssembler::Advance() {
             LogElapsedTimeSinceInProfileRuns( function_timer, "LoadBalancing                      " );
 
             nodes_needing_multiphase_treatment = tree_.NodesWithLevelset();
-            exist_multi_nodes_global = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
+            exist_multi_nodes_global           = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
             ProvideDebugInformation( "LoadBalancing - Done ", plot_this_step, print_this_step, debug_key );
 
             if constexpr( DP::Profile() ) {
                logger_.LogMessage( "Node count after remeshing:" );
                LogNodeNumbers();
             }
-         } //last stage
+         }//last stage
 
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
@@ -608,7 +603,7 @@ void ModularAlgorithmAssembler::Advance() {
             ProvideDebugInformation( "UpdateInterfaceTags - Done ", plot_this_step, print_this_step, debug_key );
 
             SetTimeInProfileRuns( function_timer );
-            ObtainPrimeStatesFromConservatives<ConservativeBufferType::RightHandSide>( {all_levels_.back()}, true );
+            ObtainPrimeStatesFromConservatives<ConservativeBufferType::RightHandSide>( { all_levels_.back() }, true );
             LogElapsedTimeSinceInProfileRuns( function_timer, "ObtainPrimeStatesFromConservatives " );
             ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, print_this_step, debug_key );
 
@@ -626,7 +621,7 @@ void ModularAlgorithmAssembler::Advance() {
 
          // Calculate the prime states based on the integrated conservatives and save them in the prime state buffer.
          SetTimeInProfileRuns( function_timer );
-         ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( all_levels_ ); //TODO-19 JW and NH: It would suffice to do it on updated_levels if we could track nodes that were load balanced but not integrated.
+         ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( all_levels_ );//TODO-19 JW and NH: It would suffice to do it on updated_levels if we could track nodes that were load balanced but not integrated.
          LogElapsedTimeSinceInProfileRuns( function_timer, "ObtainPrimeStatesFromConservatives " );
          ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, print_this_step, debug_key );
 
@@ -642,7 +637,6 @@ void ModularAlgorithmAssembler::Advance() {
             ProvideDebugInformation( "UpdateParameters - Done ", plot_this_step, print_this_step, debug_key );
          }
 
-
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.ObtainInterfaceStates( nodes_needing_multiphase_treatment, time_integrator_.IsLastStage( stage ) );
@@ -652,18 +646,18 @@ void ModularAlgorithmAssembler::Advance() {
                logger_.DelayedLogMessage( true, true );
             }
          }
-      } // stages
+      }// stages
 
       if constexpr( DP::Profile() ) {
-         MPI_Barrier( MPI_COMM_WORLD ); //For Time measurement
+         MPI_Barrier( MPI_COMM_WORLD );//For Time measurement
          time_measurement_end = MPI_Wtime();
          // Information Logging
          auto&& [number_of_nodes, number_of_leaves] = topology_.NodeAndLeafCount();
          logger_.LogMessage( "Global Number of Nodes        : " + std::to_string( number_of_nodes ) );
          logger_.LogMessage( "Global Number of Leaves       : " + std::to_string( number_of_leaves ) );
          logger_.LogMessage( "Wall clock time for micro step: " + StringOperations::ToScientificNotationString( time_measurement_end - time_measurement_start, 5 ) );
-         logger_.LogMessage( "Wall clock time per cell      : " + StringOperations::ToScientificNotationString( ( time_measurement_end - time_measurement_start ) / ( number_of_leaves*CC::ICX()*CC::ICY()*CC::ICZ() ), 5 ) );
-         logger_.LogMessage( "Number of cells               : " + StringOperations::ToScientificNotationString( number_of_leaves*CC::ICX()*CC::ICY()*CC::ICZ(), 5 ) );
+         logger_.LogMessage( "Wall clock time per cell      : " + StringOperations::ToScientificNotationString( ( time_measurement_end - time_measurement_start ) / ( number_of_leaves * CC::ICX() * CC::ICY() * CC::ICZ() ), 5 ) );
+         logger_.LogMessage( "Number of cells               : " + StringOperations::ToScientificNotationString( number_of_leaves * CC::ICX() * CC::ICY() * CC::ICZ(), 5 ) );
          logger_.LogMessage( " " );
       }
 
@@ -687,12 +681,12 @@ void ModularAlgorithmAssembler::Advance() {
 void ModularAlgorithmAssembler::ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const print_this_step,
                                                          unsigned int& debug_key ) const {
    if constexpr( DP::DebugLog() ) {
-      if( print_this_step ) { logger_.LogMessage( debug_string + std::to_string( debug_key ) );}
+      if( print_this_step ) { logger_.LogMessage( debug_string + std::to_string( debug_key ) ); }
    }
    if constexpr( DP::DebugOutput() ) {
-      if( plot_this_step ) {input_output_.WriteSingleOutput( debug_key );}
+      if( plot_this_step ) { input_output_.WriteSingleOutput( debug_key ); }
    }
-   if constexpr( DP::Debug() ) {debug_key++;}
+   if constexpr( DP::Debug() ) { debug_key++; }
 }
 
 /**
@@ -723,9 +717,9 @@ void ModularAlgorithmAssembler::ComputeRightHandSide( std::vector<unsigned int> 
                      max_eigenvalues[d][e] = std::max( max_eigenvalues[d][e], current_eigenvalues[d][e] );
                   }
                }
-            } // phases
-         } // node
-      } // level
+            }// phases
+         }   // node
+      }      // level
       MPI_Allreduce( MPI_IN_PLACE, max_eigenvalues, DTI( CC::DIM() ) * MF::ANOE(), MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
       space_solver_.SetFluxFunctionGlobalEigenvalues( max_eigenvalues );
    }
@@ -742,8 +736,8 @@ void ModularAlgorithmAssembler::ComputeRightHandSide( std::vector<unsigned int> 
 
          // Conservative as well as levelset buffers are prepared for integration
          time_integrator_.PrepareBufferForIntegration( node, stage );
-      } // node
-   } // level
+      }// node
+   }   // level
 }
 
 /**
@@ -761,11 +755,11 @@ void ModularAlgorithmAssembler::SwapBuffers( std::vector<unsigned int> const upd
       for( Node& node : tree_.NodesOnLevel( level ) ) {
          if( time_integrator_.IsLastStage( stage ) && node.HasLevelset() ) {
             BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( node );
-         } //node with level set and final stage
+         }//node with level set and final stage
 
          time_integrator_.SwapBuffersForNextStage( node );
-      } //nodes
-   } //levels
+      }//nodes
+   }   //levels
 }
 
 /**
@@ -776,7 +770,7 @@ void ModularAlgorithmAssembler::SwapBuffers( std::vector<unsigned int> const upd
 void ModularAlgorithmAssembler::Integrate( std::vector<unsigned int> const updated_levels, unsigned int const stage ) {
 
    for( auto const& level : updated_levels ) {
-      unsigned int const number_of_timesteps = 1 << ( all_levels_.back() - level ); // 2^x
+      unsigned int const number_of_timesteps = 1 << ( all_levels_.back() - level );// 2^x
 
       // We integrate all leaves
       for( Node& node : tree_.LeavesOnLevel( level ) ) {
@@ -793,12 +787,12 @@ void ModularAlgorithmAssembler::Integrate( std::vector<unsigned int> const updat
          for( BoundaryLocation const& location : CC::HBS() ) {
             if( topology_.FaceIsJump( id, location ) ) {
                std::array<int, 3> start_indices_halo = communicator_.GetStartIndicesHaloRecv( location );
-               std::array<int, 3> halo_size = communicator_.GetHaloSize( location );
+               std::array<int, 3> halo_size          = communicator_.GetHaloSize( location );
                time_integrator_.IntegrateJumpHalos( node, stage, number_of_timesteps, start_indices_halo, halo_size );
             }
          }
       }
-   } // level
+   }// level
 }
 
 /**
@@ -850,14 +844,14 @@ void ModularAlgorithmAssembler::UpdateInterfaceTags( std::vector<unsigned int> c
  * @param levels_ascending The levels on which all nodes should be checked in ascending order.
  * @param refine_if_necessary Gives whether a found node should also be refined. If false, it might cause an ill-defined tree.
  */
-void ModularAlgorithmAssembler::SenseApproachingInterface( std::vector<unsigned int> const levels_ascending, bool const  refine_if_necessary ) {
+void ModularAlgorithmAssembler::SenseApproachingInterface( std::vector<unsigned int> const levels_ascending, bool const refine_if_necessary ) {
    // WARNING: calling this function with refine=false might cause an ill-defined tree, used only during initialization
 
    // make sure this function is called from lowest ( e.g. 0 ) to highest ( e.g. Lmax ) level of interest, i.e. in ascending order
    // this guarantees that the appearance of the interface propagates up the tree
 
    bool interface_block_created = false;
-   bool node_refined = false;
+   bool node_refined            = false;
    for( auto const& level : levels_ascending ) {
       for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
          if( !topology_.IsNodeMultiPhase( node_id ) ) {
@@ -867,8 +861,7 @@ void ModularAlgorithmAssembler::SenseApproachingInterface( std::vector<unsigned 
                // not uniform anymore, thus change to multi
 
                // get additional material
-               MaterialName const material_new = ( node.GetSinglePhaseMaterial() == MaterialSignCapsule::PositiveMaterial() ) ? MaterialSignCapsule::NegativeMaterial()
-                                                                                                                                 : MaterialSignCapsule::PositiveMaterial();
+               MaterialName const material_new = ( node.GetSinglePhaseMaterial() == MaterialSignCapsule::PositiveMaterial() ) ? MaterialSignCapsule::NegativeMaterial() : MaterialSignCapsule::PositiveMaterial();
                topology_.AddMaterialToNode( node_id, material_new );
                if( level == all_levels_.back() ) {
                   // Lmax node with interface block but without children
@@ -933,8 +926,7 @@ void ModularAlgorithmAssembler::SenseVanishedInterface( std::vector<unsigned int
                   // make single again
 
                   // get the vanished material ( can use an arbitrary interface tag since it's already clear that they are uniform )
-                  MaterialName const material_old = ( node.GetInterfaceTags()[CC::FICX()][CC::FICY()][CC::FICZ()] < 0 ) ? MaterialSignCapsule::PositiveMaterial()
-                                                                                                                      : MaterialSignCapsule::NegativeMaterial();
+                  MaterialName const material_old = ( node.GetInterfaceTags()[CC::FICX()][CC::FICY()][CC::FICZ()] < 0 ) ? MaterialSignCapsule::PositiveMaterial() : MaterialSignCapsule::NegativeMaterial();
                   topology_.RemoveMaterialFromNode( node_id, material_old );
 
                   // remove old material and interface block ( by setting it to nullptr )
@@ -960,8 +952,8 @@ void ModularAlgorithmAssembler::SenseVanishedInterface( std::vector<unsigned int
 void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> const finished_levels_descending ) const {
 
    // We have to cut level zero if present as it cannot send information downwards
-   std::vector<unsigned int> levels_averaging_down(finished_levels_descending);
-   levels_averaging_down.erase(std::remove(levels_averaging_down.begin(), levels_averaging_down.end(), 0), levels_averaging_down.end());
+   std::vector<unsigned int> levels_averaging_down( finished_levels_descending );
+   levels_averaging_down.erase( std::remove( levels_averaging_down.begin(), levels_averaging_down.end(), 0 ), levels_averaging_down.end() );
 
    // The finest level does not exchange
    std::vector<unsigned int> level_exchanging( finished_levels_descending );
@@ -971,13 +963,13 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
    /*** Sending Down ***/
    // First the parents' jump buffers are filled form the childrens values.
    for( auto const& level : levels_averaging_down ) {
-      for( auto const& child_id : topology_.GlobalIdsOnLevel(level) ) {
-         std::uint64_t const parent_id = ParentIdOfNode(child_id);
-         int const rank_of_child = topology_.GetRankOfNode(child_id);
-         int const rank_of_parent = topology_.GetRankOfNode(parent_id);
+      for( auto const& child_id : topology_.GlobalIdsOnLevel( level ) ) {
+         std::uint64_t const parent_id = ParentIdOfNode( child_id );
+         int const rank_of_child       = topology_.GetRankOfNode( child_id );
+         int const rank_of_parent      = topology_.GetRankOfNode( parent_id );
          if( rank_of_child == my_rank && rank_of_parent == my_rank ) {
             // Non MPI Averaging
-            Node& parent = tree_.GetNodeWithId( parent_id );
+            Node& parent      = tree_.GetNodeWithId( parent_id );
             Node const& child = tree_.GetNodeWithId( child_id );
             for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
                Multiresolution::AverageJumpBuffer( child.GetPhaseByMaterial( material ).GetBoundaryJumpConservatives(), parent.GetPhaseByMaterial( material ).GetBoundaryJumpConservatives(), child_id );
@@ -987,7 +979,7 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
             Node const& child = tree_.GetNodeWithId( child_id );
             for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
                MPI_Send( &child.GetPhaseByMaterial( material ).GetBoundaryJumpConservatives(), CC::SIDES(), communicator_.JumpSurfaceDatatype(), rank_of_parent,
-                        communicator_.TagForRank( rank_of_parent ), MPI_COMM_WORLD );
+                         communicator_.TagForRank( rank_of_parent ), MPI_COMM_WORLD );
             }
          } else if( rank_of_child != my_rank && rank_of_parent == my_rank ) {
             SurfaceBuffer childs_jump_buffer;
@@ -995,8 +987,8 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
             // MPI_Recv
             Node& parent = tree_.GetNodeWithId( parent_id );
             for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
-               MPI_Recv( &childs_jump_buffer, CC::SIDES(), communicator_.JumpSurfaceDatatype(),rank_of_child, communicator_.TagForRank( rank_of_child ),MPI_COMM_WORLD,MPI_STATUS_IGNORE );
-               Multiresolution::AverageJumpBuffer( childs_jump_buffer,parent.GetPhaseByMaterial( material ).GetBoundaryJumpConservatives(), child_id );
+               MPI_Recv( &childs_jump_buffer, CC::SIDES(), communicator_.JumpSurfaceDatatype(), rank_of_child, communicator_.TagForRank( rank_of_child ), MPI_COMM_WORLD, MPI_STATUS_IGNORE );
+               Multiresolution::AverageJumpBuffer( childs_jump_buffer, parent.GetPhaseByMaterial( material ).GetBoundaryJumpConservatives(), child_id );
             }
          }
       }
@@ -1021,7 +1013,7 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
    unsigned int y_end;
    unsigned int z_start;
    unsigned int z_end;
-   double one_cell_size = 0.0; //Triggers floating point exception if not changed ( intended ).
+   double one_cell_size = 0.0;//Triggers floating point exception if not changed ( intended ).
 
    double direction;
    double coarse_fluxes[6][MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()];
@@ -1034,7 +1026,7 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                   coarse_fluxes[b][ETI( eq )][i][j][k] = 0.0;
-                  fine_fluxes[b][ETI( eq )][i][j][k] = 0.0;
+                  fine_fluxes[b][ETI( eq )][i][j][k]   = 0.0;
                }
             }
          }
@@ -1045,7 +1037,7 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
       for( auto const& leaf_id : leaf_ids_on_level ) {
          for( MaterialName const material : topology_.GetMaterialsOfNode( leaf_id ) ) {
             for( auto const& location : CC::ANBS() ) {
-               neighbor_id = topology_.GetTopologyNeighborId( leaf_id, location );
+               neighbor_id     = topology_.GetTopologyNeighborId( leaf_id, location );
                neighbor_exists = topology_.NodeExists( neighbor_id );
                if( neighbor_exists ) {
                   neighbor_is_leaf = topology_.NodeIsLeaf( neighbor_id );
@@ -1053,39 +1045,39 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
                   neighbor_is_leaf = false;
                }
                neighbor_location = OppositeDirection( location );
-               x_start = CC::FICX();
-               x_end   = CC::LICX();
-               y_start = CC::FICY();
-               y_end   = CC::LICY();
-               z_start = CC::FICZ();
-               z_end   = CC::LICZ();
+               x_start           = CC::FICX();
+               x_end             = CC::LICX();
+               y_start           = CC::FICY();
+               y_end             = CC::LICY();
+               z_start           = CC::FICZ();
+               z_end             = CC::LICZ();
                if( neighbor_exists && !neighbor_is_leaf ) {
-                  if( topology_.NodeIsOnRank( leaf_id, my_rank ) ) { // I have the Node, I must collect the data and update
+                  if( topology_.NodeIsOnRank( leaf_id, my_rank ) ) {// I have the Node, I must collect the data and update
 
                      direction = 0.0;
-                     switch ( location ) {
+                     switch( location ) {
                         case BoundaryLocation::East:
-                           x_start = CC::LICX();
+                           x_start   = CC::LICX();
                            direction = -1.0;
                            break;
                         case BoundaryLocation::West:
-                           x_end = CC::FICX();
+                           x_end     = CC::FICX();
                            direction = 1.0;
                            break;
                         case BoundaryLocation::North:
-                           y_start = CC::LICY();
+                           y_start   = CC::LICY();
                            direction = -1.0;
                            break;
                         case BoundaryLocation::South:
-                           y_end = CC::FICY();
+                           y_end     = CC::FICY();
                            direction = 1.0;
                            break;
                         case BoundaryLocation::Top:
-                           z_start = CC::LICZ();
+                           z_start   = CC::LICZ();
                            direction = -1.0;
                            break;
                         case BoundaryLocation::Bottom:
-                           z_end = CC::FICZ();
+                           z_end     = CC::FICZ();
                            direction = 1.0;
                            break;
 #ifndef PERFORMANCE
@@ -1096,12 +1088,12 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
 #ifndef PERFORMANCE
                      if( direction == 0.0 ) { throw std::logic_error( "No no no" ); }
 #endif
-                     Node& node = tree_.GetNodeWithId( leaf_id );
-                     one_cell_size = 1.0 / node.GetCellSize();
-                     Block& block = node.GetPhaseByMaterial( material );
-                     double ( &jump_buffer )[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpConservatives( location );
-                     unsigned int jump_index_one = 0;
-                     unsigned int jump_index_two = 0;
+                     Node& node                                               = tree_.GetNodeWithId( leaf_id );
+                     one_cell_size                                            = 1.0 / node.GetCellSize();
+                     Block& block                                             = node.GetPhaseByMaterial( material );
+                     double( &jump_buffer )[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpConservatives( location );
+                     unsigned int jump_index_one                              = 0;
+                     unsigned int jump_index_two                              = 0;
 
                      // Update Setup One
                      for( Equation const eq : MF::ASOE() ) {
@@ -1123,8 +1115,7 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
                      }
                      if( topology_.NodeIsOnRank( neighbor_id, my_rank ) ) {
                         // Non-MPI
-                        double const ( &neighbor_jump_buffer )[MF::ANOE()][CC::ICY()][CC::ICZ()] = tree_.GetNodeWithId( neighbor_id ).GetPhaseByMaterial(
-                                material ).GetBoundaryJumpConservatives( neighbor_location );
+                        double const( &neighbor_jump_buffer )[MF::ANOE()][CC::ICY()][CC::ICZ()] = tree_.GetNodeWithId( neighbor_id ).GetPhaseByMaterial( material ).GetBoundaryJumpConservatives( neighbor_location );
                         for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
                            for( unsigned int i = 0; i < CC::ICY(); ++i ) {
                               for( unsigned int j = 0; j < CC::ICZ(); ++j ) {
@@ -1159,43 +1150,42 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
                         }
                      }
                   } else {
-                     if( topology_.NodeIsOnRank( neighbor_id, my_rank ) ) { // I do not have the Node but I do have the Neighbor and must send it
+                     if( topology_.NodeIsOnRank( neighbor_id, my_rank ) ) {// I do not have the Node but I do have the Neighbor and must send it
                         // Send MPI
-                        double ( & neighbor_jump_buffer )[MF::ANOE()][CC::ICY()][CC::ICZ()] = tree_.GetNodeWithId( neighbor_id ).GetPhaseByMaterial(
-                                material ).GetBoundaryJumpConservatives( neighbor_location );
+                        double( &neighbor_jump_buffer )[MF::ANOE()][CC::ICY()][CC::ICZ()] = tree_.GetNodeWithId( neighbor_id ).GetPhaseByMaterial( material ).GetBoundaryJumpConservatives( neighbor_location );
                         MPI_Send( neighbor_jump_buffer, JumpBufferSendingSize(), MPI_DOUBLE, topology_.GetRankOfNode( leaf_id ), 0, MPI_COMM_WORLD );
                      }
                   }
-               } // Neighbor qualifies for exchange
-            } // location
+               }// Neighbor qualifies for exchange
+            }   // location
 
             // Now add up/subtract everything here
             if( topology_.NodeIsOnRank( leaf_id, my_rank ) ) {
-               Node& node = tree_.GetNodeWithId( leaf_id );
+               Node& node   = tree_.GetNodeWithId( leaf_id );
                Block& block = node.GetPhaseByMaterial( material );
                for( Equation const eq : MF::ASOE() ) {
-                  double ( & cells )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer( eq );
+                  double( &cells )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer( eq );
                   for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                      for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                         for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                            cells[i][j][k] -= ConsistencyManagedSum( coarse_fluxes[0][ETI( eq )][i][j][k] + coarse_fluxes[1][ETI( eq )][i][j][k],
-                                                                   coarse_fluxes[2][ETI( eq )][i][j][k] + coarse_fluxes[3][ETI( eq )][i][j][k],
-                                                                   coarse_fluxes[4][ETI( eq )][i][j][k] + coarse_fluxes[5][ETI( eq )][i][j][k] );
+                                                                    coarse_fluxes[2][ETI( eq )][i][j][k] + coarse_fluxes[3][ETI( eq )][i][j][k],
+                                                                    coarse_fluxes[4][ETI( eq )][i][j][k] + coarse_fluxes[5][ETI( eq )][i][j][k] );
                            cells[i][j][k] += ConsistencyManagedSum( fine_fluxes[0][ETI( eq )][i][j][k] + fine_fluxes[1][ETI( eq )][i][j][k],
-                                                                   fine_fluxes[2][ETI( eq )][i][j][k] + fine_fluxes[3][ETI( eq )][i][j][k],
-                                                                   fine_fluxes[4][ETI( eq )][i][j][k] + fine_fluxes[5][ETI( eq )][i][j][k] );
+                                                                    fine_fluxes[2][ETI( eq )][i][j][k] + fine_fluxes[3][ETI( eq )][i][j][k],
+                                                                    fine_fluxes[4][ETI( eq )][i][j][k] + fine_fluxes[5][ETI( eq )][i][j][k] );
                            for( unsigned int b = 0; b < 6; b++ ) {
                               coarse_fluxes[b][ETI( eq )][i][j][k] = 0.0;
-                              fine_fluxes[b][ETI( eq )][i][j][k] = 0.0;
+                              fine_fluxes[b][ETI( eq )][i][j][k]   = 0.0;
                            }
                         }
                      }
                   }
                }
-            } // Now add up/subtract everything here
-         } // loop over materials
-      } // leaves on id
-   } // levels to exchange
+            }// Now add up/subtract everything here
+         }   // loop over materials
+      }      // leaves on id
+   }         // levels to exchange
 
    /*** Resetting Buffer ***/
    ResetJumpConservativeBuffers( finished_levels_descending );
@@ -1210,16 +1200,16 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
  */
 template<ConservativeBufferType C>
 void ModularAlgorithmAssembler::ObtainPrimeStatesFromConservatives( std::vector<unsigned int> const updated_levels, bool const skip_interface_nodes ) const {
-   for( unsigned int const &level : updated_levels ) {
-      for( Node &non_levelset_node : tree_.NonLevelsetLeaves( level ) ) {
+   for( unsigned int const& level : updated_levels ) {
+      for( Node& non_levelset_node : tree_.NonLevelsetLeaves( level ) ) {
          DoObtainPrimeStatesFromConservativesForNonLevelsetNodes<C>( non_levelset_node );
-      } // nodes without interface
+      }// nodes without interface
       if( !skip_interface_nodes && level == all_levels_.back() ) {
          for( Node& node : tree_.NodesWithLevelset() ) {
             DoObtainPrimeStatesFromConservativesForLevelsetNodes<C>( node );
          }
-      } // nodes with interface
-   } // levels
+      }// nodes with interface
+   }   // levels
 }
 
 /**
@@ -1234,10 +1224,10 @@ void ModularAlgorithmAssembler::UpdateParameters( std::vector<unsigned int> cons
                                                   std::vector<std::reference_wrapper<Node>> const& nodes_needing_multiphase_treatment ) const {
    // loop over all levels
    for( unsigned int const& level : updated_levels ) {
-      for( Node &node : tree_.LeavesOnLevel( level ) ) {
+      for( Node& node : tree_.LeavesOnLevel( level ) ) {
          parameter_manager_.UpdateParameters( node );
-      } // nodes on level
-   } // levels
+      }// nodes on level
+   }   // levels
 
    // Extension of all parameters that require multiphase treatment
    if( exist_multi_nodes_global ) {
@@ -1251,9 +1241,7 @@ void ModularAlgorithmAssembler::UpdateParameters( std::vector<unsigned int> cons
 
    // Final halo update on all levels
    halo_manager_.MaterialHaloUpdate( all_levels_, MaterialFieldType::Parameters );
-
 }
-
 
 /**
  * @brief Calculates the prime states from given conservatives. This is done for the given node.
@@ -1264,10 +1252,10 @@ template<ConservativeBufferType C>
 void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForNonLevelsetNodes( Node& node ) const {
 
    for( auto& phase : node.GetPhases() ) {
-      PrimeStates& prime_states = phase.second.GetPrimeStateBuffer();
+      PrimeStates& prime_states          = phase.second.GetPrimeStateBuffer();
       Conservatives const& conservatives = phase.second.GetConservativeBuffer<C>();
       prime_state_handler_.ConvertConservativesToPrimeStates( phase.first, conservatives, prime_states );
-   } // phases
+   }// phases
 }
 
 /**
@@ -1277,12 +1265,12 @@ void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForNonLevels
  */
 template<ConservativeBufferType C>
 void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForLevelsetNodes( Node& node ) const {
-   std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
    for( auto& phase : node.GetPhases() ) {
-      PrimeStates& prime_states = phase.second.GetPrimeStateBuffer();
+      PrimeStates& prime_states          = phase.second.GetPrimeStateBuffer();
       Conservatives const& conservatives = phase.second.GetConservativeBuffer<C>();
-      MaterialName const& material = phase.first;
-      std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial( material );
+      MaterialName const& material       = phase.first;
+      std::int8_t const material_sign    = MaterialSignCapsule::SignOfMaterial( material );
 
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -1294,10 +1282,10 @@ void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForLevelsetN
                      prime_states[p][i][j][k] = 0.0;
                   }
                }
-            } // k
-         } // j
-      } // i
-   } //phases
+            }// k
+         }   // j
+      }      // i
+   }         //phases
 }
 
 /**
@@ -1307,35 +1295,35 @@ void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForLevelsetN
 double ModularAlgorithmAssembler::ComputeTimestepSize() const {
 
    std::array<double, DTI( CC::DIM() )> velocity_plus_sound;
-   double dt = 0.0;
+   double dt                  = 0.0;
    double sum_of_signalspeeds = 0.0;
 
-   double nu = 0.0;
+   double nu    = 0.0;
    double sigma = 0.0;
-   double g = 0.0;
+   double g     = 0.0;
 
    //scaling for viscosity and surface tension limited timestep size - values taken from \cite Sussman2000
-   constexpr double nu_timestep_size_constant = 3.0/14.0 ;
-   constexpr double sigma_timestep_size_constant = M_PI*8.0;
+   constexpr double nu_timestep_size_constant    = 3.0 / 14.0;
+   constexpr double sigma_timestep_size_constant = M_PI * 8.0;
 
    //scaling for thermal-diffusivity limited timestep size - value taken from \cite Pieper2016
    constexpr double thermal_diffusivity_dt_constant = 0.1;
-   double thermal_diffusivity = 0.0;
+   double thermal_diffusivity                       = 0.0;
 
    for( Node& node : tree_.Leaves() ) {
       for( auto const& [material, block] : node.GetPhases() ) {
          // Compute the material sign
-         auto const material_sign = MaterialSignCapsule::SignOfMaterial( material );
-         std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+         auto const material_sign                                              = MaterialSignCapsule::SignOfMaterial( material );
+         std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
          // Get all buffers needed
          PrimeStates const& prime_states = block.GetPrimeStateBuffer();
-         Parameters const& parameters = block.GetParameterBuffer();
+         Parameters const& parameters    = block.GetParameterBuffer();
 
          // Specify material properties ( if models are active viscosity and conductivity can be set to zero )
-         double const shear_viscosity = CC::ShearViscosityModelActive() ? 0.0 : material_manager_.GetMaterial( material ).GetShearViscosity();
-         double const thermal_conductivity = CC::ThermalConductivityModelActive() ? 0.0 : material_manager_.GetMaterial( material ).GetThermalConductivity();
-         double const specific_heat        = material_manager_.GetMaterial( material ).GetSpecificHeatCapacity();
+         double const shear_viscosity                         = CC::ShearViscosityModelActive() ? 0.0 : material_manager_.GetMaterial( material ).GetShearViscosity();
+         double const thermal_conductivity                    = CC::ThermalConductivityModelActive() ? 0.0 : material_manager_.GetMaterial( material ).GetThermalConductivity();
+         double const specific_heat                           = material_manager_.GetMaterial( material ).GetSpecificHeatCapacity();
          double const thermal_conductivity_over_specific_heat = specific_heat != 0.0 ? thermal_conductivity / specific_heat : 0.0;
 
          if constexpr( CC::GravityIsActive() ) {
@@ -1374,11 +1362,11 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
                      }
 
                      //only required if heat conduction is considered
-                     if constexpr( CC::HeatConductionActive() ){
+                     if constexpr( CC::HeatConductionActive() ) {
                         // change to local computation if model is active
                         if constexpr( CC::ThermalConductivityModelActive() ) {
                            double const thermal_conductivity_over_specific_heat = specific_heat != 0.0 ? parameters[Parameter::ThermalConductivity][i][j][k] / specific_heat : 0.0;
-                           thermal_diffusivity = std::max( thermal_diffusivity, thermal_conductivity_over_specific_heat * one_density );
+                           thermal_diffusivity                                  = std::max( thermal_diffusivity, thermal_conductivity_over_specific_heat * one_density );
                         } else {
                            thermal_diffusivity = std::max( thermal_diffusivity, thermal_conductivity_over_specific_heat * one_density );
                         }
@@ -1390,12 +1378,12 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
                         sigma = std::max( sigma, material_manager_.GetMaterialPairing( MaterialSignCapsule::PositiveMaterial(), MaterialSignCapsule::NegativeMaterial() ).GetSurfaceTensionCoefficient() * one_density );
                      }
                   }
-               } // k
-            } // j
-         } // i
+               }// k
+            }   // j
+         }      // i
 
-      } // block
-   } // node
+      }// block
+   }   // node
 
    /* We need the smallest possible cell size ( and not the smallest currently present one ) as the timestep on the other levels is deduced from it later in the algorithm.
     * An example is if Lmax is "missing" at the time of this computation the timesteps on the other levels would be too large by a factor of 2.
@@ -1407,33 +1395,33 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
    }
 
    if constexpr( CC::CapillaryForcesActive() ) {
-      dt = std::max( dt, std::sqrt( sigma_timestep_size_constant * sigma ) / ( std::pow( cell_size_on_maximum_level_,1.5 ) ) );
+      dt = std::max( dt, std::sqrt( sigma_timestep_size_constant * sigma ) / ( std::pow( cell_size_on_maximum_level_, 1.5 ) ) );
    }
 
-   if constexpr( CC::HeatConductionActive() ){
+   if constexpr( CC::HeatConductionActive() ) {
       dt = std::max( dt, thermal_diffusivity / ( cell_size_on_maximum_level_ * cell_size_on_maximum_level_ * thermal_diffusivity_dt_constant ) );
    }
 
    //described in \cite Sussman 2000
-   if constexpr( CC::GravityIsActive() ){
-      dt = std::max( dt, 0.5* ( sum_of_signalspeeds + std::sqrt( sum_of_signalspeeds * sum_of_signalspeeds + 4.0 * g * cell_size_on_maximum_level_ ) ) / cell_size_on_maximum_level_ );
+   if constexpr( CC::GravityIsActive() ) {
+      dt = std::max( dt, 0.5 * ( sum_of_signalspeeds + std::sqrt( sum_of_signalspeeds * sum_of_signalspeeds + 4.0 * g * cell_size_on_maximum_level_ ) ) / cell_size_on_maximum_level_ );
    }
 
    double local_dt_on_finest_level;
 
    //NH Check against double is okay in this case ( and this case only! )
-   if( dt == 0.0 ) { // The rank does not have any nodes, thus it could not compute a dt
+   if( dt == 0.0 ) {// The rank does not have any nodes, thus it could not compute a dt
       local_dt_on_finest_level = std::numeric_limits<double>::max();
    } else {
       local_dt_on_finest_level = cfl_number_ / dt;
    }
 
    //limit the time-step size in the last macro time step to the exact end time
-   if constexpr(CC::LET()){
+   if constexpr( CC::LET() ) {
       std::vector<double> const micro_time_steps = time_integrator_.MicroTimestepSizes();
-      double const current_run_time = std::accumulate(micro_time_steps.cbegin(),micro_time_steps.cend(),time_integrator_.CurrentRunTime());
+      double const current_run_time              = std::accumulate( micro_time_steps.cbegin(), micro_time_steps.cend(), time_integrator_.CurrentRunTime() );
 
-      if( current_run_time + local_dt_on_finest_level > end_time_ ){
+      if( current_run_time + local_dt_on_finest_level > end_time_ ) {
          local_dt_on_finest_level = end_time_ - current_run_time;
 
          //just for safety - make sure that the limiter does not lead to negative time-step sizes for the last output
@@ -1458,15 +1446,15 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
 void ModularAlgorithmAssembler::ResetAllJumpBuffers() const {
 
    for( auto& level : tree_.FullNodeList() ) {
-      for( auto& id_node: level ) {
+      for( auto& id_node : level ) {
          for( auto& phase : id_node.second.GetPhases() ) {
             for( auto const& location : CC::ANBS() ) {
                phase.second.ResetJumpConservatives( location );
                phase.second.ResetJumpFluxes( location );
-            } //locations
-         } //phases
-      } //nodes
-   } //levels
+            }//locations
+         }   //phases
+      }      //nodes
+   }         //levels
 }
 
 /**
@@ -1480,10 +1468,10 @@ void ModularAlgorithmAssembler::ResetJumpConservativeBuffers( std::vector<unsign
          for( auto& phase : node.GetPhases() ) {
             for( auto& location : CC::ANBS() ) {
                phase.second.ResetJumpConservatives( location );
-            } //locations
-         } //phases
-      } //node
-   } //levels
+            }//locations
+         }   //phases
+      }      //node
+   }         //levels
 }
 
 /**
@@ -1505,7 +1493,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
 
       int const my_rank_id = MpiUtilities::MyRankId();
 
-      for( auto const& [id, current_rank, future_rank] : ids_rank_map ) { //We traverse current topology
+      for( auto const& [id, current_rank, future_rank] : ids_rank_map ) {//We traverse current topology
          /*If the node has not been updated, i.e. integrated values in RHS buffer, we need to handle the AVG buffer as well*/
          bool const send_averages = std::find( updated_levels_descending.begin(), updated_levels_descending.end(), LevelOfNode( id ) ) == updated_levels_descending.end();
 
@@ -1525,7 +1513,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
             }
             if( topology_.IsNodeMultiPhase( id ) ) {
                communicator_.Send( node.GetInterfaceTags(), FullBlockSendingSize(), MPI_INT8_T, future_rank, requests );
-               if( node.HasLevelset() ) { // Lmax node
+               if( node.HasLevelset() ) {// Lmax node
 
                   for( MaterialName const material : topology_.GetMaterialsOfNode( id ) ) {
                      communicator_.Send( &node.GetPhaseByMaterial( material ).GetPrimeStateBuffer(), MF::ANOP(), conservatives_datatype, future_rank, requests );
@@ -1541,7 +1529,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
             if constexpr( DP::Profile() ) {
                CommunicationStatistics::balance_send_++;
             }
-         } else if( future_rank == my_rank_id ) { // The node is currently NOT ours, but will be in the future
+         } else if( future_rank == my_rank_id ) {// The node is currently NOT ours, but will be in the future
             // Create Node first, then post asynchronous Recv.
             Node& new_node = tree_.CreateNode( id, topology_.GetMaterialsOfNode( id ) );
 
@@ -1569,7 +1557,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                   communicator_.Recv( new_node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::Velocity ), FullBlockSendingSize(), MPI_DOUBLE, current_rank, requests );
                }
             } else {
-               std::int8_t uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( id ).back() ) * ITTI( IT::BulkPhase );
+               std::int8_t uniform_tag                                   = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( id ).back() ) * ITTI( IT::BulkPhase );
                std::int8_t( &new_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = new_node.GetInterfaceTags();
                BO::SetSingleBuffer( new_tags, uniform_tag );
             }
@@ -1582,7 +1570,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
       requests.clear();
 
       //remove nodes only after Data was received by partner
-      for( unsigned int i = 0; i < ids_rank_map.size(); i++ ) { //We traverse current topology
+      for( unsigned int i = 0; i < ids_rank_map.size(); i++ ) {//We traverse current topology
          std::uint64_t const id = std::get<0>( ids_rank_map[i] );
          int const current_rank = std::get<1>( ids_rank_map[i] );
          if( current_rank == my_rank_id ) {
@@ -1602,10 +1590,10 @@ void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level
 
    double initial_prime_states[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
 
-   for( auto& [id, node]: tree_.GetLevelContent( level ) ) {
+   for( auto& [id, node] : tree_.GetLevelContent( level ) ) {
       for( MaterialName const material : topology_.GetMaterialsOfNode( id ) ) {
 
-         std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+         std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
          Block& block = node.GetPhaseByMaterial( material );
 
@@ -1632,11 +1620,11 @@ void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level
                         conservatives[e][i][j][k] = 0.0;
                      }
                   }
-               } //k
-            } //j
-         } //i
-      } //phases
-   } //nodes
+               }//k
+            }   //j
+         }      //i
+      }         //phases
+   }            //nodes
 }
 
 void ModularAlgorithmAssembler::UpdateTopology() {
@@ -1660,7 +1648,8 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
 
    // The maximum level is not a parent hence it is removed form the parent list.
    parent_levels.erase( std::remove_if( parent_levels.begin(), parent_levels.end(),
-                                      [&]( unsigned int const level ) { return level >= topology_.GetCurrentMaximumLevel(); } ), parent_levels.end() );
+                                        [&]( unsigned int const level ) { return level >= topology_.GetCurrentMaximumLevel(); } ),
+                        parent_levels.end() );
    std::vector<std::uint64_t> nodes_to_be_coarsened;
    std::vector<std::uint64_t> nodes_needing_refinement;
    DetermineRemeshingNodes( parent_levels, nodes_to_be_coarsened, nodes_needing_refinement );
@@ -1671,8 +1660,8 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
 
    // We need to cut all non-leaves and all Lmax-leaves from the refinement list.
    nodes_needing_refinement.erase( std::remove_if( nodes_needing_refinement.begin(), nodes_needing_refinement.end(),
-                                                 [&]( std::uint64_t const id ) { return ( !topology_.NodeIsLeaf( id ) || LevelOfNode( id ) == all_levels_.back() ); } ),
-                                  nodes_needing_refinement.end() );
+                                                   [&]( std::uint64_t const id ) { return ( !topology_.NodeIsLeaf( id ) || LevelOfNode( id ) == all_levels_.back() ); } ),
+                                   nodes_needing_refinement.end() );
 
    // Global Distibution of the refine list
    std::vector<std::uint64_t> global_refine_list;
@@ -1686,7 +1675,7 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
    }
    UpdateTopology();
    std::vector<unsigned int> halo_levels( levels_to_update_ascending );
-   halo_levels.erase( halo_levels.begin() ); // The lowest level did not change during refinement
+   halo_levels.erase( halo_levels.begin() );// The lowest level did not change during refinement
 
    /*** We need to fill the Halo Cells ***/
    halo_manager_.MaterialHaloUpdate( halo_levels, MaterialFieldType::Conservatives );
@@ -1700,7 +1689,7 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
    //Gives ALL local nodes which need to be deleted
    std::vector<std::uint64_t> local_cut;
    std::copy_if( global_remove_list.begin(), global_remove_list.end(), std::back_inserter( local_cut ),
-                [&]( std::uint64_t const id ) { return topology_.NodeIsOnRank( id, communicator_.MyRankId() ); } );
+                 [&]( std::uint64_t const id ) { return topology_.NodeIsOnRank( id, communicator_.MyRankId() ); } );
 
    // Coarsening operation is called on parents, hence we convert the coarse list to a list of the respective parents.
    // NH TODO-19 this cumbersome step should go away
@@ -1714,7 +1703,7 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
 
    // Level zero parents are not allowed, as this means a coarsening of level 1.
    parents_of_coarsened.erase( std::remove_if( parents_of_coarsened.begin(), parents_of_coarsened.end(), [&]( std::uint64_t const parent_id ) { return LevelOfNode( parent_id ) == 0; } ),
-                              parents_of_coarsened.end() );
+                               parents_of_coarsened.end() );
 
    // Updating the topology ( light data )
    for( std::uint64_t const parent_id : parents_of_coarsened ) {
@@ -1756,52 +1745,52 @@ void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned in
    MPI_Datatype const conservatives_struct_ = communicator_.ConservativesDatatype();
    for( auto const& level_of_parent : parent_levels ) {
       for( auto const& parent_id : topology_.GlobalIdsOnLevel( level_of_parent ) ) {
-         bool const parent_on_my_rank = topology_.NodeIsOnRank( parent_id, my_rank );
+         bool const parent_on_my_rank              = topology_.NodeIsOnRank( parent_id, my_rank );
          std::vector<std::uint64_t> const children = IdsOfChildren( parent_id );
          for( auto const& child_id : children ) {
             if( topology_.NodeExists( child_id ) ) {
-               if( !topology_.IsNodeMultiPhase( child_id ) ) { // only single nodes may be coarsened or refined
-                  if( topology_.NodeIsLeaf( child_id ) ) { // We only check leaves ( for now, TODO-19 NH ).
+               if( !topology_.IsNodeMultiPhase( child_id ) ) {// only single nodes may be coarsened or refined
+                  if( topology_.NodeIsLeaf( child_id ) ) {    // We only check leaves ( for now, TODO-19 NH ).
                      bool const child_on_my_rank = topology_.NodeIsOnRank( child_id, my_rank );
                      if( parent_on_my_rank ) {
-                        if( child_on_my_rank ) { // We hold parent and Child -> NO MPI
+                        if( child_on_my_rank ) {// We hold parent and Child -> NO MPI
 
                            remesh_list.emplace_back( multiresolution_.ChildNeedsRemeshing<CC::NFWA()>( tree_.GetNodeWithId( parent_id ).GetPhaseByMaterial( topology_.SingleMaterialOfNode( child_id ) ),
                                                                                                        tree_.GetNodeWithId( child_id ).GetSinglePhase(),
                                                                                                        child_id ) );
 
-                        } else { // We hold parent but not the Child ( which exists ) -> MPI_Receive
+                        } else {// We hold parent but not the Child ( which exists ) -> MPI_Receive
 
                            // get material of child via topology ( since it is single-phase taking front() of the material vector is valid )
                            Block received_child_block = Block();
-                           int const sender_rank = topology_.GetRankOfNode( child_id );
+                           int const sender_rank      = topology_.GetRankOfNode( child_id );
                            MPI_Recv( &received_child_block.GetRightHandSideBuffer(), MF::ANOE(), conservatives_struct_, sender_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );
 
                            remesh_list.emplace_back( multiresolution_.ChildNeedsRemeshing<CC::NFWA()>( tree_.GetNodeWithId( parent_id ).GetPhaseByMaterial( topology_.SingleMaterialOfNode( child_id ) ),
                                                                                                        received_child_block, child_id ) );
                         }
                      } else {
-                        if( child_on_my_rank ) { // We do NOT hold the parent, but do hold the Child -> MPI Send
-                           int receiver_rank = topology_.GetRankOfNode( parent_id );
+                        if( child_on_my_rank ) {// We do NOT hold the parent, but do hold the Child -> MPI Send
+                           int receiver_rank       = topology_.GetRankOfNode( parent_id );
                            Block const& send_child = tree_.GetNodeWithId( child_id ).GetSinglePhase();
                            MPI_Send( &send_child.GetRightHandSideBuffer(), MF::ANOE(), conservatives_struct_, receiver_rank, 0, MPI_COMM_WORLD );
                         }
                      }
-                  } else { // IF: IsLeaf
+                  } else {// IF: IsLeaf
                      //Add a meshing-lock, i. e. neutral
-                     if( parent_on_my_rank ) { // Only the parent needs to fill this list.
+                     if( parent_on_my_rank ) {// Only the parent needs to fill this list.
                         remesh_list.emplace_back( RemeshIdentifier::Neutral );
                      }
-                  } // ELSE: IsLeaf
+                  }// ELSE: IsLeaf
 
                } else {// Child is multi-phase
                   // In case the child is multi-phase we don't do anything
                   if( parent_on_my_rank ) {
                      remesh_list.emplace_back( RemeshIdentifier::Neutral );
                   }
-               } // else : child is multi-phase
-            } // child node exists
-         }//children
+               }// else : child is multi-phase
+            }   // child node exists
+         }      //children
 
          //Now we have checked all siblings
 #ifndef PERFORMANCE
@@ -1820,8 +1809,8 @@ void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned in
             remove_list.insert( remove_list.end(), children.begin(), children.end() );
          }
          remesh_list.clear();
-      } // parents
-   } // level_of_parent
+      }// parents
+   }   // level_of_parent
 }
 
 /**
@@ -1831,14 +1820,14 @@ void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned in
 void ModularAlgorithmAssembler::RefineNode( std::uint64_t const id ) {
    topology_.RefineNodeWithId( id );
    std::vector<std::uint64_t> const ids_of_children = tree_.RefineNode( id );
-   Node const& parent = tree_.GetNodeWithId( id );
+   Node const& parent                               = tree_.GetNodeWithId( id );
    for( auto const& child_id : ids_of_children ) {
       Node& child = tree_.GetNodeWithId( child_id );
       // only single material nodes are supposed to be refined, hence using the single phase block is valid
       // only predicts internal cells
       for( Equation const eq : MF::ASOE() ) {
          Multiresolution::Prediction( parent.GetSinglePhase().GetRightHandSideBuffer( eq ), child.GetSinglePhase().GetRightHandSideBuffer( eq ), child_id,
-            CC::FICX(), CC::ICX(),CC::FICY(), CC::ICY(), CC::FICZ(), CC::ICZ() );
+                                      CC::FICX(), CC::ICX(), CC::FICY(), CC::ICY(), CC::FICZ(), CC::ICZ() );
       }
       // add material
       topology_.AddMaterialToNode( child_id, parent.GetSinglePhaseMaterial() );
@@ -1884,12 +1873,12 @@ void ModularAlgorithmAssembler::LogNodeNumbers() const {
 void ModularAlgorithmAssembler::LogPerformanceNumbers( std::vector<double> const& loop_times ) const {
    auto&& [number_of_nodes, number_of_leaves] = topology_.NodeAndLeafCount();
    logger_.LogMessage( "Wall clock time for macro step: " + StringOperations::ToScientificNotationString( loop_times.back(), 5 ) );
-   logger_.LogMessage( "Wall clock time per cell      : " + StringOperations::ToScientificNotationString( loop_times.back() / ( number_of_leaves*CC::ICX()*CC::ICY()*CC::ICZ() ), 5 ) );
-   logger_.LogMessage( "Number of cells               : " + StringOperations::ToScientificNotationString( number_of_leaves*CC::ICX()*CC::ICY()*CC::ICZ(), 5 ) );
+   logger_.LogMessage( "Wall clock time per cell      : " + StringOperations::ToScientificNotationString( loop_times.back() / ( number_of_leaves * CC::ICX() * CC::ICY() * CC::ICZ() ), 5 ) );
+   logger_.LogMessage( "Number of cells               : " + StringOperations::ToScientificNotationString( number_of_leaves * CC::ICX() * CC::ICY() * CC::ICZ(), 5 ) );
 }
 
 void ModularAlgorithmAssembler::LogElapsedTimeSinceInProfileRuns( double const start_time, std::string const function_name ) {
-   if( DP::Profile() ){
+   if( DP::Profile() ) {
       logger_.LogMessage( function_name + " - elapsed time: " + StringOperations::ToScientificNotationString( MPI_Wtime() - start_time ) );
    }
 }

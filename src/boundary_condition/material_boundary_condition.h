@@ -80,11 +80,11 @@
 class MaterialBoundaryCondition {
 
 public:
-   MaterialBoundaryCondition() = default;
-   virtual ~MaterialBoundaryCondition() = default;
+   MaterialBoundaryCondition()                                   = default;
+   virtual ~MaterialBoundaryCondition()                          = default;
    MaterialBoundaryCondition( MaterialBoundaryCondition const& ) = delete;
    MaterialBoundaryCondition& operator=( MaterialBoundaryCondition const& ) = delete;
-   MaterialBoundaryCondition( MaterialBoundaryCondition&& ) = delete;
+   MaterialBoundaryCondition( MaterialBoundaryCondition&& )                 = delete;
    MaterialBoundaryCondition& operator=( MaterialBoundaryCondition&& ) = delete;
 
    /**
@@ -95,4 +95,4 @@ public:
    virtual void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type ) const = 0;
 };
 
-#endif // MATERIAL_BOUNDARY_CONDITION_H
+#endif// MATERIAL_BOUNDARY_CONDITION_H

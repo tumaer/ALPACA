@@ -77,22 +77,22 @@
  */
 class VorticityAbsoluteOutput : public OutputQuantity {
 
-private: 
+private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;   
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    VorticityAbsoluteOutput() = delete;
-   explicit VorticityAbsoluteOutput( UnitHandler const& unit_handler, 
-                                     MaterialManager const& material_manager, 
+   explicit VorticityAbsoluteOutput( UnitHandler const& unit_handler,
+                                     MaterialManager const& material_manager,
                                      std::string const& quantity_name,
                                      std::array<bool, 3> const output_flags );
-   virtual ~VorticityAbsoluteOutput() = default;
+   virtual ~VorticityAbsoluteOutput()                        = default;
    VorticityAbsoluteOutput( VorticityAbsoluteOutput const& ) = delete;
    VorticityAbsoluteOutput& operator=( VorticityAbsoluteOutput const& ) = delete;
-   VorticityAbsoluteOutput( VorticityAbsoluteOutput&& ) = delete;
+   VorticityAbsoluteOutput( VorticityAbsoluteOutput&& )                 = delete;
    VorticityAbsoluteOutput& operator=( VorticityAbsoluteOutput&& ) = delete;
 };
 
-#endif // VORTICITY_ABSOLUTE_OUTPUT_H
+#endif// VORTICITY_ABSOLUTE_OUTPUT_H

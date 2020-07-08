@@ -79,9 +79,9 @@
 namespace Initialization {
 
    // Initialization function for the input_output manager
-   RestartManager InitializeRestartManager( TopologyManager & topology_manager,
-                                            Tree & tree,
+   RestartManager InitializeRestartManager( TopologyManager& topology_manager,
+                                            Tree& tree,
                                             UnitHandler const& unit_handler );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_RESTART_MANAGER_H
+#endif// INITIALIZATION_RESTART_MANAGER_H

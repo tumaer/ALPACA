@@ -4,7 +4,13 @@ variables:
 image: aeralpaca/alpaca_paco:latest
 
 stages:
+ - statictests
  - alltests
+
+clang-format:
+  stage: statictests
+  script:
+    - bash Utilities/BashScripts/clang_format_test.sh clang-format-10
 
 Unit tests:
   stage: alltests

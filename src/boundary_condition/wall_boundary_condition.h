@@ -89,7 +89,7 @@ class WallBoundaryCondition : public MaterialBoundaryCondition {
             return WallSign( MF::ASOE()[field_index] );
          case MaterialFieldType::Parameters:
             return WallSign( MF::ASOPA()[field_index] );
-         default: // case MaterialFieldType::PrimeStates:
+         default:// case MaterialFieldType::PrimeStates:
             return WallSign( MF::ASOP()[field_index] );
       }
    }
@@ -141,11 +141,11 @@ class WallBoundaryCondition : public MaterialBoundaryCondition {
    }
 
 public:
-   WallBoundaryCondition() = default;
-   ~WallBoundaryCondition() = default;
+   WallBoundaryCondition()                               = default;
+   ~WallBoundaryCondition()                              = default;
    WallBoundaryCondition( WallBoundaryCondition const& ) = delete;
    WallBoundaryCondition& operator=( WallBoundaryCondition const& ) = delete;
-   WallBoundaryCondition( WallBoundaryCondition&& ) = delete;
+   WallBoundaryCondition( WallBoundaryCondition&& )                 = delete;
    WallBoundaryCondition& operator=( WallBoundaryCondition&& ) = delete;
 
    /**
@@ -153,16 +153,16 @@ public:
     */
    void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type ) const override {
       constexpr auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
-      constexpr auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
+      constexpr auto end_indices   = BoundaryConstants<LOC>::HaloEndIndices();
 
       unsigned int const number_of_fields = MF::ANOF( field_type );
       for( auto& host_mat_block : node.GetPhases() ) {
          for( unsigned int field_index = 0; field_index < number_of_fields; ++field_index ) {
-            double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
+            double( &cells )[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
             for( unsigned int i = start_indices[0]; i < end_indices[0]; ++i ) {
                for( unsigned int j = start_indices[1]; j < end_indices[1]; ++j ) {
                   for( unsigned int k = start_indices[2]; k < end_indices[2]; ++k ) {
-                     cells[i][j][k] = WallSign(field_type, field_index) * BoundaryConstants<LOC>::SymmetryInternalValue(cells, i, j, k);
+                     cells[i][j][k] = WallSign( field_type, field_index ) * BoundaryConstants<LOC>::SymmetryInternalValue( cells, i, j, k );
                   }
                }
             }
@@ -179,4 +179,4 @@ public:
    }
 };
 
-#endif // WALL_BOUNDARY_CONDITION_H
+#endif// WALL_BOUNDARY_CONDITION_H

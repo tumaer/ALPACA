@@ -85,17 +85,16 @@
  * @note Runtime a check is done that all required parameters are present. Furthermore, pre-calculations are done for simpler access during compute call.
  */
 CarreauYasudaShearViscosityModel::CarreauYasudaShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
-                                                        UnitHandler const& unit_handler ) :
-   // Start initializer list
-   ShearRateMaterialParameterModel<CarreauYasudaShearViscosityModel>(),
-   mu_infinite_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muInfiniteShearRates", "CarreauYasudaShearViscosityModel" ), UnitType::Viscosity ) ),
-   mu_zero_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muZeroShearRates", "CarreauYasudaShearViscosityModel" ), UnitType::Viscosity ) ),
-   transition_factor_( GetCheckedParameter( dimensional_parameter_map, "transitionFactor", "CarreauYasudaShearViscosityModel" ) ),
-   power_law_exponent_( GetCheckedParameter( dimensional_parameter_map, "powerLawExponent", "CarreauYasudaShearViscosityModel" ) ),
-   shear_rate_constant_mu_( unit_handler.NonDimensionalizeValue( GetCheckedParameter(  dimensional_parameter_map, "shearRateConstantMu", "CarreauYasudaShearViscosityModel" ), {}, { UnitType::Time } ) ),
-   mu_zero_minus_infinite_( mu_zero_shear_rates_ - mu_infinite_shear_rates_ ),
-   exponent_( ( power_law_exponent_ - 1.0 ) / transition_factor_ ),
-   one_shear_rate_constant_mu_( 1.0 / shear_rate_constant_mu_ ) {
+                                                                    UnitHandler const& unit_handler ) :// Start initializer list
+                                                                                                        ShearRateMaterialParameterModel<CarreauYasudaShearViscosityModel>(),
+                                                                                                        mu_infinite_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muInfiniteShearRates", "CarreauYasudaShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                                        mu_zero_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muZeroShearRates", "CarreauYasudaShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                                        transition_factor_( GetCheckedParameter( dimensional_parameter_map, "transitionFactor", "CarreauYasudaShearViscosityModel" ) ),
+                                                                                                        power_law_exponent_( GetCheckedParameter( dimensional_parameter_map, "powerLawExponent", "CarreauYasudaShearViscosityModel" ) ),
+                                                                                                        shear_rate_constant_mu_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "shearRateConstantMu", "CarreauYasudaShearViscosityModel" ), {}, { UnitType::Time } ) ),
+                                                                                                        mu_zero_minus_infinite_( mu_zero_shear_rates_ - mu_infinite_shear_rates_ ),
+                                                                                                        exponent_( ( power_law_exponent_ - 1.0 ) / transition_factor_ ),
+                                                                                                        one_shear_rate_constant_mu_( 1.0 / shear_rate_constant_mu_ ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 
@@ -110,10 +109,8 @@ std::string CarreauYasudaShearViscosityModel::GetLogData( unsigned int const ind
    std::string log_string;
    // Add data
    log_string += StringOperations::Indent( indent ) + "Model type: Carreau-Yasuda \n";
-   log_string += StringOperations::Indent( indent ) + "mu_inf    : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( mu_infinite_shear_rates_, UnitType::Viscosity ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "mu0       : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( mu_zero_shear_rates_, UnitType::Viscosity ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "mu_inf    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( mu_infinite_shear_rates_, UnitType::Viscosity ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "mu0       : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( mu_zero_shear_rates_, UnitType::Viscosity ), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "n         : " + StringOperations::ToScientificNotationString( power_law_exponent_, 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "a         : " + StringOperations::ToScientificNotationString( transition_factor_, 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "constant  : " + StringOperations::ToScientificNotationString( shear_rate_constant_mu_, 9 ) + "\n";

@@ -79,11 +79,10 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) :
-   gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "WaterlikeFluid" ) ),
-   A_(    unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "A", "WaterlikeFluid" ), UnitType::Pressure ) ),
-   B_(    unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "B", "WaterlikeFluid" ), UnitType::Pressure ) ),
-   rho0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "rho0", "WaterlikeFluid" ), UnitType::Density ) ) {
+WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "WaterlikeFluid" ) ),
+                                                                                                                                         A_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "A", "WaterlikeFluid" ), UnitType::Pressure ) ),
+                                                                                                                                         B_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "B", "WaterlikeFluid" ), UnitType::Pressure ) ),
+                                                                                                                                         rho0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "rho0", "WaterlikeFluid" ), UnitType::Density ) ) {
    /* Empty besides initializer list*/
 }
 
@@ -99,10 +98,10 @@ WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& d
 double WaterlikeFluid::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
 #ifndef PERFORMANCE
    // Avoids compiler warnings
-   ( void ) momentum_x;
-   ( void ) momentum_y;
-   ( void ) momentum_z;
-   ( void ) energy;
+   (void)momentum_x;
+   (void)momentum_y;
+   (void)momentum_z;
+   (void)energy;
 #endif
    return A_ - B_ + B_ * std::pow( density / rho0_, gamma_ );
 }
@@ -119,11 +118,11 @@ double WaterlikeFluid::DoGetPressure( double const density, double const momentu
 double WaterlikeFluid::DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
 #ifndef PERFORMANCE
    // Avoids compiler warnings
-   ( void ) density;
-   ( void ) momentum_x;
-   ( void ) momentum_y;
-   ( void ) momentum_z;
-   ( void ) energy;
+   (void)density;
+   (void)momentum_x;
+   (void)momentum_y;
+   (void)momentum_z;
+   (void)energy;
 #endif
    return 0.0;
 }
@@ -138,9 +137,7 @@ double WaterlikeFluid::DoGetEnthalpy( double const density, double const momentu
  * @return Energy according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-   return 1.0 / ( 1.0 - gamma_ ) * ( pressure + B_ - A_ ) + B_ - A_ + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x,
-                                                                                                                   momentum_y * momentum_y,
-                                                                                                                   momentum_z * momentum_z ) / density );
+   return 1.0 / ( 1.0 - gamma_ ) * ( pressure + B_ - A_ ) + B_ - A_ + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / density );
 }
 
 /**
@@ -158,7 +155,7 @@ double WaterlikeFluid::DoGetGruneisen() const {
  * @return Psi according to Tait's equation of state.
  */
 double WaterlikeFluid::DoGetPsi( double const pressure, double const one_density ) const {
-   return gamma_ * ( pressure + B_ - A_ ) * one_density ;
+   return gamma_ * ( pressure + B_ - A_ ) * one_density;
 }
 
 /**
@@ -183,16 +180,11 @@ std::string WaterlikeFluid::GetLogData( unsigned int const indent, UnitHandler c
    // Name of the equation of state
    log_string += StringOperations::Indent( indent ) + "Type                 : Water-like fluid\n";
    // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString(
-                     DoGetGruneisen(), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString(
-                     gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "A                    : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( A_, UnitType::Pressure ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "B                    : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( B_, UnitType::Pressure ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "rho0                 : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( rho0_, UnitType::Density ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( DoGetGruneisen(), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "A                    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( A_, UnitType::Pressure ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "B                    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( B_, UnitType::Pressure ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "rho0                 : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( rho0_, UnitType::Density ), 9 ) + "\n";
 
    return log_string;
 }

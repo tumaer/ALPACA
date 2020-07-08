@@ -69,24 +69,37 @@
 #define STENCIL_SETUP_H
 
 // RECONSTRUCTION_STENCIL
-enum class ReconstructionStencils {FirstOrder, WENO3, FourthOrderCentral, WENO5, WENO5AER, WENO5Z, WENOAO53, WENO5HM, TENO5, WENOCU6, WENO7, WENO9};
-constexpr ReconstructionStencils reconstruction_stencil = ReconstructionStencils::WENO5; 
-constexpr ReconstructionStencils levelset_reconstruction_stencil = ReconstructionStencils::WENO3;
-constexpr ReconstructionStencils geometry_reconstruction_stencil = ReconstructionStencils::WENO3;
+enum class ReconstructionStencils { FirstOrder,
+                                    WENO3,
+                                    FourthOrderCentral,
+                                    WENO5,
+                                    WENO5AER,
+                                    WENO5Z,
+                                    WENOAO53,
+                                    WENO5HM,
+                                    TENO5,
+                                    WENOCU6,
+                                    WENO7,
+                                    WENO9 };
+constexpr ReconstructionStencils reconstruction_stencil                = ReconstructionStencils::WENO5;
+constexpr ReconstructionStencils levelset_reconstruction_stencil       = ReconstructionStencils::WENO3;
+constexpr ReconstructionStencils geometry_reconstruction_stencil       = ReconstructionStencils::WENO3;
 constexpr ReconstructionStencils viscous_fluxes_reconstruction_stencil = ReconstructionStencils::FourthOrderCentral;
-constexpr ReconstructionStencils heat_fluxes_reconstruction_stencil = ReconstructionStencils::FourthOrderCentral;
-
+constexpr ReconstructionStencils heat_fluxes_reconstruction_stencil    = ReconstructionStencils::FourthOrderCentral;
 
 // DERIVATIVE_STENCIL
-enum class DerivativeStencils {CentralDifference, FourthOrderCentralDifference, FourthOrderCellFace, HOUC5};
+enum class DerivativeStencils { CentralDifference,
+                                FourthOrderCentralDifference,
+                                FourthOrderCellFace,
+                                HOUC5 };
 constexpr DerivativeStencils derivative_stencil = DerivativeStencils::HOUC5;
 
 constexpr DerivativeStencils viscous_fluxes_derivative_stencil_cell_center = DerivativeStencils::FourthOrderCentralDifference;
-constexpr DerivativeStencils viscous_fluxes_derivative_stencil_cell_face = DerivativeStencils::FourthOrderCellFace;
-constexpr DerivativeStencils heat_fluxes_derivative_stencil_cell_face = DerivativeStencils::FourthOrderCellFace;
-constexpr DerivativeStencils heat_fluxes_derivative_stencil_cell_center = DerivativeStencils::FourthOrderCentralDifference;
+constexpr DerivativeStencils viscous_fluxes_derivative_stencil_cell_face   = DerivativeStencils::FourthOrderCellFace;
+constexpr DerivativeStencils heat_fluxes_derivative_stencil_cell_face      = DerivativeStencils::FourthOrderCellFace;
+constexpr DerivativeStencils heat_fluxes_derivative_stencil_cell_center    = DerivativeStencils::FourthOrderCentralDifference;
 
-constexpr DerivativeStencils normal_calculation_derivative_stencil = DerivativeStencils::CentralDifference;
+constexpr DerivativeStencils normal_calculation_derivative_stencil    = DerivativeStencils::CentralDifference;
 constexpr DerivativeStencils curvature_calculation_derivative_stencil = DerivativeStencils::FourthOrderCentralDifference;
 
-#endif // STENCIL_SETUP_H
+#endif// STENCIL_SETUP_H

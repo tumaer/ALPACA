@@ -99,7 +99,7 @@ namespace {
       std::for_each( all_nodes.begin(), all_nodes.end(), [&topology, material]( std::uint64_t const id ) { topology.AddMaterialToNode( id, material ); } );
       topology.UpdateTopology();
    }
-}
+}// namespace
 
 SCENARIO( "Topology offsets work properly on differently configured topologies", "[1rank]" ) {
 
@@ -108,10 +108,10 @@ SCENARIO( "Topology offsets work properly on differently configured topologies",
       WHEN( "The topology holds just one node" ) {
          REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
          THEN( "The offset of rank zero is zero" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 0  ) == 0 );
+            REQUIRE( topology.LeafOffsetOfRank( 0 ) == 0 );
          }
          THEN( "The offset of all other ranks is one" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 1  ) == 1 );
+            REQUIRE( topology.LeafOffsetOfRank( 1 ) == 1 );
             REQUIRE( topology.LeafOffsetOfRank( 42 ) == 1 );
          }
       }
@@ -120,15 +120,15 @@ SCENARIO( "Topology offsets work properly on differently configured topologies",
    GIVEN( "A topology holding 1 parent and 8 children" ) {
       TopologyManager topology = SingleRootNodeTopoloyWithMaximumLevel( 1 );
       RefineZerothRootNode( topology );
-      REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 9,8 ) );
+      REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 9, 8 ) );
 
       WHEN( "All nodes are on rank 0" ) {
          // That's the default.
          THEN( "The offset of rank zero is zero" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 0  ) == 0 );
+            REQUIRE( topology.LeafOffsetOfRank( 0 ) == 0 );
          }
          THEN( "The offset of all other ranks is 8" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 1  ) == 8 );
+            REQUIRE( topology.LeafOffsetOfRank( 1 ) == 8 );
             REQUIRE( topology.LeafOffsetOfRank( 42 ) == 8 );
          }
       }
@@ -138,13 +138,13 @@ SCENARIO( "Topology offsets work properly on differently configured topologies",
          topology.GetLoadBalancedTopology( 2 );
 
          THEN( "The offset of rank 0 is zero" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 0  ) == 0 );
+            REQUIRE( topology.LeafOffsetOfRank( 0 ) == 0 );
          }
          THEN( "The offset of rank 1 is four" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 1  ) == 4 );
+            REQUIRE( topology.LeafOffsetOfRank( 1 ) == 4 );
          }
          THEN( "The offset of the other ranks is eight" ) {
-            REQUIRE( topology.LeafOffsetOfRank( 5  ) == 8 );
+            REQUIRE( topology.LeafOffsetOfRank( 5 ) == 8 );
             REQUIRE( topology.LeafOffsetOfRank( 42 ) == 8 );
          }
       }

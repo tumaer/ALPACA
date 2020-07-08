@@ -101,7 +101,7 @@ class CommunicationManager : public CommunicationTypes {
    std::vector<bool> boundaries_valid_;
 
    // Three values for three dimensions, even if only one dimension is simulated
-   std::vector<std::array<unsigned int, 3>> jump_send_count_; // [0]: Plane, [1]: Stick, [2]: cube
+   std::vector<std::array<unsigned int, 3>> jump_send_count_;// [0]: Plane, [1]: Stick, [2]: cube
 
    // Function that gives all neighbor-location and external-location relations for a given global node
    void NeighborsOfNode( std::uint64_t const global_id, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& external_boundaries );
@@ -109,10 +109,10 @@ class CommunicationManager : public CommunicationTypes {
 public:
    CommunicationManager() = delete;
    explicit CommunicationManager( TopologyManager& topology, unsigned int const maximum_level );
-   ~CommunicationManager() = default;
+   ~CommunicationManager()                             = default;
    CommunicationManager( CommunicationManager const& ) = delete;
    CommunicationManager& operator=( CommunicationManager const& ) = delete;
-   CommunicationManager( CommunicationManager&& ) = delete;
+   CommunicationManager( CommunicationManager&& )                 = delete;
    CommunicationManager& operator=( CommunicationManager&& ) = delete;
 
    // Function to fill the lists holding the relation to neighbor nodes and external boundaries
@@ -137,7 +137,7 @@ public:
 
    // Send and receive function to buffer data between nodes and ranks
    int Send( void const* buffer, int const count, MPI_Datatype const datatype, int const destination_rank, std::vector<MPI_Request>& requests );
-   int Recv( void *buf, int count, MPI_Datatype datatype, int source, std::vector<MPI_Request>& requests );
+   int Recv( void* buf, int count, MPI_Datatype datatype, int source, std::vector<MPI_Request>& requests );
 
    // Helping functions to provide current rank and partner tags (MyRankId as member variable to avoid multiple calls of Mpi library)
    int TagForRank( unsigned int const partner );

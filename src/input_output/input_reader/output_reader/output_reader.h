@@ -78,23 +78,23 @@
  *        It serves as a proxy class for different output reader types (xml,...) that only read the actual data. 
  *        Here, consistency checks are done that all read data are valid.  
  */
-class OutputReader{
+class OutputReader {
 
 protected:
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit OutputReader() = default;
 
    // Functions that must be implemented by the derived classes
-   virtual double DoReadTimeNamingFactor() const = 0;
-   virtual std::string DoReadOutputTimesType( OutputType const output_type ) const = 0;
-   virtual double DoReadOutputInterval( OutputType const output_type ) const = 0;
+   virtual double DoReadTimeNamingFactor() const                                            = 0;
+   virtual std::string DoReadOutputTimesType( OutputType const output_type ) const          = 0;
+   virtual double DoReadOutputInterval( OutputType const output_type ) const                = 0;
    virtual std::vector<double> DoReadOutputTimeStamps( OutputType const output_type ) const = 0;
 
 public:
-   virtual ~OutputReader() = default;
+   virtual ~OutputReader()             = default;
    OutputReader( OutputReader const& ) = delete;
    OutputReader& operator=( OutputReader const& ) = delete;
-   OutputReader( OutputReader&& ) = delete;
+   OutputReader( OutputReader&& )                 = delete;
    OutputReader& operator=( OutputReader&& ) = delete;
 
    // Return functions proivded by the reader
@@ -104,4 +104,4 @@ public:
    std::vector<double> ReadOutputTimeStamps( OutputType const output_type ) const;
 };
 
-#endif // OUTPUT_READER_H
+#endif// OUTPUT_READER_H

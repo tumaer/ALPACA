@@ -93,7 +93,7 @@ LevelSetBoundaryType BoundaryConditionReader::ReadLevelsetBoundaryType( Boundary
 std::array<double, MF::ANOP()> BoundaryConditionReader::ReadMaterialFixedValueBoundaryConditions( BoundaryLocation const location ) const {
 
    // declare the array for the fixed values
-   std::array<double,MF::ANOP()> fixed_values;
+   std::array<double, MF::ANOP()> fixed_values;
 
    // read all prime state values from the input file
    for( PrimeState const prime : MF::ASOP() ) {

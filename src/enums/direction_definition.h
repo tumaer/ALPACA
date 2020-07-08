@@ -75,7 +75,9 @@
  *
  * @note Do NOT change the indices of the enum entries (used for mapping in arrays).
  */
-enum class Direction : unsigned int { X = 0, Y = 1, Z = 2 };
+enum class Direction : unsigned int { X = 0,
+                                      Y = 1,
+                                      Z = 2 };
 
 /**
  * @brief Converts a direction identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Direction To Index".
@@ -84,4 +86,4 @@ enum class Direction : unsigned int { X = 0, Y = 1, Z = 2 };
  */
 constexpr std::underlying_type<Direction>::type DTI( Direction const d ) { return static_cast<typename std::underlying_type<Direction>::type>( d ); }
 
-#endif // DIRECTION_DEFINITION_H
+#endif// DIRECTION_DEFINITION_H

@@ -89,6 +89,6 @@ namespace Initialization {
    // Initialization function for the topology manager class
    TopologyManager InitializeTopologyManager( InputReader const& input_reader,
                                               MaterialManager const& material_manager );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_TOPOLOGY_MANAGER_H
+#endif// INITIALIZATION_TOPOLOGY_MANAGER_H

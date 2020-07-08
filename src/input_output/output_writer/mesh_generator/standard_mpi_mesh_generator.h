@@ -81,16 +81,16 @@
 class StandardMpiMeshGenerator : public MeshGenerator {
 
    // Variable specification from the base class
+   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
    using MeshGenerator::topology_;
    using MeshGenerator::tree_;
-   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
 
    // self defined member variables
    bool const mpi_filtering_active_;
 
    // virtual functions required from the base class to compute data to hdf5 file
-   void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
+   void DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const override;
+   void DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const override;
 
    // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
@@ -102,16 +102,16 @@ class StandardMpiMeshGenerator : public MeshGenerator {
    hsize_t DoGetLocalVertexCoordinatesStartIndex() const override;
 
    // local function for vertex filtering using mpi routing
-   void FilterVertexIDs( std::vector<unsigned long long int> & vertex_ids, std::vector<unsigned long long int> const& leave_offset ) const;
+   void FilterVertexIDs( std::vector<unsigned long long int>& vertex_ids, std::vector<unsigned long long int> const& leave_offset ) const;
 
 public:
    StandardMpiMeshGenerator() = delete;
    explicit StandardMpiMeshGenerator( TopologyManager const& topology, Tree const& flower, double const dimensionalized_node_size_on_level_zero, bool const mpi_filtering_active );
-   virtual ~StandardMpiMeshGenerator() = default;
+   virtual ~StandardMpiMeshGenerator()                         = default;
    StandardMpiMeshGenerator( StandardMpiMeshGenerator const& ) = delete;
    StandardMpiMeshGenerator& operator=( StandardMpiMeshGenerator const& ) = delete;
-   StandardMpiMeshGenerator( StandardMpiMeshGenerator&& ) = delete;
+   StandardMpiMeshGenerator( StandardMpiMeshGenerator&& )                 = delete;
    StandardMpiMeshGenerator& operator=( StandardMpiMeshGenerator&& ) = delete;
 };
 
-#endif // STANDARD_MPI_MESH_GENERATOR_H
+#endif// STANDARD_MPI_MESH_GENERATOR_H

@@ -74,7 +74,7 @@
 #include <sys/stat.h>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h>     /* getenv */
+#include <stdlib.h> /* getenv */
 #include <typeinfo>
 #include <functional>
 
@@ -103,44 +103,42 @@
 #include "levelset/multi_phase_manager/buffer_handler_setup.h"
 
 // double expansion to get string from compiler variable:
-#define TOSTRING1(str) #str
-#define TOSTRING(str) TOSTRING1(str)
+#define TOSTRING1( str ) #str
+#define TOSTRING( str ) TOSTRING1( str )
 
 /**
  * @brief Default constructor, allows to set if all or just the root rank are to be logged.
  * @param save_all_ranks Decider if all ranks are to be logged. If false only root is logged.
  */
-LogWriter::LogWriter(bool const save_all_ranks) :
-   logfile_name_("Unnamed_Simulation.log"),
-   rank_(ForwardRankId()),
-   save_all_ranks_(save_all_ranks)
-{
+LogWriter::LogWriter( bool const save_all_ranks ) : logfile_name_( "Unnamed_Simulation.log" ),
+                                                    rank_( ForwardRankId() ),
+                                                    save_all_ranks_( save_all_ranks ) {
 
-   if(rank_ == 0) {
-      std::cout << "|******************************************************************************|\n" <<
-                "|*  \\\\                                                                        *|\n" <<
-                "|*  l '>                                                                      *|\n" <<
-                "|*  | |                                                                       *|\n" <<
-                "|*  | |                                                                       *|\n" <<
-                "|*  | alpaca~                                                                 *|\n" <<
-                "|*  ||    ||                                                                  *|\n" <<
-                "|*  ''    ''                                                                  *|\n" <<
-                "|*                                                                            *|\n" <<
-                "|*  THE AGE OF ALPACA HAS COME                                                *|\n" <<
-                "|*                                                                            *|\n" <<
-                "|******************************************************************************|\n"   <<
-                "|* based on git commit:                                                       *|\n" <<
-                "|* " << std::setw(74) << std::left << TOSTRING(GITHASH) << " *|\n"  <<
-                "|******************************************************************************|"   << std::endl;
+   if( rank_ == 0 ) {
+      std::cout << "|******************************************************************************|\n"
+                << "|*  \\\\                                                                        *|\n"
+                << "|*  l '>                                                                      *|\n"
+                << "|*  | |                                                                       *|\n"
+                << "|*  | |                                                                       *|\n"
+                << "|*  | alpaca~                                                                 *|\n"
+                << "|*  ||    ||                                                                  *|\n"
+                << "|*  ''    ''                                                                  *|\n"
+                << "|*                                                                            *|\n"
+                << "|*  THE AGE OF ALPACA HAS COME                                                *|\n"
+                << "|*                                                                            *|\n"
+                << "|******************************************************************************|\n"
+                << "|* based on git commit:                                                       *|\n"
+                << "|* " << std::setw( 74 ) << std::left << TOSTRING( GITHASH ) << " *|\n"
+                << "|******************************************************************************|" << std::endl;
    }
 
-   char const* val = getenv("HOSTNAME");
-   if(val != NULL) {
-      LogMessage("Running on              : " + std::string(val),true,true);
+   char const* val = getenv( "HOSTNAME" );
+   if( val != NULL ) {
+      LogMessage( "Running on              : " + std::string( val ), true, true );
    } else {
-      LogMessage("Running on              : Hostname not known",true,true);
+      LogMessage( "Running on              : Hostname not known", true, true );
    }
-   LogMessage("Dimensions              : " + std::to_string(static_cast<int>(CC::DIM())));
+   LogMessage( "Dimensions              : " + std::to_string( static_cast<int>( CC::DIM() ) ) );
    if constexpr( CC::DIM() == Dimension::Two ) {
       std::string message = "Axis symmetry";
       if constexpr( CC::Axisymmetric() ) {
@@ -150,49 +148,48 @@ LogWriter::LogWriter(bool const save_all_ranks) :
       }
       LogMessage( message, true, true );
    }
-   AddBreakLine(true);
-
+   AddBreakLine( true );
 
    // Logging the input parameters - Does not claim completeness.
-   if constexpr(CC::InviscidExchangeActive()) {
-      LogMessage("Inviscid exchange       : ACTIVE");
+   if constexpr( CC::InviscidExchangeActive() ) {
+      LogMessage( "Inviscid exchange       : ACTIVE" );
    } else {
-      LogMessage("Inviscid exchange       : NOT active");
+      LogMessage( "Inviscid exchange       : NOT active" );
    }
-   if constexpr(CC::GravityIsActive()) {
-      LogMessage("Gravity                 : ACTIVE");
+   if constexpr( CC::GravityIsActive() ) {
+      LogMessage( "Gravity                 : ACTIVE" );
    } else {
-      LogMessage("Gravity                 : NOT active");
+      LogMessage( "Gravity                 : NOT active" );
    }
-   if constexpr(CC::ViscosityIsActive()) {
-      LogMessage("Viscosity               : ACTIVE");
+   if constexpr( CC::ViscosityIsActive() ) {
+      LogMessage( "Viscosity               : ACTIVE" );
    } else {
-      LogMessage("Viscosity               : NOT active");
+      LogMessage( "Viscosity               : NOT active" );
    }
-   if constexpr(CC::CapillaryForcesActive()) {
-      LogMessage("Surface tension         : ACTIVE");
+   if constexpr( CC::CapillaryForcesActive() ) {
+      LogMessage( "Surface tension         : ACTIVE" );
    } else {
-      LogMessage("Surface tension         : NOT active");
+      LogMessage( "Surface tension         : NOT active" );
    }
-   if constexpr(CC::HeatConductionActive()) {
-      LogMessage("Heat conduction         : ACTIVE");
+   if constexpr( CC::HeatConductionActive() ) {
+      LogMessage( "Heat conduction         : ACTIVE" );
    } else {
-      LogMessage("Heat conduction         : NOT active");
+      LogMessage( "Heat conduction         : NOT active" );
    }
-   if constexpr(CC::ScaleSeparationActive()) {
-      LogMessage("Scale seperation        : ACTIVE");
+   if constexpr( CC::ScaleSeparationActive() ) {
+      LogMessage( "Scale seperation        : ACTIVE" );
    } else {
-      LogMessage("Scale seperation        : NOT active");
+      LogMessage( "Scale seperation        : NOT active" );
    }
-   if constexpr(CC::FUSY()) {
-      LogMessage("FP control for symmetry : ACTIVE");
+   if constexpr( CC::FUSY() ) {
+      LogMessage( "FP control for symmetry : ACTIVE" );
    } else {
-      LogMessage("FP control for symmetry : NOT active");
+      LogMessage( "FP control for symmetry : NOT active" );
    }
-   AddBreakLine(true);
+   AddBreakLine( true );
 
-   LogMessage("Time integrator                          : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(TimeIntegratorSetup::Concretize<time_integrator>::type).name())));
-   LogMessage("Riemann solver                           : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(RiemannSolverSetup::Concretize<riemann_solver>::type).name())));
+   LogMessage( "Time integrator                          : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( TimeIntegratorSetup::Concretize<time_integrator>::type ).name() ) ) );
+   LogMessage( "Riemann solver                           : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( RiemannSolverSetup::Concretize<riemann_solver>::type ).name() ) ) );
    if constexpr( riemann_solver == RiemannSolvers::Roe ) {
       LogMessage( "Flux Splitting Scheme                    : " + FluxSplittingToString( RoeSolverSettings::flux_splitting_scheme ) );
    }
@@ -202,31 +199,31 @@ LogWriter::LogWriter(bool const save_all_ranks) :
    if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe_M || RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
       LogMessage( "Low-Mach-number limit factor             : " + std::to_string( RoeSolverSettings::low_mach_number_limit_factor ) );
    }
-   LogMessage("Prime state handler                           : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(PrimeStateHandlerSetup::Concretize<prime_state_handler>::type).name())));
-   LogMessage("Reconstruction stencil                        : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type).name())));
-   LogMessage("Viscous fluxes reconstruction stencil         : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(ReconstructionStencilSetup::Concretize<viscous_fluxes_reconstruction_stencil>::type).name())));
-   LogMessage("Heat fluxes reconstruction stencil            : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(ReconstructionStencilSetup::Concretize<heat_fluxes_reconstruction_stencil>::type).name())));
-   LogMessage("Derivative stencil                            : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<derivative_stencil>::type).name())));
-   LogMessage("Viscous fluxes derivative stencil cell center : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil_cell_center>::type).name())));
-   LogMessage("Viscous fluxes derivative stencil cell face   : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil_cell_face>::type).name())));
-   LogMessage("Heat fluxes derivative stencil cell center    : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_center>::type).name())));
-   LogMessage("Heat fluxes derivative stencil cell face      : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_face>::type).name())));
-   LogMessage("Curvature calculation derivative stencil      : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<curvature_calculation_derivative_stencil>::type).name())));
-   LogMessage("Normal calculation derivative stencil         : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(DerivativeStencilSetup::Concretize<normal_calculation_derivative_stencil>::type).name())));
-   AddBreakLine(true);
-   LogMessage("Multi-phase manager        : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(MultiPhaseManagerSetup::Concretize<phase_manager>::type).name())));
-   LogMessage("LS Advection               : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(LevelsetAdvectorSetup::Concretize<levelset_advector>::type).name())));
-   LogMessage("LS Reinitialization        : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(LevelsetReinitializerSetup::Concretize<levelset_reinitializer>::type).name())));
-   LogMessage("Geometry calculator        : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(GeometryCalculatorSetup::Concretize<geometry_calculator>::type).name())));
-   LogMessage("Mixing method              : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(CutCellMixerSetup::Concretize<cut_cell_mixer>::type).name())));
-   LogMessage("Extension method           : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(GhostFluidExtenderSetup::Concretize<extender>::type_primestates).name())));
-   LogMessage("Interface Extension method : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(InterfaceExtenderSetup::Concretize<interface_extender>::type_states).name())));
-   LogMessage("Interface Riemann solver   : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(InterfaceRiemannSolverSetup::Concretize<interface_riemann_solver>::type).name())));
-   LogMessage("Scale Separation method    : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(ScaleSeparatorSetup::Concretize<scale_separator>::type).name())));
-   LogMessage("Buffer handler             : " + StringOperations::RemoveLeadingNumbers(std::string(typeid(BufferHandlerSetup::Concretize<buffer_handler>::type).name())));
-   AddBreakLine(true);
+   LogMessage( "Prime state handler                           : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( PrimeStateHandlerSetup::Concretize<prime_state_handler>::type ).name() ) ) );
+   LogMessage( "Reconstruction stencil                        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type ).name() ) ) );
+   LogMessage( "Viscous fluxes reconstruction stencil         : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<viscous_fluxes_reconstruction_stencil>::type ).name() ) ) );
+   LogMessage( "Heat fluxes reconstruction stencil            : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<heat_fluxes_reconstruction_stencil>::type ).name() ) ) );
+   LogMessage( "Derivative stencil                            : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<derivative_stencil>::type ).name() ) ) );
+   LogMessage( "Viscous fluxes derivative stencil cell center : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil_cell_center>::type ).name() ) ) );
+   LogMessage( "Viscous fluxes derivative stencil cell face   : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<viscous_fluxes_derivative_stencil_cell_face>::type ).name() ) ) );
+   LogMessage( "Heat fluxes derivative stencil cell center    : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_center>::type ).name() ) ) );
+   LogMessage( "Heat fluxes derivative stencil cell face      : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_face>::type ).name() ) ) );
+   LogMessage( "Curvature calculation derivative stencil      : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<curvature_calculation_derivative_stencil>::type ).name() ) ) );
+   LogMessage( "Normal calculation derivative stencil         : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<normal_calculation_derivative_stencil>::type ).name() ) ) );
+   AddBreakLine( true );
+   LogMessage( "Multi-phase manager        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( MultiPhaseManagerSetup::Concretize<phase_manager>::type ).name() ) ) );
+   LogMessage( "LS Advection               : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( LevelsetAdvectorSetup::Concretize<levelset_advector>::type ).name() ) ) );
+   LogMessage( "LS Reinitialization        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( LevelsetReinitializerSetup::Concretize<levelset_reinitializer>::type ).name() ) ) );
+   LogMessage( "Geometry calculator        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( GeometryCalculatorSetup::Concretize<geometry_calculator>::type ).name() ) ) );
+   LogMessage( "Mixing method              : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( CutCellMixerSetup::Concretize<cut_cell_mixer>::type ).name() ) ) );
+   LogMessage( "Extension method           : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( GhostFluidExtenderSetup::Concretize<extender>::type_primestates ).name() ) ) );
+   LogMessage( "Interface Extension method : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( InterfaceExtenderSetup::Concretize<interface_extender>::type_states ).name() ) ) );
+   LogMessage( "Interface Riemann solver   : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( InterfaceRiemannSolverSetup::Concretize<interface_riemann_solver>::type ).name() ) ) );
+   LogMessage( "Scale Separation method    : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ScaleSeparatorSetup::Concretize<scale_separator>::type ).name() ) ) );
+   LogMessage( "Buffer handler             : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( BufferHandlerSetup::Concretize<buffer_handler>::type ).name() ) ) );
+   AddBreakLine( true );
    LogMessage( "Output Vertex Filer: " + VertexFilterTypeToString( CC::VERTEX_FILTER() ) );
-   AddBreakLine(true);
+   AddBreakLine( true );
 }
 
 /**
@@ -235,15 +232,15 @@ LogWriter::LogWriter(bool const save_all_ranks) :
 void LogWriter::FlushWelcomeMessage() {
 
    int number_of_ranks;
-   MPI_Comm_size(MPI_COMM_WORLD,&number_of_ranks);
-   std::string const filename = logfile_name_;
-   std::string const rank_filename = filename + "_" + std::to_string(rank_);
-   auto rank_messages(FormatMessage("Data from Rank " + std::to_string(rank_) + ":"));
-   auto rank_message = rank_messages[0] + "\n"; // Dirty Hack, we know the line is to short.
+   MPI_Comm_size( MPI_COMM_WORLD, &number_of_ranks );
+   std::string const filename      = logfile_name_;
+   std::string const rank_filename = filename + "_" + std::to_string( rank_ );
+   auto rank_messages( FormatMessage( "Data from Rank " + std::to_string( rank_ ) + ":" ) );
+   auto rank_message = rank_messages[0] + "\n";// Dirty Hack, we know the line is to short.
 
-   if(rank_ == 0) {
-      std::ofstream output_stream(filename, std::ios::app);
-      output_stream << std::scientific << std::setprecision(5);
+   if( rank_ == 0 ) {
+      std::ofstream output_stream( filename, std::ios::app );
+      output_stream << std::scientific << std::setprecision( 5 );
       output_stream << "|******************************************************************************|" << std::endl;
       output_stream << "|*  \\\\                                                                        *|" << std::endl;
       output_stream << "|*  l '>                                                                      *|" << std::endl;
@@ -257,15 +254,15 @@ void LogWriter::FlushWelcomeMessage() {
       output_stream << "|*                                                                            *|" << std::endl;
       output_stream << "|******************************************************************************|" << std::endl;
       output_stream << "|* based on git commit:                                                       *|" << std::endl;
-      output_stream << "|* " << std::setw(74) << std::left << TOSTRING(GITHASH) << " *|" << std::endl;
+      output_stream << "|* " << std::setw( 74 ) << std::left << TOSTRING( GITHASH ) << " *|" << std::endl;
       output_stream << "|******************************************************************************|" << std::endl;
       output_stream.flush();
       output_stream.close();
    }
 
-   if(save_all_ranks_ && number_of_ranks > 1) {
-      std::ofstream output_stream(rank_filename, std::ios::app);
-      output_stream << std::scientific << std::setprecision(5);
+   if( save_all_ranks_ && number_of_ranks > 1 ) {
+      std::ofstream output_stream( rank_filename, std::ios::app );
+      output_stream << std::scientific << std::setprecision( 5 );
       output_stream << "|******************************************************************************|" << std::endl;
       output_stream << "|*  \\\\                                                                        *|" << std::endl;
       output_stream << "|*  l '>                                                                      *|" << std::endl;
@@ -279,7 +276,7 @@ void LogWriter::FlushWelcomeMessage() {
       output_stream << "|*                                                                            *|" << std::endl;
       output_stream << "|******************************************************************************|" << std::endl;
       output_stream << "|* based on git commit:                                                       *|" << std::endl;
-      output_stream << "|* " << std::setw(74) << std::left << TOSTRING(GITHASH) << " *|" << std::endl;
+      output_stream << "|* " << std::setw( 74 ) << std::left << TOSTRING( GITHASH ) << " *|" << std::endl;
       output_stream << "|******************************************************************************|" << std::endl;
       output_stream << rank_message;
       output_stream.flush();
@@ -287,28 +284,27 @@ void LogWriter::FlushWelcomeMessage() {
    }
 }
 
-
 /**
  * @brief Writes the output file, and collects output from all ranks if necessary
  */
 void LogWriter::Flush() {
 
    int number_of_ranks;
-   MPI_Comm_size(MPI_COMM_WORLD,&number_of_ranks);
-   std::string const filename = logfile_name_;
-   std::string const rank_filename = filename + "_" + std::to_string(rank_);
+   MPI_Comm_size( MPI_COMM_WORLD, &number_of_ranks );
+   std::string const filename      = logfile_name_;
+   std::string const rank_filename = filename + "_" + std::to_string( rank_ );
 
-   if(rank_ == 0) {
-      std::cout << "|******************************************************************************|"  << std::endl;
-      std::ofstream output_stream(filename, std::ios::app);
+   if( rank_ == 0 ) {
+      std::cout << "|******************************************************************************|" << std::endl;
+      std::ofstream output_stream( filename, std::ios::app );
       AddBreakLine();
       output_stream << log_;
       output_stream.flush();
       output_stream.close();
    }
 
-   if(save_all_ranks_ && number_of_ranks > 1) {
-      std::ofstream output_stream(rank_filename, std::ios::app);
+   if( save_all_ranks_ && number_of_ranks > 1 ) {
+      std::ofstream output_stream( rank_filename, std::ios::app );
       AddBreakLine();
       output_stream << log_;
       output_stream.flush();
@@ -325,48 +321,48 @@ void LogWriter::Flush() {
  *                         Alpaca is deternined.
  * @param[in]  fast_forward  Whether the Alpaca should rush to its current position to indicate that the simulation was restarted.
  */
-void LogWriter::FlushAlpaca(double const percentage, bool const fast_forward) {
+void LogWriter::FlushAlpaca( double const percentage, bool const fast_forward ) {
 
-   double cut_percentage = std::max(0.0, percentage);
-   cut_percentage = std::min(cut_percentage, 1.0);
-   unsigned int const plot_percentage = (unsigned int)std::floor(cut_percentage * 64 + 9);
+   double cut_percentage              = std::max( 0.0, percentage );
+   cut_percentage                     = std::min( cut_percentage, 1.0 );
+   unsigned int const plot_percentage = (unsigned int)std::floor( cut_percentage * 64 + 9 );
 
    std::stringstream line_stream;
-   AddBreakLine(true);
+   AddBreakLine( true );
    line_stream << "  ";
-   LogMessage(line_stream.str());
-   line_stream.str("");
-   line_stream << std::setw(plot_percentage-1) << " \\\\";
-   LogMessage(line_stream.str());
-   line_stream.str("");
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
+   line_stream << std::setw( plot_percentage - 1 ) << " \\\\";
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
    if( fast_forward ) line_stream << std::setfill( '>' );
-   line_stream << std::setw(plot_percentage+1) << " l '>";
+   line_stream << std::setw( plot_percentage + 1 ) << " l '>";
    if( fast_forward ) line_stream << std::setfill( ' ' );
-   LogMessage(line_stream.str());
-   line_stream.str("");
-   line_stream << std::setw(plot_percentage) << " | |";
-   LogMessage(line_stream.str());
-   line_stream.str("");
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
+   line_stream << std::setw( plot_percentage ) << " | |";
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
    if( fast_forward ) line_stream << std::setfill( '>' );
-   line_stream << std::setw(plot_percentage) << " | |";
+   line_stream << std::setw( plot_percentage ) << " | |";
    if( fast_forward ) line_stream << std::setfill( ' ' );
-   LogMessage(line_stream.str());
-   line_stream.str("");
-   line_stream << std::setw(plot_percentage) << "~alpaca |";
-   LogMessage(line_stream.str());
-   line_stream.str("");
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
+   line_stream << std::setw( plot_percentage ) << "~alpaca |";
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
    if( fast_forward ) line_stream << std::setfill( '>' );
-   line_stream << std::setw(plot_percentage) << " ||    ||";
+   line_stream << std::setw( plot_percentage ) << " ||    ||";
    if( fast_forward ) line_stream << std::setfill( ' ' );
-   LogMessage(line_stream.str());
-   line_stream.str("");
-   line_stream << std::setw(plot_percentage) << " ''    ''";
-   LogMessage(line_stream.str());
-   line_stream.str("");
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
+   line_stream << std::setw( plot_percentage ) << " ''    ''";
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
    line_stream << "  ";
-   LogMessage(line_stream.str());
-   line_stream.str("");
-   AddBreakLine(true);
+   LogMessage( line_stream.str() );
+   line_stream.str( "" );
+   AddBreakLine( true );
 }
 
 /**
@@ -374,7 +370,7 @@ void LogWriter::FlushAlpaca(double const percentage, bool const fast_forward) {
  *
  * @param[in]  delayed_log  The string that should be appended.
  */
-void LogWriter::AppendDelayedLog(std::string const delayed_log) {
+void LogWriter::AppendDelayedLog( std::string const delayed_log ) {
    delayed_log_ += delayed_log;
 }
 
@@ -384,7 +380,7 @@ void LogWriter::AppendDelayedLog(std::string const delayed_log) {
  */
 int LogWriter::ForwardRankId() const {
    int rank_id = -1;
-   MPI_Comm_rank(MPI_COMM_WORLD,&rank_id);
+   MPI_Comm_rank( MPI_COMM_WORLD, &rank_id );
    return rank_id;
 }
 
@@ -393,33 +389,31 @@ int LogWriter::ForwardRankId() const {
  * @param message An arbitrary string message $MUST NOT CONTAIN TABS '\t' or NEWLINES '\n'$
  * @return Gives a string in homogeneous ASCII-Layout.
  */
-std::vector<std::string> LogWriter::FormatMessage(std::string const &message) const {
-   unsigned int message_size = message.size();
-   unsigned int number_of_lines = std::ceil( double(message_size) / double(76.0));
+std::vector<std::string> LogWriter::FormatMessage( std::string const& message ) const {
+   unsigned int message_size    = message.size();
+   unsigned int number_of_lines = std::ceil( double( message_size ) / double( 76.0 ) );
 
    std::vector<std::string> final_lines;
 
-   for(unsigned int i = 0; i < number_of_lines; ++i) {
-      if(message.size() <= i*75+75) {
-         final_lines.emplace_back(message.begin()+(i*75),message.end());
-      }else {
-         final_lines.emplace_back(message.begin()+(i*75),message.begin() + (i*75)+75);
+   for( unsigned int i = 0; i < number_of_lines; ++i ) {
+      if( message.size() <= i * 75 + 75 ) {
+         final_lines.emplace_back( message.begin() + ( i * 75 ), message.end() );
+      } else {
+         final_lines.emplace_back( message.begin() + ( i * 75 ), message.begin() + ( i * 75 ) + 75 );
       }
    }
 
-   for(auto& line : final_lines) {
-      if(line.size() < 75) {
+   for( auto& line : final_lines ) {
+      if( line.size() < 75 ) {
          int difference = 75 - line.size();
-         line.insert(line.end(), difference, ' ');
-
+         line.insert( line.end(), difference, ' ' );
       }
-      line.insert(line.end(),'*');
-      line.insert(line.end(),'|');
-      line.insert(0,"|* ");
+      line.insert( line.end(), '*' );
+      line.insert( line.end(), '|' );
+      line.insert( 0, "|* " );
    }
 
    return final_lines;
-
 }
 
 /**
@@ -430,26 +424,26 @@ std::vector<std::string> LogWriter::FormatMessage(std::string const &message) co
  */
 void LogWriter::LogMessage( std::string const& message, bool const print_to_terminal, bool const save_in_logfile ) {
 
-   std::vector<std::string> formatted(FormatMessage(message));
+   std::vector<std::string> formatted( FormatMessage( message ) );
 
-   if(print_to_terminal) {
-      if(rank_ == 0) {
-         for(auto const& line : formatted) {
-            std::cout << std::scientific << std::setprecision(5) << line << std::endl;
+   if( print_to_terminal ) {
+      if( rank_ == 0 ) {
+         for( auto const& line : formatted ) {
+            std::cout << std::scientific << std::setprecision( 5 ) << line << std::endl;
          }
       }
    }
-   if(save_in_logfile) {
-      if(save_all_ranks_) {
-         for(auto const& line : formatted) {
-            log_.append(line);
-            log_.append("\n");
+   if( save_in_logfile ) {
+      if( save_all_ranks_ ) {
+         for( auto const& line : formatted ) {
+            log_.append( line );
+            log_.append( "\n" );
          }
       } else {
-         if(rank_ == 0) {
-            for(auto const& line : formatted) {
-               log_.append(line);
-               log_.append("\n");
+         if( rank_ == 0 ) {
+            for( auto const& line : formatted ) {
+               log_.append( line );
+               log_.append( "\n" );
             }
          }
       }
@@ -463,28 +457,27 @@ void LogWriter::LogMessage( std::string const& message, bool const print_to_term
  * @param save_in_logfile Decider if message is to be saved in the log file.
  */
 void LogWriter::LogLinebreakMessage( std::string const& message, bool const print_to_terminal, bool const save_in_logfile ) {
-  // Instantiate vector containing split strings if needed
-  std::vector<std::string> all_lines;
-  std::string line;
-  std::stringstream stream( message );
-  while ( std::getline( stream, line, '\n' ) ) {
+   // Instantiate vector containing split strings if needed
+   std::vector<std::string> all_lines;
+   std::string line;
+   std::stringstream stream( message );
+   while( std::getline( stream, line, '\n' ) ) {
       all_lines.push_back( line );
-  }
+   }
 
-  // Loop through all single_messages and call single send message function
-  for( auto const& single_message : all_lines ) {
-    LogMessage( single_message, print_to_terminal, save_in_logfile );
-  }
+   // Loop through all single_messages and call single send message function
+   for( auto const& single_message : all_lines ) {
+      LogMessage( single_message, print_to_terminal, save_in_logfile );
+   }
 }
-
 
 /**
  * @brief Writes a delayed message to the terminal (std::cout) and/or save the message in order to include it in the log file.
  * @param print_to_terminal Decider if message is to be printed to std::cout.
  * @param save_in_logfile Decider if message is to be saved in the log file.
  */
-void LogWriter::DelayedLogMessage(bool const print_to_terminal, bool const save_in_logfile) {
-   LogMessage(delayed_log_, print_to_terminal, save_in_logfile);
+void LogWriter::DelayedLogMessage( bool const print_to_terminal, bool const save_in_logfile ) {
+   LogMessage( delayed_log_, print_to_terminal, save_in_logfile );
    delayed_log_.clear();
 }
 
@@ -492,15 +485,15 @@ void LogWriter::DelayedLogMessage(bool const print_to_terminal, bool const save_
  * @brief Introduces a breaking line to the log message to enhance clearness of the logging output.
  * @param print_to_terminal Decision wether break line is also written to the terminal cout. Default: false
  */
-void LogWriter::AddBreakLine(bool const print_to_terminal) {
-   LogMessage("**************************************************************************", print_to_terminal);
+void LogWriter::AddBreakLine( bool const print_to_terminal ) {
+   LogMessage( "**************************************************************************", print_to_terminal );
 }
 
 /**
  * @brief Sets the name of the log file.
  * @param name Log file name.
  */
-void LogWriter::SetLogfileName(std::string const name) {
+void LogWriter::SetLogfileName( std::string const name ) {
    logfile_name_ = name;
 }
 
@@ -509,7 +502,7 @@ void LogWriter::SetLogfileName(std::string const name) {
  * @param save_all_ranks Decider whether or not all ranks are to be logged. (Only relevant at first call!)
  * @return The logger instance.
  */
-LogWriter& LogWriter::Instance(bool save_all_ranks) {
-   static LogWriter instance_(save_all_ranks);
+LogWriter& LogWriter::Instance( bool save_all_ranks ) {
+   static LogWriter instance_( save_all_ranks );
    return instance_;
 }

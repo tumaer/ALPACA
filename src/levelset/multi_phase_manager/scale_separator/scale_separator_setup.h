@@ -71,7 +71,6 @@
 #include "user_specifications/numerical_setup.h"
 #include "two_phase_scale_separator.h"
 
-
 /**
  * @brief A namespace to get a ScaleSeparator type based on a specified constexpr.
  */
@@ -93,6 +92,6 @@ namespace ScaleSeparatorSetup {
       typedef TwoPhaseScaleSeparator type;
    };
 
-}
+}// namespace ScaleSeparatorSetup
 
-#endif // SCALE_SEPARATOR_SETUP_H
+#endif// SCALE_SEPARATOR_SETUP_H

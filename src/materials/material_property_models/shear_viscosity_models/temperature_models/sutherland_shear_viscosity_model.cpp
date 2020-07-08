@@ -81,13 +81,12 @@
  * @note Runtime a check is done that all required parameters are present. Furthermore, pre-calculations are done for simpler access during compute call.
  */
 SutherlandShearViscosityModel::SutherlandShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
-                                                              UnitHandler const& unit_handler ) :
-   // Start initializer list
-   TemperatureMaterialParameterModel<SutherlandShearViscosityModel>(),
-   mu0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "mu0", "SutherlandShearViscosityModel" ), UnitType::Viscosity ) ),
-   T0_(  unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "T0", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
-   S_(   unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "S", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
-   constant_( mu0_ * ( T0_ + S_ ) / std::pow( T0_,1.5 ) ) {
+                                                              UnitHandler const& unit_handler ) :// Start initializer list
+                                                                                                  TemperatureMaterialParameterModel<SutherlandShearViscosityModel>(),
+                                                                                                  mu0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "mu0", "SutherlandShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                                  T0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "T0", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
+                                                                                                  S_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "S", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
+                                                                                                  constant_( mu0_ * ( T0_ + S_ ) / std::pow( T0_, 1.5 ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 
@@ -102,12 +101,9 @@ std::string SutherlandShearViscosityModel::GetLogData( unsigned int const indent
    std::string log_string;
    // Add data
    log_string += StringOperations::Indent( indent ) + "Model type: Sutherland \n";
-   log_string += StringOperations::Indent( indent ) + "mu0       : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( mu0_, UnitType::Viscosity ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "T0        : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( T0_, UnitType::Temperature ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "S         : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( S_, UnitType::Temperature ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "mu0       : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( mu0_, UnitType::Viscosity ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "T0        : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( T0_, UnitType::Temperature ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "S         : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( S_, UnitType::Temperature ), 9 ) + "\n";
 
    return log_string;
 }

@@ -81,8 +81,8 @@ class CarreauYasudaShearViscosityModel : public ShearRateMaterialParameterModel<
    friend ShearRateMaterialParameterModel;
 
    // Definition of parameters needed in the base class for the computations
-   static constexpr Parameter parameter_buffer_type_ = Parameter::ShearViscosity; // buffer that is modified by the model
-   static constexpr DerivativeStencils derivative_stencil_ = viscous_fluxes_derivative_stencil_cell_center; // stencil required for the shear rate
+   static constexpr Parameter parameter_buffer_type_       = Parameter::ShearViscosity;                    // buffer that is modified by the model
+   static constexpr DerivativeStencils derivative_stencil_ = viscous_fluxes_derivative_stencil_cell_center;// stencil required for the shear rate
 
    // member variables needed for the model calculation
    double const mu_infinite_shear_rates_;
@@ -101,16 +101,15 @@ class CarreauYasudaShearViscosityModel : public ShearRateMaterialParameterModel<
 public:
    CarreauYasudaShearViscosityModel() = delete;
    explicit CarreauYasudaShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
-                                        UnitHandler const& unit_handler );
-   virtual ~CarreauYasudaShearViscosityModel() = default;
+                                              UnitHandler const& unit_handler );
+   virtual ~CarreauYasudaShearViscosityModel()                                 = default;
    CarreauYasudaShearViscosityModel( const CarreauYasudaShearViscosityModel& ) = delete;
    CarreauYasudaShearViscosityModel& operator=( const CarreauYasudaShearViscosityModel& ) = delete;
-   CarreauYasudaShearViscosityModel( CarreauYasudaShearViscosityModel&& ) = delete;
+   CarreauYasudaShearViscosityModel( CarreauYasudaShearViscosityModel&& )                 = delete;
    CarreauYasudaShearViscosityModel& operator=( CarreauYasudaShearViscosityModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
-
 };
 
-#endif // CARREAU_SHEAR_VISCOSITY_MODEL_H
+#endif// CARREAU_SHEAR_VISCOSITY_MODEL_H

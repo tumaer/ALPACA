@@ -68,7 +68,6 @@
 #ifndef HEAT_EXCHANGE_FLUXES_H
 #define HEAT_EXCHANGE_FLUXES_H
 
-
 #include "topology/node.h"
 
 /**
@@ -77,27 +76,23 @@
 class HeatExchangeFluxes {
 
 private:
-
    double const thermal_conductivity_positive_;
    double const thermal_conductivity_negative_;
 
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
 
-   void ComputeRealMaterialTemperature( Node const& node, double (&real_material_temperature)[CC::TCX()][CC::TCY()][CC::TCZ()]) const;
+   void ComputeRealMaterialTemperature( Node const& node, double ( &real_material_temperature )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
 
 public:
    HeatExchangeFluxes() = delete;
    explicit HeatExchangeFluxes( double const thermal_conductivity_positive, double const thermal_conductivity_negative );
-   ~HeatExchangeFluxes() = default;
+   ~HeatExchangeFluxes()                           = default;
    HeatExchangeFluxes( HeatExchangeFluxes const& ) = delete;
    HeatExchangeFluxes& operator=( HeatExchangeFluxes const& ) = delete;
-   HeatExchangeFluxes( HeatExchangeFluxes&& ) = delete;
+   HeatExchangeFluxes( HeatExchangeFluxes&& )                 = delete;
    HeatExchangeFluxes& operator=( HeatExchangeFluxes&& ) = delete;
 
-   void ComputeInterfaceFluxes( Node& node
-                              , double const (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const;
-
+   void ComputeInterfaceFluxes( Node& node, double const ( &delta_aperture_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const;
 };
 
-
-#endif //HEAT_EXCHANGE_FLUXES_H
+#endif//HEAT_EXCHANGE_FLUXES_H

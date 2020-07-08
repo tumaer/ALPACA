@@ -78,7 +78,7 @@
 namespace Initialization {
 
    // Initialization function of the multiresolution
-   Multiresolution InitializeMultiresolution( InputReader const& input_reader,TopologyManager const& topology_manager );
-}
+   Multiresolution InitializeMultiresolution( InputReader const& input_reader, TopologyManager const& topology_manager );
+}// namespace Initialization
 
-#endif // INITIALIZATION_MULTIRESOLUTION_H
+#endif// INITIALIZATION_MULTIRESOLUTION_H

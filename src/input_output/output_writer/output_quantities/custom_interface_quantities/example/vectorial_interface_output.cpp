@@ -82,15 +82,14 @@
 VectorialInterfaceOutput::VectorialInterfaceOutput( UnitHandler const& unit_handler,
                                                     MaterialManager const& material_manager,
                                                     std::string const& quantity_name,
-                                                    std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { DTI( CC::DIM() ), 1 } ) {
+                                                    std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { DTI( CC::DIM() ), 1 } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void VectorialInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void VectorialInterfaceOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
@@ -168,7 +167,7 @@ void VectorialInterfaceOutput::DoComputeCellData( Node const& node, std::vector<
 /**
  * @brief see base class definition.
  */
-void VectorialInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
+void VectorialInterfaceOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const ) const {
 
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
@@ -207,7 +206,7 @@ void VectorialInterfaceOutput::DoComputeDebugCellData( Node const& node, std::ve
                   /**
                    * Default value if material is not contained in node
                    */
-                  cell_data[cell_data_counter++] = - 1.0;
+                  cell_data[cell_data_counter++] = -1.0;
                }
             }
          }

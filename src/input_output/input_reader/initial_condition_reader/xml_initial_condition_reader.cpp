@@ -72,9 +72,8 @@
  * @brief Default constructor for the initial condition reader for xml-type input files.
  * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
-XmlInitialConditionReader::XmlInitialConditionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   InitialConditionReader(),
-   xml_input_file_( std::move( inputfile ) ) {
+XmlInitialConditionReader::XmlInitialConditionReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : InitialConditionReader(),
+                                                                                                           xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
@@ -85,7 +84,7 @@ std::string XmlInitialConditionReader::DoReadMaterialInitialConditions( unsigned
    // Define the material name
    std::string const material_name( "material" + std::to_string( material_index ) );
    // Get the correct node
-   tinyxml2::XMLElement const *material_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "initialConditions", material_name } );
+   tinyxml2::XMLElement const* material_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "initialConditions", material_name } );
 
    return XmlUtilities::ReadString( material_node );
 }
@@ -97,7 +96,7 @@ std::string XmlInitialConditionReader::DoReadLevelsetInitialConditions( unsigned
    // Define the levelset name
    std::string const levelset_name( "levelSet" + std::to_string( levelset_index ) );
    // Get the correct nodes
-   tinyxml2::XMLElement const *levelset_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "initialConditions", levelset_name } );
+   tinyxml2::XMLElement const* levelset_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "domain", "initialConditions", levelset_name } );
 
    return XmlUtilities::ReadString( levelset_node );
 }

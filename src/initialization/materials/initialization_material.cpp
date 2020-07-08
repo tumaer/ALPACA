@@ -95,35 +95,35 @@ namespace Initialization {
                                                                      std::unordered_map<std::string, double> const& eos_data,
                                                                      UnitHandler const& unit_handler ) {
       // logger
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // switch between different eos to call specific constructors
-      switch ( eos_name ) {
-         case EquationOfStateName::StiffenedGas : {
+      switch( eos_name ) {
+         case EquationOfStateName::StiffenedGas: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<StiffenedGas const> eos( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
             logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
-         case EquationOfStateName::StiffenedGasSafe : {
+         case EquationOfStateName::StiffenedGasSafe: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<StiffenedGasSafe const> eos( std::make_unique<StiffenedGasSafe const>( eos_data, unit_handler ) );
             logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
-         case EquationOfStateName::StiffenedGasCompleteSafe :{
+         case EquationOfStateName::StiffenedGasCompleteSafe: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<StiffenedGasCompleteSafe const> eos( std::make_unique<StiffenedGasCompleteSafe const>( eos_data, unit_handler ) );
             logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
-         case EquationOfStateName::WaterlikeFluid : {
+         case EquationOfStateName::WaterlikeFluid: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<WaterlikeFluid const> eos( std::make_unique<WaterlikeFluid const>( eos_data, unit_handler ) );
             logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
-         case EquationOfStateName::NobleAbelStiffenedGas : {
+         case EquationOfStateName::NobleAbelStiffenedGas: {
             // sanity check if gruneise nflag ist
             if constexpr( !CC::GruneisenDensityDependent() ) {
                throw std::runtime_error( "To use NobleAbelStiffenedGas you need to activate CC::GruneisenDensityDependent" );
@@ -134,7 +134,7 @@ namespace Initialization {
             logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
-         default : {
+         default: {
             throw std::logic_error( "The equation of state has not been implemented!" );
          }
       }
@@ -151,44 +151,44 @@ namespace Initialization {
                                                                                 std::unordered_map<std::string, double> const& model_data,
                                                                                 UnitHandler const& unit_handler ) {
       // logger
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // switch between different shear viscosity models
       switch( model_name ) {
-         case MaterialPropertyModelName::NotUsed : {
+         case MaterialPropertyModelName::NotUsed: {
             return nullptr;
          }
-         case MaterialPropertyModelName::ShearViscosityConstant : {
+         case MaterialPropertyModelName::ShearViscosityConstant: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<ConstantShearViscosityModel const> model( std::make_unique<ConstantShearViscosityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
-         case MaterialPropertyModelName::ShearViscosityPowerLaw : {
+         case MaterialPropertyModelName::ShearViscosityPowerLaw: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<PowerLawShearViscosityModel const> model( std::make_unique<PowerLawShearViscosityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
-         case MaterialPropertyModelName::ShearViscosityCarreauYasuda : {
+         case MaterialPropertyModelName::ShearViscosityCarreauYasuda: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<CarreauYasudaShearViscosityModel const> model( std::make_unique<CarreauYasudaShearViscosityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
-         case MaterialPropertyModelName::ShearViscosityCross : {
+         case MaterialPropertyModelName::ShearViscosityCross: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<CrossShearViscosityModel const> model( std::make_unique<CrossShearViscosityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
-         case MaterialPropertyModelName::ShearViscositySutherland : {
+         case MaterialPropertyModelName::ShearViscositySutherland: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<SutherlandShearViscosityModel const> model( std::make_unique<SutherlandShearViscosityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
-         default : {
+         default: {
             throw std::logic_error( "This shear viscosity model is not implemented yet!" );
          }
       }
@@ -205,14 +205,14 @@ namespace Initialization {
                                                                                      std::unordered_map<std::string, double> const& model_data,
                                                                                      UnitHandler const& unit_handler ) {
       // logger
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
 
       // switch between different conductivity models
       switch( model_name ) {
-         case MaterialPropertyModelName::NotUsed : {
+         case MaterialPropertyModelName::NotUsed: {
             return nullptr;
          }
-         case MaterialPropertyModelName::ThermalConductivityConstant : {
+         case MaterialPropertyModelName::ThermalConductivityConstant: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<ConstantThermalConductivityModel const> model( std::make_unique<ConstantThermalConductivityModel const>( model_data, unit_handler ) );
             logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
@@ -245,15 +245,15 @@ namespace Initialization {
       std::unordered_map<std::string, double> eos_data( material_reader.ReadEquationOfStateData( material_index + 1 ) );
 
       // Declare all variables that can be filled (use default values)
-      double specific_heat_capacity_fixed_value = -1.0;
-      double thermal_conductivity_fixed_value = -1.0;
-      double bulk_viscosity_fixed_value = -1.0;
-      double shear_viscosity_fixed_value = -1.0;
-      MaterialPropertyModelName shear_viscosity_model_name = MaterialPropertyModelName::NotUsed;
-      std::unordered_map<std::string, double> shear_viscosity_model_data = {};
-      std::unique_ptr<MaterialParameterModel const> shear_viscosity_model = nullptr;
-      MaterialPropertyModelName thermal_conductivity_model_name = MaterialPropertyModelName::NotUsed;
-      std::unordered_map<std::string, double> thermal_conductivity_model_data = {};
+      double specific_heat_capacity_fixed_value                                = -1.0;
+      double thermal_conductivity_fixed_value                                  = -1.0;
+      double bulk_viscosity_fixed_value                                        = -1.0;
+      double shear_viscosity_fixed_value                                       = -1.0;
+      MaterialPropertyModelName shear_viscosity_model_name                     = MaterialPropertyModelName::NotUsed;
+      std::unordered_map<std::string, double> shear_viscosity_model_data       = {};
+      std::unique_ptr<MaterialParameterModel const> shear_viscosity_model      = nullptr;
+      MaterialPropertyModelName thermal_conductivity_model_name                = MaterialPropertyModelName::NotUsed;
+      std::unordered_map<std::string, double> thermal_conductivity_model_data  = {};
       std::unique_ptr<MaterialParameterModel const> thermal_conductivity_model = nullptr;
 
       // Declare the vector that is used for reading the correct values
@@ -301,7 +301,7 @@ namespace Initialization {
 
       // Create final data (eos + modles) and log information
       // logger
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Material " + std::to_string( material_index + 1 ) + ":" );
       // Equation of state
@@ -361,13 +361,13 @@ namespace Initialization {
 
       // Return the final fully initialized material ( move operations to transfer pointer ownership (deleted move constructor))
       return Material(
-         std::move( eos ),
-         bulk_viscosity_fixed_value,
-         shear_viscosity_fixed_value,
-         thermal_conductivity_fixed_value,
-         specific_heat_capacity_fixed_value,
-         std::move( shear_viscosity_model ),
-         std::move( thermal_conductivity_model ),
-         unit_handler );
+            std::move( eos ),
+            bulk_viscosity_fixed_value,
+            shear_viscosity_fixed_value,
+            thermal_conductivity_fixed_value,
+            specific_heat_capacity_fixed_value,
+            std::move( shear_viscosity_model ),
+            std::move( thermal_conductivity_model ),
+            unit_handler );
    }
-} // namespace initialization
+}// namespace Initialization

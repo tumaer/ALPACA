@@ -78,21 +78,19 @@
  */
 class InterfaceStateCalculator {
 private:
-
    InterfaceVelocityPressureCalculator const interface_velocity_pressure_calculator_;
    CapillaryPressureCalculator const capillary_pressure_calculator_;
 
 public:
    InterfaceStateCalculator() = delete;
-   explicit InterfaceStateCalculator( MaterialManager const& material_manager);
-   ~InterfaceStateCalculator() = default;
+   explicit InterfaceStateCalculator( MaterialManager const& material_manager );
+   ~InterfaceStateCalculator()                                 = default;
    InterfaceStateCalculator( InterfaceStateCalculator const& ) = delete;
    InterfaceStateCalculator& operator=( InterfaceStateCalculator const& ) = delete;
-   InterfaceStateCalculator( InterfaceStateCalculator&& ) = delete;
+   InterfaceStateCalculator( InterfaceStateCalculator&& )                 = delete;
    InterfaceStateCalculator& operator=( InterfaceStateCalculator&& ) = delete;
 
    void ObtainInterfaceStates( Node& node ) const;
 };
 
-
-#endif //INTERFACE_STATE_CALCULATOR_H
+#endif//INTERFACE_STATE_CALCULATOR_H

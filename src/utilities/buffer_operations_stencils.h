@@ -88,42 +88,41 @@ namespace BufferOperations {
        * @tparam ReconstructionStencil type to be used for the reconstruction to the cell face.
        */
       template<typename ReconstructionStencil>
-      inline void ComputeScalarAtCellFaces( double const (&scalar)[CC::TCX()][CC::TCY()][CC::TCZ()],
+      inline void ComputeScalarAtCellFaces( double const ( &scalar )[CC::TCX()][CC::TCY()][CC::TCZ()],
                                             double const cell_size,
-                                            double (&scalar_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())] ) {
+                                            double ( &scalar_at_cell_faces )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )] ) {
 
          //x-direction
-         for( unsigned int i = CC::FICX()-1; i <= CC::LICX(); ++i ) {
+         for( unsigned int i = CC::FICX() - 1; i <= CC::LICX(); ++i ) {
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-                  scalar_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>(scalar, i, j, k, cell_size);
+                  scalar_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( scalar, i, j, k, cell_size );
                }
             }
          }
 
          //y-direction only for 2D/3D
-         if constexpr(CC::DIM() != Dimension::One) {
+         if constexpr( CC::DIM() != Dimension::One ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-               for( unsigned int j = CC::FICY()-1; j <= CC::LICY(); ++j ) {
+               for( unsigned int j = CC::FICY() - 1; j <= CC::LICY(); ++j ) {
                   for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-                     scalar_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::Y>(scalar, i, j, k, cell_size);
+                     scalar_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][1] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::Y>( scalar, i, j, k, cell_size );
                   }
                }
             }
          }
 
          //z-direction only for 3D
-         if constexpr(CC::DIM() == Dimension::Three) {
+         if constexpr( CC::DIM() == Dimension::Three ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
-                  for( unsigned int k = CC::FICZ()-1; k <= CC::LICZ(); ++k ) {
-                     scalar_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::Z>(scalar, i, j, k, cell_size);
+                  for( unsigned int k = CC::FICZ() - 1; k <= CC::LICZ(); ++k ) {
+                     scalar_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][2] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::Z>( scalar, i, j, k, cell_size );
                   }
                }
             }
          }
       }
-
 
       /**
        * @brief Computes a three dimensional vectorial field at the cell faces.
@@ -137,20 +136,19 @@ namespace BufferOperations {
        * @tparam ReconstructionStencil type to be used for the reconstruction to the cell face.
        */
       template<typename ReconstructionStencil>
-      inline void ComputeVectorAtCellFaces( double const (&v1)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                            double const (&v2)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                            double const (&v3)[CC::TCX()][CC::TCY()][CC::TCZ()],
+      inline void ComputeVectorAtCellFaces( double const ( &v1 )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                            double const ( &v2 )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                            double const ( &v3 )[CC::TCX()][CC::TCY()][CC::TCZ()],
                                             double const cell_size,
-                                            double (&vector_at_cell_face)[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI(CC::DIM())][DTI(CC::DIM())] ) {
+                                            double ( &vector_at_cell_face )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )][DTI( CC::DIM() )] ) {
 
          //x-direction
          for( unsigned int i = CC::FICX() - 1; i <= CC::LICX(); ++i ) {
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-                  vector_at_cell_face[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][0] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( v1, i, j, k, cell_size);
-                  if constexpr( CC::DIM() != Dimension::One )   vector_at_cell_face[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][1] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( v2, i, j, k, cell_size );
-                  if constexpr( CC::DIM() == Dimension::Three ) vector_at_cell_face[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][2] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( v3, i, j, k, cell_size );
-
+                  vector_at_cell_face[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][0] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( v1, i, j, k, cell_size );
+                  if constexpr( CC::DIM() != Dimension::One ) vector_at_cell_face[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][1] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( v2, i, j, k, cell_size );
+                  if constexpr( CC::DIM() == Dimension::Three ) vector_at_cell_face[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][2] = SU::Reconstruction<ReconstructionStencil, SP::Central, Direction::X>( v3, i, j, k, cell_size );
                }
             }
          }
@@ -194,26 +192,26 @@ namespace BufferOperations {
        * @tparam DerivativeStencil type to be used for the computation of the derivative at the center.
        */
       template<typename DerivativeStencil>
-      inline void ComputeVectorGradientAtCellCenter( double const (&v1)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                     double const (&v2)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                     double const (&v3)[CC::TCX()][CC::TCY()][CC::TCZ()],
+      inline void ComputeVectorGradientAtCellCenter( double const ( &v1 )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                     double const ( &v2 )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                     double const ( &v3 )[CC::TCX()][CC::TCY()][CC::TCZ()],
                                                      double const cell_size,
-                                                     double (&vector_gradient)[CC::TCX()][CC::TCY()][CC::TCZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) {
+                                                     double ( &vector_gradient )[CC::TCX()][CC::TCY()][CC::TCZ()][DTI( CC::DIM() )][DTI( CC::DIM() )] ) {
 
          /**
           * @brief Offsets in order to also calculate first derivatives in halo cells. This is necessary for the  reconstruction to cell faces.
           */
          constexpr unsigned int offset_x = DerivativeStencil::DownstreamStencilSize() + 1;
-         constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? DerivativeStencil::DownstreamStencilSize() + 1: 0;
-         constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? DerivativeStencil::DownstreamStencilSize() + 1: 0;
+         constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? DerivativeStencil::DownstreamStencilSize() + 1 : 0;
+         constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? DerivativeStencil::DownstreamStencilSize() + 1 : 0;
 
          for( unsigned int i = 0 + offset_x; i < CC::TCX() - offset_x; ++i ) {
             for( unsigned int j = 0 + offset_y; j < CC::TCY() - offset_y; ++j ) {
                for( unsigned int k = 0 + offset_z; k < CC::TCZ() - offset_z; ++k ) {
 
                   std::array<std::array<double, 3>, 3> const single_gradient = SU::JacobianMatrix<DerivativeStencil>( v1, v2, v3, i, j, k, cell_size );
-                  for( unsigned int r = 0; r < DTI(CC::DIM()); ++r) {
-                     for( unsigned int c = 0; c < DTI(CC::DIM()); ++c) {
+                  for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
+                     for( unsigned int c = 0; c < DTI( CC::DIM() ); ++c ) {
                         vector_gradient[i][j][k][r][c] = single_gradient[r][c];
                      }
                   }
@@ -236,11 +234,11 @@ namespace BufferOperations {
        * @tparam ReconstructionStencil type to be used for the reconstruction of derivatives at cell face.
        */
       template<typename DerivativeStencilCenter, typename DerivativeStencilFace, typename ReconstructionStencil>
-      inline void ComputeVectorGradientAtCellFaces( double const (&v1)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                    double const (&v2)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                    double const (&v3)[CC::TCX()][CC::TCY()][CC::TCZ()],
+      inline void ComputeVectorGradientAtCellFaces( double const ( &v1 )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                    double const ( &v2 )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                    double const ( &v3 )[CC::TCX()][CC::TCY()][CC::TCZ()],
                                                     double const cell_size,
-                                                    double (&gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())] ) {
+                                                    double ( &gradient_at_cell_faces )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )][DTI( CC::DIM() )][DTI( CC::DIM() )] ) {
 
          // Compute first the whole vector gradient at the center positions
          /**
@@ -248,20 +246,20 @@ namespace BufferOperations {
           * [CC::ICX()+1]  [CC::ICY()+1]  [CC::ICZ()+1]  [DTI(CC::DIM())]  [DTI(CC::DIM())][DTI(CC::DIM())]
           * Field index x  Field index y  Field index z  Cell face x/y/z   Velocity gradient: dv_i / dx_j
           */
-         double gradient_at_cell_center[CC::TCX()][CC::TCY()][CC::TCZ()][DTI(CC::DIM())][DTI(CC::DIM())];
+         double gradient_at_cell_center[CC::TCX()][CC::TCY()][CC::TCZ()][DTI( CC::DIM() )][DTI( CC::DIM() )];
 
          // initialize the gradient tensor
          for( unsigned int i = 0; i < CC::TCX(); ++i ) {
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                  for( unsigned int r = 0; r < DTI(CC::DIM()); ++r ) {
-                     for( unsigned int c = 0; c < DTI(CC::DIM()); ++c ) {
+                  for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
+                     for( unsigned int c = 0; c < DTI( CC::DIM() ); ++c ) {
                         gradient_at_cell_center[i][j][k][r][c] = 0.0;
                      }
                   }
-               } //k
-            } //j
-         } //i
+               }//k
+            }   //j
+         }      //i
 
          // calculates the vector gradient at the cell center
          ComputeVectorGradientAtCellCenter<DerivativeStencilCenter>( v1, v2, v3, cell_size, gradient_at_cell_center );
@@ -277,35 +275,31 @@ namespace BufferOperations {
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                   // Loop through vectorial gradient
-                  for( unsigned int r = 0; r < DTI(CC::DIM()); ++r ) {
-                     for( unsigned int c = 0; c < DTI(CC::DIM()); ++c ) {
+                  for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
+                     for( unsigned int c = 0; c < DTI( CC::DIM() ); ++c ) {
                         // Reconstruction calculations (dv_i/dy and dv_i/dz)
                         if( c != 0 ) {
                            for( unsigned int ii = 0; ii < ReconstructionStencil::StencilSize(); ++ii ) {
-                              interpolation_array[ii] = gradient_at_cell_center[i + (ii - ReconstructionStencil::DownstreamStencilSize())][j][k][r][c];
+                              interpolation_array[ii] = gradient_at_cell_center[i + ( ii - ReconstructionStencil::DownstreamStencilSize() )][j][k][r][c];
                            }
-                           gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<ReconstructionStencil, SP::Central>( interpolation_array, cell_size );
+                           gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][r][c] = SU::Reconstruction<ReconstructionStencil, SP::Central>( interpolation_array, cell_size );
                         }
-                           // Explicit derivative calculation at cell face (all dv_i/dx derivatives)
+                        // Explicit derivative calculation at cell face (all dv_i/dx derivatives)
                         else {
                            switch( r ) {
                               case 0: {
-                                 gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v1, i, j, k, cell_size );
-                              }
-                                 break;
+                                 gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v1, i, j, k, cell_size );
+                              } break;
                               case 1: {
-                                 gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v2, i, j, k, cell_size );
-                              }
-                                 break;
+                                 gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v2, i, j, k, cell_size );
+                              } break;
                               case 2: {
-                                 gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v3, i, j, k, cell_size );
-                              }
-                                 break;
+                                 gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][0][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::X>( v3, i, j, k, cell_size );
+                              } break;
                               default:
                                  break;
                            }
                         }
-
                      }
                   }
                }
@@ -319,35 +313,31 @@ namespace BufferOperations {
                for( unsigned int j = CC::FICY() - 1; j <= CC::LICY(); ++j ) {
                   for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                      // Loop through all vectorial gradient components
-                     for( unsigned int r = 0; r < DTI(CC::DIM()); ++r ) {
-                        for( unsigned int c = 0; c < DTI(CC::DIM()); ++c ) {
+                     for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
+                        for( unsigned int c = 0; c < DTI( CC::DIM() ); ++c ) {
                            // Reconstruction calculations (dv_i/dx and dv_i/dz)
                            if( c != 1 ) {
                               for( unsigned int jj = 0; jj < ReconstructionStencil::StencilSize(); ++jj ) {
-                                 interpolation_array[jj] = gradient_at_cell_center[i][j + (jj - ReconstructionStencil::DownstreamStencilSize())][k][r][c];
+                                 interpolation_array[jj] = gradient_at_cell_center[i][j + ( jj - ReconstructionStencil::DownstreamStencilSize() )][k][r][c];
                               }
-                              gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<ReconstructionStencil, SP::Central>( interpolation_array, cell_size );
+                              gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][1][r][c] = SU::Reconstruction<ReconstructionStencil, SP::Central>( interpolation_array, cell_size );
                            }
-                              // Explicit derivative calculation at cell face (all dv_i/dy derivatives)
+                           // Explicit derivative calculation at cell face (all dv_i/dy derivatives)
                            else {
                               switch( r ) {
                                  case 0: {
-                                    gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v1, i, j, k, cell_size );
-                                 }
-                                    break;
+                                    gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v1, i, j, k, cell_size );
+                                 } break;
                                  case 1: {
-                                    gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v2, i, j, k, cell_size );
-                                 }
-                                    break;
+                                    gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v2, i, j, k, cell_size );
+                                 } break;
                                  case 2: {
-                                    gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v3, i, j, k, cell_size );
-                                 }
-                                    break;
+                                    gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][1][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Y>( v3, i, j, k, cell_size );
+                                 } break;
                                  default:
                                     break;
                               }
                            }
-
                         }
                      }
                   }
@@ -362,35 +352,31 @@ namespace BufferOperations {
                for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                   for( unsigned int k = CC::FICZ() - 1; k <= CC::LICZ(); ++k ) {
                      // Loop through all vectorial gradient components
-                     for( unsigned int r = 0; r < DTI(CC::DIM()); ++r ) {
-                        for( unsigned int c = 0; c < DTI(CC::DIM()); ++c ) {
+                     for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
+                        for( unsigned int c = 0; c < DTI( CC::DIM() ); ++c ) {
                            // Reconstruction calculations (dv_i/dx and dv_i/dy)
                            if( c != 2 ) {
                               for( unsigned int kk = 0; kk < ReconstructionStencil::StencilSize(); ++kk ) {
-                                 interpolation_array[kk] = gradient_at_cell_center[i][j][k + (kk - ReconstructionStencil::DownstreamStencilSize())][r][c];
+                                 interpolation_array[kk] = gradient_at_cell_center[i][j][k + ( kk - ReconstructionStencil::DownstreamStencilSize() )][r][c];
                               }
-                              gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<ReconstructionStencil, SP::Central>( interpolation_array, cell_size );
+                              gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][2][r][c] = SU::Reconstruction<ReconstructionStencil, SP::Central>( interpolation_array, cell_size );
                            }
-                              // Explicit derivative calculation at cell face (all dv_i/dz derivatives)
+                           // Explicit derivative calculation at cell face (all dv_i/dz derivatives)
                            else {
                               switch( r ) {
                                  case 0: {
-                                    gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v1, i, j, k, cell_size );
-                                 }
-                                    break;
+                                    gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v1, i, j, k, cell_size );
+                                 } break;
                                  case 1: {
-                                    gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v2, i, j, k, cell_size );
-                                 }
-                                    break;
+                                    gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v2, i, j, k, cell_size );
+                                 } break;
                                  case 2: {
-                                    gradient_at_cell_faces[BIT::T2FX(i)][BIT::T2FY(j)][BIT::T2FZ(k)][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v3, i, j, k, cell_size );
-                                 }
-                                    break;
+                                    gradient_at_cell_faces[BIT::T2FX( i )][BIT::T2FY( j )][BIT::T2FZ( k )][2][r][c] = SU::Reconstruction<DerivativeStencilFace, SP::Central, Direction::Z>( v3, i, j, k, cell_size );
+                                 } break;
                                  default:
                                     break;
                               }
                            }
-
                         }
                      }
                   }
@@ -399,8 +385,8 @@ namespace BufferOperations {
          }
       }
 
-   } // namespace Stencils
+   }// namespace Stencils
 
-} // namespace BufferOperations
+}// namespace BufferOperations
 
-#endif // BUFFER_OPERATIONS_STENCILS_H
+#endif// BUFFER_OPERATIONS_STENCILS_H

@@ -85,6 +85,6 @@ namespace Initialization {
    // Initialize function for the complete material manager
    MaterialManager InitializeMaterialManager( InputReader const& input_reader, UnitHandler const& unit_handler );
 
-} // namespace Initialization
+}// namespace Initialization
 
-#endif // INITIALIZATION_MATERIAL_MANAGER_H
+#endif// INITIALIZATION_MATERIAL_MANAGER_H

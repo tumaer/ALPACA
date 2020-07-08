@@ -85,12 +85,11 @@ namespace Initialization {
                                            OutputType const output_type );
    std::vector<double> ComputeSnapshotTimes( RestartReader const& restart_reader, TimeControlReader const& time_control_reader, UnitHandler const& unit_handler );
 
-
    // Initialization function for the input_output manager
    InputOutputManager InitializeInputOutputManager( InputReader const& input_reader,
                                                     OutputWriter const& output_writer,
                                                     RestartManager const& restart_manager,
                                                     UnitHandler const& unit_handler );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_INPUT_OUTPUT_MANAGER_H
+#endif// INITIALIZATION_INPUT_OUTPUT_MANAGER_H

@@ -87,9 +87,9 @@ class StiffenedGasCompleteSafe : public EquationOfState {
    double const specific_gas_constant_;
 
    // functions required from the bae class
-   double DoGetPressure   ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnthalpy   ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnergy     ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
+   double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
    double DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
    double DoGetGruneisen() const override;
    double DoGetPsi( double const pressure, double const one_density ) const override;
@@ -100,14 +100,14 @@ class StiffenedGasCompleteSafe : public EquationOfState {
 public:
    StiffenedGasCompleteSafe() = delete;
    explicit StiffenedGasCompleteSafe( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler );
-   virtual ~StiffenedGasCompleteSafe() = default;
+   virtual ~StiffenedGasCompleteSafe()                         = default;
    StiffenedGasCompleteSafe( StiffenedGasCompleteSafe const& ) = delete;
    StiffenedGasCompleteSafe& operator=( StiffenedGasCompleteSafe const& ) = delete;
-   StiffenedGasCompleteSafe( StiffenedGasCompleteSafe&& ) = delete;
+   StiffenedGasCompleteSafe( StiffenedGasCompleteSafe&& )                 = delete;
    StiffenedGasCompleteSafe operator=( StiffenedGasCompleteSafe&& ) = delete;
 
    // function for logging
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // STIFFENED_GAS_COMPLETE_SAFE_H
+#endif// STIFFENED_GAS_COMPLETE_SAFE_H

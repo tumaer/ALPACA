@@ -77,11 +77,10 @@
  * @param material_pairing_data All already initialized material pairings.
  */
 MaterialManager::MaterialManager( std::vector<Material> materials,
-                                  std::vector<MaterialPairing> material_pairings ) :
-   // Start initializer list
-   materials_( std::move( materials ) ),
-   material_pairings_( std::move( material_pairings ) ),
-   pairing_offset_( GenerateMaterialPairingOffset( materials_.size() ) ) {
+                                  std::vector<MaterialPairing> material_pairings ) :// Start initializer list
+                                                                                     materials_( std::move( materials ) ),
+                                                                                     material_pairings_( std::move( material_pairings ) ),
+                                                                                     pairing_offset_( GenerateMaterialPairingOffset( materials_.size() ) ) {
 
    // Instantiation of material sign capsule for two-material computations
    // AB 20-03-30: This concept could be used everywhere if material manager is present in class and must be implemented in case of
@@ -164,7 +163,7 @@ Material const& MaterialManager::GetMaterial( MaterialName const material ) cons
  * @return Instance of the material pairing.
  */
 MaterialPairing const& MaterialManager::GetMaterialPairing( MaterialName const first_material, MaterialName const second_material ) const {
-      return material_pairings_[MapPairingToIndex( first_material, second_material )];
+   return material_pairings_[MapPairingToIndex( first_material, second_material )];
 }
 
 /**
@@ -193,8 +192,7 @@ std::vector<int> MaterialManager::GenerateMaterialPairingOffset( size_t const nu
       // 2-materials: -1, 3-materials: -1, 4-materials: 0, 5-materials: 2; 6-fludis: 5, 7-materials: 9, ...
       int offset = -1;
       pairing_offset.push_back( offset );
-      for ( size_t n = 3; n <= number_of_materials; n++ )
-      {
+      for( size_t n = 3; n <= number_of_materials; n++ ) {
          // increment offset
          offset += n - 3;
          // add offset at correct position for number of materials

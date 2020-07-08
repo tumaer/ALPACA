@@ -65,6 +65,7 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
+#include "user_specifications/compile_time_constants.h"
 
 /**
  * @brief Utility functions for generating the mesh of the current simulation.
@@ -113,4 +114,4 @@ namespace MeshGeneratorUtilities {
    constexpr double CellSizeForBlockSize( double const block_size ) {
       return block_size / double( CC::ICX() );
    }
-}
+}// namespace MeshGeneratorUtilities

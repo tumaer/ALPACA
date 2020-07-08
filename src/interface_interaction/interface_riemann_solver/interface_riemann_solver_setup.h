@@ -74,7 +74,6 @@
 #include "two_rarefaction_iterative_interface_riemann_solver.h"
 #include "hllc_interface_riemann_solver.h"
 
-
 /**
  * @brief A namespace to get a InterfaceRiemannSolver type based on a specified constexpr.
  */
@@ -117,6 +116,6 @@ namespace InterfaceRiemannSolverSetup {
       typedef HllcInterfaceRiemannSolver type;
    };
 
-}
+}// namespace InterfaceRiemannSolverSetup
 
-#endif // INTERFACE_RIEMANN_SOLVER_SETUP_H
+#endif// INTERFACE_RIEMANN_SOLVER_SETUP_H

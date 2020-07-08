@@ -76,6 +76,6 @@
 namespace Initialization {
    // Initialization function for the input reader
    InputReader InitializeInputReader( std::string const& input_filename );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_INPUT_READER_H
+#endif// INITIALIZATION_INPUT_READER_H

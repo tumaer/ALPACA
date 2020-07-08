@@ -77,12 +77,20 @@
 /**
  * @brief Unique identifier to separate the (implemented) types of material boundary condition.
  */
-enum class MaterialBoundaryType { Internal, ZeroGradient, Symmetry, FixedValue, Wall, Periodic };
+enum class MaterialBoundaryType { Internal,
+                                  ZeroGradient,
+                                  Symmetry,
+                                  FixedValue,
+                                  Wall,
+                                  Periodic };
 
 /**
  * @brief Unique identifier to separate the (implemented) types of level-set boundary condition.
  */
-enum class LevelSetBoundaryType { Internal, ZeroGradient, Symmetry, Periodic };
+enum class LevelSetBoundaryType { Internal,
+                                  ZeroGradient,
+                                  Symmetry,
+                                  Periodic };
 
 /**
  * @brief Unique Identifier for the Boundary Location (Compass orientations plus Top/Bottom plus Diagonals)
@@ -90,14 +98,34 @@ enum class LevelSetBoundaryType { Internal, ZeroGradient, Symmetry, Periodic };
  */
 enum class BoundaryLocation : unsigned int {
    // normal Types used in 1D, for planes, and for DomainBoundaries
-      East = 0, West = 1, North = 2, South = 3, Top = 4, Bottom = 5,
+   East   = 0,
+   West   = 1,
+   North  = 2,
+   South  = 3,
+   Top    = 4,
+   Bottom = 5,
    // Diagonals in 2 Dimensions for Sticks in 3D and cubes in 2D
-      BottomNorth, BottomSouth, TopNorth,  TopSouth, // x-Axis Sticks
-      BottomEast,  BottomWest,  TopEast,   TopWest,  // y-Axis Sticks
-      NorthEast,   NorthWest,   SouthEast, SouthWest,// z-Axis Sticks
-   // Diagonals in 3 Dimensions for cubes in 3D
-      EastNorthTop, EastNorthBottom, EastSouthTop, EastSouthBottom, //East-Side
-      WestNorthTop, WestNorthBottom, WestSouthTop, WestSouthBottom, //West-Side
+   BottomNorth,
+   BottomSouth,
+   TopNorth,
+   TopSouth,// x-Axis Sticks
+   BottomEast,
+   BottomWest,
+   TopEast,
+   TopWest,// y-Axis Sticks
+   NorthEast,
+   NorthWest,
+   SouthEast,
+   SouthWest,// z-Axis Sticks
+             // Diagonals in 3 Dimensions for cubes in 3D
+   EastNorthTop,
+   EastNorthBottom,
+   EastSouthTop,
+   EastSouthBottom,//East-Side
+   WestNorthTop,
+   WestNorthBottom,
+   WestSouthTop,
+   WestSouthBottom,//West-Side
    //DO NOT EXTEND WITHOUT ADJUSTING THE OppositeDirection FUNCTION
 };
 
@@ -106,7 +134,7 @@ enum class BoundaryLocation : unsigned int {
  * @param l The location identifier.
  * @return Index to be used in Arrays.
  */
-static inline constexpr std::underlying_type<BoundaryLocation>::type LTI(BoundaryLocation const l) { return static_cast<typename std::underlying_type<BoundaryLocation>::type>( l ); }
+static inline constexpr std::underlying_type<BoundaryLocation>::type LTI( BoundaryLocation const l ) { return static_cast<typename std::underlying_type<BoundaryLocation>::type>( l ); }
 
 /**
  * @brief Gives the inverse direction. Convenience function.
@@ -115,7 +143,7 @@ static inline constexpr std::underlying_type<BoundaryLocation>::type LTI(Boundar
  */
 constexpr BoundaryLocation OppositeDirection( BoundaryLocation const location ) {
    switch( location ) {
-      case BoundaryLocation::East: //Planes
+      case BoundaryLocation::East://Planes
          return BoundaryLocation::West;
       case BoundaryLocation::West:
          return BoundaryLocation::East;
@@ -128,7 +156,7 @@ constexpr BoundaryLocation OppositeDirection( BoundaryLocation const location ) 
       case BoundaryLocation::Bottom:
          return BoundaryLocation::Top;
 
-      case BoundaryLocation::BottomNorth: //Sticks
+      case BoundaryLocation::BottomNorth://Sticks
          return BoundaryLocation::TopSouth;
       case BoundaryLocation::BottomSouth:
          return BoundaryLocation::TopNorth;
@@ -155,7 +183,7 @@ constexpr BoundaryLocation OppositeDirection( BoundaryLocation const location ) 
       case BoundaryLocation::SouthWest:
          return BoundaryLocation::NorthEast;
 
-      case BoundaryLocation::EastNorthTop: //Cubes
+      case BoundaryLocation::EastNorthTop://Cubes
          return BoundaryLocation::WestSouthBottom;
       case BoundaryLocation::EastNorthBottom:
          return BoundaryLocation::WestSouthTop;
@@ -169,7 +197,7 @@ constexpr BoundaryLocation OppositeDirection( BoundaryLocation const location ) 
          return BoundaryLocation::EastSouthTop;
       case BoundaryLocation::WestSouthTop:
          return BoundaryLocation::EastNorthBottom;
-      default: // Only remaning case: BoundaryLocation::WestSouthBottom:
+      default:// Only remaning case: BoundaryLocation::WestSouthBottom:
          return BoundaryLocation::EastNorthTop;
    }
 }
@@ -184,25 +212,25 @@ constexpr BoundaryLocation OppositeDirection( BoundaryLocation const location ) 
  */
 inline std::string BoundaryLocationToString( BoundaryLocation const location, bool const first_capitalized ) {
    switch( location ) {
-      case BoundaryLocation::East : {
+      case BoundaryLocation::East: {
          return first_capitalized ? "East" : "east";
       }
-      case BoundaryLocation::West : {
+      case BoundaryLocation::West: {
          return first_capitalized ? "West" : "west";
       }
-      case BoundaryLocation::North : {
+      case BoundaryLocation::North: {
          return first_capitalized ? "North" : "north";
       }
-      case BoundaryLocation::South : {
+      case BoundaryLocation::South: {
          return first_capitalized ? "South" : "south";
       }
-      case BoundaryLocation::Top : {
+      case BoundaryLocation::Top: {
          return first_capitalized ? "Top" : "top";
       }
-      case BoundaryLocation::Bottom : {
+      case BoundaryLocation::Bottom: {
          return first_capitalized ? "Bottom" : "bottom";
       }
-      default : {
+      default: {
          throw std::logic_error( "Boundary location not known!" );
       }
    }
@@ -219,20 +247,15 @@ inline MaterialBoundaryType StringToMaterialBoundaryType( std::string const& bou
    // switch statements cannot be used with strings
    if( boundary_upper_case == "ZEROGRADIENT" ) {
       return MaterialBoundaryType::ZeroGradient;
-   }
-   else if( boundary_upper_case == "SYMMETRY" ) {
+   } else if( boundary_upper_case == "SYMMETRY" ) {
       return MaterialBoundaryType::Symmetry;
-   }
-   else if( boundary_upper_case == "WALL" ) {
+   } else if( boundary_upper_case == "WALL" ) {
       return MaterialBoundaryType::Wall;
-   }
-   else if( boundary_upper_case == "FIXEDVALUE" ) {
+   } else if( boundary_upper_case == "FIXEDVALUE" ) {
       return MaterialBoundaryType::FixedValue;
-   }
-   else if( boundary_upper_case == "PERIODIC" ) {
+   } else if( boundary_upper_case == "PERIODIC" ) {
       return MaterialBoundaryType::Periodic;
-   }
-   else {
+   } else {
       throw std::logic_error( "Material boundary type '" + boundary_upper_case + "' not known!" );
    }
 }
@@ -248,16 +271,13 @@ inline LevelSetBoundaryType StringToLevelSetBoundaryType( std::string const& bou
    // switch statements cannot be used with strings
    if( boundary_upper_case == "ZEROGRADIENT" ) {
       return LevelSetBoundaryType::ZeroGradient;
-   }
-   else if( boundary_upper_case == "SYMMETRY" ) {
+   } else if( boundary_upper_case == "SYMMETRY" ) {
       return LevelSetBoundaryType::Symmetry;
-   }
-   else if( boundary_upper_case == "PERIODIC" ) {
+   } else if( boundary_upper_case == "PERIODIC" ) {
       return LevelSetBoundaryType::Periodic;
-   }
-   else {
+   } else {
       throw std::logic_error( "Levelset boundary type '" + boundary_upper_case + "' not known!" );
    }
 }
 
-#endif // BOUNDARY_SPECIFICATIONS_H
+#endif// BOUNDARY_SPECIFICATIONS_H

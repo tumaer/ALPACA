@@ -88,89 +88,87 @@ CommunicationTypes::~CommunicationTypes() {
 /**
  * @brief Datatypes for 3D Simulations. See Meta function.
  */
-void CommunicationTypes::CreateDataTypes(){
+void CommunicationTypes::CreateDataTypes() {
 
    //creates all Datatypes for Halo Updates
-   for(unsigned int type = 0; type < 2; type++) {
+   for( unsigned int type = 0; type < 2; type++ ) {
       // material data types
-      for(BoundaryLocation const location: CC::HBS()){
+      for( BoundaryLocation const location : CC::HBS() ) {
          //send
-         MPI_Type_create_subarray(3, block_size_.data(), halo_size_[LTI(location)].data(), start_indices_halo_send_[LTI(location)].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &send_types_[type][LTI(location)]);
-         MPI_Type_commit(&send_types_[type][LTI(location)]);
+         MPI_Type_create_subarray( 3, block_size_.data(), halo_size_[LTI( location )].data(), start_indices_halo_send_[LTI( location )].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &send_types_[type][LTI( location )] );
+         MPI_Type_commit( &send_types_[type][LTI( location )] );
 
          //recv
-         MPI_Type_create_subarray(3, block_size_.data(), halo_size_[LTI(location)].data(), start_indices_halo_recv_[LTI(location)].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &recv_types_[type][LTI(location)]);
-         MPI_Type_commit(&recv_types_[type][LTI(location)]);
+         MPI_Type_create_subarray( 3, block_size_.data(), halo_size_[LTI( location )].data(), start_indices_halo_recv_[LTI( location )].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &recv_types_[type][LTI( location )] );
+         MPI_Type_commit( &recv_types_[type][LTI( location )] );
       }
 
       //ProjectLevel representation of child-memory
-      for(unsigned int child = 0; child < CC::NOC(); ++child) {
-         MPI_Type_create_subarray(3, block_size_.data(), child_size_.data(), start_index_child_[child].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &averaging_send_[type][child]);
-         MPI_Type_commit(&averaging_send_[type][child]);
+      for( unsigned int child = 0; child < CC::NOC(); ++child ) {
+         MPI_Type_create_subarray( 3, block_size_.data(), child_size_.data(), start_index_child_[child].data(), MPI_ORDER_C, type == 0 ? MPI_DOUBLE : MPI_INT8_T, &averaging_send_[type][child] );
+         MPI_Type_commit( &averaging_send_[type][child] );
       }
    }
 
-   int const jump_send_start_index[3] = {0, 0, 0};
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::East)].data(),  halo_size_[LTI(BoundaryLocation::East)].data() , jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_plane_ew_);
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::North)].data(), halo_size_[LTI(BoundaryLocation::North)].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_plane_ns_);
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::Top)].data(),   halo_size_[LTI(BoundaryLocation::Top)].data()  , jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_plane_tb_);
+   int const jump_send_start_index[3] = { 0, 0, 0 };
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::East )].data(), halo_size_[LTI( BoundaryLocation::East )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_plane_ew_ );
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::North )].data(), halo_size_[LTI( BoundaryLocation::North )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_plane_ns_ );
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::Top )].data(), halo_size_[LTI( BoundaryLocation::Top )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_plane_tb_ );
 
-   MPI_Type_commit(&jump_plane_ew_);
-   MPI_Type_commit(&jump_plane_ns_);
-   MPI_Type_commit(&jump_plane_tb_);
+   MPI_Type_commit( &jump_plane_ew_ );
+   MPI_Type_commit( &jump_plane_ns_ );
+   MPI_Type_commit( &jump_plane_tb_ );
 
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::BottomSouth)].data(),  halo_size_[LTI(BoundaryLocation::BottomSouth)].data() , jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_stick_x_);
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::BottomWest)].data(),  halo_size_[LTI(BoundaryLocation::BottomWest)].data() , jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_stick_y_);
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::SouthWest)].data(),  halo_size_[LTI(BoundaryLocation::SouthWest)].data() , jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_stick_z_);
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::BottomSouth )].data(), halo_size_[LTI( BoundaryLocation::BottomSouth )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_stick_x_ );
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::BottomWest )].data(), halo_size_[LTI( BoundaryLocation::BottomWest )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_stick_y_ );
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::SouthWest )].data(), halo_size_[LTI( BoundaryLocation::SouthWest )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_stick_z_ );
 
-   MPI_Type_commit(&jump_stick_x_);
-   MPI_Type_commit(&jump_stick_y_);
-   MPI_Type_commit(&jump_stick_z_);
+   MPI_Type_commit( &jump_stick_x_ );
+   MPI_Type_commit( &jump_stick_y_ );
+   MPI_Type_commit( &jump_stick_z_ );
 
-   MPI_Type_create_subarray(3, halo_size_[LTI(BoundaryLocation::EastNorthTop)].data(),  halo_size_[LTI(BoundaryLocation::EastNorthTop)].data() , jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_cube_);
-   MPI_Type_commit(&jump_cube_);
+   MPI_Type_create_subarray( 3, halo_size_[LTI( BoundaryLocation::EastNorthTop )].data(), halo_size_[LTI( BoundaryLocation::EastNorthTop )].data(), jump_send_start_index, MPI_ORDER_C, MPI_DOUBLE, &jump_cube_ );
+   MPI_Type_commit( &jump_cube_ );
 
    int const tc_per_conservative = CC::TCX() * CC::TCY() * CC::TCZ();
-   MPI_Type_contiguous(tc_per_conservative, MPI_DOUBLE, &single_conservatives_);
+   MPI_Type_contiguous( tc_per_conservative, MPI_DOUBLE, &single_conservatives_ );
    int const tc_per_jump = MF::ANOE() * CC::ICY() * CC::ICZ();
-   MPI_Type_contiguous(tc_per_jump, MPI_DOUBLE, &single_boundary_jump_);
+   MPI_Type_contiguous( tc_per_jump, MPI_DOUBLE, &single_boundary_jump_ );
 
-   MPI_Type_commit(&single_conservatives_);
-   MPI_Type_commit(&single_boundary_jump_);
-
+   MPI_Type_commit( &single_conservatives_ );
+   MPI_Type_commit( &single_boundary_jump_ );
 }
 
 /**
  * @brief Frees MPI datatypes used in three dimensional simulations. See Meta function.
  */
-void CommunicationTypes::FreeTypes(){
+void CommunicationTypes::FreeTypes() {
 
-   for(unsigned int type = 0; type < 2; type++) {
+   for( unsigned int type = 0; type < 2; type++ ) {
       // material data types
-      for(BoundaryLocation location: CC::HBS()){
-         MPI_Type_free(&send_types_[type][LTI(location)]);
-         MPI_Type_free(&recv_types_[type][LTI(location)]);
+      for( BoundaryLocation location : CC::HBS() ) {
+         MPI_Type_free( &send_types_[type][LTI( location )] );
+         MPI_Type_free( &recv_types_[type][LTI( location )] );
       }
 
       //ProjectLevel representation of child-memory
-      for(unsigned int i = 0; i < CC::NOC(); ++i) {
-         MPI_Type_free(&averaging_send_[type][i]);
+      for( unsigned int i = 0; i < CC::NOC(); ++i ) {
+         MPI_Type_free( &averaging_send_[type][i] );
       }
    }
 
    //Jump Halo data types
-   MPI_Type_free(&jump_plane_ew_);
-   MPI_Type_free(&jump_plane_ns_);
-   MPI_Type_free(&jump_plane_tb_);
-   MPI_Type_free(&jump_stick_x_);
-   MPI_Type_free(&jump_stick_y_);
-   MPI_Type_free(&jump_stick_z_);
-   MPI_Type_free(&jump_cube_);
-
+   MPI_Type_free( &jump_plane_ew_ );
+   MPI_Type_free( &jump_plane_ns_ );
+   MPI_Type_free( &jump_plane_tb_ );
+   MPI_Type_free( &jump_stick_x_ );
+   MPI_Type_free( &jump_stick_y_ );
+   MPI_Type_free( &jump_stick_z_ );
+   MPI_Type_free( &jump_cube_ );
 
    //Whole block-struct
-   MPI_Type_free(&single_conservatives_);
-   MPI_Type_free(&single_boundary_jump_);
+   MPI_Type_free( &single_conservatives_ );
+   MPI_Type_free( &single_boundary_jump_ );
 }
 
 /**
@@ -179,8 +177,8 @@ void CommunicationTypes::FreeTypes(){
  * @param datatype Mpi Datatype that should be received.
  * @return The Datatype needed to send into the right sub_array.
  */
-MPI_Datatype CommunicationTypes::RecvDatatype(BoundaryLocation const location, DatatypeForMpi const datatype) const {
-   return recv_types_[DTI(datatype)][LTI(location)];
+MPI_Datatype CommunicationTypes::RecvDatatype( BoundaryLocation const location, DatatypeForMpi const datatype ) const {
+   return recv_types_[DTI( datatype )][LTI( location )];
 }
 
 /**
@@ -189,8 +187,8 @@ MPI_Datatype CommunicationTypes::RecvDatatype(BoundaryLocation const location, D
  * @param datatype Mpi Datatype that should be sent.
  * @return The Datatype needed to send from the right sub_array.
  */
-MPI_Datatype CommunicationTypes::SendDatatype(BoundaryLocation const location, DatatypeForMpi const datatype) const {
-   return send_types_[DTI(datatype)][LTI(location)];
+MPI_Datatype CommunicationTypes::SendDatatype( BoundaryLocation const location, DatatypeForMpi const datatype ) const {
+   return send_types_[DTI( datatype )][LTI( location )];
 }
 
 /**
@@ -215,11 +213,11 @@ MPI_Datatype CommunicationTypes::JumpSurfaceDatatype() const {
  * @param datatype Mpi Datatype that should be sent.
  * @return The subarray into which the data is to be averaged.
  */
-MPI_Datatype CommunicationTypes::AveragingSendDatatype(unsigned int const child_position, DatatypeForMpi const datatype) const {
-   if(child_position < CC::NOC()){
-      return averaging_send_[DTI(datatype)][child_position];
+MPI_Datatype CommunicationTypes::AveragingSendDatatype( unsigned int const child_position, DatatypeForMpi const datatype ) const {
+   if( child_position < CC::NOC() ) {
+      return averaging_send_[DTI( datatype )][child_position];
    }
-   throw std::logic_error("Child position not possible: " + std::to_string(child_position));
+   throw std::logic_error( "Child position not possible: " + std::to_string( child_position ) );
 }
 
 /**
@@ -227,9 +225,9 @@ MPI_Datatype CommunicationTypes::AveragingSendDatatype(unsigned int const child_
  * @param location The location identifier.
  * @return The correct MPI_Datatype.
  */
-MPI_Datatype CommunicationTypes::JumpPlaneSendDatatype(BoundaryLocation const location) const {
+MPI_Datatype CommunicationTypes::JumpPlaneSendDatatype( BoundaryLocation const location ) const {
 
-   switch(location) {
+   switch( location ) {
       case BoundaryLocation::East:
       case BoundaryLocation::West:
          return jump_plane_ew_;

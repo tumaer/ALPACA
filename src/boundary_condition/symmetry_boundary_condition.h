@@ -86,7 +86,7 @@ class SymmetryBoundaryCondition : public MaterialBoundaryCondition, public Level
             return SymmetrySign( MF::ASOE()[field_index] );
          case MaterialFieldType::Parameters:
             return SymmetrySign( MF::ASOPA()[field_index] );
-         default: // case MaterialFieldType::PrimeStates:
+         default:// case MaterialFieldType::PrimeStates:
             return SymmetrySign( MF::ASOP()[field_index] );
       }
    }
@@ -100,9 +100,9 @@ class SymmetryBoundaryCondition : public MaterialBoundaryCondition, public Level
     * @param host_buffer Reference of the buffer that is to be updated.
     */
    template<class T>
-   inline void UpdateSimpleSymmetry( T (&host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
+   inline void UpdateSimpleSymmetry( T ( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
       auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
-      auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
+      auto end_indices   = BoundaryConstants<LOC>::HaloEndIndices();
 
       for( unsigned int i = start_indices[0]; i < end_indices[0]; ++i ) {
          for( unsigned int j = start_indices[1]; j < end_indices[1]; ++j ) {
@@ -114,11 +114,11 @@ class SymmetryBoundaryCondition : public MaterialBoundaryCondition, public Level
    }
 
 public:
-   SymmetryBoundaryCondition() = default;
-   ~SymmetryBoundaryCondition() = default;
+   SymmetryBoundaryCondition()                                   = default;
+   ~SymmetryBoundaryCondition()                                  = default;
    SymmetryBoundaryCondition( SymmetryBoundaryCondition const& ) = delete;
    SymmetryBoundaryCondition& operator=( SymmetryBoundaryCondition const& ) = delete;
-   SymmetryBoundaryCondition( SymmetryBoundaryCondition&& ) = delete;
+   SymmetryBoundaryCondition( SymmetryBoundaryCondition&& )                 = delete;
    SymmetryBoundaryCondition& operator=( SymmetryBoundaryCondition&& ) = delete;
 
    /**
@@ -126,12 +126,12 @@ public:
     */
    void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type ) const override {
       constexpr auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
-      constexpr auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
+      constexpr auto end_indices   = BoundaryConstants<LOC>::HaloEndIndices();
 
       unsigned int const number_of_fields = MF::ANOF( field_type );
       for( auto& host_mat_block : node.GetPhases() ) {
          for( unsigned int field_index = 0; field_index < number_of_fields; ++field_index ) {
-            double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
+            double( &cells )[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
             for( unsigned int i = start_indices[0]; i < end_indices[0]; ++i ) {
                for( unsigned int j = start_indices[1]; j < end_indices[1]; ++j ) {
                   for( unsigned int k = start_indices[2]; k < end_indices[2]; ++k ) {
@@ -151,8 +151,8 @@ public:
        *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
        */
       if( node.HasLevelset() ) {
-          double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
-          UpdateSimpleSymmetry( buffer );
+         double( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
+         UpdateSimpleSymmetry( buffer );
       }
    }
 
@@ -160,7 +160,7 @@ public:
     * @brief See base class. Adjusted to symmetry condition.
     */
    void UpdateInterfaceTagExternal( Node& node ) const override {
-      std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
       UpdateSimpleSymmetry( interface_tags );
    }
 
@@ -175,7 +175,7 @@ public:
 
 // Implementations of the symmetry functions for the different natural boundary locations (conservatives)
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( Equation const equation) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( Equation const equation ) {
    switch( equation ) {
       case Equation::MomentumX:
          return -1.0;
@@ -185,7 +185,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( Equation const equation) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( Equation const equation ) {
    switch( equation ) {
       case Equation::MomentumX:
          return -1.0;
@@ -195,7 +195,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::North>::SymmetrySign( Equation const equation) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::North>::SymmetrySign( Equation const equation ) {
    switch( equation ) {
       case Equation::MomentumY:
          return -1.0;
@@ -205,7 +205,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::North>::SymmetrySig
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::South>::SymmetrySign( Equation const equation) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::South>::SymmetrySign( Equation const equation ) {
    switch( equation ) {
       case Equation::MomentumY:
          return -1.0;
@@ -215,7 +215,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::South>::SymmetrySig
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::Top>::SymmetrySign( Equation const equation) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::Top>::SymmetrySign( Equation const equation ) {
    switch( equation ) {
       case Equation::MomentumZ:
          return -1.0;
@@ -225,7 +225,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::Top>::SymmetrySign(
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySign( Equation const equation) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySign( Equation const equation ) {
    switch( equation ) {
       case Equation::MomentumZ:
          return -1.0;
@@ -235,7 +235,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySi
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( PrimeState const prime_state) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign( PrimeState const prime_state ) {
    switch( prime_state ) {
       case PrimeState::VelocityX:
          return -1.0;
@@ -245,7 +245,7 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::East>::SymmetrySign
 }
 
 template<>
-constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( PrimeState const prime_state) {
+constexpr double SymmetryBoundaryCondition<BoundaryLocation::West>::SymmetrySign( PrimeState const prime_state ) {
    switch( prime_state ) {
       case PrimeState::VelocityX:
          return -1.0;
@@ -324,4 +324,4 @@ constexpr double SymmetryBoundaryCondition<BoundaryLocation::Bottom>::SymmetrySi
    return 1.0;
 }
 
-#endif // SYMMETRY_BOUNDARY_CONDITION_H
+#endif// SYMMETRY_BOUNDARY_CONDITION_H

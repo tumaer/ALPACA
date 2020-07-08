@@ -79,18 +79,17 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-NobleAbelStiffenedGas::NobleAbelStiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) :
-   gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "NobelAbelStiffendGas" ) ),
-   covolume_(               unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "covolume", "NobelAbelStiffendGas" ),
-                                                                 {}, { UnitType::Density } ) ),
-   pressure_constant_(      unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "pressureConstant", "NobelAbelStiffendGas" ),
-                                                                 UnitType::Pressure ) ),
-   energy_constant_(        unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "energyConstant", "NobelAbelStiffendGas" ),
-                                                                 { UnitType::Velocity, UnitType::Velocity }, {} ) ),
-   entropy_constant_(       unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "entropyConstant", "NobelAbelStiffendGas" ),
-                                                                 { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ),
-   specific_heat_capacity_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "specificHeatCapacity", "NobelAbelStiffendGas" ),
-                                                                 { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ) {
+NobleAbelStiffenedGas::NobleAbelStiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "NobelAbelStiffendGas" ) ),
+                                                                                                                                                       covolume_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "covolume", "NobelAbelStiffendGas" ),
+                                                                                                                                                                                                       {}, { UnitType::Density } ) ),
+                                                                                                                                                       pressure_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "pressureConstant", "NobelAbelStiffendGas" ),
+                                                                                                                                                                                                                UnitType::Pressure ) ),
+                                                                                                                                                       energy_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "energyConstant", "NobelAbelStiffendGas" ),
+                                                                                                                                                                                                              { UnitType::Velocity, UnitType::Velocity }, {} ) ),
+                                                                                                                                                       entropy_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "entropyConstant", "NobelAbelStiffendGas" ),
+                                                                                                                                                                                                               { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ),
+                                                                                                                                                       specific_heat_capacity_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "specificHeatCapacity", "NobelAbelStiffendGas" ),
+                                                                                                                                                                                                                     { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
@@ -104,7 +103,7 @@ NobleAbelStiffenedGas::NobleAbelStiffenedGas( std::unordered_map<std::string, do
  * @return Pressure according to NASG equation of state.
  */
 double NobleAbelStiffenedGas::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   double const one_density = 1.0 / density;
+   double const one_density     = 1.0 / density;
    double const internal_energy = one_density * ( energy - one_density * 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) );
 
    return ( gamma_ - 1.0 ) * ( internal_energy - energy_constant_ ) / ( one_density - covolume_ ) - gamma_ * pressure_constant_;
@@ -216,18 +215,12 @@ std::string NobleAbelStiffenedGas::GetLogData( unsigned int const indent, UnitHa
    log_string += StringOperations::Indent( indent ) + "Type                  : Nobel-Abel stiffened gas \n";
    // Parameters with small indentation
    log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient : Density dependent \n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                 : " + StringOperations::ToScientificNotationString(
-                     gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Co-volume             : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( covolume_, {}, { UnitType::Density } ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Pressure constant     : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( pressure_constant_, UnitType::Pressure ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Energy constant       : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( energy_constant_, { UnitType::Velocity, UnitType::Velocity }, {} ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Entropy constant      : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( entropy_constant_, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Specific heat capacity: " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( specific_heat_capacity_, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gamma                 : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Co-volume             : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( covolume_, {}, { UnitType::Density } ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Pressure constant     : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( pressure_constant_, UnitType::Pressure ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Energy constant       : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( energy_constant_, { UnitType::Velocity, UnitType::Velocity }, {} ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Entropy constant      : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( entropy_constant_, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Specific heat capacity: " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( specific_heat_capacity_, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ), 9 ) + "\n";
 
    return log_string;
 }

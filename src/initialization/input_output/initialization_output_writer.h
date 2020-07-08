@@ -86,12 +86,11 @@ namespace Initialization {
    std::vector<std::unique_ptr<OutputQuantity const>> GetMaterialOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager );
    std::vector<std::unique_ptr<OutputQuantity const>> GetInterfaceOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager );
 
-
    // Initialization function for the input_output manager
-   OutputWriter InitializeOutputWriter( TopologyManager & topology_manager,
-                                        Tree & tree,
+   OutputWriter InitializeOutputWriter( TopologyManager& topology_manager,
+                                        Tree& tree,
                                         MaterialManager const& material_manager,
                                         UnitHandler const& unit_handler );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_OUTPUT_WRITER_H
+#endif// INITIALIZATION_OUTPUT_WRITER_H

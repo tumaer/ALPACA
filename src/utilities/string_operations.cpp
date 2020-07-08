@@ -87,7 +87,7 @@ namespace StringOperations {
          sign_string = " ";
       }
       std::ostringstream out;
-      out << sign_string << std::scientific << std::setprecision( precision ) <<  number;
+      out << sign_string << std::scientific << std::setprecision( precision ) << number;
       return out.str();
    }
 
@@ -137,7 +137,7 @@ namespace StringOperations {
     */
    std::string RemoveLeadingNumbers( std::string const& word ) {
       std::string name_without_leading_number( word );
-      return name_without_leading_number.erase( 0, std::min( word.find_first_not_of( "0123456789" ), word.size() -1 ) );
+      return name_without_leading_number.erase( 0, std::min( word.find_first_not_of( "0123456789" ), word.size() - 1 ) );
    }
 
-}
+}// namespace StringOperations

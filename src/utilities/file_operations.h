@@ -72,17 +72,17 @@
 
 namespace FileOperations {
 
-// operations for file and path modification
-std::string RemoveFileExtension( std::string const& filename );
-std::string RemoveFilePath( std::string const& filename );
-std::string ChangeFileExtension( std::string const& filename_with_path, std::string const extension );
-std::string GetFileExtension( std::string const& filename );
-bool CheckIfPathExists( std::string const& path );
-bool CreateFolder( std::string const& path );
-std::string AddUnusedNumberToPath( std::string const& path, unsigned int const start_number = 0 );
-void WriteTextBasedFile( std::string const& filename, std::string const& content );
-void AppendToTextBasedFile( std::string const& filename, std::string const& content );
+   // operations for file and path modification
+   std::string RemoveFileExtension( std::string const& filename );
+   std::string RemoveFilePath( std::string const& filename );
+   std::string ChangeFileExtension( std::string const& filename_with_path, std::string const extension );
+   std::string GetFileExtension( std::string const& filename );
+   bool CheckIfPathExists( std::string const& path );
+   bool CreateFolder( std::string const& path );
+   std::string AddUnusedNumberToPath( std::string const& path, unsigned int const start_number = 0 );
+   void WriteTextBasedFile( std::string const& filename, std::string const& content );
+   void AppendToTextBasedFile( std::string const& filename, std::string const& content );
 
-} // namespace FileOperations
+}// namespace FileOperations
 
-#endif // FILE_OPERATIONS_H
+#endif// FILE_OPERATIONS_H

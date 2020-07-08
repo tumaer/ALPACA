@@ -91,11 +91,11 @@ class XmlTimeControlReader : public TimeControlReader {
 public:
    XmlTimeControlReader() = delete;
    explicit XmlTimeControlReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlTimeControlReader() = default;
+   ~XmlTimeControlReader()                             = default;
    XmlTimeControlReader( XmlTimeControlReader const& ) = default;
    XmlTimeControlReader& operator=( XmlTimeControlReader const& ) = delete;
-   XmlTimeControlReader( XmlTimeControlReader&& ) = default;
+   XmlTimeControlReader( XmlTimeControlReader&& )                 = default;
    XmlTimeControlReader& operator=( XmlTimeControlReader&& ) = delete;
 };
 
-#endif // XML_TIME_CONTROL_READER_H
+#endif// XML_TIME_CONTROL_READER_H

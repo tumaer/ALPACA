@@ -77,22 +77,22 @@
  */
 class VortexStretchingOutput : public OutputQuantity {
 
-private: 
+private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;   
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    VortexStretchingOutput() = delete;
-   explicit VortexStretchingOutput( UnitHandler const& unit_handler, 
-                                    MaterialManager const& material_manager, 
+   explicit VortexStretchingOutput( UnitHandler const& unit_handler,
+                                    MaterialManager const& material_manager,
                                     std::string const& quantity_name,
                                     std::array<bool, 3> const output_flags );
-   virtual ~VortexStretchingOutput() = default;
+   virtual ~VortexStretchingOutput()                       = default;
    VortexStretchingOutput( VortexStretchingOutput const& ) = delete;
    VortexStretchingOutput& operator=( VortexStretchingOutput const& ) = delete;
-   VortexStretchingOutput( VortexStretchingOutput&& ) = delete;
+   VortexStretchingOutput( VortexStretchingOutput&& )                 = delete;
    VortexStretchingOutput& operator=( VortexStretchingOutput&& ) = delete;
 };
 
-#endif // VORTEX_STRETCHING_OUTPUT_H
+#endif// VORTEX_STRETCHING_OUTPUT_H

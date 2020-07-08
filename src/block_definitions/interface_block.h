@@ -94,29 +94,29 @@ class InterfaceBlock {
 public:
    InterfaceBlock() = delete;
    explicit InterfaceBlock( double const levelset_initial );
-   explicit InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] );
-   ~InterfaceBlock() = default;
+   explicit InterfaceBlock( double const ( &levelset_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   ~InterfaceBlock()                       = default;
    InterfaceBlock( InterfaceBlock const& ) = delete;
    InterfaceBlock& operator=( InterfaceBlock const& ) = delete;
-   InterfaceBlock( InterfaceBlock&& ) = delete;
+   InterfaceBlock( InterfaceBlock&& )                 = delete;
    InterfaceBlock& operator=( InterfaceBlock&& ) = delete;
 
    // Returning general field buffer
-   auto GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    // Returning interface description buffers
-   auto GetBaseBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetBaseBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetBaseBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetBaseBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   auto GetRightHandSideBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetRightHandSideBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetRightHandSideBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetRightHandSideBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   auto GetReinitializedBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetReinitializedBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetReinitializedBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetReinitializedBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   auto GetInitialBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetInitialBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInitialBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInitialBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    template<InterfaceDescriptionBufferType C>
    InterfaceDescriptions& GetInterfaceDescriptionBuffer();
@@ -136,22 +136,22 @@ public:
    InterfaceDescriptions const& GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type ) const;
 
    // Returning state buffers
-   auto GetInterfaceStateBuffer( InterfaceState const state_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetInterfaceStateBuffer( InterfaceState const state_type) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceStateBuffer( InterfaceState const state_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceStateBuffer( InterfaceState const state_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    InterfaceStates& GetInterfaceStateBuffer();
    InterfaceStates const& GetInterfaceStateBuffer() const;
 
    // returning parameter buffers
-   auto GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    InterfaceParameters& GetInterfaceParameterBuffer();
    InterfaceParameters const& GetInterfaceParameterBuffer() const;
 
    // returning general interface block buffer
-   auto GetBuffer( InterfaceBlockBufferType const buffer_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetBuffer( InterfaceBlockBufferType const buffer_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetBuffer( InterfaceBlockBufferType const buffer_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetBuffer( InterfaceBlockBufferType const buffer_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 };
 
-#endif // INTERFACE_BLOCK_H
+#endif// INTERFACE_BLOCK_H

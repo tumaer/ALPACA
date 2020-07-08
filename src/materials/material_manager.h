@@ -85,11 +85,11 @@ class MaterialManager {
    // Vector with all materials
    std::vector<Material> const materials_;
    // Vector with all material pairings
-   std::vector<MaterialPairing> const material_pairings_;  
-   
-   // offset vector to provide proper mapping from material names to its material pairings 
+   std::vector<MaterialPairing> const material_pairings_;
+
+   // offset vector to provide proper mapping from material names to its material pairings
    std::vector<int> const pairing_offset_;
-  
+
    // local function to map a pairing of two materials to  corresponding vector index of the material pairings
    unsigned int MapPairingToIndex( MaterialName const first_material, MaterialName const second_material ) const;
    // factory function to generate the pairing offset vector (allows constness of it)
@@ -97,28 +97,28 @@ class MaterialManager {
 
 public:
    MaterialManager() = delete;
-   explicit MaterialManager( std::vector<Material> materials, 
+   explicit MaterialManager( std::vector<Material> materials,
                              std::vector<MaterialPairing> material_pairings );
-   ~MaterialManager() = default;
-   MaterialManager( MaterialManager const&) = delete;
+   ~MaterialManager()                        = default;
+   MaterialManager( MaterialManager const& ) = delete;
    MaterialManager& operator=( MaterialManager const& ) = delete;
-   MaterialManager( MaterialManager&& ) = delete;
+   MaterialManager( MaterialManager&& )                 = delete;
    MaterialManager& operator=( MaterialManager&& ) = delete;
 
-   // Get the number of all materials contained in the simulation 
-   std::size_t GetNumberOfMaterials() const; 
+   // Get the number of all materials contained in the simulation
+   std::size_t GetNumberOfMaterials() const;
 
-   // Get all materials used in the simulation 
+   // Get all materials used in the simulation
    std::vector<MaterialName> GetMaterialNames() const;
 
-   // provides a material for a given index 
-   Material const& GetMaterial( std::size_t const index ) const; 
+   // provides a material for a given index
+   Material const& GetMaterial( std::size_t const index ) const;
 
    // provides a material for a given identifier
    Material const& GetMaterial( MaterialName const material ) const;
 
-   // provides the pairing of two material identifier 
+   // provides the pairing of two material identifier
    MaterialPairing const& GetMaterialPairing( MaterialName const first_material, MaterialName const second_material ) const;
 };
 
-#endif // MATERIAL_MANAGER_H
+#endif// MATERIAL_MANAGER_H

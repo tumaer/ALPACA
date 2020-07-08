@@ -83,9 +83,9 @@ SCENARIO( "TimeDataItems can be correctly populated", "[1rank]" ) {
 
 SCENARIO( "DataItems can be correctly populated", "[1rank]" ) {
    GIVEN( "An hdf5 filename (test.h5) + 42 global cells + a dataset named ds" ) {
-      std::string const filename = "test.h5";
+      std::string const filename         = "test.h5";
       unsigned int const number_of_cells = 42;
-      std::string const dataset = "ds";
+      std::string const dataset          = "ds";
       WHEN( "Created with dimensions of scalar" ) {
          std::array<unsigned int, 2> const dimensions = { 1, 1 };
          REQUIRE( XdmfUtilities::DataItemString( filename, dataset, number_of_cells, dimensions ) == "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\"42\"> test.h5:/ds </DataItem>\n" );
@@ -230,7 +230,7 @@ SCENARIO( "Header string can be properly created", "[1rank]" ) {
 SCENARIO( "Footer string can be properly created", "[1rank]" ) {
    GIVEN( "Default values (nothing" ) {
       WHEN( "Created with default values" ) {
-         REQUIRE( XdmfUtilities::FooterInformation() == "  </Grid>\n" 
+         REQUIRE( XdmfUtilities::FooterInformation() == "  </Grid>\n"
                                                         " </Domain>\n"
                                                         "</Xdmf>" );
       }

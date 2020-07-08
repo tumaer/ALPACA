@@ -68,7 +68,6 @@
 #ifndef FOURTH_ORDER_CENTRAL_DIFFERENCE_H
 #define FOURTH_ORDER_CENTRAL_DIFFERENCE_H
 
-
 #include "stencils/stencil.h"
 
 /**
@@ -80,24 +79,22 @@ class FourthOrderCentralDifference : public Stencil<FourthOrderCentralDifference
 
    static constexpr StencilType stencil_type_ = StencilType::Derivative;
 
-   static constexpr unsigned int stencil_size_ = 5;
+   static constexpr unsigned int stencil_size_            = 5;
    static constexpr unsigned int downstream_stencil_size_ = 2;
 
    /**
     * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
     * @note Hotpath function.
     */
-   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const cell_size ) const {
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const, double const cell_size ) const {
       double const denominator = cell_size * 12.0;
-      double const result = - array[downstream_stencil_size_ + 2] + 8.0 * array[downstream_stencil_size_ + 1] - 8.0 * array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ - 2];
+      double const result      = -array[downstream_stencil_size_ + 2] + 8.0 * array[downstream_stencil_size_ + 1] - 8.0 * array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ - 2];
       return result / denominator;
    }
 
 public:
    explicit constexpr FourthOrderCentralDifference() = default;
-   ~FourthOrderCentralDifference() = default;
-
+   ~FourthOrderCentralDifference()                   = default;
 };
 
-
-#endif //FOURTH_ORDER_CENTRAL_DIFFERENCE_H
+#endif//FOURTH_ORDER_CENTRAL_DIFFERENCE_H

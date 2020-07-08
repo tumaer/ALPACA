@@ -90,10 +90,10 @@ public:
    ExternalHaloManager() = delete;
    explicit ExternalHaloManager( std::array<std::unique_ptr<MaterialBoundaryCondition const>, 6> material_boundary_conditions,
                                  std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> levelset_boundary_conditions );
-   ~ExternalHaloManager() = default;
+   ~ExternalHaloManager()                            = default;
    ExternalHaloManager( ExternalHaloManager const& ) = delete;
    ExternalHaloManager& operator=( ExternalHaloManager const& ) = delete;
-   ExternalHaloManager( ExternalHaloManager&& ) = delete;
+   ExternalHaloManager( ExternalHaloManager&& )                 = delete;
    ExternalHaloManager& operator=( ExternalHaloManager&& ) = delete;
 
    void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) const;

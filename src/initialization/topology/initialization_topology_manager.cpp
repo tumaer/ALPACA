@@ -103,18 +103,17 @@ namespace Initialization {
    bool IsMaterialPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction ) {
       // Declare the boundary locations
       BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East :
-                                              direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
+                                                                          direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
       BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West :
-                                               direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
+                                                                           direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
       // Declare the two boundary conditions
-      MaterialBoundaryType const first_boundary = boundary_condition_reader.ReadMaterialBoundaryType( first_location );
+      MaterialBoundaryType const first_boundary  = boundary_condition_reader.ReadMaterialBoundaryType( first_location );
       MaterialBoundaryType const second_boundary = boundary_condition_reader.ReadMaterialBoundaryType( second_location );
 
       // check periodicity
       if( first_boundary == MaterialBoundaryType::Periodic || second_boundary == MaterialBoundaryType::Periodic ) {
          if( first_boundary != second_boundary ) {
-            throw std::invalid_argument(   "Incorrect use of " + BoundaryLocationToString( first_location, true ) + "-" + BoundaryLocationToString( second_location, true )
-                                         + " periodic condition, both boundaries from the material must be periodic!" );
+            throw std::invalid_argument( "Incorrect use of " + BoundaryLocationToString( first_location, true ) + "-" + BoundaryLocationToString( second_location, true ) + " periodic condition, both boundaries from the material must be periodic!" );
          } else {
             return true;
          }
@@ -133,18 +132,17 @@ namespace Initialization {
    bool IsLevelsetPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction ) {
       // Declare the boundary locations
       BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East :
-                                              direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
+                                                                          direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
       BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West :
-                                               direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
+                                                                           direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
       // Declare the two boundary conditions
-      LevelSetBoundaryType const first_boundary = boundary_condition_reader.ReadLevelsetBoundaryType( first_location );
+      LevelSetBoundaryType const first_boundary  = boundary_condition_reader.ReadLevelsetBoundaryType( first_location );
       LevelSetBoundaryType const second_boundary = boundary_condition_reader.ReadLevelsetBoundaryType( second_location );
 
       // check periodicity
       if( first_boundary == LevelSetBoundaryType::Periodic || second_boundary == LevelSetBoundaryType::Periodic ) {
          if( first_boundary != second_boundary ) {
-            throw std::invalid_argument(   "Incorrect use of " + BoundaryLocationToString( first_location, true ) + "-" + BoundaryLocationToString( second_location, true )
-                                         + " periodic condition, both boundaries from the levelset must be periodic!" );
+            throw std::invalid_argument( "Incorrect use of " + BoundaryLocationToString( first_location, true ) + "-" + BoundaryLocationToString( second_location, true ) + " periodic condition, both boundaries from the levelset must be periodic!" );
          } else {
             return true;
          }
@@ -209,7 +207,6 @@ namespace Initialization {
       return active_periodic_locations;
    }
 
-
    /**
     * @brief Initializes the complete topology manager class with the given input classes.
     * @param input_reader Reader that provides access to the full data of the input file.
@@ -223,4 +220,4 @@ namespace Initialization {
                               input_reader.GetMultiResolutionReader().ReadMaximumLevel(),
                               GetActivePeriodicDirections( input_reader.GetBoundaryConditionReader(), material_manager ) );
    }
-}
+}// namespace Initialization
