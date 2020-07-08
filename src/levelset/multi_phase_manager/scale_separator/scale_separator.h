@@ -68,7 +68,6 @@
 #ifndef SCALE_SEPARATOR_H
 #define SCALE_SEPARATOR_H
 
-
 #include "materials/material_manager.h"
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator_marching_cubes.h"
@@ -81,7 +80,7 @@ class ScaleSeparator {
 
 protected:
    MaterialManager const& material_manager_;
-   HaloManager & halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager& halo_manager_;// TODO-19 NH Think about making it const (rats tail)
 
    ScaleSeparator() = delete;
 
@@ -90,10 +89,8 @@ protected:
     * @param material_manager Instance of a MaterialManager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit ScaleSeparator( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-      material_manager_( material_manager ),
-      halo_manager_( halo_manager )
-   {
+   explicit ScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager ) : material_manager_( material_manager ),
+                                                                                                   halo_manager_( halo_manager ) {
       // Empty Constructor, besides initializer list.
    }
 
@@ -104,11 +101,9 @@ public:
     * @brief Performs a scale separation procedure.
     * @param nodes The nodes for which scale separation should be done.
     */
-   void SeparateScales(std::vector<std::reference_wrapper<Node>> const& nodes) const {
-      static_cast<DerivedScaleSeparator const&>(*this).SeparateScalesImplementation(nodes);
+   void SeparateScales( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+      static_cast<DerivedScaleSeparator const&>( *this ).SeparateScalesImplementation( nodes );
    }
-
 };
 
-
-#endif //SCALE_SEPARATOR_H
+#endif//SCALE_SEPARATOR_H

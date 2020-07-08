@@ -76,17 +76,17 @@
  */
 namespace StringOperations {
 
-// converts a number to scientific notation string, e.g. -1.0E+10
-std::string ToScientificNotationString( double const number, int const precision = std::numeric_limits<double>::digits10 + 1, bool consider_sign = false );
-// converts a string to a string without spaces and all letters are upper cases 
-std::string ToUpperCaseWithoutSpaces( std::string const& word );
-// removes all spaces from a string 
-std::string RemoveSpaces( std::string const& word );
-// gives a empty string with a certain width
-std::string Indent( unsigned int const width );
-// remove leading numbers from a string 
-std::string RemoveLeadingNumbers( std::string const& word );
+   // converts a number to scientific notation string, e.g. -1.0E+10
+   std::string ToScientificNotationString( double const number, int const precision = std::numeric_limits<double>::digits10 + 1, bool consider_sign = false );
+   // converts a string to a string without spaces and all letters are upper cases
+   std::string ToUpperCaseWithoutSpaces( std::string const& word );
+   // removes all spaces from a string
+   std::string RemoveSpaces( std::string const& word );
+   // gives a empty string with a certain width
+   std::string Indent( unsigned int const width );
+   // remove leading numbers from a string
+   std::string RemoveLeadingNumbers( std::string const& word );
 
-} // namespace StringOperations
+}// namespace StringOperations
 
-#endif // STRING_OPERATIONS_H
+#endif// STRING_OPERATIONS_H

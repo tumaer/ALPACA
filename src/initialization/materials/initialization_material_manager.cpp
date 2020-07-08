@@ -150,7 +150,6 @@ namespace Initialization {
       return material_pairings;
    }
 
-
    /**
     * @brief Initializes the complete material manager class with the given input reader.
     * @param input_reader Reader that provides access to the full data of the input file.
@@ -164,9 +163,9 @@ namespace Initialization {
       std::vector<MaterialPairing> material_pairings( InitializeMaterialPairings( input_reader.GetMaterialReader(), unit_handler ) );
 
       // Log a final empty line
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
 
       return MaterialManager( std::move( materials ), std::move( material_pairings ) );
    }
-}
+}// namespace Initialization

@@ -71,6 +71,8 @@
 /**
  * @brief Identifer for Remeshing if nodes should be refined, coarsened or nothing has to be done.
  */
-enum class RemeshIdentifier { Neutral, Refine, Coarse };
+enum class RemeshIdentifier { Neutral,
+                              Refine,
+                              Coarse };
 
-#endif // REMESH_IDENTIFIER_H
+#endif// REMESH_IDENTIFIER_H

@@ -72,33 +72,33 @@
 #include "topology/tree.h"
 
 namespace TestUtilities {
-   
-   // inline void CreateTopologyAndTree( TopologyManager & topology, 
-   //                                    Tree & tree, 
-   //                                    unsigned int const number_of_leaves, 
+
+   // inline void CreateTopologyAndTree( TopologyManager & topology,
+   //                                    Tree & tree,
+   //                                    unsigned int const number_of_leaves,
    //                                    unsigned int const number_of_interface_leaves,
    //                                    bool const do_load_balance = false ) {
    //    REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
    //    REQUIRE( number_of_leaves >= number_of_interface_leaves );
 
-   //    // First check if the given number of leaves is realizable 
+   //    // First check if the given number of leaves is realizable
    //    unsigned int leaf_counter = 1;
    //    while( true ) {
-   //       // If the number of desired leaves coincides with the numbers in the row 
+   //       // If the number of desired leaves coincides with the numbers in the row
    //       if( number_of_leaves == leaf_counter ) {
    //          break;
    //       }
-         
-   //       // If the number does not match with the next entry throw error 
+
+   //       // If the number does not match with the next entry throw error
    //       if( number_of_leaves > leaf_counter && number_of_leaves < leaf_counter + 7 ) {
    //          REQUIRE( number_of_leaves == leaf_counter + 7 );
    //       }
-   //       // Increment counter 
-   //       leaf_counter += 7;         
+   //       // Increment counter
+   //       leaf_counter += 7;
    //    }
 
    //    // If only one leaf is desired simply add material and update topology
-   //    if( number_of_leaves == 1 ) {  
+   //    if( number_of_leaves == 1 ) {
    //       if( number_of_interface_leaves == 1 ) {
    //          topology.AddMaterialToNode( 0x1400000, MaterialName::MaterialOne );
    //          tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
@@ -106,7 +106,7 @@ namespace TestUtilities {
    //          topology.AddMaterialToNode( 0x1400000, MaterialName::MaterialOne );
    //          tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
    //       }
-   //       topology.UpdateTopology();   
+   //       topology.UpdateTopology();
    //    } else {
    //       // coutner to remember how much leafs are created
    //       unsigned int created_number_of_leaves = 1;
@@ -130,24 +130,24 @@ namespace TestUtilities {
    //          REQUIRE( created_number_of_levels == topology.GetMaximumLevel() );
    //       }
 
-   //       // coutner for the interface leaves 
+   //       // coutner for the interface leaves
    //       unsigned int created_number_of_interface_leaves = 1;
    //       // Loop through all leaves and add for all interface nodes two materials otherwise 1
    //       for( auto const id : topology.LocalLeafIds() ) {
-   //          if( created_number_of_interface_leaves > number_of_interface_leaves ) { 
+   //          if( created_number_of_interface_leaves > number_of_interface_leaves ) {
    //             topology.AddMaterialToNode( id, MaterialName::MaterialOne );
    //             tree.CreateNode( id, { MaterialName::MaterialOne } );
-   //          } else { 
+   //          } else {
    //             topology.AddMaterialToNode( id, MaterialName::MaterialOne );
    //             topology.AddMaterialToNode( id, MaterialName::MaterialTwo );
    //             tree.CreateNode( id, { MaterialName::MaterialOne, MaterialName::MaterialTwo } );
    //          }
    //          created_number_of_interface_leaves++;
    //       }
-   //       topology.UpdateTopology(); 
+   //       topology.UpdateTopology();
    //    }
 
-   //    // In case load balancing is desired 
+   //    // In case load balancing is desired
    //    if( do_load_balance ) {
    //       topology.GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
    //    }
@@ -199,7 +199,7 @@ namespace TestUtilities {
       topology.AddMaterialToNode( 0xA000006, MaterialName::MaterialOne );
       topology.AddMaterialToNode( 0xA000007, MaterialName::MaterialOne );
       topology.UpdateTopology();
-      // Refine one of the second nodes 
+      // Refine one of the second nodes
       topology.RefineNodeWithId( 0xA000000 );
       topology.UpdateTopology();
       // For load balancing to work, the nodes must have a weight = materials inside them
@@ -219,31 +219,31 @@ namespace TestUtilities {
       }
    }
 
-   inline void GetFirstNodeInTopologyWithoutMultiLeaves( TopologyManager & topology, Tree & tree ) {
+   inline void GetFirstNodeInTopologyWithoutMultiLeaves( TopologyManager& topology, Tree& tree ) {
       REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
       topology.UpdateTopology();
       topology.AddMaterialToNode( 0x1400000, MaterialName::MaterialOne );
       tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
-      topology.UpdateTopology();   
+      topology.UpdateTopology();
    }
 
-   inline void RefineFirstNodeInTopologyAndAddTwoMultiLeaves( TopologyManager & topology, Tree & tree ) {
+   inline void RefineFirstNodeInTopologyAndAddTwoMultiLeaves( TopologyManager& topology, Tree& tree ) {
       REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 1, 1 ) );
       topology.RefineNodeWithId( 0x1400000 );
       topology.UpdateTopology();
 
       unsigned int counter = 0;
       for( auto const id : topology.LocalLeafIds() ) {
-         if( counter >= 2 ) { 
+         if( counter >= 2 ) {
             topology.AddMaterialToNode( id, MaterialName::MaterialOne );
             tree.CreateNode( id, { MaterialName::MaterialOne } );
-         } else { 
+         } else {
             topology.AddMaterialToNode( id, MaterialName::MaterialOne );
             topology.AddMaterialToNode( id, MaterialName::MaterialTwo );
             tree.CreateNode( id, { MaterialName::MaterialOne, MaterialName::MaterialTwo } );
          }
          counter++;
       }
-      topology.UpdateTopology();   
+      topology.UpdateTopology();
    }
-}
+}// namespace TestUtilities

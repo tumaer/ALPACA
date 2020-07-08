@@ -68,5 +68,9 @@
 /**
  * @brief Unique identifier to separate the kind of Internal boundary with respect to its MPI treatment and topology information.
  */
-enum class InternalBoundaryType { JumpBoundaryLocal, JumpBoundaryMpiSend, JumpBoundaryMpiRecv,
-                                  NoJumpBoundaryLocal, NoJumpBoundaryMpiSend, NoJumpBoundaryMpiRecv };
+enum class InternalBoundaryType { JumpBoundaryLocal,
+                                  JumpBoundaryMpiSend,
+                                  JumpBoundaryMpiRecv,
+                                  NoJumpBoundaryLocal,
+                                  NoJumpBoundaryMpiSend,
+                                  NoJumpBoundaryMpiRecv };

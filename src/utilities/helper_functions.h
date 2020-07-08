@@ -79,16 +79,16 @@ double GetCheckedParameter( std::unordered_map<std::string, double> const& param
  * @brief Creates an std::array from the given arguments. Template magic.
  */
 template<typename... Ts>
-constexpr std::array<typename std::common_type<Ts...>::type, sizeof...(Ts)> MakeArray( Ts&&... args ) {
-   return {args...};
+constexpr std::array<typename std::common_type<Ts...>::type, sizeof...( Ts )> MakeArray( Ts&&... args ) {
+   return { args... };
 }
 
 /**
  * @brief Creates an array with entries from the given enumeration (template type) by casting the given index sequence.
  */
 template<typename EnumType, std::size_t... Is>
-constexpr std::array<EnumType, sizeof...(Is)> IndexSequenceToEnumArray( std::index_sequence<Is...> const ) {
-  return {static_cast<EnumType>(Is)...};
+constexpr std::array<EnumType, sizeof...( Is )> IndexSequenceToEnumArray( std::index_sequence<Is...> const ) {
+   return { static_cast<EnumType>( Is )... };
 }
 
-#endif // HELPER_FUNCTIONS_H
+#endif// HELPER_FUNCTIONS_H

@@ -68,7 +68,8 @@
 #ifndef MATERIAL_FIELD_QUANTITIES_DEFINITIONS_H
 #define MATERIAL_FIELD_QUANTITIES_DEFINITIONS_H
 
-#include  <iostream>
+#include <iostream>
+#include <vector>
 
 #include "block_definitions/field_material_definitions.h"
 #include "block_definitions/field_details.h"
@@ -85,11 +86,17 @@
  */
 enum class MaterialFieldQuantityName {
    // conservatives
-   Mass, Momentum, Energy,
+   Mass,
+   Momentum,
+   Energy,
    // prime states
-   Density, Temperature, Pressure, Velocity,
+   Density,
+   Temperature,
+   Pressure,
+   Velocity,
    // parameters
-   ShearViscosity, ThermalConductivity
+   ShearViscosity,
+   ThermalConductivity
 };
 
 /**
@@ -98,14 +105,14 @@ enum class MaterialFieldQuantityName {
  * @return suffix for the given identifier.
  */
 inline std::string SuffixOfConservativeBufferType( ConservativeBufferType const buffer_type ) {
-   switch (buffer_type) {
-      case ConservativeBufferType::Average : {
+   switch( buffer_type ) {
+      case ConservativeBufferType::Average: {
          return "";
       }
-      case ConservativeBufferType::RightHandSide : {
+      case ConservativeBufferType::RightHandSide: {
          return "_rhs";
       }
-      default : { //last possibility ConservativeBufferType::Initial :
+      default: {//last possibility ConservativeBufferType::Initial :
          return "_initial";
       }
    }
@@ -142,7 +149,8 @@ struct MaterialFieldQuantityData {
       size_t current_size = field_indices_.size();
       // Erase all elements that are not active
       field_indices_.erase( std::remove_if( field_indices_.begin(), field_indices_.end(),
-                                            [&field_type]( double const& index ) { return !MF::IsFieldActive( field_type, index ); } ), field_indices_.end() );
+                                            [&field_type]( double const& index ) { return !MF::IsFieldActive( field_type, index ); } ),
+                            field_indices_.end() );
       // Throw warning if some of the fields have been rejected
       if( current_size != field_indices_.size() ) {
          std::cerr << "Output Warning! Some of the desired material fields are not active! Continue with reduced set!" << std::endl;
@@ -165,83 +173,87 @@ inline MaterialFieldQuantityData DataOfMaterialFieldQuantity( MaterialFieldQuant
    // General declaration of the struct
    MaterialFieldQuantityData quantity_data;
    // Differ between all quantities
-   switch (output_quantity) {
+   switch( output_quantity ) {
       // conservatives
-      case MaterialFieldQuantityName::Mass : {
+      case MaterialFieldQuantityName::Mass: {
          quantity_data.field_type_          = MaterialFieldType::Conservatives;
          quantity_data.field_indices_       = { ETI( Equation::Mass ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
-      case MaterialFieldQuantityName::Momentum : {
-         quantity_data.field_type_          = MaterialFieldType::Conservatives;
-         quantity_data.field_indices_       = { ETI( Equation::MomentumX )
+      case MaterialFieldQuantityName::Momentum: {
+         quantity_data.field_type_    = MaterialFieldType::Conservatives;
+         quantity_data.field_indices_ = { ETI( Equation::MomentumX )
 #if DIMENSION != 1
-            , ETI(Equation::MomentumY)
+                                                ,
+                                          ETI( Equation::MomentumY )
 #endif
 #if DIMENSION == 3
-            , ETI(Equation::MomentumZ)
+                                                ,
+                                          ETI( Equation::MomentumZ )
 #endif
-            };
+         };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
-      case MaterialFieldQuantityName::Energy : {
+      case MaterialFieldQuantityName::Energy: {
          quantity_data.field_type_          = MaterialFieldType::Conservatives;
          quantity_data.field_indices_       = { ETI( Equation::Energy ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
       // prime states
-      case MaterialFieldQuantityName::Density : {
+      case MaterialFieldQuantityName::Density: {
          quantity_data.field_type_          = MaterialFieldType::PrimeStates;
          quantity_data.field_indices_       = { PTI( PrimeState::Density ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
-      case MaterialFieldQuantityName::Temperature : {
+      case MaterialFieldQuantityName::Temperature: {
          quantity_data.field_type_          = MaterialFieldType::PrimeStates;
          quantity_data.field_indices_       = { PTI( PrimeState::Temperature ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
-      case MaterialFieldQuantityName::Pressure : {
+      case MaterialFieldQuantityName::Pressure: {
          quantity_data.field_type_          = MaterialFieldType::PrimeStates;
          quantity_data.field_indices_       = { PTI( PrimeState::Pressure ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
-      case MaterialFieldQuantityName::Velocity : {
-         quantity_data.field_type_          = MaterialFieldType::PrimeStates;
-         quantity_data.field_indices_       = { PTI( PrimeState::VelocityX )
+      case MaterialFieldQuantityName::Velocity: {
+         quantity_data.field_type_    = MaterialFieldType::PrimeStates;
+         quantity_data.field_indices_ = { PTI( PrimeState::VelocityX )
 #if DIMENSION != 1
-            , PTI(PrimeState::VelocityY)
+                                                ,
+                                          PTI( PrimeState::VelocityY )
 #endif
 #if DIMENSION == 3
-            , PTI(PrimeState::VelocityZ)
+                                                ,
+                                          PTI( PrimeState::VelocityZ )
 #endif
-            };
+         };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
       // parameter
-      case MaterialFieldQuantityName::ShearViscosity : {
+      case MaterialFieldQuantityName::ShearViscosity: {
          quantity_data.field_type_          = MaterialFieldType::Parameters;
          quantity_data.field_indices_       = { PTI( Parameter::ShearViscosity ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
-      case MaterialFieldQuantityName::ThermalConductivity : {
+      case MaterialFieldQuantityName::ThermalConductivity: {
          quantity_data.field_type_          = MaterialFieldType::Parameters;
          quantity_data.field_indices_       = { PTI( Parameter::ThermalConductivity ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
       // default if nothing matches
-      default : {
+      default: {
          throw std::logic_error( "Material field output quantity is not known!" );
       }
    }
 }
 
-#endif // MATERIAL_FIELD_QUANTITIES_DEFINITIONS_H
+#endif// MATERIAL_FIELD_QUANTITIES_DEFINITIONS_H

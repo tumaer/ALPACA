@@ -72,9 +72,7 @@
  * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
  * @param communicator Instance to a CommunicationManager which provides MPI-related methods.
  */
-NumerousPhaseManager::NumerousPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-   MultiPhaseManager( material_manager, halo_manager )
-{
+NumerousPhaseManager::NumerousPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager ) : MultiPhaseManager( material_manager, halo_manager ) {
    // Empty Constructor, besides call of base class constructor.
 }
 
@@ -134,6 +132,6 @@ void NumerousPhaseManager::InitializeVolumeFractionBufferImplementation( std::ve
  * @brief See base class.
  * @param nodes See base class.
  */
-void NumerousPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& , bool const ) const {
+void NumerousPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const&, bool const ) const {
    throw std::logic_error( "Not yet implemented: NumerousPhaseManager::ObtainInterfaceStates" );
 }

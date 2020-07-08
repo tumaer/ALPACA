@@ -92,18 +92,18 @@ class SourceTermSolver {
 
 public:
    SourceTermSolver() = delete;
-   explicit SourceTermSolver( MaterialManager const& material_manager, std::array<double,3> const gravity );
-   ~SourceTermSolver() = default;
+   explicit SourceTermSolver( MaterialManager const& material_manager, std::array<double, 3> const gravity );
+   ~SourceTermSolver()                         = default;
    SourceTermSolver( SourceTermSolver const& ) = delete;
    SourceTermSolver& operator=( SourceTermSolver const& ) = delete;
-   SourceTermSolver( SourceTermSolver&& ) = delete;
+   SourceTermSolver( SourceTermSolver&& )                 = delete;
    SourceTermSolver& operator=( SourceTermSolver&& ) = delete;
 
    void Sources( std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
-      double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
+                 double ( &face_fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                 double ( &face_fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                 double ( &face_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                 double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 };
 
-#endif // SOURCE_TERM_SOLVER_H
+#endif// SOURCE_TERM_SOLVER_H

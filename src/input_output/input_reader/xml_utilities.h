@@ -85,7 +85,7 @@ namespace XmlUtilities {
     * @param child_names List of child names (passed in subsequent).
     * @return Last child node in list (throw error if not existent).
     */
-   inline tinyxml2::XMLElement const* GetChild( tinyxml2::XMLElement const *parent_node, std::vector<std::string> child_names  ) {
+   inline tinyxml2::XMLElement const* GetChild( tinyxml2::XMLElement const* parent_node, std::vector<std::string> child_names ) {
       if( !child_names.empty() ) {
          // Obtain the child name and erase it from the vector
          std::string const child_name( child_names.front() );
@@ -101,7 +101,7 @@ namespace XmlUtilities {
             // otherwise return the child of of the next child
             return GetChild( child_node, child_names );
 
-         } catch ( std::logic_error const& err ) {
+         } catch( std::logic_error const& err ) {
             std::string const parent_name( parent_node->Name() );
             // Back propagate the error message to its original parent node
             throw std::logic_error( std::string( err.what() ) + " under <" + parent_name + ">" );
@@ -117,7 +117,7 @@ namespace XmlUtilities {
     * @param child_names List of child names (passed in subsequent).
     * @return Last child node in list (throw error if not existent).
     */
-   inline tinyxml2::XMLElement const* GetChild( tinyxml2::XMLDocument const& xml_document, std::vector<std::string> child_names  ) {
+   inline tinyxml2::XMLElement const* GetChild( tinyxml2::XMLDocument const& xml_document, std::vector<std::string> child_names ) {
       if( !child_names.empty() ) {
          // Obtain the child name and erase it from the vector
          std::string const child_name( child_names.front() );
@@ -144,7 +144,7 @@ namespace XmlUtilities {
     *
     * @note If the given type of the node does not coincide with a double value an error is thrown.
     */
-   inline double ReadDouble( tinyxml2::XMLElement const *node ) {
+   inline double ReadDouble( tinyxml2::XMLElement const* node ) {
       double value;
       if( node->QueryDoubleText( &value ) != tinyxml2::XML_SUCCESS ) {
          // Get the names of all parent nodes for this specific node
@@ -170,7 +170,7 @@ namespace XmlUtilities {
     *
     * @note If the given type of the node does not coincide with an integer value an error is thrown.
     */
-   inline int ReadInt( tinyxml2::XMLElement const *node ) {
+   inline int ReadInt( tinyxml2::XMLElement const* node ) {
       int value;
       if( node->QueryIntText( &value ) != tinyxml2::XML_SUCCESS ) {
          // Get the names of all parent nodes for this specific node
@@ -196,7 +196,7 @@ namespace XmlUtilities {
     *
     * @note If the given type of the node does not coincide with a string an error is thrown.
     */
-   inline std::string ReadString( tinyxml2::XMLElement const *node ) {
+   inline std::string ReadString( tinyxml2::XMLElement const* node ) {
 
       std::string const value( node->GetText() );
 
@@ -223,7 +223,7 @@ namespace XmlUtilities {
     *
     * @note If the order starting with 1 is broken, following time steps are not read anymore.
     */
-   inline std::vector<double> ReadTimeStamps( tinyxml2::XMLElement const *parent_node ) {
+   inline std::vector<double> ReadTimeStamps( tinyxml2::XMLElement const* parent_node ) {
       // Base name for all tags
       std::string timestamp_name;
       std::string base_name( "ts" );
@@ -231,9 +231,9 @@ namespace XmlUtilities {
       std::vector<double> timestamps;
       // Read until final number is reached
       bool keep_reading = true;
-      int index = 1;
+      int index         = 1;
       while( keep_reading ) {
-         timestamp_name = base_name + std::to_string( index++ );
+         timestamp_name                   = base_name + std::to_string( index++ );
          tinyxml2::XMLElement const* node = parent_node->FirstChildElement( timestamp_name.c_str() );
          if( node == nullptr ) {
             keep_reading = false;
@@ -244,6 +244,6 @@ namespace XmlUtilities {
 
       return timestamps;
    }
-}
+}// namespace XmlUtilities
 
-#endif // XML_UTILITIES_H
+#endif// XML_UTILITIES_H

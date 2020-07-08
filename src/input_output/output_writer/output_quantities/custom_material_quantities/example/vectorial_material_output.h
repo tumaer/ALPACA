@@ -86,20 +86,20 @@ class VectorialMaterialOutput : public OutputQuantity {
 
 private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    VectorialMaterialOutput() = delete;
    explicit VectorialMaterialOutput( UnitHandler const& unit_handler,
-                                  MaterialManager const& material_manager,
-                                  std::string const& quantity_name,
-                                  std::array<bool, 3> const output_flags );
-   virtual ~VectorialMaterialOutput() = default;
+                                     MaterialManager const& material_manager,
+                                     std::string const& quantity_name,
+                                     std::array<bool, 3> const output_flags );
+   virtual ~VectorialMaterialOutput()                        = default;
    VectorialMaterialOutput( VectorialMaterialOutput const& ) = delete;
    VectorialMaterialOutput& operator=( VectorialMaterialOutput const& ) = delete;
-   VectorialMaterialOutput( VectorialMaterialOutput&& ) = delete;
+   VectorialMaterialOutput( VectorialMaterialOutput&& )                 = delete;
    VectorialMaterialOutput& operator=( VectorialMaterialOutput&& ) = delete;
 };
 
-#endif // VECTORIAL_MATERIAL_OUTPUT_H
+#endif// VECTORIAL_MATERIAL_OUTPUT_H

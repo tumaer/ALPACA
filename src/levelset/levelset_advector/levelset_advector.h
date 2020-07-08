@@ -68,7 +68,6 @@
 #ifndef LEVELSET_ADVECTOR_H
 #define LEVELSET_ADVECTOR_H
 
-
 #include "topology/node.h"
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator_marching_cubes.h"
@@ -84,11 +83,11 @@ class LevelsetAdvector {
 
 public:
    //Private constructor only
-   ~LevelsetAdvector() = default;
-   LevelsetAdvector() = default;
+   ~LevelsetAdvector()                         = default;
+   LevelsetAdvector()                          = default;
    LevelsetAdvector( LevelsetAdvector const& ) = delete;
    LevelsetAdvector& operator=( LevelsetAdvector const& ) = delete;
-   LevelsetAdvector( LevelsetAdvector&& ) = delete;
+   LevelsetAdvector( LevelsetAdvector&& )                 = delete;
    LevelsetAdvector& operator=( LevelsetAdvector&& ) = delete;
 
    /**
@@ -96,9 +95,8 @@ public:
     * @param node The node for which the level-set field is propagated in time.
     */
    void Advect( Node& node ) const {
-      static_cast<DerivedLevelsetAdvector const&>(*this).AdvectImplementation( node );
+      static_cast<DerivedLevelsetAdvector const&>( *this ).AdvectImplementation( node );
    }
 };
 
-
-#endif //LEVELSET_ADVECTOR_H
+#endif//LEVELSET_ADVECTOR_H

@@ -68,16 +68,15 @@
 #ifndef INTERFACE_TAG_FUNCTIONS_H
 #define INTERFACE_TAG_FUNCTIONS_H
 
-
 #include "user_specifications/compile_time_constants.h"
 
-namespace InterfaceTagFunctions{
+namespace InterfaceTagFunctions {
 
-void InitializeInternalInterfaceTags(std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-void SetInternalCutCellTagsFromLevelset(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()], std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-void SetTotalInterfaceTagsFromCutCells(std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-bool TotalInterfaceTagsAreUniform(std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
+   void InitializeInternalInterfaceTags( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   void SetInternalCutCellTagsFromLevelset( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()], std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   void SetTotalInterfaceTagsFromCutCells( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   bool TotalInterfaceTagsAreUniform( std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
 
-}
+}// namespace InterfaceTagFunctions
 
-#endif //INTERFACE_TAG_FUNCTIONS_H
+#endif//INTERFACE_TAG_FUNCTIONS_H

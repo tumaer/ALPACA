@@ -72,27 +72,29 @@
 #include "enums/signal_speed.h"
 
 // RIEMANN_SOLVER
-enum class RiemannSolvers {Roe, Hllc, Hll};
+enum class RiemannSolvers { Roe,
+                            Hllc,
+                            Hll };
 constexpr RiemannSolvers riemann_solver = RiemannSolvers::Roe;
 
 namespace RoeSolverSettings {
-/* FluxSplitting options are:
+   /* FluxSplitting options are:
  * Roe | LocalLaxFriedrichs | GlobalLaxFriedrichs | Roe_M | LocalLaxFriedrichs_M
  * Roe_M and LocalLaxFriedrichs_M according to \cite Fleischmann20
  */
-constexpr FluxSplitting flux_splitting_scheme = FluxSplitting::Roe;
+   constexpr FluxSplitting flux_splitting_scheme = FluxSplitting::Roe;
 
-/* Phi in \cite Fleischmann20.
+   /* Phi in \cite Fleischmann20.
  * Limits the speed of sound in the eigenvalue calculation of Roe-M and LLF-M
  */
-constexpr double low_mach_number_limit_factor = 5.0;
-}
+   constexpr double low_mach_number_limit_factor = 5.0;
+}// namespace RoeSolverSettings
 
 namespace HllSolverSettings {
-/* Signal Speed choices for HLL-type solvers are:
+   /* Signal Speed choices for HLL-type solvers are:
  * Einfeldt \cite Einfeldt88 | Davis \cite Davis88 | Toro \cite Toro94 | Arithmetic \cite Coralic14
  */
-constexpr SignalSpeed signal_speed_selection = SignalSpeed::Einfeldt;
-}
+   constexpr SignalSpeed signal_speed_selection = SignalSpeed::Einfeldt;
+}// namespace HllSolverSettings
 
-#endif // RIEMANN_SOLVER_SETTINGS_H
+#endif// RIEMANN_SOLVER_SETTINGS_H

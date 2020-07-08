@@ -107,6 +107,6 @@ namespace RiemannSolverSetup {
    struct Concretize<RiemannSolvers::Hll> {
       typedef HllRiemannSolver type;
    };
-}
+}// namespace RiemannSolverSetup
 
-#endif // RIEMANN_SOLVER_SETUP_H
+#endif// RIEMANN_SOLVER_SETUP_H

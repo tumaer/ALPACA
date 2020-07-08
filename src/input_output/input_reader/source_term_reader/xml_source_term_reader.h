@@ -79,21 +79,21 @@
  *        (double, int, string) is done.  
  */
 class XmlSourceTermReader : public SourceTermReader {
- 
+
    // The already openend xml input file (must be shared pointer to distribute input file on different readers)
    std::shared_ptr<tinyxml2::XMLDocument const> const xml_input_file_;
 
    // Functions that are required from base class
-   double DoReadGravity(  Direction const direction ) const override; 
+   double DoReadGravity( Direction const direction ) const override;
 
 public:
    XmlSourceTermReader() = delete;
    explicit XmlSourceTermReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile );
-   ~XmlSourceTermReader() = default;
+   ~XmlSourceTermReader()                            = default;
    XmlSourceTermReader( XmlSourceTermReader const& ) = delete;
    XmlSourceTermReader& operator=( XmlSourceTermReader const& ) = delete;
-   XmlSourceTermReader( XmlSourceTermReader&& ) = delete;
+   XmlSourceTermReader( XmlSourceTermReader&& )                 = delete;
    XmlSourceTermReader& operator=( XmlSourceTermReader&& ) = delete;
 };
 
-#endif // XML_SOURCE_TERM_READER_H
+#endif// XML_SOURCE_TERM_READER_H

@@ -102,10 +102,10 @@ class TopologyNode {
 public:
    TopologyNode() = delete;
    explicit TopologyNode( std::uint64_t const id, int const rank = -1 );
-   ~TopologyNode() = default;
+   ~TopologyNode()                     = default;
    TopologyNode( TopologyNode const& ) = delete;
    TopologyNode& operator=( TopologyNode const& ) = delete;
-   TopologyNode( TopologyNode&& ) = default; //Needed for usage in vector.
+   TopologyNode( TopologyNode&& )                 = default;//Needed for usage in vector.
    TopologyNode& operator=( TopologyNode&& ) = delete;
 
    void Refine( std::uint64_t const id );
@@ -121,8 +121,8 @@ public:
    void RankWiseNodeBlockCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank ) const;
    unsigned int GetDepth() const;
 
-   void IdsOnLevel( unsigned int const level,std::vector<std::uint64_t>& ids ) const;
-   void LocalIdsOnLevel( unsigned int const level,std::vector<std::uint64_t>& ids, int const local_rank ) const;
+   void IdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids ) const;
+   void LocalIdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids, int const local_rank ) const;
 
    unsigned int LocalLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const;
    unsigned int LocalInterfaceLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const;
@@ -132,10 +132,10 @@ public:
 
    void LocalNodes( std::vector<std::uint64_t>& local_nodes, int const rank ) const;
 
-   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, unsigned int const level = 0 );
-   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, const HilbertPosition position,unsigned int const level = 0 );
+   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, unsigned int const level = 0 );
+   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, const HilbertPosition position, unsigned int const level = 0 );
 
-   void ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const, int const, int const> >& ids_current_future_rank_map );
+   void ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map );
 
    int BalanceTargetRanks();
    void SetCurrentRankOfLeaf( std::uint64_t const id, int const rank );
@@ -154,21 +154,21 @@ public:
     * @brief Gives the id of this topology node.
     * @return id.
     */
-   inline std::uint64_t Id() const {return unique_id_;}
+   inline std::uint64_t Id() const { return unique_id_; }
 
    /**
     * @brief Gives the current rank of the TopologyNode.
     * @return Rank.
     */
-   inline int GetRank() const {return current_rank_;}
+   inline int GetRank() const { return current_rank_; }
 
    /**
     * @brief Specification of == operator for the id of topology nodes
     * @param rhs right hand side value of == operator
     * @return True if Ids of two nodes are equal, False otherwise 
     */
-   inline bool operator==( std::uint64_t const rhs ) {return ( rhs == unique_id_ );}
-   inline bool operator==( TopologyNode const& rhs ) {return ( rhs.Id() == unique_id_ );}
+   inline bool operator==( std::uint64_t const rhs ) { return ( rhs == unique_id_ ); }
+   inline bool operator==( TopologyNode const& rhs ) { return ( rhs.Id() == unique_id_ ); }
 };
 
-#endif // TOPOLOGY_NODE_H
+#endif// TOPOLOGY_NODE_H

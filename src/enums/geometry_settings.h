@@ -71,11 +71,13 @@
 /**
  * @brief Identifer for the cut cell criteria.
  */
-enum class CutCellCriteria { SignChangeBased, ValueBased };
+enum class CutCellCriteria { SignChangeBased,
+                             ValueBased };
 
 /**
  * @brief Identifer whther to use differentiation or reconstruction stencil inside the geometry calculator.
  */
-enum class GeometryStencilType {Reconstruction, Derivative};
+enum class GeometryStencilType { Reconstruction,
+                                 Derivative };
 
-#endif // GEOMETRY_SETTINGS_H
+#endif// GEOMETRY_SETTINGS_H

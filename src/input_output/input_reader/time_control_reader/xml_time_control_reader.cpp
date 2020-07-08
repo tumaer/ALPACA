@@ -73,9 +73,8 @@
  * @brief Default constructor for the time-control reader for xml-type input files.
  * @param inputfile The xml input file document holding all information of the user inputs (shared pointer to provide document for different readers).
  */
-XmlTimeControlReader::XmlTimeControlReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) :
-   TimeControlReader(),
-   xml_input_file_( std::move( inputfile ) ) {
+XmlTimeControlReader::XmlTimeControlReader( std::shared_ptr<tinyxml2::XMLDocument> inputfile ) : TimeControlReader(),
+                                                                                                 xml_input_file_( std::move( inputfile ) ) {
    /** Empty besides initializer list and base class constructor call */
 }
 

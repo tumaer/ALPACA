@@ -80,7 +80,11 @@ namespace FieldDetails {
    */
    enum class EquationPool {
       // mandatory equations
-      Mass, Energy, MomentumX, MomentumY, MomentumZ,
+      Mass,
+      Energy,
+      MomentumX,
+      MomentumY,
+      MomentumZ,
       // optional equations
       // Example
    };
@@ -91,9 +95,13 @@ namespace FieldDetails {
    */
    enum class PrimeStatePool {
       // mandatory prime states
-      Density, Pressure, VelocityX, VelocityY, VelocityZ,
+      Density,
+      Pressure,
+      VelocityX,
+      VelocityY,
+      VelocityZ,
       // optional prime states
-      Temperature, // Example
+      Temperature,// Example
    };
 
    /**
@@ -112,7 +120,8 @@ namespace FieldDetails {
    * @note  Every member has to be added to the InterfaceDescription enumeration as well.
    */
    enum class InterfaceDescriptionPool {
-      Levelset, VolumeFraction
+      Levelset,
+      VolumeFraction
    };
 
    /**
@@ -123,7 +132,8 @@ namespace FieldDetails {
       // mandatory interface states
       Velocity,
       // optional interface states
-      PressurePositive, PressureNegative
+      PressurePositive,
+      PressureNegative
    };
 
    /**
@@ -192,21 +202,21 @@ namespace FieldDetails {
    /**
    * @brief Configuration of the active conservative equations.
    */
-   struct ActiveEquations : public ActiveFieldsDefinition< ActiveEquations, EquationPool > {
+   struct ActiveEquations : public ActiveFieldsDefinition<ActiveEquations, EquationPool> {
       static constexpr auto Definition = MakeArray(
-         //           conservative                  unit                    input_name*
-         // mandatory equations (DO NOT CHANGE):
-           FieldInfo{ EquationPool::Mass,           UnitType::Density,          "" }
-         , FieldInfo{ EquationPool::Energy,         UnitType::Energy,           "" }
-         , FieldInfo{ EquationPool::MomentumX,      UnitType::Momentum,         "" }
-   #if DIMENSION != 1
-         , FieldInfo{ EquationPool::MomentumY,      UnitType::Momentum,         "" }
-   #endif
-   #if DIMENSION == 3
-         , FieldInfo{ EquationPool::MomentumZ,      UnitType::Momentum,         "" }
-   #endif
-         // optional equations:
-      // , FieldInfo{ EquationPool::Example,        UnitType::Example,      "example" }
+            //           conservative                  unit                    input_name*
+            // mandatory equations (DO NOT CHANGE):
+            FieldInfo{ EquationPool::Mass, UnitType::Density, "" }, FieldInfo{ EquationPool::Energy, UnitType::Energy, "" }, FieldInfo { EquationPool::MomentumX, UnitType::Momentum, "" }
+#if DIMENSION != 1
+            ,
+            FieldInfo { EquationPool::MomentumY, UnitType::Momentum, "" }
+#endif
+#if DIMENSION == 3
+            ,
+            FieldInfo { EquationPool::MomentumZ, UnitType::Momentum, "" }
+#endif
+            // optional equations:
+            // , FieldInfo{ EquationPool::Example,        UnitType::Example,      "example" }
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active equations! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -215,22 +225,23 @@ namespace FieldDetails {
    /**
    * @brief Configuration of the active prime states.
    */
-   struct ActivePrimeStates : public ActiveFieldsDefinition< ActivePrimeStates, PrimeStatePool > {
+   struct ActivePrimeStates : public ActiveFieldsDefinition<ActivePrimeStates, PrimeStatePool> {
       static constexpr auto Definition = MakeArray(
-         //           prime state                      unit                       input_name
-         // mandatory prime states (DO NOT CHANGE):
-           FieldInfo{ PrimeStatePool::Density,         UnitType::Density,         "density" }
-         , FieldInfo{ PrimeStatePool::Pressure,        UnitType::Pressure,        "pressure" }
-         , FieldInfo{ PrimeStatePool::VelocityX,       UnitType::Velocity,        "velocityX" }
-   #if DIMENSION != 1
-         , FieldInfo{ PrimeStatePool::VelocityY,       UnitType::Velocity,        "velocityY" }
-   #endif
-   #if DIMENSION == 3
-         , FieldInfo{ PrimeStatePool::VelocityZ,       UnitType::Velocity,        "velocityZ" }
-   #endif
-         // optional prime states:
-         , FieldInfo{ PrimeStatePool::Temperature,     UnitType::Temperature,          "" }
-      // , FieldInfo{ PrimeStatePool::Example,        UnitType::Example,      "example" }
+            //           prime state                      unit                       input_name
+            // mandatory prime states (DO NOT CHANGE):
+            FieldInfo{ PrimeStatePool::Density, UnitType::Density, "density" }, FieldInfo{ PrimeStatePool::Pressure, UnitType::Pressure, "pressure" }, FieldInfo { PrimeStatePool::VelocityX, UnitType::Velocity, "velocityX" }
+#if DIMENSION != 1
+            ,
+            FieldInfo { PrimeStatePool::VelocityY, UnitType::Velocity, "velocityY" }
+#endif
+#if DIMENSION == 3
+            ,
+            FieldInfo { PrimeStatePool::VelocityZ, UnitType::Velocity, "velocityZ" }
+#endif
+            // optional prime states:
+            ,
+            FieldInfo{ PrimeStatePool::Temperature, UnitType::Temperature, "" }
+            // , FieldInfo{ PrimeStatePool::Example,        UnitType::Example,      "example" }
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active prime states! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -239,13 +250,12 @@ namespace FieldDetails {
    /**
    * @brief Configuration of the active parameters.
    */
-   struct ActiveParameters : public ActiveFieldsDefinition< ActiveParameters, ParameterPool > {
+   struct ActiveParameters : public ActiveFieldsDefinition<ActiveParameters, ParameterPool> {
       static constexpr auto Definition = MakeArray(
-         //           parameter                                      unit                  input_name
-           FieldInfo{ ParameterPool::ShearViscosity,         UnitType::Viscosity,            "" }
-         , FieldInfo{ ParameterPool::ThermalConductivity,    UnitType::ThermalConductivity,  "" }
+            //           parameter                                      unit                  input_name
+            FieldInfo{ ParameterPool::ShearViscosity, UnitType::Viscosity, "" }, FieldInfo{ ParameterPool::ThermalConductivity, UnitType::ThermalConductivity, "" }
 
-      // , FieldInfo{ ParameterPool::Example,                    UnitType::Example,      "example" }
+            // , FieldInfo{ ParameterPool::Example,                    UnitType::Example,      "example" }
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active parameters! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -254,13 +264,12 @@ namespace FieldDetails {
    /**
    * @brief Configuration of the active interface description fields.
    */
-   struct ActiveInterfaceDescriptions : public ActiveFieldsDefinition< ActiveInterfaceDescriptions, InterfaceDescriptionPool > {
+   struct ActiveInterfaceDescriptions : public ActiveFieldsDefinition<ActiveInterfaceDescriptions, InterfaceDescriptionPool> {
       static constexpr auto Definition = MakeArray(
-         //           interface description                               unit                  input_name
-         // mandatory description (DO NOT CHANGE):
-           FieldInfo{ InterfaceDescriptionPool::Levelset,            UnitType::Unitless,     "phi" }
-         , FieldInfo{ InterfaceDescriptionPool::VolumeFraction,      UnitType::Unitless,         "" }
-      // , FieldInfo{ InterfaceDescriptionPool::Example,             UnitType::Example,      "example" }
+            //           interface description                               unit                  input_name
+            // mandatory description (DO NOT CHANGE):
+            FieldInfo{ InterfaceDescriptionPool::Levelset, UnitType::Unitless, "phi" }, FieldInfo{ InterfaceDescriptionPool::VolumeFraction, UnitType::Unitless, "" }
+            // , FieldInfo{ InterfaceDescriptionPool::Example,             UnitType::Example,      "example" }
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active interface descriptions! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -269,15 +278,15 @@ namespace FieldDetails {
    /**
    * @brief Configuration of the active interface states.
    */
-   struct ActiveInterfaceStates : public ActiveFieldsDefinition< ActiveInterfaceStates, InterfaceStatePool > {
+   struct ActiveInterfaceStates : public ActiveFieldsDefinition<ActiveInterfaceStates, InterfaceStatePool> {
       static constexpr auto Definition = MakeArray(
-         //           interface state                             unit                  input_name
-         // mandatory interface states (DO NOT CHANGE):
-           FieldInfo{ InterfaceStatePool::Velocity,            UnitType::Velocity,         "" }
-         // optional interface states:
-         , FieldInfo{ InterfaceStatePool::PressurePositive,    UnitType::Pressure,         "" }
-         , FieldInfo{ InterfaceStatePool::PressureNegative,    UnitType::Pressure,         "" }
-      // , FieldInfo{ InterfaceStatePool::Example,             UnitType::Example,      "example" }
+            //           interface state                             unit                  input_name
+            // mandatory interface states (DO NOT CHANGE):
+            FieldInfo{ InterfaceStatePool::Velocity, UnitType::Velocity, "" }
+            // optional interface states:
+            ,
+            FieldInfo{ InterfaceStatePool::PressurePositive, UnitType::Pressure, "" }, FieldInfo{ InterfaceStatePool::PressureNegative, UnitType::Pressure, "" }
+            // , FieldInfo{ InterfaceStatePool::Example,             UnitType::Example,      "example" }
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active interface states! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -286,16 +295,16 @@ namespace FieldDetails {
    /**
    * @brief Configuration of the active interface parameters.
    */
-   struct ActiveInterfaceParameters : public ActiveFieldsDefinition< ActiveInterfaceParameters, InterfaceParameterPool > {
+   struct ActiveInterfaceParameters : public ActiveFieldsDefinition<ActiveInterfaceParameters, InterfaceParameterPool> {
       static constexpr auto Definition = MakeArray(
-         //           interface parameter                                                     unit                              input_name              component_name*
-           FieldInfo{ InterfaceParameterPool::SurfaceTensionCoefficient,        UnitType::SurfaceTensionCoefficient,                "" }
-      // , FieldInfo{ InterfaceParameterPool::Example,                                  UnitType::Example,                       "example" }
+            //           interface parameter                                                     unit                              input_name              component_name*
+            FieldInfo{ InterfaceParameterPool::SurfaceTensionCoefficient, UnitType::SurfaceTensionCoefficient, "" }
+            // , FieldInfo{ InterfaceParameterPool::Example,                                  UnitType::Example,                       "example" }
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active interface parameters! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
    };
-}
+}// namespace FieldDetails
 
 // NH: NEVER EVER change the underlying type.
 /**
@@ -304,11 +313,11 @@ namespace FieldDetails {
  */
 enum class Equation : unsigned int {
    // mandatory equations:
-   Mass           = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::Mass ),
-   Energy         = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::Energy ),
-   MomentumX      = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::MomentumX ),
-   MomentumY      = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::MomentumY ),
-   MomentumZ      = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::MomentumZ ),
+   Mass      = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::Mass ),
+   Energy    = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::Energy ),
+   MomentumX = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::MomentumX ),
+   MomentumY = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::MomentumY ),
+   MomentumZ = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::MomentumZ ),
    // optional equations
    // Example     = FieldDetails::ActiveEquations::FieldIndex( FieldDetails::EquationPool::Example ),
 };
@@ -326,13 +335,13 @@ constexpr std::underlying_type<Equation>::type ETI( Equation const e ) { return 
  */
 enum class PrimeState : unsigned int {
    // mandatory prime states
-   Density        = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Density ),
-   Pressure       = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Pressure ),
-   VelocityX      = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::VelocityX ),
-   VelocityY      = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::VelocityY ),
-   VelocityZ      = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::VelocityZ ),
+   Density   = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Density ),
+   Pressure  = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Pressure ),
+   VelocityX = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::VelocityX ),
+   VelocityY = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::VelocityY ),
+   VelocityZ = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::VelocityZ ),
    // optional prime states
-   Temperature    = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Temperature ),
+   Temperature = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Temperature ),
    // Example     = FieldDetails::ActivePrimeStates::FieldIndex( FieldDetails::PrimeStatePool::Example ),
 };
 /**
@@ -349,8 +358,8 @@ constexpr std::underlying_type<PrimeState>::type PTI( PrimeState const p ) { ret
  */
 enum class Parameter : unsigned int {
    // parameters
-   ShearViscosity       = FieldDetails::ActiveParameters::FieldIndex( FieldDetails::ParameterPool::ShearViscosity ),
-   ThermalConductivity  = FieldDetails::ActiveParameters::FieldIndex( FieldDetails::ParameterPool::ThermalConductivity )
+   ShearViscosity      = FieldDetails::ActiveParameters::FieldIndex( FieldDetails::ParameterPool::ShearViscosity ),
+   ThermalConductivity = FieldDetails::ActiveParameters::FieldIndex( FieldDetails::ParameterPool::ThermalConductivity )
    // Example     = FieldDetails::ActiveParameters::FieldIndex( FieldDetails::ParameterPool::Example ),
 };
 
@@ -368,8 +377,8 @@ constexpr std::underlying_type<Parameter>::type PTI( Parameter const p ) { retur
  */
 enum class InterfaceDescription : unsigned int {
    // mandatory interface descriptions
-   Levelset        = FieldDetails::ActiveInterfaceDescriptions::FieldIndex( FieldDetails::InterfaceDescriptionPool::Levelset ),
-   VolumeFraction  = FieldDetails::ActiveInterfaceDescriptions::FieldIndex( FieldDetails::InterfaceDescriptionPool::VolumeFraction ),
+   Levelset       = FieldDetails::ActiveInterfaceDescriptions::FieldIndex( FieldDetails::InterfaceDescriptionPool::Levelset ),
+   VolumeFraction = FieldDetails::ActiveInterfaceDescriptions::FieldIndex( FieldDetails::InterfaceDescriptionPool::VolumeFraction ),
    // Example      = FieldDetails::ActiveInterfaceDescriptions::FieldIndex( FieldDetails::InterfaceDescriptionPool::Example ),
 };
 
@@ -387,10 +396,10 @@ constexpr std::underlying_type<InterfaceDescription>::type IDTI( InterfaceDescri
  */
 enum class InterfaceState : unsigned int {
    // mandatory interface states
-   Velocity             = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::Velocity ),
+   Velocity = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::Velocity ),
    // optional interface states
-   PressurePositive     = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::PressurePositive ),
-   PressureNegative     = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::PressureNegative ),
+   PressurePositive = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::PressurePositive ),
+   PressureNegative = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::PressureNegative ),
    // Example           = FieldDetails::ActiveInterfaceStates::FieldIndex( FieldDetails::InterfaceStatePool::Example ),
 };
 
@@ -408,7 +417,7 @@ constexpr std::underlying_type<InterfaceState>::type ISTI( InterfaceState const 
  */
 enum class InterfaceParameter : unsigned int {
    // mandatory interface states
-   SurfaceTensionCoefficient  = FieldDetails::ActiveInterfaceParameters::FieldIndex( FieldDetails::InterfaceParameterPool::SurfaceTensionCoefficient ),
+   SurfaceTensionCoefficient = FieldDetails::ActiveInterfaceParameters::FieldIndex( FieldDetails::InterfaceParameterPool::SurfaceTensionCoefficient ),
    // Example           = FieldDetails::ActiveInterfaceParameters::FieldIndex( FieldDetails::InterfaceParameterPool::Example ),
 };
 /**
@@ -418,4 +427,4 @@ enum class InterfaceParameter : unsigned int {
  */
 constexpr std::underlying_type<InterfaceParameter>::type IPTI( InterfaceParameter const ip ) { return static_cast<typename std::underlying_type<InterfaceParameter>::type>( ip ); }
 
-#endif // FIELD_DETAILS_H
+#endif// FIELD_DETAILS_H

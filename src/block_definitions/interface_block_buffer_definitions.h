@@ -75,10 +75,16 @@
  */
 enum class InterfaceBlockBufferType {
    // interface description buffers
-   LevelsetBase, LevelsetRightHandSide, LevelsetReinitialized,
-   VolumeFractionBase, VolumeFractionRightHandSide, VolumeFractionReinitialized,
+   LevelsetBase,
+   LevelsetRightHandSide,
+   LevelsetReinitialized,
+   VolumeFractionBase,
+   VolumeFractionRightHandSide,
+   VolumeFractionReinitialized,
    // interface state buffers
-   InterfaceStateVelocity, InterfaceStatePressurePositive, InterfaceStatePressureNegative,
+   InterfaceStateVelocity,
+   InterfaceStatePressurePositive,
+   InterfaceStatePressureNegative,
    // interface parameter buffers
    InterfaceParameterSurfaceTensionCoefficient
 };
@@ -91,35 +97,33 @@ enum class InterfaceBlockBufferType {
  */
 static constexpr InterfaceBlockBufferType MapInterfaceDescritpionToInterfaceBlockBufferType( InterfaceDescription const description_field, InterfaceDescriptionBufferType const buffer_type ) {
    switch( buffer_type ) {
-      case InterfaceDescriptionBufferType::Base : {
+      case InterfaceDescriptionBufferType::Base: {
          switch( description_field ) {
-            case InterfaceDescription::Levelset : {
+            case InterfaceDescription::Levelset: {
                return InterfaceBlockBufferType::LevelsetBase;
             }
-            default : {
+            default: {
                return InterfaceBlockBufferType::VolumeFractionBase;
             }
          }
-      }
-      break;
+      } break;
       case InterfaceDescriptionBufferType::RightHandSide: {
          switch( description_field ) {
-            case InterfaceDescription::Levelset : {
+            case InterfaceDescription::Levelset: {
                return InterfaceBlockBufferType::LevelsetRightHandSide;
             }
-            default : {
+            default: {
                return InterfaceBlockBufferType::VolumeFractionRightHandSide;
             }
          }
-      }
-      break;
+      } break;
       // Last possibility (reinitialized)
-      default : {
+      default: {
          switch( description_field ) {
-            case InterfaceDescription::Levelset : {
+            case InterfaceDescription::Levelset: {
                return InterfaceBlockBufferType::LevelsetReinitialized;
             }
-            default : {
+            default: {
                return InterfaceBlockBufferType::VolumeFractionReinitialized;
             }
          }
@@ -134,14 +138,14 @@ static constexpr InterfaceBlockBufferType MapInterfaceDescritpionToInterfaceBloc
  */
 static constexpr InterfaceBlockBufferType MapInterfaceStateToInterfaceBlockBufferType( InterfaceState const state ) {
    switch( state ) {
-      case InterfaceState::Velocity : {
+      case InterfaceState::Velocity: {
          return InterfaceBlockBufferType::InterfaceStateVelocity;
       }
-      case InterfaceState::PressurePositive : {
+      case InterfaceState::PressurePositive: {
          return InterfaceBlockBufferType::InterfaceStatePressurePositive;
       }
       // Last possibility
-      default : {
+      default: {
          return InterfaceBlockBufferType::InterfaceStatePressureNegative;
       }
    }
@@ -154,7 +158,7 @@ static constexpr InterfaceBlockBufferType MapInterfaceStateToInterfaceBlockBuffe
  */
 static constexpr InterfaceBlockBufferType MapInterfaceParameterToInterfaceBlockBufferType( InterfaceParameter const parameter ) {
    switch( parameter ) {
-      default : {
+      default: {
          return InterfaceBlockBufferType::InterfaceParameterSurfaceTensionCoefficient;
       }
    }
@@ -169,16 +173,16 @@ static constexpr InterfaceBlockBufferType MapInterfaceParameterToInterfaceBlockB
  */
 static constexpr InterfaceBlockBufferType MapInterfaceFieldToInterfaceBlockBufferType( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::RightHandSide ) {
    switch( field_type ) {
-      case InterfaceFieldType::Description : {
+      case InterfaceFieldType::Description: {
          return MapInterfaceDescritpionToInterfaceBlockBufferType( IF::ITID( field_index ), buffer_type );
       }
-      case InterfaceFieldType::Parameters : {
+      case InterfaceFieldType::Parameters: {
          return MapInterfaceParameterToInterfaceBlockBufferType( IF::ITIP( field_index ) );
       }
-      default : {
+      default: {
          return MapInterfaceStateToInterfaceBlockBufferType( IF::ITIS( field_index ) );
       }
    }
 }
 
-#endif // INTERFACE_BLOCK_BUFFER_DEFINITIONS_H
+#endif// INTERFACE_BLOCK_BUFFER_DEFINITIONS_H

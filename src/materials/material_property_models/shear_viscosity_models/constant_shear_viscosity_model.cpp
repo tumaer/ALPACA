@@ -78,10 +78,9 @@
  * @note Runtime a check is done that all required parameters are present. Furthermore, pre-calculations are done for simpler access during compute call.
  */
 ConstantShearViscosityModel::ConstantShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
-                                                          UnitHandler const& unit_handler ) :
-   // Start initializer list
-   ConstantMaterialParameterModel<ConstantShearViscosityModel>(),
-   mu_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muConstant", "ConstantShearViscosityModel" ), UnitType::Viscosity ) ) {
+                                                          UnitHandler const& unit_handler ) :// Start initializer list
+                                                                                              ConstantMaterialParameterModel<ConstantShearViscosityModel>(),
+                                                                                              mu_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muConstant", "ConstantShearViscosityModel" ), UnitType::Viscosity ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 
@@ -96,8 +95,7 @@ std::string ConstantShearViscosityModel::GetLogData( unsigned int const indent, 
    std::string log_string;
    // Add data
    log_string += StringOperations::Indent( indent ) + "Model type: Constant \n";
-   log_string += StringOperations::Indent( indent ) + "mu_const  : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( mu_constant_, UnitType::Viscosity ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "mu_const  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( mu_constant_, UnitType::Viscosity ), 9 ) + "\n";
 
    return log_string;
 }

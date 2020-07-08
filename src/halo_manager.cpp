@@ -77,14 +77,12 @@
  * @param communication_manager Instance to access communication information.
  * @param maximum_level The maximum level used in the simulation.
  */
-HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager & internal_halo_manager,
-                          CommunicationManager const& communication_manager, unsigned int const maximum_level ) :
-   tree_( tree ),
-   external_halo_manager_( external_halo_manager ),
-   internal_halo_manager_( internal_halo_manager ),
-   communication_manager_( communication_manager ),
-   maximum_level_( maximum_level )
-{
+HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager& internal_halo_manager,
+                          CommunicationManager const& communication_manager, unsigned int const maximum_level ) : tree_( tree ),
+                                                                                                                  external_halo_manager_( external_halo_manager ),
+                                                                                                                  internal_halo_manager_( internal_halo_manager ),
+                                                                                                                  communication_manager_( communication_manager ),
+                                                                                                                  maximum_level_( maximum_level ) {
    // Empty besides initializer list.
 }
 
@@ -95,7 +93,7 @@ HaloManager::HaloManager( Tree& tree, ExternalHaloManager const& external_halo_m
  * @param cut_jumps Decider if jump halos should be updated on all specified level. If true: jumps will not be updated on the coarsest level in "upddate_levels".
  */
 void HaloManager::MaterialHaloUpdate( std::vector<unsigned int> const& levels_ascending, MaterialFieldType const field_type, bool const cut_jumps ) const {
-   std::vector<unsigned int> no_jump_update_levels(levels_ascending);
+   std::vector<unsigned int> no_jump_update_levels( levels_ascending );
    /* NH 2017-02-20: It may be that no-jump halos are not to be updated on the coarsest level in the input list. Therefore this level is handled separately.
     * Afterwards a normal Halo update is performed on all remaining levels in the input list.
     */
@@ -178,11 +176,11 @@ void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> c
       internal_halo_manager_.InterfaceTagHaloUpdateOnLevel( level );
       // Update of domain boundaries
       for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
-         std::uint64_t const id = std::get<0>( domain_boundary );
+         std::uint64_t const id          = std::get<0>( domain_boundary );
          BoundaryLocation const location = std::get<1>( domain_boundary );
          external_halo_manager_.UpdateInterfaceTagExternal( tree_.GetNodeWithId( id ), location );
       }
-   } //levels
+   }//levels
 }
 
 /**
@@ -204,9 +202,9 @@ void HaloManager::InterfaceHaloUpdateOnLevelList( std::vector<unsigned int> cons
       internal_halo_manager_.InterfaceHaloUpdateOnLevel( level, type );
       // Update of domain boundaries
       for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
-         std::uint64_t const id = std::get<0>( domain_boundary );
+         std::uint64_t const id          = std::get<0>( domain_boundary );
          BoundaryLocation const location = std::get<1>( domain_boundary );
          external_halo_manager_.UpdateLevelsetExternal( tree_.GetNodeWithId( id ), type, location );
       }
-   } //levels
+   }//levels
 }

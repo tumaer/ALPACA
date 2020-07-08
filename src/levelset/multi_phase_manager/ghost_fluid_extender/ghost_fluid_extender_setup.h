@@ -104,6 +104,6 @@ namespace GhostFluidExtenderSetup {
       typedef UpwindGhostFluidExtender<MaterialFieldType::PrimeStates> type_primestates;
       typedef UpwindGhostFluidExtender<MaterialFieldType::Parameters> type_parameters;
    };
-}
+}// namespace GhostFluidExtenderSetup
 
-#endif // GHOST_FLUID_EXTENDER_SETUP_H
+#endif// GHOST_FLUID_EXTENDER_SETUP_H

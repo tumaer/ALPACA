@@ -72,31 +72,30 @@
 #include "topology/id_information.h"
 #include "communication/internal_halo_manager.h"
 
-
 SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
    constexpr MaterialName material_one = MaterialName::MaterialOne;
    constexpr MaterialName material_two = MaterialName::MaterialTwo;
 
    GIVEN( "A single-level all multi-phase topology with 2x2x2 neighboring nodes" ) {
-      constexpr unsigned int maximum_level = 0;
+      constexpr unsigned int maximum_level      = 0;
       TopologyManager two_nodes_level_zero_topo = TopologyManager( { 2, 2, 2 }, maximum_level, 0 );
-      Tree tree = Tree( two_nodes_level_zero_topo, maximum_level, 1.0 );
-      for( auto const id : two_nodes_level_zero_topo.LocalLeafIds() ){
+      Tree tree                                 = Tree( two_nodes_level_zero_topo, maximum_level, 1.0 );
+      for( auto const id : two_nodes_level_zero_topo.LocalLeafIds() ) {
          two_nodes_level_zero_topo.AddMaterialToNode( id, material_one );
          two_nodes_level_zero_topo.AddMaterialToNode( id, material_two );
-         tree.CreateNode( id, {material_one, material_two} );
+         tree.CreateNode( id, { material_one, material_two } );
       }
       two_nodes_level_zero_topo.UpdateTopology();
 
       WHEN( "Material, interface tag and levelset values are set and halo-updated" ) {
          for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
             node.SetInterfaceBlock( std::make_unique<InterfaceBlock>( static_cast<double>( id ) ) );
-            auto& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+            auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
             auto& interface_tags = node.GetInterfaceTags();
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                   for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                     cells[i][j][k] = static_cast<double>( id );
+                     cells[i][j][k]          = static_cast<double>( id );
                      interface_tags[i][j][k] = static_cast<int8_t>( PositionOfNodeAmongSiblings( id ) );
                   }
                }
@@ -110,23 +109,21 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          internal_halos.InterfaceHaloUpdateOnLevel( maximum_level, InterfaceBlockBufferType::LevelsetRightHandSide );
 
          THEN( "The halo values contain the proper values from the neighbor node" ) {
-            std::unordered_map<int, std::vector<BoundaryLocation>> sides_to_check_for_id( {
-                  { 0, { BoundaryLocation::East, BoundaryLocation::NorthEast, BoundaryLocation::EastNorthTop} },
-                  { 1, { BoundaryLocation::West, BoundaryLocation::NorthWest, BoundaryLocation::WestNorthTop} },
-                  { 2, { BoundaryLocation::East, BoundaryLocation::SouthEast, BoundaryLocation::EastSouthTop} },
-                  { 3, { BoundaryLocation::West, BoundaryLocation::SouthWest, BoundaryLocation::WestSouthTop} },
-                  { 4, { BoundaryLocation::East, BoundaryLocation::NorthEast, BoundaryLocation::EastNorthBottom} },
-                  { 5, { BoundaryLocation::West, BoundaryLocation::NorthWest, BoundaryLocation::WestNorthBottom} },
-                  { 6, { BoundaryLocation::East, BoundaryLocation::SouthEast, BoundaryLocation::EastSouthBottom} },
-                  { 7, { BoundaryLocation::West, BoundaryLocation::SouthWest, BoundaryLocation::WestSouthBottom} }
-               } );
+            std::unordered_map<int, std::vector<BoundaryLocation>> sides_to_check_for_id( { { 0, { BoundaryLocation::East, BoundaryLocation::NorthEast, BoundaryLocation::EastNorthTop } },
+                                                                                            { 1, { BoundaryLocation::West, BoundaryLocation::NorthWest, BoundaryLocation::WestNorthTop } },
+                                                                                            { 2, { BoundaryLocation::East, BoundaryLocation::SouthEast, BoundaryLocation::EastSouthTop } },
+                                                                                            { 3, { BoundaryLocation::West, BoundaryLocation::SouthWest, BoundaryLocation::WestSouthTop } },
+                                                                                            { 4, { BoundaryLocation::East, BoundaryLocation::NorthEast, BoundaryLocation::EastNorthBottom } },
+                                                                                            { 5, { BoundaryLocation::West, BoundaryLocation::NorthWest, BoundaryLocation::WestNorthBottom } },
+                                                                                            { 6, { BoundaryLocation::East, BoundaryLocation::SouthEast, BoundaryLocation::EastSouthBottom } },
+                                                                                            { 7, { BoundaryLocation::West, BoundaryLocation::SouthWest, BoundaryLocation::WestSouthBottom } } } );
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
-               auto const& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+               auto const& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
                auto const& interface_tags = node.GetInterfaceTags();
-               auto const& levelset = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
+               auto const& levelset       = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
                for( auto const& side : sides_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) ) ) {
                   auto const recv_indices = communication.GetStartIndicesHaloRecv( side );
-                  auto const size = communication.GetHaloSize( side );
+                  auto const size         = communication.GetHaloSize( side );
                   for( int i = recv_indices[0]; i < size[0] + recv_indices[0]; ++i ) {
                      for( int j = recv_indices[1]; j < size[1] + recv_indices[1]; ++j ) {
                         for( int k = recv_indices[2]; k < size[2] + recv_indices[2]; ++k ) {
@@ -143,21 +140,21 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
    }
 
    GIVEN( "The simplest all two-phase single-jump topology" ) {
-      constexpr unsigned int maximum_level = 1;
-      TopologyManager simple_jump_topo = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
+      constexpr unsigned int maximum_level   = 1;
+      TopologyManager simple_jump_topo       = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
       constexpr std::uint64_t jump_parent_id = 0x1400001;
-      Tree tree = Tree( simple_jump_topo, maximum_level, 1.0 );
+      Tree tree                              = Tree( simple_jump_topo, maximum_level, 1.0 );
       if( simple_jump_topo.NodeIsOnRank( jump_parent_id, MpiUtilities::MyRankId() ) ) {
          simple_jump_topo.AddMaterialToNode( jump_parent_id, material_one );
          simple_jump_topo.AddMaterialToNode( jump_parent_id, material_two );
-         tree.CreateNode( jump_parent_id, {material_one, material_two} );
+         tree.CreateNode( jump_parent_id, { material_one, material_two } );
       }
       simple_jump_topo.RefineNodeWithId( jump_parent_id );
       simple_jump_topo.UpdateTopology();
       for( auto const id : simple_jump_topo.LocalLeafIds() ) {
          simple_jump_topo.AddMaterialToNode( id, material_one );
          simple_jump_topo.AddMaterialToNode( id, material_two );
-         tree.CreateNode( id, {material_one, material_two} );
+         tree.CreateNode( id, { material_one, material_two } );
       }
       simple_jump_topo.UpdateTopology();
 
@@ -167,12 +164,12 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          }
          for( auto& level : tree.FullNodeList() ) {
             for( auto& [id, node] : level ) {
-               auto& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+               auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
                auto& interface_tags = node.GetInterfaceTags();
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                      for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                        cells[i][j][k] = static_cast<double>( id );
+                        cells[i][j][k]          = static_cast<double>( id );
                         interface_tags[i][j][k] = static_cast<int8_t>( PositionOfNodeAmongSiblings( id ) );
                      }
                   }
@@ -187,22 +184,28 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level );
          internal_halos.InterfaceHaloUpdateOnLevel( maximum_level, InterfaceBlockBufferType::LevelsetRightHandSide );
 
-         THEN( "The values in the jump halos are correct" )  {
-            std::unordered_map<int, BoundaryLocation> side_to_check_for_id( { { 0, BoundaryLocation::East }, { 1, BoundaryLocation::West }, // On level 0 [and 1] (standard)
-                                                                              { 2, BoundaryLocation::West }, { 4, BoundaryLocation::West }, { 6, BoundaryLocation::West }, // For jump ("other side")
-                                                                              { 3, BoundaryLocation::West }, { 5, BoundaryLocation::West }, { 7, BoundaryLocation::West }  // On level 1 (standard),
-                                                                            } );
+         THEN( "The values in the jump halos are correct" ) {
+            std::unordered_map<int, BoundaryLocation> side_to_check_for_id( {
+                  { 0, BoundaryLocation::East },
+                  { 1, BoundaryLocation::West },// On level 0 [and 1] (standard)
+                  { 2, BoundaryLocation::West },
+                  { 4, BoundaryLocation::West },
+                  { 6, BoundaryLocation::West },// For jump ("other side")
+                  { 3, BoundaryLocation::West },
+                  { 5, BoundaryLocation::West },
+                  { 7, BoundaryLocation::West }// On level 1 (standard),
+            } );
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
-               auto const& cells = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
-               auto const& interface_tags = node.GetInterfaceTags();
-               auto const& levelset = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
-               auto const& side = side_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) );
-               auto const recv_indices = communication.GetStartIndicesHaloRecv( side );
-               auto const size = communication.GetHaloSize( side );
-               bool const is_jump = simple_jump_topo.FaceIsJump( id, side );
-               double const material_target_value = static_cast<double>( is_jump ? GetNeighborId( ParentIdOfNode( id ), side ) : GetNeighborId( id, side ) );
+               auto const& cells                   = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+               auto const& interface_tags          = node.GetInterfaceTags();
+               auto const& levelset                = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
+               auto const& side                    = side_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) );
+               auto const recv_indices             = communication.GetStartIndicesHaloRecv( side );
+               auto const size                     = communication.GetHaloSize( side );
+               bool const is_jump                  = simple_jump_topo.FaceIsJump( id, side );
+               double const material_target_value  = static_cast<double>( is_jump ? GetNeighborId( ParentIdOfNode( id ), side ) : GetNeighborId( id, side ) );
                std::uint8_t const tag_target_value = is_jump ? PositionOfNodeAmongSiblings( id ) : PositionOfNodeAmongSiblings( GetNeighborId( id, side ) );
-               double const levelset_target_value = static_cast<double>( is_jump ? id : GetNeighborId( id, side ) );
+               double const levelset_target_value  = static_cast<double>( is_jump ? id : GetNeighborId( id, side ) );
                for( int i = recv_indices[0]; i < size[0] + recv_indices[0]; ++i ) {
                   for( int j = recv_indices[1]; j < size[1] + recv_indices[1]; ++j ) {
                      for( int k = recv_indices[2]; k < size[2] + recv_indices[2]; ++k ) {

@@ -88,7 +88,7 @@ class OutputWriter {
    unsigned int const number_of_materials_;
 
    // Instance of the hdf5 file writer (cannot be const due to variable changes during simulation, singleton allows constness of OutputWriter)
-   Hdf5Manager & hdf5_manager_;
+   Hdf5Manager& hdf5_manager_;
 
    // The different mesh generators for the standard, debug and interface output (vertexIDs and coordinates generation)
    std::unique_ptr<MeshGenerator const> const standard_mesh_generator_;
@@ -101,18 +101,18 @@ class OutputWriter {
    std::vector<std::unique_ptr<OutputQuantity const>> const interface_output_quantities_;
 
    // Map that provides the dimensionalization information of all quantities (allows single vector allocations for quantities with same dimensions)
-   std::map<std::array<unsigned int,2>,std::vector<unsigned int>> const material_quantities_dimension_map_;
-   std::map<std::array<unsigned int,2>,std::vector<unsigned int>> const interface_quantities_dimension_map_;
+   std::map<std::array<unsigned int, 2>, std::vector<unsigned int>> const material_quantities_dimension_map_;
+   std::map<std::array<unsigned int, 2>, std::vector<unsigned int>> const interface_quantities_dimension_map_;
 
    // local functions to write the hdf5 and xdmf files
    void WriteHdf5File( double const output_time, std::string const& hdf5_filename, MeshGenerator const& mesh_generator, OutputType const output_type ) const;
    void WriteXdmfTimeStepFile( double const output_time, std::string const& hdf5_filename, MeshGenerator const& mesh_generator, OutputType const output_type ) const;
    void AppendToXdmfTimeSeriesFile( double const output_time, std::string const& hdf5_filename, MeshGenerator const& mesh_generator,
-      std::string const& time_series_filename_without_extension, OutputType const output_type ) const;
+                                    std::string const& time_series_filename_without_extension, OutputType const output_type ) const;
    std::string XdmfSpatialDataInformation( double const output_time, std::string const& hdf5_short_filename, MeshGenerator const& mesh_generator, OutputType const output_type ) const;
 
    // local factory functions
-   std::map<std::array<unsigned int,2>,std::vector<unsigned int>> ComputeDimensionMap( std::vector<std::unique_ptr<OutputQuantity const>> const& quantities ) const;
+   std::map<std::array<unsigned int, 2>, std::vector<unsigned int>> ComputeDimensionMap( std::vector<std::unique_ptr<OutputQuantity const>> const& quantities ) const;
 
 public:
    OutputWriter() = delete;
@@ -122,10 +122,10 @@ public:
                           std::vector<std::unique_ptr<OutputQuantity const>> material_output_quantities,
                           std::vector<std::unique_ptr<OutputQuantity const>> interface_output_quantities,
                           unsigned int const number_of_materials );
-   ~OutputWriter() = default;
+   ~OutputWriter()                     = default;
    OutputWriter( OutputWriter const& ) = delete;
    OutputWriter& operator=( OutputWriter const& ) = delete;
-   OutputWriter( OutputWriter&& ) = delete;
+   OutputWriter( OutputWriter&& )                 = delete;
    OutputWriter& operator=( OutputWriter&& ) = delete;
 
    // Function to write the actual output files
@@ -138,4 +138,4 @@ public:
    void FinalizeTimeSeriesFile( std::string const& time_series_filename_without_extension ) const;
 };
 
-#endif // OUTPUT_WRITER_H
+#endif// OUTPUT_WRITER_H

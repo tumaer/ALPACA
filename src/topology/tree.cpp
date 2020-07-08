@@ -76,10 +76,9 @@
  * @param maximum_level The maximum level possibly present in the simulation.
  * @param node_size_on_level_zero The geometric size of blocks on level zero.
  */
-Tree::Tree( TopologyManager const& topology, unsigned int const maximum_level, double const node_size_on_level_zero ) :
-   topology_( topology ),
-   node_size_on_level_zero_( node_size_on_level_zero ),
-   nodes_( maximum_level + 1 ) // Level 0 + #Levels
+Tree::Tree( TopologyManager const& topology, unsigned int const maximum_level, double const node_size_on_level_zero ) : topology_( topology ),
+                                                                                                                        node_size_on_level_zero_( node_size_on_level_zero ),
+                                                                                                                        nodes_( maximum_level + 1 )// Level 0 + #Levels
 {
    /** Empty besides initializer list */
 }
@@ -103,14 +102,14 @@ void Tree::InsertNode( std::uint64_t const id, std::vector<MaterialName> const m
  * @param interface_block The InterfaceBlock to be contained in the new node.
  */
 Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials,
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) {
+                        std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) {
 
    unsigned int const level = LevelOfNode( id );
-   auto entry_and_decision = nodes_[level].emplace( std::piecewise_construct, std::forward_as_tuple( id ),
-      std::forward_as_tuple( id, node_size_on_level_zero_, materials, interface_tags, std::move( interface_block ) ) );
+   auto entry_and_decision  = nodes_[level].emplace( std::piecewise_construct, std::forward_as_tuple( id ),
+                                                    std::forward_as_tuple( id, node_size_on_level_zero_, materials, interface_tags, std::move( interface_block ) ) );
 
 #ifndef PERFORMANCE
-   if( ! std::get<1>( entry_and_decision ) ) {
+   if( !std::get<1>( entry_and_decision ) ) {
       throw std::logic_error( "Could not insert node into tree. Id already existed" );
    }
 #endif
@@ -125,11 +124,11 @@ Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const&
 Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials ) {
 
    unsigned int const level = LevelOfNode( id );
-   auto entry_and_decision = nodes_[level].emplace( std::piecewise_construct, std::forward_as_tuple( id ),
-      std::forward_as_tuple( id, node_size_on_level_zero_, materials ) );
+   auto entry_and_decision  = nodes_[level].emplace( std::piecewise_construct, std::forward_as_tuple( id ),
+                                                    std::forward_as_tuple( id, node_size_on_level_zero_, materials ) );
 
 #ifndef PERFORMANCE
-   if( ! std::get<1>( entry_and_decision ) ) {
+   if( !std::get<1>( entry_and_decision ) ) {
       throw std::logic_error( "Could not insert node into tree. Id already existed" );
    }
 #endif
@@ -144,15 +143,15 @@ Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const&
  */
 std::vector<std::uint64_t> Tree::RefineNode( std::uint64_t const id ) {
 
-   unsigned int const  level = LevelOfNode( id );
+   unsigned int const level = LevelOfNode( id );
 #ifndef PERFORMANCE
    if( level >= CC::AMNL() ) {
       throw std::invalid_argument( "Nodes on this level cannot be refined further" );
    }
 #endif
 
-   std::vector<std::uint64_t> const children_ids = IdsOfChildren( id ); //IdsOfChildren adjusts to 1D/2D.
-   Node const& node = GetNodeWithId( id );
+   std::vector<std::uint64_t> const children_ids = IdsOfChildren( id );//IdsOfChildren adjusts to 1D/2D.
+   Node const& node                              = GetNodeWithId( id );
 
    for( std::int64_t const child_id : children_ids ) {
       // only single material nodes are supposed to be refined, hence the use of uniform interface tag is valid
@@ -183,7 +182,7 @@ std::vector<std::reference_wrapper<Node>> Tree::Leaves() {
    leaves.reserve( leaf_ids.size() );
 
    for( auto const& id : leaf_ids ) {
-      leaves.emplace_back( GetNodeWithId( id ) ); //We add this leaf
+      leaves.emplace_back( GetNodeWithId( id ) );//We add this leaf
    }
    return leaves;
 }
@@ -198,7 +197,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::Leaves() const {
    leaves.reserve( leaf_ids.size() );
 
    for( auto const& id : leaf_ids ) {
-      leaves.emplace_back( GetNodeWithId( id ) ); //We add this leaf
+      leaves.emplace_back( GetNodeWithId( id ) );//We add this leaf
    }
    return leaves;
 }
@@ -208,14 +207,14 @@ std::vector<std::reference_wrapper<Node const>> Tree::Leaves() const {
  * @param level The level of interest.
  * @return List of leaves.
  */
-std::vector<std::reference_wrapper<Node>>Tree::LeavesOnLevel( unsigned int const level ) {
+std::vector<std::reference_wrapper<Node>> Tree::LeavesOnLevel( unsigned int const level ) {
 
    std::vector<std::uint64_t> leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
    std::vector<std::reference_wrapper<Node>> leaves;
    leaves.reserve( leaf_ids_on_level.size() );
 
    for( auto& id : leaf_ids_on_level ) {
-      leaves.emplace_back( GetNodeWithId( id ) ); //We add this leaf
+      leaves.emplace_back( GetNodeWithId( id ) );//We add this leaf
    }
    return leaves;
 }
@@ -230,7 +229,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::LeavesOnLevel( unsigned in
    leaves.reserve( leaf_ids_on_level.size() );
 
    for( auto const& id : leaf_ids_on_level ) {
-      leaves.emplace_back( GetNodeWithId( id ) ); //We add this leaf
+      leaves.emplace_back( GetNodeWithId( id ) );//We add this leaf
    }
    return leaves;
 }
@@ -285,7 +284,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::InterfaceLeaves() const {
    interface_leaves.reserve( interface_leaf_ids.size() );
 
    for( auto const& id : interface_leaf_ids ) {
-      interface_leaves.emplace_back( GetNodeWithId( id ) ); //We add this leaf
+      interface_leaves.emplace_back( GetNodeWithId( id ) );//We add this leaf
    }
    return interface_leaves;
 }
@@ -331,7 +330,6 @@ std::vector<std::reference_wrapper<Node const>> Tree::NodesOnLevel( unsigned int
 
    return nodes;
 }
-
 
 /**
  * @brief gives all nodes with levelset in the tree. $List is in arbitrary order$.
@@ -379,7 +377,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::AllNodes() const {
    nodes.reserve( node_ids.size() );
 
    for( auto const& id : node_ids ) {
-      nodes.emplace_back( GetNodeWithId( id ) ); //We add this node
+      nodes.emplace_back( GetNodeWithId( id ) );//We add this node
    }
    return nodes;
 }

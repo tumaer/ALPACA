@@ -98,8 +98,8 @@ void TestUnityOnUnitArrayWithMargin( double const allowed_margin ) {
       unit_array.fill( 1.0 );
       constexpr double cell_size = 1.0;
       THEN( "The resulting value is unity" ) {
-         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindLeft,double>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
-         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindRight,double>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S, StencilProperty::UpwindLeft, double>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S, StencilProperty::UpwindRight, double>( unit_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
       }
    }
 }
@@ -110,11 +110,11 @@ void TestWenoValuesLeftAndRightOfStepWithMargin( double const allowed_margin ) {
       unsigned int const size = S::StencilSize();
       std::array<double, size> step_array;
       step_array.fill( 1.0 );
-      std::fill_n( step_array.begin(), size / 2 , 0.0 );
+      std::fill_n( step_array.begin(), size / 2, 0.0 );
       constexpr double cell_size = 1.0;
       THEN( "The left or right value of the step is returned - according to upwinding direction" ) {
-         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindLeft,double>( step_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
-         REQUIRE( StencilUtilities::Reconstruction<S,StencilProperty::UpwindRight,double>( step_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S, StencilProperty::UpwindLeft, double>( step_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
+         REQUIRE( StencilUtilities::Reconstruction<S, StencilProperty::UpwindRight, double>( step_array, cell_size ) == Approx( 1.0 ).margin( allowed_margin ) );
       }
    }
 }
@@ -127,8 +127,8 @@ void TestZeronessOnUnitArrayWithMargin( double const allowed_margin ) {
       unit_array.fill( 1.0 );
       constexpr double cell_size = 1.0;
       THEN( "The resulting value is zero" ) {
-         REQUIRE( SU::Derivative<S,StencilProperty::UpwindLeft>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
-         REQUIRE( SU::Derivative<S,StencilProperty::UpwindRight>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
+         REQUIRE( SU::Derivative<S, StencilProperty::UpwindLeft>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
+         REQUIRE( SU::Derivative<S, StencilProperty::UpwindRight>( unit_array, cell_size ) == Approx( 0.0 ).margin( allowed_margin ) );
       }
    }
 }
@@ -210,11 +210,11 @@ SCENARIO( "Reconstruction stencil correctness", "[1rank]" ) {
          unsigned int const size = FourthOrderCentral::StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
-         std::fill_n( step_array.begin(), size / 2 , 0.0 );
+         std::fill_n( step_array.begin(), size / 2, 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.5 is returned regardless the upwinding direction" ) {
-            REQUIRE( StencilUtilities::Reconstruction<FourthOrderCentral,StencilProperty::UpwindLeft, double>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
-            REQUIRE( StencilUtilities::Reconstruction<FourthOrderCentral,StencilProperty::UpwindRight, double>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
+            REQUIRE( StencilUtilities::Reconstruction<FourthOrderCentral, StencilProperty::UpwindLeft, double>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
+            REQUIRE( StencilUtilities::Reconstruction<FourthOrderCentral, StencilProperty::UpwindRight, double>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
          }
       }
    }
@@ -229,13 +229,13 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
          unsigned int const size = houc5.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
-         std::fill_n( step_array.begin(), size / 2 , 0.0 );
+         std::fill_n( step_array.begin(), size / 2, 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.78333 is returned for upwind right direction and 0.45 for upwind left" ) {
-            REQUIRE( SU::Derivative<HOUC5,StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 0.7833333333333333333333333333333 ).margin( 1e-16 ) );
-            REQUIRE( SU::Derivative<HOUC5,StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 0.45 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<HOUC5, StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 0.7833333333333333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<HOUC5, StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 0.45 ).margin( 1e-16 ) );
          }
-      }   
+      }
    }
 
    GIVEN( "A fourth order central difference derivative stencil" ) {
@@ -246,12 +246,12 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
          unsigned int const size = fourth_order_central_difference.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
-         std::fill_n( step_array.begin(), size / 2 , 0.0 );
+         std::fill_n( step_array.begin(), size / 2, 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.58333 is returned for the central difference direction" ) {
-            REQUIRE( SU::Derivative<FourthOrderCentralDifference,StencilProperty::Central>( step_array, cell_size ) == Approx( 0.583333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<FourthOrderCentralDifference, StencilProperty::Central>( step_array, cell_size ) == Approx( 0.583333333333333333333 ).margin( 1e-16 ) );
          }
-      }   
+      }
    }
 
    GIVEN( "A fourth order cell face derivative stencil" ) {
@@ -262,13 +262,13 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
          unsigned int const size = fourth_order_cell_face.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
-         std::fill_n( step_array.begin(), size / 2 , 0.0 );
+         std::fill_n( step_array.begin(), size / 2, 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "1.0833333 is returned for the upwind left direction" ) {
-            REQUIRE( SU::Derivative<FourthOrderCellFace,StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
-            REQUIRE( SU::Derivative<FourthOrderCellFace,StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<FourthOrderCellFace, StencilProperty::UpwindLeft>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<FourthOrderCellFace, StencilProperty::UpwindRight>( step_array, cell_size ) == Approx( 1.083333333333333333333 ).margin( 1e-16 ) );
          }
-      }   
+      }
    }
 
    GIVEN( "A central difference derivative stencil" ) {
@@ -279,11 +279,11 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
          unsigned int const size = central_difference.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
-         std::fill_n( step_array.begin(), size / 2 , 0.0 );
+         std::fill_n( step_array.begin(), size / 2, 0.0 );
          constexpr double cell_size = 1.0;
          THEN( "0.5 is returned for the central difference direction" ) {
-            REQUIRE( SU::Derivative<CentralDifference,StencilProperty::Central>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
+            REQUIRE( SU::Derivative<CentralDifference, StencilProperty::Central>( step_array, cell_size ) == Approx( 0.5 ).margin( 1e-16 ) );
          }
-      }   
+      }
    }
 }

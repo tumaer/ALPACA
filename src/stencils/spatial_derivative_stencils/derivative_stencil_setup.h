@@ -74,7 +74,6 @@
 #include "fourth_order_cell_face.h"
 #include "houc_5.h"
 
-
 /**
  * @brief A namespace to get a DerivativeStencil type based on a specified constexpr.
  */
@@ -117,6 +116,6 @@ namespace DerivativeStencilSetup {
       typedef HOUC5 type;
    };
 
-}
+}// namespace DerivativeStencilSetup
 
-#endif // DERIVATIVE_STENCIL_SETUP_H
+#endif// DERIVATIVE_STENCIL_SETUP_H

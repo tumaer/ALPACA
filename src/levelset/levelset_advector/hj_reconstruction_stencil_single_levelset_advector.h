@@ -80,13 +80,12 @@ class HjReconstructionStencilSingleLevelsetAdvector : public LevelsetAdvector<Hj
    void AdvectImplementation( Node& node ) const;
 
 public:
-   explicit HjReconstructionStencilSingleLevelsetAdvector() = default;
-   ~HjReconstructionStencilSingleLevelsetAdvector() = default;
+   explicit HjReconstructionStencilSingleLevelsetAdvector()                                              = default;
+   ~HjReconstructionStencilSingleLevelsetAdvector()                                                      = default;
    HjReconstructionStencilSingleLevelsetAdvector( HjReconstructionStencilSingleLevelsetAdvector const& ) = delete;
    HjReconstructionStencilSingleLevelsetAdvector& operator=( HjReconstructionStencilSingleLevelsetAdvector const& ) = delete;
-   HjReconstructionStencilSingleLevelsetAdvector( HjReconstructionStencilSingleLevelsetAdvector&& ) = delete;
+   HjReconstructionStencilSingleLevelsetAdvector( HjReconstructionStencilSingleLevelsetAdvector&& )                 = delete;
    HjReconstructionStencilSingleLevelsetAdvector& operator=( HjReconstructionStencilSingleLevelsetAdvector&& ) = delete;
 };
 
-
-#endif //HJ_RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
+#endif//HJ_RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H

@@ -80,17 +80,16 @@
 InterfaceTagsOutput::InterfaceTagsOutput( UnitHandler const& unit_handler,
                                           MaterialManager const& material_manager,
                                           std::string const& quantity_name,
-                                          std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
+                                          std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void InterfaceTagsOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void InterfaceTagsOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
    // Loop through number of internal cells
    for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
@@ -105,9 +104,9 @@ void InterfaceTagsOutput::DoComputeCellData( Node const& node, std::vector<doubl
 /**
  * @brief see base class definition.
  */
-void InterfaceTagsOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const ) const {
+void InterfaceTagsOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const ) const {
 
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
    /** Assign the correct rank to the data vector */
    for( unsigned int k = 0; k < CC::TCZ(); ++k ) {

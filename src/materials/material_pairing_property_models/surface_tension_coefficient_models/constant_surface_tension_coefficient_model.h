@@ -92,15 +92,15 @@ class ConstantSurfaceTensionCoefficientModel : public ConstantInterfaceParameter
 public:
    ConstantSurfaceTensionCoefficientModel() = delete;
    explicit ConstantSurfaceTensionCoefficientModel( std::unordered_map<std::string, double> const& parameter_map,
-                                              UnitHandler const& unit_handler );
-   virtual ~ConstantSurfaceTensionCoefficientModel() = default;
+                                                    UnitHandler const& unit_handler );
+   virtual ~ConstantSurfaceTensionCoefficientModel()                                       = default;
    ConstantSurfaceTensionCoefficientModel( const ConstantSurfaceTensionCoefficientModel& ) = delete;
    ConstantSurfaceTensionCoefficientModel& operator=( const ConstantSurfaceTensionCoefficientModel& ) = delete;
-   ConstantSurfaceTensionCoefficientModel( ConstantSurfaceTensionCoefficientModel&& ) = delete;
+   ConstantSurfaceTensionCoefficientModel( ConstantSurfaceTensionCoefficientModel&& )                 = delete;
    ConstantSurfaceTensionCoefficientModel& operator=( ConstantSurfaceTensionCoefficientModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // CONSTANT_SURFACE_TENSION_COEFFICIENT_MODEL_H
+#endif// CONSTANT_SURFACE_TENSION_COEFFICIENT_MODEL_H

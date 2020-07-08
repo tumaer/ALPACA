@@ -78,7 +78,7 @@
  * Constants used during the iterative solution of the Riemann problem.
  */
 namespace IterationConstants {
-/**
+   /**
  * @brief      Computes the constant A.
  *
  * @param[in]  gamma    The gamma of the material.
@@ -86,11 +86,11 @@ namespace IterationConstants {
  *
  * @return     The constant A.
  */
-constexpr double A( double const gamma, double const density ) {
-   return 2.0 / ( ( gamma + 1.0 ) * density );
-}
+   constexpr double A( double const gamma, double const density ) {
+      return 2.0 / ( ( gamma + 1.0 ) * density );
+   }
 
-/**
+   /**
  * @brief      Computes the constant B.
  *
  * @param[in]  gamma  The gamma of the material.
@@ -98,11 +98,11 @@ constexpr double A( double const gamma, double const density ) {
  *
  * @return     The result.
  */
-constexpr double B( double const gamma, double const p_ref ) {
-   return p_ref * ( ( gamma - 1.0 ) / ( gamma + 1.0 ) );
-}
+   constexpr double B( double const gamma, double const p_ref ) {
+      return p_ref * ( ( gamma - 1.0 ) / ( gamma + 1.0 ) );
+   }
 
-/**
+   /**
  * @brief      Computes the constant C.
  *
  * @param[in]  gamma           The gamma of the material.
@@ -110,25 +110,25 @@ constexpr double B( double const gamma, double const p_ref ) {
  *
  * @return     The result.
  */
-constexpr double C( double const gamma, double const speed_of_sound ) {
-   return 2.0 * speed_of_sound / ( gamma - 1.0 );
-}
+   constexpr double C( double const gamma, double const speed_of_sound ) {
+      return 2.0 * speed_of_sound / ( gamma - 1.0 );
+   }
 
-/**
+   /**
  * @brief      Computes the constant D.
  *
  * @param[in]  gamma  The ratio of specific heats of the material.
  *
  * @return     The result.
  */
-constexpr double D( double const gamma ) {
-   return ( gamma - 1.0 ) / ( 2.0 * gamma );
-}
-}
+   constexpr double D( double const gamma ) {
+      return ( gamma - 1.0 ) / ( 2.0 * gamma );
+   }
+}// namespace IterationConstants
 
 namespace IterationUtilities {
 
-/**
+   /**
  * @brief      Computes a value necessary for the iterative solution procedure.
  *
  * @param[in]  p           The pressure.
@@ -136,11 +136,11 @@ namespace IterationUtilities {
  *
  * @return     The result.
  */
-constexpr double MaterialPressureFunction( double const p, double const material_B ) {
-   return p + material_B;
-}
+   constexpr double MaterialPressureFunction( double const p, double const material_B ) {
+      return p + material_B;
+   }
 
-/**
+   /**
  * @brief      Returns the current residuum of the iterative solution procedure.
  *
  * @param[in]  old_value  The old value.
@@ -148,35 +148,34 @@ constexpr double MaterialPressureFunction( double const p, double const material
  *
  * @return     The tolerance.
  */
-inline double GetTolerance( double const old_value, double const new_value ) {
-   return std::abs( new_value - old_value ) / std::max( std::abs( old_value ), std::numeric_limits<double>::epsilon() );
-}
-}
+   inline double GetTolerance( double const old_value, double const new_value ) {
+      return std::abs( new_value - old_value ) / std::max( std::abs( old_value ), std::numeric_limits<double>::epsilon() );
+   }
+}// namespace IterationUtilities
 
 namespace {
 
-/**
+   /**
  * @brief Evaluates the function whose zero point is calculated iteratively.
  * @param function_left The evaluated relation for the left state.
  * @param function_right The evaluated relation for the right state.
  * @param velocity_difference The velocity difference between the left and right state.
  * @return The function value.
  */
-constexpr double RootFunction ( double const function_left, double const function_right, double const velocity_difference ) {
-   return function_left + function_right + velocity_difference;
-}
+   constexpr double RootFunction( double const function_left, double const function_right, double const velocity_difference ) {
+      return function_left + function_right + velocity_difference;
+   }
 
-/**
+   /**
  * @brief Evaluates the derivative of the function whose zero point is calculated iteratively.
  * @param derivative_left The derivative of the relation of the left side.
  * @param derivative_right The derivative of the relation of the right side.
  * @return The derivative.
  */
-constexpr double DerivativeOfRootFunction ( double const derivative_left, double const derivative_right ) {
-   return derivative_left + derivative_right;
-}
-}
-
+   constexpr double DerivativeOfRootFunction( double const derivative_left, double const derivative_right ) {
+      return derivative_left + derivative_right;
+   }
+}// namespace
 
 /**
  * @brief Implements an iterative solution procedure for a Riemann problem. In ALPACA, it is used to solve the interface Riemann problem.
@@ -214,9 +213,9 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
     * @return     The shock/rarefaction relation and its derivative.
     */
    std::array<double, 2> ObtainFunctionAndDerivative( double const initial_root, double const p,
-      double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
+                                                      double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
       return static_cast<DerivedIterativeInterfaceRiemannSolver const&>( *this ).ObtainFunctionAndDerivativeImplementation( initial_root, p,
-         pressure_function, one_pressure_function, pressure_constant, A, B, C, D );
+                                                                                                                            pressure_function, one_pressure_function, pressure_constant, A, B, C, D );
    }
 
    /**
@@ -233,32 +232,32 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
     * @return An array that contains following information in the given order: interface_velocity, interface_pressure_positive, interface_pressure_negative.
     */
    std::array<double, 3> SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
-      double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
-      double const delta_p ) const {
+                                                                     double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
+                                                                     double const delta_p ) const {
       /**
        * For the iteration procedure several constants can be computed in advance. Those constants can be found in \cite Toro2009 chapter 4.3.
        */
-      double const speed_of_sound_left = material_manager_.GetMaterial(material_left).GetEquationOfState().GetSpeedOfSound(rho_left, p_left);
-      double const speed_of_sound_right = material_manager_.GetMaterial(material_right).GetEquationOfState().GetSpeedOfSound(rho_right, p_right);
+      double const speed_of_sound_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().GetSpeedOfSound( rho_left, p_left );
+      double const speed_of_sound_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().GetSpeedOfSound( rho_right, p_right );
 
-      double const impedance_left = rho_left * speed_of_sound_left;
+      double const impedance_left  = rho_left * speed_of_sound_left;
       double const impedance_right = rho_right * speed_of_sound_right;
 
       double const inverse_impedance_sum = 1.0 / std::max( ( impedance_left + impedance_right ), std::numeric_limits<double>::epsilon() );
 
-      double const gamma_left = material_manager_.GetMaterial(material_left).GetEquationOfState().GetGamma();
-      double const gamma_right = material_manager_.GetMaterial(material_right).GetEquationOfState().GetGamma();
+      double const gamma_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().GetGamma();
+      double const gamma_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().GetGamma();
 
-      double const pressure_constant_left = material_manager_.GetMaterial(material_left).GetEquationOfState().GetB();
-      double const pressure_constant_right = material_manager_.GetMaterial(material_right).GetEquationOfState().GetB();
+      double const pressure_constant_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().GetB();
+      double const pressure_constant_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().GetB();
 
-      double const pressure_function_left = IterationUtilities::MaterialPressureFunction( p_left, pressure_constant_left );
-      double const one_pressure_function_left = 1.0 / std::max( pressure_function_left, std::numeric_limits<double>::epsilon() );
-      double const pressure_function_right = IterationUtilities::MaterialPressureFunction( p_right, pressure_constant_right );
+      double const pressure_function_left      = IterationUtilities::MaterialPressureFunction( p_left, pressure_constant_left );
+      double const one_pressure_function_left  = 1.0 / std::max( pressure_function_left, std::numeric_limits<double>::epsilon() );
+      double const pressure_function_right     = IterationUtilities::MaterialPressureFunction( p_right, pressure_constant_right );
       double const one_pressure_function_right = 1.0 / std::max( pressure_function_right, std::numeric_limits<double>::epsilon() );
 
       double const velocity_difference = velocity_normal_right - velocity_normal_left;
-      double const velocity_sum = velocity_normal_right + velocity_normal_left;
+      double const velocity_sum        = velocity_normal_right + velocity_normal_left;
 
       double const A_left = IterationConstants::A( gamma_left, rho_left );
       double const B_left = IterationConstants::B( gamma_left, pressure_function_left );
@@ -270,12 +269,13 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
       double const C_right = IterationConstants::C( gamma_right, speed_of_sound_right );
       double const D_right = IterationConstants::D( gamma_right );
 
-      double initial_root = ( impedance_left  *  p_right           +
-         impedance_right * ( p_left - delta_p ) +
-         impedance_left  *  impedance_right   * ( velocity_normal_left - velocity_normal_right ) ) * inverse_impedance_sum;
+      double initial_root = ( impedance_left * p_right +
+                              impedance_right * ( p_left - delta_p ) +
+                              impedance_left * impedance_right * ( velocity_normal_left - velocity_normal_right ) ) *
+                            inverse_impedance_sum;
 
-      bool converged = false;
-      double interface_velocity = 0.0;
+      bool converged                     = false;
+      double interface_velocity          = 0.0;
       double interface_pressure_positive = 0.0;
       double interface_pressure_negative = 0.0;
 
@@ -284,8 +284,8 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
        */
       for( unsigned it = 0; it < IterativeInterfaceRiemannSolverConstants::MaximumNumberOfIterations; ++it ) {
 
-         std::array<double, 2> const relations_left = ObtainFunctionAndDerivative(initial_root, p_left, pressure_function_left, one_pressure_function_left, pressure_constant_left, A_left, B_left, C_left, D_left);
-         std::array<double, 2> const relations_right = ObtainFunctionAndDerivative(initial_root, p_right, pressure_function_right, one_pressure_function_right, pressure_constant_right, A_right, B_right, C_right, D_right);
+         std::array<double, 2> const relations_left  = ObtainFunctionAndDerivative( initial_root, p_left, pressure_function_left, one_pressure_function_left, pressure_constant_left, A_left, B_left, C_left, D_left );
+         std::array<double, 2> const relations_right = ObtainFunctionAndDerivative( initial_root, p_right, pressure_function_right, one_pressure_function_right, pressure_constant_right, A_right, B_right, C_right, D_right );
 
          double const derivative_of_root_function = DerivativeOfRootFunction( relations_left[1], relations_right[1] );
 
@@ -297,8 +297,8 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
                converged = true;
 
                interface_pressure_positive = next_root;
-               interface_pressure_negative = interface_pressure_positive - delta_p; //interface pressure right
-               interface_velocity = 0.5 * velocity_sum + 0.5 * (relations_right[0] - relations_left[0]);
+               interface_pressure_negative = interface_pressure_positive - delta_p;//interface pressure right
+               interface_velocity          = 0.5 * velocity_sum + 0.5 * ( relations_right[0] - relations_left[0] );
 
                break;
             }
@@ -312,28 +312,31 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
        * In case the iterative procedure did not converge within the specified maximum number of iterations, we take the linearized solution.
        */
       if( !converged ) {
-         interface_velocity = ( impedance_left *  velocity_normal_left  +
-            impedance_right * velocity_normal_right +
-            p_left - p_right - delta_p ) * inverse_impedance_sum;
+         interface_velocity = ( impedance_left * velocity_normal_left +
+                                impedance_right * velocity_normal_right +
+                                p_left - p_right - delta_p ) *
+                              inverse_impedance_sum;
 
-         interface_pressure_positive = ( impedance_left  *  p_right           +
-            impedance_right * ( p_left - delta_p ) +
-            impedance_left  *  impedance_right   * ( velocity_normal_left - velocity_normal_right ) ) * inverse_impedance_sum;
+         interface_pressure_positive = ( impedance_left * p_right +
+                                         impedance_right * ( p_left - delta_p ) +
+                                         impedance_left * impedance_right * ( velocity_normal_left - velocity_normal_right ) ) *
+                                       inverse_impedance_sum;
 
-         interface_pressure_negative = ( impedance_left  * ( p_right + delta_p ) +
-            impedance_right *  p_left             +
-            impedance_left  *  impedance_right    * ( velocity_normal_left - velocity_normal_right ) ) * inverse_impedance_sum;
+         interface_pressure_negative = ( impedance_left * ( p_right + delta_p ) +
+                                         impedance_right * p_left +
+                                         impedance_left * impedance_right * ( velocity_normal_left - velocity_normal_right ) ) *
+                                       inverse_impedance_sum;
       }
 
-      return {interface_velocity, interface_pressure_positive, interface_pressure_negative};
+      return { interface_velocity, interface_pressure_positive, interface_pressure_negative };
    }
 
 public:
-   IterativeInterfaceRiemannSolver() = delete;
-   ~IterativeInterfaceRiemannSolver() = default;
+   IterativeInterfaceRiemannSolver()                                         = delete;
+   ~IterativeInterfaceRiemannSolver()                                        = default;
    IterativeInterfaceRiemannSolver( IterativeInterfaceRiemannSolver const& ) = delete;
    IterativeInterfaceRiemannSolver& operator=( IterativeInterfaceRiemannSolver const& ) = delete;
-   IterativeInterfaceRiemannSolver( IterativeInterfaceRiemannSolver&& ) = delete;
+   IterativeInterfaceRiemannSolver( IterativeInterfaceRiemannSolver&& )                 = delete;
    IterativeInterfaceRiemannSolver& operator=( IterativeInterfaceRiemannSolver&& ) = delete;
 };
 
@@ -342,7 +345,7 @@ public:
  */
 namespace ShockRelations {
 
-/**
+   /**
  * @brief      Computes the shock relation.
  *
  * @param[in]  p      The pressure for which the function should be evaluated.
@@ -352,12 +355,12 @@ namespace ShockRelations {
  *
  * @return     The resulting function value.
  */
-inline double Function( double p, double const p_ref, double const A, double const B ) {
-   p = std::max( p, std::numeric_limits<double>::epsilon() );
-   return ( p - p_ref ) * std::sqrt( A / ( p + B ) );
-}
+   inline double Function( double p, double const p_ref, double const A, double const B ) {
+      p = std::max( p, std::numeric_limits<double>::epsilon() );
+      return ( p - p_ref ) * std::sqrt( A / ( p + B ) );
+   }
 
-/**
+   /**
  * @brief      Computes the derivative of the shock relation.
  *
  * @param[in]  p      The pressure for which the function should be evaluated.
@@ -367,18 +370,18 @@ inline double Function( double p, double const p_ref, double const A, double con
  *
  * @return     The derivative of the function evaluation.
  */
-inline double Derivative( double p, double const p_ref, double const A, double const B ) {
-   p = std::max( p, std::numeric_limits<double>::epsilon() );
-   return std::sqrt( A / ( B + p ) ) * ( 1.0 - ( p - p_ref ) / ( 2.0 * ( B + p ) ) );
-}
-}
+   inline double Derivative( double p, double const p_ref, double const A, double const B ) {
+      p = std::max( p, std::numeric_limits<double>::epsilon() );
+      return std::sqrt( A / ( B + p ) ) * ( 1.0 - ( p - p_ref ) / ( 2.0 * ( B + p ) ) );
+   }
+}// namespace ShockRelations
 
 /**
  * Implements the rarefaction relations as described in \cite Toro2009 chapter 4.3
  */
 namespace RarefactionRelations {
 
-/**
+   /**
  * @brief      Computes the rarefaction relation.
  *
  * @param[in]  p          The pressure for which the function should be evaluated.
@@ -388,12 +391,12 @@ namespace RarefactionRelations {
  *
  * @return     The result.
  */
-inline double Function( double p, double const one_p_ref, double const C, double const D ) {
-   p = std::max( p, std::numeric_limits<double>::epsilon() );
-   return C * ( std::pow( p * one_p_ref, D ) - 1.0 );
-}
+   inline double Function( double p, double const one_p_ref, double const C, double const D ) {
+      p = std::max( p, std::numeric_limits<double>::epsilon() );
+      return C * ( std::pow( p * one_p_ref, D ) - 1.0 );
+   }
 
-/**
+   /**
  * @brief      The derivative of the rarefaction relation.
  *
  * @param[in]  p          The pressure for which the function should be evaluated.
@@ -404,11 +407,10 @@ inline double Function( double p, double const one_p_ref, double const C, double
  * @return     The result.
  */
 
-inline double Derivative( double p, double const one_p_ref, double const C, double const D ) {
-   p = std::max( p, std::numeric_limits<double>::epsilon() );
-   return C * D * std::pow( one_p_ref, D ) * std::pow( p, ( D - 1.0 ) );
-}
-}
+   inline double Derivative( double p, double const one_p_ref, double const C, double const D ) {
+      p = std::max( p, std::numeric_limits<double>::epsilon() );
+      return C * D * std::pow( one_p_ref, D ) * std::pow( p, ( D - 1.0 ) );
+   }
+}// namespace RarefactionRelations
 
-
-#endif //ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
+#endif//ITERATIVE_INTERFACE_RIEMANN_SOLVER_H

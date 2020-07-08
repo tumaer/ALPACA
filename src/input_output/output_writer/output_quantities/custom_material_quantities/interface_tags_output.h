@@ -79,8 +79,8 @@ class InterfaceTagsOutput : public OutputQuantity {
 
 private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    InterfaceTagsOutput() = delete;
@@ -88,11 +88,11 @@ public:
                                  MaterialManager const& material_manager,
                                  std::string const& quantity_name,
                                  std::array<bool, 3> const output_flags );
-   virtual ~InterfaceTagsOutput() = default;
+   virtual ~InterfaceTagsOutput()                    = default;
    InterfaceTagsOutput( InterfaceTagsOutput const& ) = delete;
    InterfaceTagsOutput& operator=( InterfaceTagsOutput const& ) = delete;
-   InterfaceTagsOutput( InterfaceTagsOutput&& ) = delete;
+   InterfaceTagsOutput( InterfaceTagsOutput&& )                 = delete;
    InterfaceTagsOutput& operator=( InterfaceTagsOutput&& ) = delete;
 };
 
-#endif // INTERFACE_TAGS_OUTPUT_H
+#endif// INTERFACE_TAGS_OUTPUT_H

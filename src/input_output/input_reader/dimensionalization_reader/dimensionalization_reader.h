@@ -75,23 +75,23 @@
  *        It serves as a proxy class for different dimensionalization reader types (xml,...) that only read the actual data.
  *        Here, consistency checks are done that all read data are valid.
  */
-class DimensionalizationReader{
+class DimensionalizationReader {
 
 protected:
    // constructor can only be called from derived classes
    explicit DimensionalizationReader() = default;
 
    // Functions that must be implemented by the derived classes
-   virtual double DoReadReferenceLength() const = 0;
-   virtual double DoReadReferenceVelocity() const = 0;
-   virtual double DoReadReferenceDensity() const = 0;
+   virtual double DoReadReferenceLength() const      = 0;
+   virtual double DoReadReferenceVelocity() const    = 0;
+   virtual double DoReadReferenceDensity() const     = 0;
    virtual double DoReadReferenceTemperature() const = 0;
 
 public:
-   virtual ~DimensionalizationReader() = default;
+   virtual ~DimensionalizationReader()                         = default;
    DimensionalizationReader( DimensionalizationReader const& ) = delete;
    DimensionalizationReader& operator=( DimensionalizationReader const& ) = delete;
-   DimensionalizationReader( DimensionalizationReader&& ) = delete;
+   DimensionalizationReader( DimensionalizationReader&& )                 = delete;
    DimensionalizationReader& operator=( DimensionalizationReader&& ) = delete;
 
    // Return functions
@@ -101,4 +101,4 @@ public:
    double ReadReferenceTemperature() const;
 };
 
-#endif // DIMENSIONALIZATION_READER_H
+#endif// DIMENSIONALIZATION_READER_H

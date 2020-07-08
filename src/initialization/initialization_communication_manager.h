@@ -76,7 +76,7 @@
 namespace Initialization {
 
    // Initialization of the communication manager
-   CommunicationManager InitializeCommunicationManager( TopologyManager & topology_manager );
-}
+   CommunicationManager InitializeCommunicationManager( TopologyManager& topology_manager );
+}// namespace Initialization
 
-#endif // INITIALIZATION_COMMUNICATION_MANAGER_H
+#endif// INITIALIZATION_COMMUNICATION_MANAGER_H

@@ -83,13 +83,13 @@ class PrimeStateHandler {
 
    MaterialManager const& material_manager_;
 
-   explicit PrimeStateHandler( MaterialManager const& material_manager ) : material_manager_( material_manager ) { }
+   explicit PrimeStateHandler( MaterialManager const& material_manager ) : material_manager_( material_manager ) {}
 
 public:
-   ~PrimeStateHandler() = default;
+   ~PrimeStateHandler()                          = default;
    PrimeStateHandler( PrimeStateHandler const& ) = delete;
    PrimeStateHandler& operator=( PrimeStateHandler const& ) = delete;
-   PrimeStateHandler( PrimeStateHandler&& ) = delete;
+   PrimeStateHandler( PrimeStateHandler&& )                 = delete;
    PrimeStateHandler& operator=( PrimeStateHandler&& ) = delete;
 
    /**
@@ -116,8 +116,8 @@ public:
     * @param i,j,k Indices of the cell.
     */
    inline void ConvertPrimeStatesToConservatives( MaterialName const& material, PrimeStates const& prime_states, Conservatives& conservatives, unsigned int const i, unsigned int const j, unsigned int const k ) const {
-      auto&& conservatives_cell = conservatives.GetCellView(i, j, k);
-      ConvertPrimeStatesToConservatives( material, prime_states.GetCellView(i, j, k), conservatives_cell );
+      auto&& conservatives_cell = conservatives.GetCellView( i, j, k );
+      ConvertPrimeStatesToConservatives( material, prime_states.GetCellView( i, j, k ), conservatives_cell );
    }
 
    /**
@@ -131,7 +131,7 @@ public:
     */
    template<typename PrimeStatesContainerType, typename ConservativesContainerType>
    inline void ConvertPrimeStatesToConservatives( MaterialName const& material, PrimeStatesContainerType const& prime_states_container, ConservativesContainerType& conservatives_container ) const {
-      static_cast<DerivedPrimeStateHandler const&>(*this).ConvertPrimeStatesToConservativesImplementation( material, prime_states_container, conservatives_container );
+      static_cast<DerivedPrimeStateHandler const&>( *this ).ConvertPrimeStatesToConservativesImplementation( material, prime_states_container, conservatives_container );
    }
 
    /**
@@ -158,8 +158,8 @@ public:
     * @param i,j,k Indices of the cell.
     */
    inline void ConvertConservativesToPrimeStates( MaterialName const& material, Conservatives const& conservatives, PrimeStates& prime_states, unsigned int const i, unsigned int const j, unsigned int const k ) const {
-      auto&& prime_states_cell = prime_states.GetCellView(i, j, k);
-      ConvertConservativesToPrimeStates( material, conservatives.GetCellView(i, j, k), prime_states_cell );
+      auto&& prime_states_cell = prime_states.GetCellView( i, j, k );
+      ConvertConservativesToPrimeStates( material, conservatives.GetCellView( i, j, k ), prime_states_cell );
    }
 
    /**
@@ -173,8 +173,8 @@ public:
     */
    template<typename ConservativesContainerType, typename PrimeStatesContainerType>
    inline void ConvertConservativesToPrimeStates( MaterialName const& material, ConservativesContainerType const& conservatives_container, PrimeStatesContainerType& prime_states_container ) const {
-      static_cast<DerivedPrimeStateHandler const&>(*this).ConvertConservativesToPrimeStatesImplementation( material, conservatives_container, prime_states_container );
+      static_cast<DerivedPrimeStateHandler const&>( *this ).ConvertConservativesToPrimeStatesImplementation( material, conservatives_container, prime_states_container );
    }
 };
 
-#endif // PRIME_STATE_HANDLER_H
+#endif// PRIME_STATE_HANDLER_H

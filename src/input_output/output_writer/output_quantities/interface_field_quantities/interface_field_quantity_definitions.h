@@ -68,9 +68,11 @@
 #ifndef INTERFACE_FIELD_QUANTITIES_H
 #define INTERFACE_FIELD_QUANTITIES_H
 
+#include "enums/interface_tag_definition.h"
 #include "block_definitions/field_interface_definitions.h"
 #include "block_definitions/field_details.h"
 #include <iostream>
+#include <vector>
 
 /**
  * @brief The InterfaceFieldName enum gives all possible choices for which an output can be written (interface descriptions, interface states and  interface paramteres).
@@ -84,9 +86,12 @@
  */
 enum class InterfaceFieldQuantityName {
    // interface descriptions
-   Levelset, VolumeFraction,
+   Levelset,
+   VolumeFraction,
    // interface states
-   InterfaceVelocity, PressurePositive, PressureNegative,
+   InterfaceVelocity,
+   PressurePositive,
+   PressureNegative,
    // interface parameters
    SurfaceTensionCoefficient
 };
@@ -97,17 +102,17 @@ enum class InterfaceFieldQuantityName {
  * @return suffix for the given identifier.
  */
 inline std::string SuffixOfInterfaceDescriptionBufferType( InterfaceDescriptionBufferType const buffer_type ) {
-   switch (buffer_type) {
-      case InterfaceDescriptionBufferType::Base : {
+   switch( buffer_type ) {
+      case InterfaceDescriptionBufferType::Base: {
          return "";
       }
-      case InterfaceDescriptionBufferType::RightHandSide : {
+      case InterfaceDescriptionBufferType::RightHandSide: {
          return "_rhs";
       }
-      case InterfaceDescriptionBufferType::Reinitialized : {
+      case InterfaceDescriptionBufferType::Reinitialized: {
          return "_reinitialized";
       }
-      default : { //last possibility InterfaceDescriptionBufferType::Initial :
+      default: {//last possibility InterfaceDescriptionBufferType::Initial :
          return "_initial";
       }
    }
@@ -146,7 +151,8 @@ struct InterfaceFieldQuantityData {
       size_t current_size = field_indices_.size();
       // Erase all elements that are not active
       field_indices_.erase( std::remove_if( field_indices_.begin(), field_indices_.end(),
-                                            [&field_type]( double const& index ) { return !IF::IsFieldActive( field_type, index ); } ), field_indices_.end() );
+                                            [&field_type]( double const& index ) { return !IF::IsFieldActive( field_type, index ); } ),
+                            field_indices_.end() );
       // Throw warning if some of the fields have been rejected
       if( current_size != field_indices_.size() ) {
          std::cerr << "Output Warning! Some of the desired interface fields are not active! Continue with reduced set!" << std::endl;
@@ -168,16 +174,16 @@ inline InterfaceFieldQuantityData DataOfInterfaceFieldQuantity( InterfaceFieldQu
    // General declaration of the struct
    InterfaceFieldQuantityData quantity_data;
    // Differ between all quantities
-   switch (output_quantity) {
+   switch( output_quantity ) {
       // interface descriptions
-      case InterfaceFieldQuantityName::Levelset : {
+      case InterfaceFieldQuantityName::Levelset: {
          quantity_data.field_type_                     = InterfaceFieldType::Description;
          quantity_data.field_indices_                  = { IDTI( InterfaceDescription::Levelset ) };
          quantity_data.use_interface_tags_for_default_ = true;
          quantity_data.default_value_                  = CC::LSCOF();
          return quantity_data;
       }
-      case InterfaceFieldQuantityName::VolumeFraction : {
+      case InterfaceFieldQuantityName::VolumeFraction: {
          quantity_data.field_type_                     = InterfaceFieldType::Description;
          quantity_data.field_indices_                  = { IDTI( InterfaceDescription::VolumeFraction ) };
          quantity_data.use_interface_tags_for_default_ = true;
@@ -185,21 +191,21 @@ inline InterfaceFieldQuantityData DataOfInterfaceFieldQuantity( InterfaceFieldQu
          return quantity_data;
       }
       // interface states
-      case InterfaceFieldQuantityName::InterfaceVelocity : {
+      case InterfaceFieldQuantityName::InterfaceVelocity: {
          quantity_data.field_type_                     = InterfaceFieldType::States;
          quantity_data.field_indices_                  = { ISTI( InterfaceState::Velocity ) };
          quantity_data.use_interface_tags_for_default_ = false;
          quantity_data.default_value_                  = 0.0;
          return quantity_data;
       }
-      case InterfaceFieldQuantityName::PressurePositive : {
+      case InterfaceFieldQuantityName::PressurePositive: {
          quantity_data.field_type_                     = InterfaceFieldType::States;
          quantity_data.field_indices_                  = { ISTI( InterfaceState::PressurePositive ) };
          quantity_data.use_interface_tags_for_default_ = false;
          quantity_data.default_value_                  = 0.0;
          return quantity_data;
       }
-      case InterfaceFieldQuantityName::PressureNegative : {
+      case InterfaceFieldQuantityName::PressureNegative: {
          quantity_data.field_type_                     = InterfaceFieldType::States;
          quantity_data.field_indices_                  = { ISTI( InterfaceState::PressureNegative ) };
          quantity_data.use_interface_tags_for_default_ = false;
@@ -207,7 +213,7 @@ inline InterfaceFieldQuantityData DataOfInterfaceFieldQuantity( InterfaceFieldQu
          return quantity_data;
       }
       // interface parameters
-      case InterfaceFieldQuantityName::SurfaceTensionCoefficient : {
+      case InterfaceFieldQuantityName::SurfaceTensionCoefficient: {
          quantity_data.field_type_                     = InterfaceFieldType::Parameters;
          quantity_data.field_indices_                  = { IPTI( InterfaceParameter::SurfaceTensionCoefficient ) };
          quantity_data.use_interface_tags_for_default_ = false;
@@ -215,10 +221,10 @@ inline InterfaceFieldQuantityData DataOfInterfaceFieldQuantity( InterfaceFieldQu
          return quantity_data;
       }
       // default if nothing matches
-      default : {
+      default: {
          throw std::logic_error( "Interface field quantity not known!" );
       }
    }
 }
 
-#endif // INTERFACE_FIELD_QUANTITIES_H
+#endif// INTERFACE_FIELD_QUANTITIES_H

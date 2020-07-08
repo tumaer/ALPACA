@@ -73,16 +73,16 @@
  */
 class DebugProfileSetup {
 
-   static constexpr bool debug_logging_ = false; // Writes debug information to the logger
-   static constexpr bool debug_output_ = false; // Writes the debug output (mesh and simulation data) to file
-   static constexpr bool profiling_ = false;
+   static constexpr bool debug_logging_ = false;// Writes debug information to the logger
+   static constexpr bool debug_output_  = false;// Writes the debug output (mesh and simulation data) to file
+   static constexpr bool profiling_     = false;
 
 public:
    /**
     * @brief Gives a bool indicating if any debugging option is set.
     * @return True if any debugging option is enabled. False otherwise.
     */
-   static constexpr bool Debug() {return debug_logging_ || debug_output_;}
+   static constexpr bool Debug() { return debug_logging_ || debug_output_; }
 
    /**
     * @brief Gives a bool to decide if additional debugging information should be provided. This function is not about debugging information
@@ -91,22 +91,22 @@ public:
     *        $Convenience function. The compiler should recognize unset debug if clauses and take them out in release-builds (hopefully).$
     * @return Debug logging decision for the current build.
     */
-   static constexpr bool DebugLog() {return debug_logging_;}
+   static constexpr bool DebugLog() { return debug_logging_; }
 
    /**
     * @brief Gives a bool to decide if additional debug output files are to be written out. The output is the actual mesh and simulation data of all cells that are written
     *        into the output format specified through the input file (e.g., XDMF/HDF5)
     * @return Debug output decision for the current build.
     */
-   static constexpr bool DebugOutput() {return debug_output_;}
+   static constexpr bool DebugOutput() { return debug_output_; }
 
    /**
     * @brief Give a bool to indicate whether or not profiling (timing) runs are beeing run.
     * @return Profiling decision.
     */
-   static constexpr bool Profile() {return profiling_;}
+   static constexpr bool Profile() { return profiling_; }
 };
 
 using DP = DebugProfileSetup;
 
-#endif // DEBUG_PROFILE_SETUP_H
+#endif// DEBUG_PROFILE_SETUP_H

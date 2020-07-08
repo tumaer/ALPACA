@@ -83,36 +83,36 @@ class RungeKutta3TVD : public TimeIntegrator<RungeKutta3TVD> {
 
    static constexpr unsigned int number_of_stages_ = 3;
 
+   static constexpr std::array<double, number_of_stages_> timestep_multiplier_jump_conservatives_ = {
+         1.0 / 6.0,// first stage
+         1.0 / 6.0,// second stage
+         2.0 / 3.0 // third stage
+   };
 
-   static constexpr std::array<double, number_of_stages_> timestep_multiplier_jump_conservatives_ = { 1.0 / 6.0, // first stage
-                                                                                                      1.0 / 6.0, // second stage
-                                                                                                      2.0 / 3.0  // third stage  
-                                                                                                    };
-                                                                           
-   static constexpr std::array<double, number_of_stages_> timestep_multiplier_conservatives_      = { 1.0, // first stage
-                                                                                                      0.25, // second stage
-                                                                                                      2.0 / 3.0  // third stage  
-                                                                                                    };
+   static constexpr std::array<double, number_of_stages_> timestep_multiplier_conservatives_ = {
+         1.0,     // first stage
+         0.25,    // second stage
+         2.0 / 3.0// third stage
+   };
 
-   static constexpr std::array<std::array<double, 2>, number_of_stages_ - 1> buffer_multiplier_       = {{
-                                                                                                       {0.25     ,    0.75  }, // second stage
-                                                                                                       {2.0 / 3.0, 1.0 / 3.0}  // third stage
-                                                                                                      }};
-  
+   static constexpr std::array<std::array<double, 2>, number_of_stages_ - 1> buffer_multiplier_ = { {
+         { 0.25, 0.75 },         // second stage
+         { 2.0 / 3.0, 1.0 / 3.0 }// third stage
+   } };
+
 public:
-   RungeKutta3TVD() = delete;
-   ~RungeKutta3TVD() = default;
+   RungeKutta3TVD()                        = delete;
+   ~RungeKutta3TVD()                       = default;
    RungeKutta3TVD( RungeKutta3TVD const& ) = delete;
    RungeKutta3TVD& operator=( RungeKutta3TVD const& ) = delete;
-   RungeKutta3TVD( RungeKutta3TVD&& ) = delete;
+   RungeKutta3TVD( RungeKutta3TVD&& )                 = delete;
    RungeKutta3TVD& operator=( RungeKutta3TVD&& ) = delete;
 
    /**
      * @brief Constructor.
      * @param start_time Time when the simulation should start.
      */
-   explicit RungeKutta3TVD( double const start_time = 0.0 ) : TimeIntegrator(start_time) {}
-
+   explicit RungeKutta3TVD( double const start_time = 0.0 ) : TimeIntegrator( start_time ) {}
 };
 
-#endif // RUNGE_KUTTA_3_TVD_H
+#endif// RUNGE_KUTTA_3_TVD_H

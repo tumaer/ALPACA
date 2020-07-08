@@ -99,31 +99,31 @@ public:
    explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
                   std::int8_t const initial_interface_tag = ITTI( IT::OldCutCell ) );
    explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
-                  std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block = nullptr );
+                  std::int8_t const ( &initial_interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block = nullptr );
    Node( Node const& ) = delete;
    Node& operator=( Node const& ) = delete;
-   Node( Node&& ) = delete;
+   Node( Node&& )                 = delete;
    Node& operator=( Node&& ) = delete;
-   ~Node() = default;
+   ~Node()                   = default;
 
    // Functions to return geometry/topology data of the node
-   double GetBlockCoordinateX() const; // NH TODO can we somehow (smart) get rid of this?
+   double GetBlockCoordinateX() const;// NH TODO can we somehow (smart) get rid of this?
    double GetBlockSize() const;
    double GetCellSize() const;
 
-   // Functions to get material data of the node 
+   // Functions to get material data of the node
    Block& GetSinglePhase();
    Block const& GetSinglePhase() const;
-   Block& GetPhaseByMaterial(MaterialName const material);
-   Block const& GetPhaseByMaterial(MaterialName const material) const;
+   Block& GetPhaseByMaterial( MaterialName const material );
+   Block const& GetPhaseByMaterial( MaterialName const material ) const;
    MaterialName GetSinglePhaseMaterial() const;
    std::vector<MaterialName> GetMaterials() const;
    std::unordered_map<MaterialName, Block>& GetPhases();
    std::unordered_map<MaterialName, Block> const& GetPhases() const;
 
-   void AddPhase(MaterialName const material);
-   void RemovePhase(MaterialName const material);
-   bool ContainsMaterial(MaterialName const material) const;
+   void AddPhase( MaterialName const material );
+   void RemovePhase( MaterialName const material );
+   bool ContainsMaterial( MaterialName const material ) const;
 
    InterfaceBlock& GetInterfaceBlock();
    InterfaceBlock const& GetInterfaceBlock() const;
@@ -131,8 +131,8 @@ public:
    bool HasLevelset() const;
 
    std::int8_t GetUniformInterfaceTag() const;
-   auto GetInterfaceTags() -> std::int8_t (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
-   auto GetInterfaceTags() const -> std::int8_t const (&)[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceTags() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceTags() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 };
 
-#endif // NODE_H
+#endif// NODE_H

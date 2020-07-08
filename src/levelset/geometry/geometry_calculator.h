@@ -81,38 +81,34 @@ template<typename DerivedGeometryCalculator>
 class GeometryCalculator {
 
 public:
-   GeometryCalculator() = default;
-   ~GeometryCalculator() = default;
+   GeometryCalculator()                            = default;
+   ~GeometryCalculator()                           = default;
    GeometryCalculator( GeometryCalculator const& ) = delete;
    GeometryCalculator& operator=( GeometryCalculator const& ) = delete;
-   GeometryCalculator( GeometryCalculator&& ) = delete;
+   GeometryCalculator( GeometryCalculator&& )                 = delete;
    GeometryCalculator& operator=( GeometryCalculator&& ) = delete;
 
-   std::array<double, 6> ComputeCellFaceAperture( double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                                                  , unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1) const {
-      return static_cast<const DerivedGeometryCalculator*>(this)->ComputeCellFaceApertureImplementation(levelset, i, j, k, material_sign);
+   std::array<double, 6> ComputeCellFaceAperture( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1 ) const {
+      return static_cast<const DerivedGeometryCalculator*>( this )->ComputeCellFaceApertureImplementation( levelset, i, j, k, material_sign );
    }
 
-   double ComputeVolumeFraction( double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                                 , unsigned int const i, unsigned int const j, unsigned int const k
-                                 , std::int8_t const material_sign = 1) const {
-      return static_cast<const DerivedGeometryCalculator*>(this)->ComputeVolumeFractionImplementation(levelset, i, j, k, material_sign);
+   double ComputeVolumeFraction( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1 ) const {
+      return static_cast<const DerivedGeometryCalculator*>( this )->ComputeVolumeFractionImplementation( levelset, i, j, k, material_sign );
    }
 };
 
-
 //box size for subcell and cut-cell computation
 static constexpr unsigned int subcell_box_size_x = 3;
-static constexpr unsigned int subcell_box_size_y = CC::DIM() != Dimension::One   ? 3 : 1;
+static constexpr unsigned int subcell_box_size_y = CC::DIM() != Dimension::One ? 3 : 1;
 static constexpr unsigned int subcell_box_size_z = CC::DIM() == Dimension::Three ? 3 : 1;
 
 static constexpr unsigned int cell_box_size_x = 2;
-static constexpr unsigned int cell_box_size_y = CC::DIM() != Dimension::One   ? 2 : 1;
+static constexpr unsigned int cell_box_size_y = CC::DIM() != Dimension::One ? 2 : 1;
 static constexpr unsigned int cell_box_size_z = CC::DIM() == Dimension::Three ? 2 : 1;
 
-void GetLevelsetAtCellCorners(double (&cell_corner_levelset)[cell_box_size_x][cell_box_size_y][cell_box_size_z],
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-   unsigned int const i, unsigned int const j, unsigned int const k);
+void GetLevelsetAtCellCorners( double ( &cell_corner_levelset )[cell_box_size_x][cell_box_size_y][cell_box_size_z],
+                               double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                               unsigned int const i, unsigned int const j, unsigned int const k );
 
 /**
  * @brief Implements a cut cell criteria.
@@ -124,16 +120,16 @@ void GetLevelsetAtCellCorners(double (&cell_corner_levelset)[cell_box_size_x][ce
  * @tparam Different cut cell criteria can b used. Template specifications implement the different criteria.
  */
 template<CutCellCriteria>
-bool IsCutCell(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-   unsigned int const i, unsigned int const j, unsigned int const k);
+bool IsCutCell( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                unsigned int const i, unsigned int const j, unsigned int const k );
 
-void ComputeInterfaceCurvature(Node const& node, double (&curvature)[CC::TCX()][CC::TCY()][CC::TCZ()]);
+void ComputeInterfaceCurvature( Node const& node, double ( &curvature )[CC::TCX()][CC::TCY()][CC::TCZ()] );
 
-void GetLevelsetAtSubcellCorners(double (&subcell_corner_levelset)[subcell_box_size_x][subcell_box_size_y][subcell_box_size_z],
-   double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-   unsigned int const i, unsigned int const j, unsigned int const k);
+void GetLevelsetAtSubcellCorners( double ( &subcell_corner_levelset )[subcell_box_size_x][subcell_box_size_y][subcell_box_size_z],
+                                  double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                  unsigned int const i, unsigned int const j, unsigned int const k );
 
-std::array<double, 3> GetNormal(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-   unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1);
+std::array<double, 3> GetNormal( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                 unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1 );
 
-#endif //GEOMETRY_CALCULATOR_H
+#endif//GEOMETRY_CALCULATOR_H

@@ -86,39 +86,38 @@ class FedkiwGhostFluidExtender : public GhostFluidExtender<FedkiwGhostFluidExten
 
 private:
    // Taking some variables from the base class
+   using GhostFluidExtenderSpecification::epsilon_;
    using GhostFluidExtenderSpecification::field_type_;
    using GhostFluidExtenderSpecification::number_of_convergence_tracking_quantities_;
-   using GhostFluidExtenderSpecification::epsilon_;
    static constexpr unsigned int stencil_width_ = 1;
-   static constexpr unsigned int i_offset_ = CC::HS() - stencil_width_;
-   static constexpr unsigned int j_offset_ = CC::DIM() != Dimension::One   ? CC::HS() - stencil_width_ : 0;
-   static constexpr unsigned int k_offset_ = CC::DIM() == Dimension::Three ? CC::HS() - stencil_width_ : 0;
-   static constexpr unsigned int repetition_ = CC::HS() / stencil_width_;
+   static constexpr unsigned int i_offset_      = CC::HS() - stencil_width_;
+   static constexpr unsigned int j_offset_      = CC::DIM() != Dimension::One ? CC::HS() - stencil_width_ : 0;
+   static constexpr unsigned int k_offset_      = CC::DIM() == Dimension::Three ? CC::HS() - stencil_width_ : 0;
+   static constexpr unsigned int repetition_    = CC::HS() / stencil_width_;
 
 protected:
-
    /**
     * @brief Extend to cut-cell neighbors and extension band iteratively.
     * @param node The node which is extended.
     * @param convergence_tracking_quantities An array holding information about the convergence status of the iterative extension method.
     */
-   void IterativeExtension( Node& node, double (&convergence_tracking_quantities)[2][number_of_convergence_tracking_quantities_] ) const {
+   void IterativeExtension( Node& node, double ( &convergence_tracking_quantities )[2][number_of_convergence_tracking_quantities_] ) const {
 
-      double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
 
       // Loop through all materials of the node
       for( auto& phase : node.GetPhases() ) {
 
-         std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial( phase.first );
-         unsigned int const material_index = phase.first == MaterialSignCapsule::PositiveMaterial() ? 0 : 1;
+         std::int8_t const material_sign        = MaterialSignCapsule::SignOfMaterial( phase.first );
+         unsigned int const material_index      = phase.first == MaterialSignCapsule::PositiveMaterial() ? 0 : 1;
          double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
-         double const material_sign_double = double( material_sign );
+         double const material_sign_double      = double( material_sign );
 
          double extension_rhs[MF::ANOF( field_type_ )][CC::TCX()][CC::TCY()][CC::TCZ()];
          double one_normalization_constant[MF::ANOF( field_type_ )];
-         for(unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
+         for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
             one_normalization_constant[field_index] = 1.0 / ( std::max( epsilon_, convergence_tracking_quantities[material_index][field_index] ) );
          }
 
@@ -127,28 +126,28 @@ protected:
              * Setting the extension_rhs buffer to zero is crucial!
              */
             for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
-               for( unsigned int i = 0; i < CC::TCX(); ++i) {
-                  for( unsigned int j = 0; j < CC::TCY(); ++j) {
-                     for( unsigned int k = 0; k < CC::TCZ(); ++k) {
+               for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+                  for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+                     for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                         extension_rhs[field_index][i][j][k] = 0.0;
-                     } // k
-                  } // j
-               } // i
-            } // fields of field_type
+                     }// k
+                  }   // j
+               }      // i
+            }         // fields of field_type
 
-            std::array<double, DTI(CC::DIM())> rhs_contributions;
+            std::array<double, DTI( CC::DIM() )> rhs_contributions;
 
-            unsigned int derivative_indices[DTI(CC::DIM())][2];
-            for( unsigned int d = 0; d < DTI(CC::DIM()); ++d ) {
+            unsigned int derivative_indices[DTI( CC::DIM() )][2];
+            for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
                for( unsigned int l = 0; l < 2; ++l ) {
                   derivative_indices[d][l] = 0;
                }
             }
 
             // Loop through internal block - finally, fill extension band and cut-cell neighbors
-            for( unsigned int i = CC::FICX()-i_offset_; i <= CC::LICX()+i_offset_; ++i ) {
-               for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
-                  for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
+            for( unsigned int i = CC::FICX() - i_offset_; i <= CC::LICX() + i_offset_; ++i ) {
+               for( unsigned int j = CC::FICY() - j_offset_; j <= CC::LICY() + j_offset_; ++j ) {
+                  for( unsigned int k = CC::FICZ() - k_offset_; k <= CC::LICZ() + k_offset_; ++k ) {
                      double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
                      /**
                       * JW: We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
@@ -156,12 +155,11 @@ protected:
                       */
                      if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( material_sign * levelset[i][j][k] < 0.0 || cell_volume_fraction < CC::MITH() ) ) {
 
-                        if( -material_sign * levelset[i+1][j][k] > -material_sign * levelset[i][j][k]
-                            && -material_sign * levelset[i-1][j][k] > -material_sign * levelset[i][j][k] ) {
+                        if( -material_sign * levelset[i + 1][j][k] > -material_sign * levelset[i][j][k] && -material_sign * levelset[i - 1][j][k] > -material_sign * levelset[i][j][k] ) {
                            derivative_indices[0][0] = i;
                            derivative_indices[0][1] = i;
                         } else {
-                           if( -material_sign * levelset[i+1][j][k] < -material_sign * levelset[i-1][j][k] ) {
+                           if( -material_sign * levelset[i + 1][j][k] < -material_sign * levelset[i - 1][j][k] ) {
                               derivative_indices[0][0] = i + 1;
                               derivative_indices[0][1] = i;
                            } else {
@@ -171,12 +169,11 @@ protected:
                         }
 
                         if constexpr( CC::DIM() != Dimension::One ) {
-                           if( -material_sign * levelset[i][j+1][k] > -material_sign * levelset[i][j][k]
-                               && -material_sign * levelset[i][j-1][k] > -material_sign * levelset[i][j][k] ) {
+                           if( -material_sign * levelset[i][j + 1][k] > -material_sign * levelset[i][j][k] && -material_sign * levelset[i][j - 1][k] > -material_sign * levelset[i][j][k] ) {
                               derivative_indices[1][0] = j;
                               derivative_indices[1][1] = j;
                            } else {
-                              if( -material_sign * levelset[i][j+1][k] < -material_sign * levelset[i][j-1][k] ) {
+                              if( -material_sign * levelset[i][j + 1][k] < -material_sign * levelset[i][j - 1][k] ) {
                                  derivative_indices[1][0] = j + 1;
                                  derivative_indices[1][1] = j;
                               } else {
@@ -187,12 +184,11 @@ protected:
                         }
 
                         if constexpr( CC::DIM() == Dimension::Three ) {
-                           if( -material_sign * levelset[i][j][k+1] > -material_sign * levelset[i][j][k]
-                               && -material_sign * levelset[i][j][k-1] > -material_sign * levelset[i][j][k] ) {
+                           if( -material_sign * levelset[i][j][k + 1] > -material_sign * levelset[i][j][k] && -material_sign * levelset[i][j][k - 1] > -material_sign * levelset[i][j][k] ) {
                               derivative_indices[2][0] = k;
                               derivative_indices[2][1] = k;
                            } else {
-                              if( -material_sign * levelset[i][j][k+1] < -material_sign * levelset[i][j][k-1] ) {
+                              if( -material_sign * levelset[i][j][k + 1] < -material_sign * levelset[i][j][k - 1] ) {
                                  derivative_indices[2][0] = k + 1;
                                  derivative_indices[2][1] = k;
                               } else {
@@ -204,7 +200,7 @@ protected:
 
                         //calculate gradients
                         for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
-                           double const (&cell)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
+                           double const( &cell )[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
 
                            rhs_contributions[0] = cell[derivative_indices[0][0]][j][k] - cell[derivative_indices[0][1]][j][k];
                            rhs_contributions[0] *= levelset[derivative_indices[0][0]][j][k] - levelset[derivative_indices[0][1]][j][k];
@@ -225,37 +221,36 @@ protected:
                               convergence_tracking_quantities[material_index][MF::ANOF( field_type_ )] = std::max( convergence_tracking_quantities[material_index][MF::ANOF( field_type_ )], std::abs( extension_rhs[field_index][i][j][k] * one_normalization_constant[field_index] ) );
                            }
 
-                        } // fields of field_type
-                     } // cells to extend
-                  } // k
-               } // j
-            } // i
+                        }// fields of field_type
+                     }   // cells to extend
+                  }      // k
+               }         // j
+            }            // i
 
             for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
-               double (&extension_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
-               for( unsigned int i = CC::FICX()-i_offset_; i <= CC::LICX()+i_offset_; ++i ) {
-                  for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
-                     for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
+               double( &extension_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
+               for( unsigned int i = CC::FICX() - i_offset_; i <= CC::LICX() + i_offset_; ++i ) {
+                  for( unsigned int j = CC::FICY() - j_offset_; j <= CC::LICY() + j_offset_; ++j ) {
+                     for( unsigned int k = CC::FICZ() - k_offset_; k <= CC::LICZ() + k_offset_; ++k ) {
                         extension_buffer[i][j][k] += extension_rhs[field_index][i][j][k];
-                     } // k
-                  } // j
-               } // i
-            } // fields of field_type
+                     }// k
+                  }   // j
+               }      // i
+            }         // fields of field_type
          }
       }
    }
 
 public:
    FedkiwGhostFluidExtender() = delete;
-   explicit FedkiwGhostFluidExtender( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-      GhostFluidExtenderSpecification( material_manager, halo_manager ) {
+   explicit FedkiwGhostFluidExtender( MaterialManager const& material_manager, HaloManager& halo_manager ) : GhostFluidExtenderSpecification( material_manager, halo_manager ) {
       /** Empty Constructor, besides call of base class constructor. */
    }
-   ~FedkiwGhostFluidExtender() = default;
+   ~FedkiwGhostFluidExtender()                                 = default;
    FedkiwGhostFluidExtender( FedkiwGhostFluidExtender const& ) = delete;
    FedkiwGhostFluidExtender& operator=( FedkiwGhostFluidExtender const& ) = delete;
-   FedkiwGhostFluidExtender( FedkiwGhostFluidExtender&& ) = delete;
+   FedkiwGhostFluidExtender( FedkiwGhostFluidExtender&& )                 = delete;
    FedkiwGhostFluidExtender operator=( FedkiwGhostFluidExtender&& ) = delete;
 };
 
-#endif //FEDKIW_GHOST_FLUID_EXTENDER_H
+#endif//FEDKIW_GHOST_FLUID_EXTENDER_H

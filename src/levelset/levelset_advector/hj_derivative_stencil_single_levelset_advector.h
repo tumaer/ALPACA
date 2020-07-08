@@ -80,13 +80,12 @@ class HjDerivativeStencilSingleLevelsetAdvector : public LevelsetAdvector<HjDeri
    void AdvectImplementation( Node& node ) const;
 
 public:
-   explicit HjDerivativeStencilSingleLevelsetAdvector() = default;
-   ~HjDerivativeStencilSingleLevelsetAdvector() = default;
+   explicit HjDerivativeStencilSingleLevelsetAdvector()                                          = default;
+   ~HjDerivativeStencilSingleLevelsetAdvector()                                                  = default;
    HjDerivativeStencilSingleLevelsetAdvector( HjDerivativeStencilSingleLevelsetAdvector const& ) = delete;
    HjDerivativeStencilSingleLevelsetAdvector& operator=( HjDerivativeStencilSingleLevelsetAdvector const& ) = delete;
-   HjDerivativeStencilSingleLevelsetAdvector( HjDerivativeStencilSingleLevelsetAdvector&& ) = delete;
+   HjDerivativeStencilSingleLevelsetAdvector( HjDerivativeStencilSingleLevelsetAdvector&& )                 = delete;
    HjDerivativeStencilSingleLevelsetAdvector& operator=( HjDerivativeStencilSingleLevelsetAdvector&& ) = delete;
 };
 
-
-#endif //HJ_DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
+#endif//HJ_DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H

@@ -79,11 +79,11 @@
  *       of MaterialOutOfBounds and filling the gap in between.
  */
 enum class MaterialName : unsigned short {
-   MaterialOne                 = 0,
-   MaterialTwo                 = 1,
-   MaterialThree               = 2,
-   MaterialFour                = 3,
-   MaterialOutOfBounds         = 4
+   MaterialOne         = 0,
+   MaterialTwo         = 1,
+   MaterialThree       = 2,
+   MaterialFour        = 3,
+   MaterialOutOfBounds = 4
 };
 
 /**
@@ -107,13 +107,13 @@ constexpr MaterialName ITM( typename std::underlying_type<MaterialName>::type i 
  *       If an additionall material is added simply add all pairings in the order MaterialPairing[1:N-1][N] and increase the out of bounds number.
  */
 enum class MaterialPairingName : unsigned short {
-   MaterialPairingOneTwo       = 0,
-   MaterialPairingOneThree     = 1,
-   MaterialPairingTwoThree     = 2,
-   MaterialPairingOneFour      = 3,
-   MaterialPairingTwoFour      = 4,
-   MaterialPairingThreeFour    = 5,
-   MaterialPairingOutOfBounds  = 6
+   MaterialPairingOneTwo      = 0,
+   MaterialPairingOneThree    = 1,
+   MaterialPairingTwoThree    = 2,
+   MaterialPairingOneFour     = 3,
+   MaterialPairingTwoFour     = 4,
+   MaterialPairingThreeFour   = 5,
+   MaterialPairingOutOfBounds = 6
 };
 
 /**
@@ -150,4 +150,4 @@ inline std::vector<std::vector<unsigned int>> GetMaterialPairingIndices( unsigne
    return pairing_indices;
 }
 
-#endif // MATERIAL_DEFINITIONS_H
+#endif// MATERIAL_DEFINITIONS_H

@@ -78,7 +78,7 @@ class NumerousPhaseManager : public MultiPhaseManager<NumerousPhaseManager> {
    friend MultiPhaseManager;
 
    void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
-   void EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
+   void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
    void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
@@ -87,13 +87,12 @@ class NumerousPhaseManager : public MultiPhaseManager<NumerousPhaseManager> {
 
 public:
    NumerousPhaseManager() = delete;
-   explicit NumerousPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager );
-   ~NumerousPhaseManager() = default;
+   explicit NumerousPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager );
+   ~NumerousPhaseManager()                             = default;
    NumerousPhaseManager( NumerousPhaseManager const& ) = delete;
    NumerousPhaseManager& operator=( NumerousPhaseManager const& ) = delete;
-   NumerousPhaseManager( NumerousPhaseManager&& ) = delete;
+   NumerousPhaseManager( NumerousPhaseManager&& )                 = delete;
    NumerousPhaseManager& operator=( NumerousPhaseManager&& ) = delete;
 };
 
-
-#endif //NUMEROUS_PHASE_MANAGER_H
+#endif//NUMEROUS_PHASE_MANAGER_H

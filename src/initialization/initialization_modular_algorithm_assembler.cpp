@@ -104,7 +104,7 @@ namespace Initialization {
     * @return vector with all levels.
     */
    std::vector<unsigned int> GetAllLevels( unsigned int const maximum_level ) {
-      std::vector<unsigned int> all_levels( maximum_level + 1 ); //Level zero need to be counted as well
+      std::vector<unsigned int> all_levels( maximum_level + 1 );//Level zero need to be counted as well
       std::iota( all_levels.begin(), all_levels.end(), 0 );
       return all_levels;
    }
@@ -123,23 +123,23 @@ namespace Initialization {
     * @return The fully initialized Modular algorithm assembler class.
     */
    ModularAlgorithmAssembler InitializeModularAlgorithmAssembler( InputReader const& input_reader,
-                                                                  TopologyManager & topology_manager,
-                                                                  Tree & tree,
-                                                                  CommunicationManager & communication_manager,
-                                                                  HaloManager & halo_manager,
+                                                                  TopologyManager& topology_manager,
+                                                                  Tree& tree,
+                                                                  CommunicationManager& communication_manager,
+                                                                  HaloManager& halo_manager,
                                                                   Multiresolution const& multiresolution,
                                                                   MaterialManager const& material_manager,
-                                                                  InputOutputManager & input_output_manager,
+                                                                  InputOutputManager& input_output_manager,
                                                                   InitialCondition const& initial_condition,
                                                                   UnitHandler const& unit_handler ) {
 
       // Get data that is logged
       double const start_time = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadStartTime(), UnitType::Time );
-      double const end_time = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadEndTime(), UnitType::Time );
+      double const end_time   = unit_handler.NonDimensionalizeValue( input_reader.GetTimeControlReader().ReadEndTime(), UnitType::Time );
       double const cfl_number = input_reader.GetTimeControlReader().ReadCFLNumber();
 
       // Log data
-      LogWriter & logger = LogWriter::Instance();
+      LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Time control data: " );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Start time: " + std::to_string( start_time ) );
@@ -169,4 +169,4 @@ namespace Initialization {
                                         material_manager,
                                         input_output_manager );
    }
-} // namespace Initialization
+}// namespace Initialization

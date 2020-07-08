@@ -77,10 +77,9 @@
  * @note Runtime a check is done that all required parameters are present. Furthermore, pre-calculations are done to simply access in compute call
  */
 ConstantSurfaceTensionCoefficientModel::ConstantSurfaceTensionCoefficientModel( std::unordered_map<std::string, double> const& parameter_map,
-                                                                                UnitHandler const& unit_handler ) :
-   // Start initializer list
-   ConstantInterfaceParameterModel<ConstantSurfaceTensionCoefficientModel>(),
-   sigma_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( parameter_map, "sigmaConstant", "ConstantSurfaceTensionCoefficientModel" ), UnitType::SurfaceTensionCoefficient ) ) {
+                                                                                UnitHandler const& unit_handler ) :// Start initializer list
+                                                                                                                    ConstantInterfaceParameterModel<ConstantSurfaceTensionCoefficientModel>(),
+                                                                                                                    sigma_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( parameter_map, "sigmaConstant", "ConstantSurfaceTensionCoefficientModel" ), UnitType::SurfaceTensionCoefficient ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 
@@ -93,8 +92,7 @@ std::string ConstantSurfaceTensionCoefficientModel::GetLogData( unsigned int con
    std::string log_string;
    // Add data
    log_string += StringOperations::Indent( indent ) + "Model type: Constant \n";
-   log_string += StringOperations::Indent( indent ) + "sigma0    : " + StringOperations::ToScientificNotationString(
-                     unit_handler.DimensionalizeValue( sigma_constant_, UnitType::SurfaceTensionCoefficient ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "sigma0    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( sigma_constant_, UnitType::SurfaceTensionCoefficient ), 9 ) + "\n";
 
    return log_string;
 }

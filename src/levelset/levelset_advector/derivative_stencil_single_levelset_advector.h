@@ -68,7 +68,6 @@
 #ifndef DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
 #define DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
 
-
 #include "levelset_advector.h"
 
 /**
@@ -81,13 +80,12 @@ class DerivativeStencilSingleLevelsetAdvector : public LevelsetAdvector<Derivati
    void AdvectImplementation( Node& node ) const;
 
 public:
-   explicit DerivativeStencilSingleLevelsetAdvector() = default;
-   ~DerivativeStencilSingleLevelsetAdvector() = default;
+   explicit DerivativeStencilSingleLevelsetAdvector()                                        = default;
+   ~DerivativeStencilSingleLevelsetAdvector()                                                = default;
    DerivativeStencilSingleLevelsetAdvector( DerivativeStencilSingleLevelsetAdvector const& ) = delete;
    DerivativeStencilSingleLevelsetAdvector& operator=( DerivativeStencilSingleLevelsetAdvector const& ) = delete;
-   DerivativeStencilSingleLevelsetAdvector( DerivativeStencilSingleLevelsetAdvector&& ) = delete;
+   DerivativeStencilSingleLevelsetAdvector( DerivativeStencilSingleLevelsetAdvector&& )                 = delete;
    DerivativeStencilSingleLevelsetAdvector& operator=( DerivativeStencilSingleLevelsetAdvector&& ) = delete;
 };
 
-
-#endif //DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
+#endif//DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H

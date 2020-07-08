@@ -30,22 +30,17 @@ inline EquationOfStateName StringToEos( std::string const& eos_name ) {
    // switch statements cannot be used with strings
    if( eos_upper_case == "STIFFENEDGAS" ) {
       return EquationOfStateName::StiffenedGas;
-   }
-   else if( eos_upper_case == "STIFFENEDGASSAFE" ) {
+   } else if( eos_upper_case == "STIFFENEDGASSAFE" ) {
       return EquationOfStateName::StiffenedGasSafe;
-   }
-   else if( eos_upper_case == "STIFFENEDGASCOMPLETESAFE" ) {
+   } else if( eos_upper_case == "STIFFENEDGASCOMPLETESAFE" ) {
       return EquationOfStateName::StiffenedGasCompleteSafe;
-   }
-   else if( eos_upper_case == "NOBLEABELSTIFFENEDGAS" ) {
+   } else if( eos_upper_case == "NOBLEABELSTIFFENEDGAS" ) {
       return EquationOfStateName::NobleAbelStiffenedGas;
-   }
-   else if( eos_upper_case == "WATERLIKEFLUID" ) {
+   } else if( eos_upper_case == "WATERLIKEFLUID" ) {
       return EquationOfStateName::WaterlikeFluid;
-   }
-   else {
+   } else {
       throw std::logic_error( "Equation of state " + eos_upper_case + " is not known!" );
    }
 }
 
-#endif // EQUATION_OF_STATE_DEFINITIONS_H
+#endif// EQUATION_OF_STATE_DEFINITIONS_H

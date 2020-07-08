@@ -83,7 +83,6 @@ public:
    static long balance_recv_;
    static long average_level_send_;
    static long average_level_recv_;
-
 };
 
 std::string SummedCommunicationStatisticsString();

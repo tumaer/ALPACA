@@ -79,12 +79,10 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) :
-   gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGasSafe" ) ),
-   background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGasSafe" ), UnitType::Pressure ) ) {
+StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGasSafe" ) ),
+                                                                                                                                             background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGasSafe" ), UnitType::Pressure ) ) {
    /** Empty besides initializer list */
 }
-
 
 /**
  * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| ).
@@ -96,10 +94,8 @@ StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> cons
  * @return Pressure according to stiffened-gas equation of state.
  */
 double StiffenedGasSafe::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   double pressure = -gamma_ * background_pressure_ + ( gamma_ -1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x,
-      momentum_y * momentum_y,
-      momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
-   return std::max( pressure , -background_pressure_ + epsilon_ );
+   double pressure = -gamma_ * background_pressure_ + ( gamma_ - 1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
+   return std::max( pressure, -background_pressure_ + epsilon_ );
 }
 
 /**
@@ -126,8 +122,7 @@ double StiffenedGasSafe::DoGetEnthalpy( double const density, double const momen
  * @return Energy according to stiffened-gas equation of state.
  */
 double StiffenedGasSafe::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-   return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ -1.0 )
-          + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
+   return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ - 1.0 ) + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
 }
 
 /**
@@ -187,12 +182,9 @@ std::string StiffenedGasSafe::GetLogData( unsigned int const indent, UnitHandler
    // Name of the equation of state
    log_string += StringOperations::Indent( indent ) + "Type                 : Stiffened gas safe\n";
    // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString(
-                   DoGetGruneisen(), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString(
-                   gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString(
-                   unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( DoGetGruneisen(), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
 
    return log_string;
 }

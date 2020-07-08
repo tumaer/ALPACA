@@ -68,53 +68,66 @@
 #ifndef NUMERICAL_SETUP_H
 #define NUMERICAL_SETUP_H
 
-
 // TIME_INTEGRATION_SCHEME
-enum class TimeIntegrators {RK2, RK3};
+enum class TimeIntegrators { RK2,
+                             RK3 };
 constexpr TimeIntegrators time_integrator = TimeIntegrators::RK3;
 
 // PRIME_STATE_HANDLER
-enum class PrimeStateHandlers {Euler};
+enum class PrimeStateHandlers { Euler };
 constexpr PrimeStateHandlers prime_state_handler = PrimeStateHandlers::Euler;
 
 // MULTI_PHASE_MANAGER
-enum class PhaseManagers {TwoPhase, NumerousPhase};
+enum class PhaseManagers { TwoPhase,
+                           NumerousPhase };
 constexpr PhaseManagers phase_manager = PhaseManagers::TwoPhase;
 
 // LEVELSET_ADVECTOR
-enum class LevelsetAdvectors {DerivativeStencil, ReconstructionStencil, HjReconstructionStencil, HjDerivativeStencil};
+enum class LevelsetAdvectors { DerivativeStencil,
+                               ReconstructionStencil,
+                               HjReconstructionStencil,
+                               HjDerivativeStencil };
 constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::ReconstructionStencil;
 
 // LEVELSET_REINITIALIZER
-enum class LevelsetReinitializers {Min, Weno, Explicit};
+enum class LevelsetReinitializers { Min,
+                                    Weno,
+                                    Explicit };
 constexpr LevelsetReinitializers levelset_reinitializer = LevelsetReinitializers::Weno;
 
 // MIXING_METHOD
-enum class CutCellMixers {ApertureBased, NormalBased, Lauer};
+enum class CutCellMixers { ApertureBased,
+                           NormalBased,
+                           Lauer };
 constexpr CutCellMixers cut_cell_mixer = CutCellMixers::ApertureBased;
 
 // EXTENSION_METHOD
-enum class Extenders {Fedkiw, Upwind, Explicit}; 
+enum class Extenders { Fedkiw,
+                       Upwind,
+                       Explicit };
 constexpr Extenders extender = Extenders::Fedkiw;
 
 // GEOMETRY_CALCULATOR
-enum class GeometryCalculators {MarchingCubes};
+enum class GeometryCalculators { MarchingCubes };
 constexpr GeometryCalculators geometry_calculator = GeometryCalculators::MarchingCubes;
 
 // INTERFACE_RIEMANN_SOLVER
-enum class InterfaceRiemannSolvers {Linearized, Exact, TwoRarefaction, Hllc};
+enum class InterfaceRiemannSolvers { Linearized,
+                                     Exact,
+                                     TwoRarefaction,
+                                     Hllc };
 constexpr InterfaceRiemannSolvers interface_riemann_solver = InterfaceRiemannSolvers::Linearized;
 
 // SCALE_SEPARATOR
-enum class ScaleSeparators {TwoPhase};
+enum class ScaleSeparators { TwoPhase };
 constexpr ScaleSeparators scale_separator = ScaleSeparators::TwoPhase;
 
 // INTERFACE_EXTENDER
-enum class InterfaceExtenders {TwoPhase};
+enum class InterfaceExtenders { TwoPhase };
 constexpr InterfaceExtenders interface_extender = InterfaceExtenders::TwoPhase;
 
 // BUFFER_HANDLER
-enum class BufferHandlers {TwoPhase};
+enum class BufferHandlers { TwoPhase };
 constexpr BufferHandlers buffer_handler = BufferHandlers::TwoPhase;
 
-#endif // NUMERICAL_SETUP_H
+#endif// NUMERICAL_SETUP_H

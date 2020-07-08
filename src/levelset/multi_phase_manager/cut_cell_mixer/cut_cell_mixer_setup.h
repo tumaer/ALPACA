@@ -72,7 +72,6 @@
 #include "aperture_cut_cell_mixer.h"
 #include "lauer_cut_cell_mixer.h"
 
-
 /**
  * @brief A namespace to get a CutCellMixer type based on a specified constexpr.
  */
@@ -101,6 +100,6 @@ namespace CutCellMixerSetup {
       typedef LauerCutCellMixer type;
    };
 
-}
+}// namespace CutCellMixerSetup
 
-#endif // CUT_CELL_MIXER_SETUP_H
+#endif// CUT_CELL_MIXER_SETUP_H

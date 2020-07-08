@@ -78,7 +78,6 @@
 class MaterialPairing {
 
 protected:
-
    // material pairing properties (fixed values).
    double const surface_tension_coefficient_;
    // models
@@ -89,7 +88,7 @@ public:
                              std::unique_ptr<InterfaceParameterModel const> surface_tension_coefficient_model,
                              UnitHandler const& unit_handler );
    explicit MaterialPairing();
-   virtual ~MaterialPairing() = default;
+   virtual ~MaterialPairing()                = default;
    MaterialPairing( MaterialPairing const& ) = delete;
    MaterialPairing& operator=( MaterialPairing const& ) = delete;
    // Non-deleted move constructor
@@ -101,4 +100,4 @@ public:
    InterfaceParameterModel const& GetSurfaceTensionCoefficientModel() const;
 };
 
-#endif //MATERIAL_PAIRING_H
+#endif//MATERIAL_PAIRING_H

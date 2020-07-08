@@ -95,21 +95,21 @@ class TimeIntegrator {
      * @brief Constructor.
      * @param start_time Time when the simulation should start.
      */
-   explicit TimeIntegrator(double const start_time = 0.0) : start_time_(start_time) {}
+   explicit TimeIntegrator( double const start_time = 0.0 ) : start_time_( start_time ) {}
 
    /**
      * @brief Performs the time integration (same Algorithm as in Integrate function) for the Jump Flux Buffers.
      * @param block The block whose contents should be integrated, consistent buffer states need to be ensured by caller.
      * @param timestep The size of the time step used in the current integration step.
      */
-   void IntegrateJumpConservatives(Block& block, double const timestep) const {
+   void IntegrateJumpConservatives( Block& block, double const timestep ) const {
 
       for( auto const& location : CC::ANBS() ) {
-         double (&boundary_conservatives)[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpConservatives(location);
-         double        (&boundary_fluxes)[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpFluxes(location);
-         for(unsigned int e = 0; e < MF::ANOE(); ++e) {
-            for(unsigned int i = 0; i < CC::ICY(); ++i) {
-               for(unsigned int j = 0; j < CC::ICZ(); ++j) {
+         double( &boundary_conservatives )[MF::ANOE()][CC::ICY()][CC::ICZ()] = block.GetBoundaryJumpConservatives( location );
+         double( &boundary_fluxes )[MF::ANOE()][CC::ICY()][CC::ICZ()]        = block.GetBoundaryJumpFluxes( location );
+         for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
+            for( unsigned int i = 0; i < CC::ICY(); ++i ) {
+               for( unsigned int j = 0; j < CC::ICZ(); ++j ) {
                   //integrate change of conservatives over the block boundary
                   boundary_conservatives[e][i][j] += timestep * boundary_fluxes[e][i][j];
 
@@ -128,14 +128,14 @@ class TimeIntegrator {
      * @param timestep The size of the time step used in the current integration step.
      * @note  This function works only for RK2 and RK3. In order to use higher-order schemes, it might be necessary to adapt it.
      */
-   void IntegrateConservatives(Block& block, double const timestep) const {
+   void IntegrateConservatives( Block& block, double const timestep ) const {
 
-      for(Equation const eq : MF::ASOE()) {
-         double (&u_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(eq);
-         double (&u_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer(eq);
-         for(unsigned int i = CC::FICX(); i <= CC::LICX(); ++i) {
-            for(unsigned int j = CC::FICY(); j <= CC::LICY(); ++j) {
-               for(unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
+      for( Equation const eq : MF::ASOE() ) {
+         double( &u_old )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( eq );
+         double( &u_new )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer( eq );
+         for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
+            for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+               for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                   u_new[i][j][k] = u_old[i][j][k] + timestep * u_new[i][j][k];
                }
             }
@@ -152,15 +152,15 @@ class TimeIntegrator {
      * @param start_indices_halo The start indices of the halo cells in all directions.
      * @param halo_size The number of halo cells to be integrated in each direction.
      */
-   void IntegrateHalo(Block& block, double const timestep, std::array<int,3> const start_indices_halo, std::array<int,3> const halo_size) const {
+   void IntegrateHalo( Block& block, double const timestep, std::array<int, 3> const start_indices_halo, std::array<int, 3> const halo_size ) const {
 
-      for(Equation const eq : MF::ASOE()) {
-         double (&u_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(eq);
-         double (&u_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer(eq);
+      for( Equation const eq : MF::ASOE() ) {
+         double( &u_old )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( eq );
+         double( &u_new )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetRightHandSideBuffer( eq );
 
-         for(int i = start_indices_halo[0]; i < start_indices_halo[0] + halo_size[0]; i++) {
-            for(int j = start_indices_halo[1]; j < start_indices_halo[1] + halo_size[1]; j++) {
-               for(int k = start_indices_halo[2]; k < start_indices_halo[2] + halo_size[2]; k++) {
+         for( int i = start_indices_halo[0]; i < start_indices_halo[0] + halo_size[0]; i++ ) {
+            for( int j = start_indices_halo[1]; j < start_indices_halo[1] + halo_size[1]; j++ ) {
+               for( int k = start_indices_halo[2]; k < start_indices_halo[2] + halo_size[2]; k++ ) {
                   u_new[i][j][k] = u_old[i][j][k] + timestep * u_new[i][j][k];
                }
             }
@@ -175,24 +175,24 @@ class TimeIntegrator {
      * @param timestep The size of the time step used in the current integration step.
      * @note  This function works only for RK2 and RK3. In order to use higher-order schemes, it might be necessary to adapt it.
      */
-   void IntegrateLevelset(Node& node, double const timestep) const {
-      double (&levelset_new)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetRightHandSideBuffer(InterfaceDescription::Levelset);
-      double const (&levelset_old)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer(InterfaceDescription::Levelset);
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&levelset_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer(InterfaceDescription::Levelset);
+   void IntegrateLevelset( Node& node, double const timestep ) const {
+      double( &levelset_new )[CC::TCX()][CC::TCY()][CC::TCZ()]                 = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
+      double const( &levelset_old )[CC::TCX()][CC::TCY()][CC::TCZ()]           = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+      double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
-      for(unsigned int i = 0; i < CC::TCX(); ++i) {
-         for(unsigned int j = 0; j < CC::TCY(); ++j) {
-            for(unsigned int k = 0; k < CC::TCZ(); ++k) {
+      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                //integrate narrow band including cut-cells
-               if(std::abs(interface_tags[i][j][k]) < ITTI(IT::BulkPhase)){
+               if( std::abs( interface_tags[i][j][k] ) < ITTI( IT::BulkPhase ) ) {
                   levelset_new[i][j][k] = levelset_old[i][j][k] + timestep * levelset_new[i][j][k];
                } else {
                   levelset_new[i][j][k] = levelset_reinitialized[i][j][k];
                }
-            } //k
-         } //j
-      } //i
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
@@ -220,19 +220,18 @@ class TimeIntegrator {
    }
 
 public:
-   TimeIntegrator() = delete;
-   ~TimeIntegrator() = default;
+   TimeIntegrator()                        = delete;
+   ~TimeIntegrator()                       = default;
    TimeIntegrator( TimeIntegrator const& ) = delete;
    TimeIntegrator& operator=( TimeIntegrator const& ) = delete;
-   TimeIntegrator( TimeIntegrator&& ) = delete;
+   TimeIntegrator( TimeIntegrator&& )                 = delete;
    TimeIntegrator& operator=( TimeIntegrator&& ) = delete;
-
 
    /**
      * @brief Sets the start time of the simulation to the given value.
      * @param The start time to use for the simlation.
      */
-   void SetStartTime(double const start_time) {
+   void SetStartTime( double const start_time ) {
       start_time_ = start_time;
    }
 
@@ -241,15 +240,15 @@ public:
      *        $NOT SAFE: Corrupted Input results in wrong integrations$
      * @param time_step The time step (size) to be appended.
      */
-   void AppendMicroTimestep(double const time_step) {
-      micro_timestep_sizes_.push_back(time_step);
+   void AppendMicroTimestep( double const time_step ) {
+      micro_timestep_sizes_.push_back( time_step );
    }
 
    /**
      * @brief Computes the macro time step size, adds it to the macro timestep list and empties the micro timestep list.
      */
    void FinishMacroTimestep() {
-      macro_timestep_sizes_.push_back(std::accumulate(micro_timestep_sizes_.cbegin(),micro_timestep_sizes_.cend(),0.0));
+      macro_timestep_sizes_.push_back( std::accumulate( micro_timestep_sizes_.cbegin(), micro_timestep_sizes_.cend(), 0.0 ) );
       micro_timestep_sizes_.clear();
    }
 
@@ -265,7 +264,7 @@ public:
      * @brief Returns the current run time, i.e. time of all fully passed MACRO timesteps.
      * @return Run time.
      */
-   inline double CurrentRunTime() const {return std::accumulate(macro_timestep_sizes_.cbegin(),macro_timestep_sizes_.cend(),start_time_);}
+   inline double CurrentRunTime() const { return std::accumulate( macro_timestep_sizes_.cbegin(), macro_timestep_sizes_.cend(), start_time_ ); }
 
    /**
      * @brief Integrates all jump halos a node holds.
@@ -275,19 +274,18 @@ public:
      * @param start_indices_halo The start indices of the halo cells in all directions.
      * @param halo_size The number of halo cells to be integrated in each direction.
      */
-   void IntegrateJumpHalos(Node& node, unsigned int const stage, unsigned int const number_of_timesteps,
-      std::array<int,3> const start_indices_halo, std::array<int,3> const halo_size) const {
-      #ifndef PERFORMANCE
-         if( stage >= NumberOfStages() ) {
-            throw std::invalid_argument("Stage is too large for the chosen time integration scheme");
-         }
-      #endif
+   void IntegrateJumpHalos( Node& node, unsigned int const stage, unsigned int const number_of_timesteps,
+                            std::array<int, 3> const start_indices_halo, std::array<int, 3> const halo_size ) const {
+#ifndef PERFORMANCE
+      if( stage >= NumberOfStages() ) {
+         throw std::invalid_argument( "Stage is too large for the chosen time integration scheme" );
+      }
+#endif
 
-      double const timestep = std::accumulate(micro_timestep_sizes_.crbegin(),micro_timestep_sizes_.crbegin()+number_of_timesteps,0.0)
-                            * GetTimestepMultiplierConservatives(stage);
+      double const timestep = std::accumulate( micro_timestep_sizes_.crbegin(), micro_timestep_sizes_.crbegin() + number_of_timesteps, 0.0 ) * GetTimestepMultiplierConservatives( stage );
 
       for( auto& phase : node.GetPhases() ) {
-         IntegrateHalo(phase.second, timestep, start_indices_halo, halo_size);
+         IntegrateHalo( phase.second, timestep, start_indices_halo, halo_size );
       }
    }
 
@@ -297,29 +295,29 @@ public:
      * @param stage The integration stage.
      * @param number_of_timesteps The number of time steps relevant for this integration, i.e. on coarser levels the timestep sizes of the finer levels need to be summed.
      */
-   void IntegrateNode(Node& node, unsigned int const stage, unsigned int const number_of_timesteps) const {
-   #ifndef PERFORMANCE
+   void IntegrateNode( Node& node, unsigned int const stage, unsigned int const number_of_timesteps ) const {
+#ifndef PERFORMANCE
       if( stage >= NumberOfStages() ) {
-         throw std::invalid_argument("Stage is too large for the chosen time integration scheme");
+         throw std::invalid_argument( "Stage is too large for the chosen time integration scheme" );
       }
-   #endif
+#endif
 
       // The timestepsize for the jump conservatives is different than for the regular RK stage, depending on the order of the overall scheme. Therefore,
       // different multiplicators are required.
-      double const timestep = std::accumulate(micro_timestep_sizes_.crbegin(),micro_timestep_sizes_.crbegin() + number_of_timesteps,0.0);
-      double const multiplier_jump_conservatives = GetTimestepMultiplierJumpConservatives(stage);
-      double const multiplier_conservatives      = GetTimestepMultiplierConservatives(stage);
+      double const timestep                      = std::accumulate( micro_timestep_sizes_.crbegin(), micro_timestep_sizes_.crbegin() + number_of_timesteps, 0.0 );
+      double const multiplier_jump_conservatives = GetTimestepMultiplierJumpConservatives( stage );
+      double const multiplier_conservatives      = GetTimestepMultiplierConservatives( stage );
 
       for( auto& phase : node.GetPhases() ) {
-         IntegrateJumpConservatives(phase.second, multiplier_jump_conservatives * timestep);
+         IntegrateJumpConservatives( phase.second, multiplier_jump_conservatives * timestep );
       }
 
       if( node.HasLevelset() ) {
-         IntegrateLevelset(node, multiplier_conservatives * timestep);
+         IntegrateLevelset( node, multiplier_conservatives * timestep );
       }
 
       for( auto& phase : node.GetPhases() ) {
-         IntegrateConservatives(phase.second, multiplier_conservatives * timestep);
+         IntegrateConservatives( phase.second, multiplier_conservatives * timestep );
       }
    }
 
@@ -328,35 +326,35 @@ public:
      * @param node The node from which the necessary conservatives are written to the initial buffer.
      * @param stage The stage of the time stepping scheme.
      */
-   void FillInitialBuffer(Node& node, unsigned int const stage) const {
+   void FillInitialBuffer( Node& node, unsigned int const stage ) const {
       if( stage == 0 ) {
          if( node.HasLevelset() ) {
             for( auto& mat_block : node.GetPhases() ) {
-               std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial(mat_block.first);
-               double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+               std::int8_t const material_sign                                   = MaterialSignCapsule::SignOfMaterial( mat_block.first );
+               double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
 
-               double const reference_volume_fraction = (material_sign > 0) ? 0.0 : 1.0;
-               double const material_sign_double = double(material_sign);
+               double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
+               double const material_sign_double      = double( material_sign );
 
                for( Equation const eq : MF::ASOE() ) {
-                  double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetAverageBuffer(eq);
-                  double (&u_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer(eq);
+                  double const( &u )[CC::TCX()][CC::TCY()][CC::TCZ()]   = mat_block.second.GetAverageBuffer( eq );
+                  double( &u_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer( eq );
                   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                           u_initial[i][j][k] = u[i][j][k] * (reference_volume_fraction + material_sign_double * volume_fraction[i][j][k]);
-                        } //k
-                     } //j
-                  } //i
-               } //equations
-            } //phases
+                           u_initial[i][j][k] = u[i][j][k] * ( reference_volume_fraction + material_sign_double * volume_fraction[i][j][k] );
+                        }//k
+                     }   //j
+                  }      //i
+               }         //equations
+            }            //phases
 
             BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Base, InterfaceDescriptionBufferType::Initial>( node );
 
-         } else { //nodes without levelset
+         } else {//nodes without levelset
             BO::Material::CopyConservativeBuffersForNode<ConservativeBufferType::Average, ConservativeBufferType::Initial>( node );
          }
-      } //if initial stage
+      }//if initial stage
    }
 
    /**
@@ -364,38 +362,38 @@ public:
      * @param node The node for which the average buffer is prepared for the next sub-timestep.
      * @param stage The stage of the time-stepping scheme.
      */
-   void PrepareBufferForIntegration(Node& node, unsigned int const stage) const {
+   void PrepareBufferForIntegration( Node& node, unsigned int const stage ) const {
       //buffer preparation is only necessary for later stages
       if( stage != 0 ) {
 
-         auto const multipliers = GetBufferMultiplier(stage);
+         auto const multipliers = GetBufferMultiplier( stage );
 
          for( auto& mat_block : node.GetPhases() ) {
             for( Equation const eq : MF::ASOE() ) {
-               double               (&u)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetAverageBuffer(eq);
-               double const (&u_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer(eq);
+               double( &u )[CC::TCX()][CC::TCY()][CC::TCZ()]               = mat_block.second.GetAverageBuffer( eq );
+               double const( &u_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] = mat_block.second.GetInitialBuffer( eq );
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                      for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                         u[i][j][k] = multipliers[0] * u[i][j][k] + multipliers[1] * u_initial[i][j][k];
-                     } //k
-                  } //j
-               } //i
-            } //equations
-         } //phases
+                     }//k
+                  }   //j
+               }      //i
+            }         //equations
+         }            //phases
 
          if( node.HasLevelset() ) {
-            double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-            double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
+            double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]               = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+            double const( &levelset_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
 
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                   for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                      levelset[i][j][k] = multipliers[0] * levelset[i][j][k] + multipliers[1] * levelset_initial[i][j][k];
-                  } //k
-               } //j
-            } //i
-         } //nodes with levelset
+                  }//k
+               }   //j
+            }      //i
+         }         //nodes with levelset
       }
    }
 
@@ -412,14 +410,14 @@ public:
      * @param stage The stage to be checked (zero based).
      * @return True if given stage is the last stage, false otherwise.
      */
-   constexpr bool IsLastStage(unsigned int const stage) const {return stage == (NumberOfStages() - 1);}
+   constexpr bool IsLastStage( unsigned int const stage ) const { return stage == ( NumberOfStages() - 1 ); }
 
    /**
      * @brief Swaps the two buffers of the provided Block object.
      * @param block Reference to Block object whose buffers are to be swapped.
      * @note This function must be inherited properly as soon as other integrators are implemented!
      */
-   void SwapBuffersForNextStage(Node& node) const {
+   void SwapBuffersForNextStage( Node& node ) const {
       // swap the conservative buffers
       BO::Material::SwapConservativeBuffersForNode<ConservativeBufferType::RightHandSide, ConservativeBufferType::Average>( node );
       // swap the levelset buffer properly if required
@@ -429,4 +427,4 @@ public:
    }
 };
 
-#endif // TIME_INTEGRATOR_H
+#endif// TIME_INTEGRATOR_H

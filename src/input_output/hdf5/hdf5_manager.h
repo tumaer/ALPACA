@@ -98,9 +98,9 @@ public:
    static Hdf5Manager& Instance();
 
    ~Hdf5Manager();
-   Hdf5Manager( Hdf5Manager const&) = delete;
-   Hdf5Manager& operator=( Hdf5Manager const&) = delete;
-   Hdf5Manager( Hdf5Manager&& ) = delete;
+   Hdf5Manager( Hdf5Manager const& ) = delete;
+   Hdf5Manager& operator=( Hdf5Manager const& ) = delete;
+   Hdf5Manager( Hdf5Manager&& )                 = delete;
    Hdf5Manager& operator=( Hdf5Manager&& ) = delete;
 
    // Functions to open, close files, groups, datasets and dataspaces
@@ -136,7 +136,7 @@ public:
       Hdf5Group const& group = groups_.at( active_group_ );
       // Write to the group
       hid_t data_type = H5Screate( H5S_SCALAR );
-      hid_t data = H5Acreate2( group.id_, scalar_name.c_str(), datatype_id, data_type, H5P_DEFAULT, H5P_DEFAULT );
+      hid_t data      = H5Acreate2( group.id_, scalar_name.c_str(), datatype_id, data_type, H5P_DEFAULT, H5P_DEFAULT );
       H5Awrite( data, datatype_id, &value );
       H5Aclose( data );
       H5Sclose( data_type );
@@ -154,14 +154,14 @@ public:
     */
    template<typename BufferType>
    void WriteDataset( std::string const& dataset_name, BufferType const* buffer ) {
-   #ifndef PERFORMANCE
+#ifndef PERFORMANCE
       // Check if the dataset was opened before
       if( datasets_.find( dataset_name ) == datasets_.end() ) {
          throw std::logic_error( "Before writing to a dataset it must be opened!" );
       }
-   #endif
+#endif
       // Get the correct dataset info
-      Hdf5Dataset & dataset = datasets_[dataset_name];
+      Hdf5Dataset& dataset   = datasets_[dataset_name];
       Hdf5Group const& group = groups_[dataset.group_name_];
       // Select the correct hyperslab
       H5Sselect_hyperslab( dataset.local_hyperslab_, H5S_SELECT_SET, dataset.start_indices_.data(), NULL, dataset.count_.data(), dataset.local_dimensions_.data() );
@@ -191,13 +191,13 @@ public:
 #endif
       // Get the correct group information
       Hdf5Dataset const& dataset = datasets_.at( dataspace_name );
-      Hdf5Group const& group = groups_.at( dataset.group_name_ );
+      Hdf5Group const& group     = groups_.at( dataset.group_name_ );
 
       // Creates a new dataset and links it into the file/group
       hid_t const dataset_id = H5Dcreate2( group.id_, dataset_name.c_str(), dataset.datatype_, dataset.dataspace_id_, H5P_DEFAULT, dataset.properties_create_, H5P_DEFAULT );
       // Create the local memory and hyperslab space required for writing the data (NULL marks that dataset cannot grow until it is closed)
       hid_t const local_memory_space = H5Screate_simple( dataset.local_dimensions_.size(), dataset.local_dimensions_.data(), NULL );
-      hid_t const local_hyperslab = H5Dget_space( dataset_id );
+      hid_t const local_hyperslab    = H5Dget_space( dataset_id );
       H5Sselect_hyperslab( local_hyperslab, H5S_SELECT_SET, dataset.start_indices_.data(), NULL, dataset.local_dimensions_.data(), NULL );
       // Write the local dataset to the given group
       H5Dwrite( dataset_id, dataset.datatype_, local_memory_space, local_hyperslab, group.properties_, buffer );
@@ -216,7 +216,7 @@ public:
     * @tparam Type of values to be written.
     */
    template<typename T>
-   void ReadAttributeScalar( std::string const& scalar_name, T & value, hid_t const datatype_id = H5T_NATIVE_DOUBLE ) const {
+   void ReadAttributeScalar( std::string const& scalar_name, T& value, hid_t const datatype_id = H5T_NATIVE_DOUBLE ) const {
 #ifndef PERFORMANCE
       if( active_group_.empty() ) {
          throw std::runtime_error( "Before read a single scalar from a group you must activate one!" );
@@ -240,7 +240,7 @@ public:
     * @note No sanity check is done that the provided buffer is large enough to store the data. Use GetDatasetExtent function to check the (contiguous) size of dataset.
     */
    template<typename BufferType>
-   void ReadFullDataset( std::string const& dataset_name, BufferType * buffer, hid_t const datatype_id = H5T_NATIVE_DOUBLE ) const {
+   void ReadFullDataset( std::string const& dataset_name, BufferType* buffer, hid_t const datatype_id = H5T_NATIVE_DOUBLE ) const {
 #ifndef PERFORMANCE
       if( active_group_.empty() ) {
          throw std::runtime_error( "Before reading a full dataset from a hdf5 file, a group must be opened and activated!" );
@@ -250,7 +250,7 @@ public:
       Hdf5Group const& group = groups_.at( active_group_ );
 
       /** Open the dataset for reading and select the entire local hyperslab */
-      hid_t dataset_id = H5Dopen2( group.id_, dataset_name.c_str(), H5P_DEFAULT );
+      hid_t dataset_id      = H5Dopen2( group.id_, dataset_name.c_str(), H5P_DEFAULT );
       hid_t local_hyperslab = H5Dget_space( dataset_id );
       // read the data from file and store it in the contiguous buffer
       H5Dread( dataset_id, datatype_id, H5S_ALL, H5S_ALL, group.properties_, buffer );
@@ -270,7 +270,7 @@ public:
     * @tparam BufferType Type of the buffer where data is stored.
     */
    template<typename BufferType>
-   void ReadDataset( std::string const& dataset_name, BufferType * buffer, hsize_t const dataset_offset ) {
+   void ReadDataset( std::string const& dataset_name, BufferType* buffer, hsize_t const dataset_offset ) {
 #ifndef PERFORMANCE
       // Check if the dataset was opened before
       if( datasets_.find( dataset_name ) == datasets_.end() ) {
@@ -278,7 +278,7 @@ public:
       }
 #endif
       // Get the correct dataset info
-      Hdf5Dataset & dataset = datasets_[dataset_name];
+      Hdf5Dataset& dataset   = datasets_[dataset_name];
       Hdf5Group const& group = groups_[dataset.group_name_];
       // Change the offset to the desired enty
       dataset.start_indices_.front() = dataset_offset;
@@ -287,4 +287,4 @@ public:
    }
 };
 
-#endif // HDF5_MANAGER_H
+#endif// HDF5_MANAGER_H

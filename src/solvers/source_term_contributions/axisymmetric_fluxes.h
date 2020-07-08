@@ -76,15 +76,15 @@
 class AxisymmetricFluxes {
 
 public:
-   explicit AxisymmetricFluxes() = default;
-   ~AxisymmetricFluxes() = default;
+   explicit AxisymmetricFluxes()                   = default;
+   ~AxisymmetricFluxes()                           = default;
    AxisymmetricFluxes( AxisymmetricFluxes const& ) = delete;
-   AxisymmetricFluxes( AxisymmetricFluxes&& ) = delete;
+   AxisymmetricFluxes( AxisymmetricFluxes&& )      = delete;
    AxisymmetricFluxes& operator=( AxisymmetricFluxes const& ) = delete;
    AxisymmetricFluxes& operator=( AxisymmetricFluxes&& ) = delete;
 
-   void ComputeAxisymmetricContributions( Block const& block, double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
-      double const cell_size, double const node_origin_x) const;
+   void ComputeAxisymmetricContributions( Block const& block, double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
+                                          double const cell_size, double const node_origin_x ) const;
 };
 
-#endif //AXISYMMETRIC_FLUXES_H
+#endif//AXISYMMETRIC_FLUXES_H

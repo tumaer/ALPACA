@@ -73,14 +73,18 @@
 /**
  * @brief Identifier for flux splitting schemes to be used in Roe Riemann Solver.
  */
-enum class FluxSplitting { Roe, LocalLaxFriedrichs, GlobalLaxFriedrichs, Roe_M, LocalLaxFriedrichs_M };
+enum class FluxSplitting { Roe,
+                           LocalLaxFriedrichs,
+                           GlobalLaxFriedrichs,
+                           Roe_M,
+                           LocalLaxFriedrichs_M };
 
 /**
  * @brief Provides a string representation of the applied FluxSplitting type in Roe Riemann Solver (used for log file).
  * @param flux_type FluxSplitting identifier.
  * @return String representation for the given FluxSplitting type.
  */
-inline std::string FluxSplittingToString( FluxSplitting const flux_type) {
+inline std::string FluxSplittingToString( FluxSplitting const flux_type ) {
    switch( flux_type ) {
       case FluxSplitting::Roe:
          return "Roe";
@@ -97,4 +101,4 @@ inline std::string FluxSplittingToString( FluxSplitting const flux_type) {
    }
 }
 
-#endif // FLUXSPLITTING_H
+#endif// FLUXSPLITTING_H

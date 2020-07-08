@@ -78,35 +78,35 @@
  * @tparam FieldEnum Enumeration type allowing to access the material fields.
  * @tparam int(*const FieldToIndex)(FieldEnum) Function converting the field enumeration to an index in the range [0;N).
  */
-template<std::size_t N, typename FieldEnum, unsigned int( *const FieldToIndex )( FieldEnum )>
+template<std::size_t N, typename FieldEnum, unsigned int ( *const FieldToIndex )( FieldEnum )>
 struct FieldBuffer {
    std::array<double[CC::TCX()][CC::TCY()][CC::TCZ()], N> Fields;
 
    /**
     * @brief Access the buffer corresponding to field f.
     */
-   auto operator[]( FieldEnum const f ) -> double(&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-      return Fields[FieldToIndex(f)];
+   auto operator[]( FieldEnum const f ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+      return Fields[FieldToIndex( f )];
    }
 
    /**
     * @brief Access the buffer corresponding to field f. Const overload.
     */
-   auto operator[]( FieldEnum const f ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
-      return Fields[FieldToIndex(f)];
+   auto operator[]( FieldEnum const f ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+      return Fields[FieldToIndex( f )];
    }
 
    /**
     * @brief Access the buffer at the given index.
     */
-   auto operator[]( unsigned short const index ) -> double(&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   auto operator[]( unsigned short const index ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
       return Fields[index];
    }
 
    /**
     * @brief Access the buffer at the given index. Const overload.
     */
-   auto operator[]( unsigned short const index ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   auto operator[]( unsigned short const index ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
       return Fields[index];
    }
 
@@ -213,4 +213,4 @@ using InterfaceParameters = FieldBuffer<IF::ANOPA(), InterfaceParameter, IPTI>;
 static_assert( sizeof( InterfaceParameters ) == IF::ANOPA() * CC::TCX() * CC::TCY() * CC::TCZ() * sizeof( double ),
                "InterfaceParameter Struct is not contiguous in Memory" );
 
-#endif // FIELD_BUFFER_H
+#endif// FIELD_BUFFER_H

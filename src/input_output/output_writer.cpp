@@ -91,17 +91,16 @@ OutputWriter::OutputWriter( std::unique_ptr<MeshGenerator const> standard_mesh_g
                             std::unique_ptr<MeshGenerator const> interface_mesh_generator,
                             std::vector<std::unique_ptr<OutputQuantity const>> material_output_quantities,
                             std::vector<std::unique_ptr<OutputQuantity const>> interface_output_quantities,
-                            unsigned int const number_of_materials ) :
-   // Start initializer list
-   number_of_materials_( number_of_materials ),
-   hdf5_manager_( Hdf5Manager::Instance() ),
-   standard_mesh_generator_( std::move( standard_mesh_generator ) ),
-   debug_mesh_generator_( std::move( debug_mesh_generator ) ),
-   interface_mesh_generator_( std::move( interface_mesh_generator ) ),
-   material_output_quantities_( std::move( material_output_quantities ) ),
-   interface_output_quantities_( std::move( interface_output_quantities ) ),
-   material_quantities_dimension_map_( ComputeDimensionMap( material_output_quantities_ ) ),
-   interface_quantities_dimension_map_( ComputeDimensionMap( interface_output_quantities_ ) ) {
+                            unsigned int const number_of_materials ) :// Start initializer list
+                                                                       number_of_materials_( number_of_materials ),
+                                                                       hdf5_manager_( Hdf5Manager::Instance() ),
+                                                                       standard_mesh_generator_( std::move( standard_mesh_generator ) ),
+                                                                       debug_mesh_generator_( std::move( debug_mesh_generator ) ),
+                                                                       interface_mesh_generator_( std::move( interface_mesh_generator ) ),
+                                                                       material_output_quantities_( std::move( material_output_quantities ) ),
+                                                                       interface_output_quantities_( std::move( interface_output_quantities ) ),
+                                                                       material_quantities_dimension_map_( ComputeDimensionMap( material_output_quantities_ ) ),
+                                                                       interface_quantities_dimension_map_( ComputeDimensionMap( interface_output_quantities_ ) ) {
    /** Empty besides initializer list */
 }
 
@@ -148,9 +147,9 @@ void OutputWriter::WriteOutput( OutputType const output_type,
    // Define the full path filename of the hdf5 file
    std::string const hdf5_filename( filename_without_extension + ".h5" );
    // Obtain the correct mesh generator for the given output (ternary operator used to avoid new function declaration and allow constness)
-   MeshGenerator const& mesh_generator = output_type == OutputType::Debug     ? *debug_mesh_generator_ :
-                                         output_type == OutputType::Interface ? *interface_mesh_generator_ :
-                                                                                *standard_mesh_generator_;
+   MeshGenerator const& mesh_generator = output_type == OutputType::Debug ? *debug_mesh_generator_ :
+                                                                            output_type == OutputType::Interface ? *interface_mesh_generator_ :
+                                                                                                                   *standard_mesh_generator_;
    // Call the writing function with the specific mesh_generator
    WriteHdf5File( output_time, hdf5_filename, mesh_generator, output_type );
    // Only write xdmf on rank 0 to avoid write conflicts
@@ -238,7 +237,7 @@ std::string OutputWriter::XdmfSpatialDataInformation( double const output_time,
          if( output_type == OutputType::Debug ) {
             // Add material prefix for all quantities
             for( size_t material_index = 0; material_index < number_of_materials_; material_index++ ) {
-               xdmf_content += output_quantity->GetXdmfAttributeString( hdf5_short_filename, "cell_data", global_number_cells, "material_" + std::to_string( material_index + 1 ) + "_");
+               xdmf_content += output_quantity->GetXdmfAttributeString( hdf5_short_filename, "cell_data", global_number_cells, "material_" + std::to_string( material_index + 1 ) + "_" );
             }
          } else {
             xdmf_content += output_quantity->GetXdmfAttributeString( hdf5_short_filename, "cell_data", global_number_cells );
@@ -278,8 +277,8 @@ void OutputWriter::WriteHdf5File( double const output_time, std::string const& h
    /** Vertex IDs */
    // Define the hdf5 dataset properties for vertex ids
    std::vector<hsize_t> const global_dimensions_vertex_ids = mesh_generator.GetGlobalDimensionsOfVertexIDs();
-   std::vector<hsize_t> const local_dimensions_vertex_ids = mesh_generator.GetLocalDimensionsOfVertexIDs();
-   hsize_t const start_index_vertex_ids = mesh_generator.GetLocalVertexIDsStartIndex();
+   std::vector<hsize_t> const local_dimensions_vertex_ids  = mesh_generator.GetLocalDimensionsOfVertexIDs();
+   hsize_t const start_index_vertex_ids                    = mesh_generator.GetLocalVertexIDsStartIndex();
 
    // Declare the vector where the vertex IDs are written into. The vector is not initialized with a certain size since done inside of the mesh generator
    std::vector<unsigned long long int> vertex_ids;
@@ -295,8 +294,8 @@ void OutputWriter::WriteHdf5File( double const output_time, std::string const& h
    /** Vertex coordinates */
    // Define the hdf5 dataset properties for vertex coordinates
    std::vector<hsize_t> const global_dimensions_vertex_coordinates = mesh_generator.GetGlobalDimensionsOfVertexCoordinates();
-   std::vector<hsize_t> const local_dimensions_vertex_coordinates = mesh_generator.GetLocalDimensionsOfVertexCoordinates();
-   hsize_t const start_index_vertex_coordinates = mesh_generator.GetLocalVertexCoordinatesStartIndex();
+   std::vector<hsize_t> const local_dimensions_vertex_coordinates  = mesh_generator.GetLocalDimensionsOfVertexCoordinates();
+   hsize_t const start_index_vertex_coordinates                    = mesh_generator.GetLocalVertexCoordinatesStartIndex();
 
    // Declare the vector where the vertex coordinates are written into. The vector is not initialized with a certain size since done inside of the mesh generator
    std::vector<double> vertex_coordinates;
@@ -319,8 +318,8 @@ void OutputWriter::WriteHdf5File( double const output_time, std::string const& h
    std::vector<std::reference_wrapper<Node const>> const local_nodes = mesh_generator.GetLocalNodes();
 
    // Define the hdf5 dataset properties for cell data (same for all quantities)
-   hsize_t const global_number_of_cells = mesh_generator.GetGlobalNumberOfCells();
-   hsize_t const local_number_of_cells = mesh_generator.GetLocalNumberOfCells();
+   hsize_t const global_number_of_cells  = mesh_generator.GetGlobalNumberOfCells();
+   hsize_t const local_number_of_cells   = mesh_generator.GetLocalNumberOfCells();
    hsize_t const local_cells_start_index = mesh_generator.GetLocalCellsStartIndex();
 
    // Data vector for each quantity (not initialized here. Size is assigned in the dimension loop)
@@ -410,15 +409,15 @@ void OutputWriter::WriteHdf5File( double const output_time, std::string const& h
  * @param quantities Vector with all quantities for which the map should be computed.
  * @return Map with key: Array with both quantity dimensions (row, column); value: Vector with all indices in the quantities vector for the given dimension.
  */
-std::map<std::array<unsigned int,2>,std::vector<unsigned int>> OutputWriter::ComputeDimensionMap( std::vector<std::unique_ptr<OutputQuantity const>> const& quantities ) const {
+std::map<std::array<unsigned int, 2>, std::vector<unsigned int>> OutputWriter::ComputeDimensionMap( std::vector<std::unique_ptr<OutputQuantity const>> const& quantities ) const {
    // Map that is returned
-   std::map<std::array<unsigned int,2>,std::vector<unsigned int>> dimension_map;
+   std::map<std::array<unsigned int, 2>, std::vector<unsigned int>> dimension_map;
    // quantity counter to get the correct index for each quantity
    unsigned int quantity_counter = 0;
    // Loop through all quantities
    for( auto const& quantity : quantities ) {
       // Create a new entry in the map for the given dimension or add the given index to existing
-      dimension_map[ quantity->GetDimensions() ].push_back( quantity_counter );
+      dimension_map[quantity->GetDimensions()].push_back( quantity_counter );
       quantity_counter++;
    }
 

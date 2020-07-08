@@ -100,9 +100,9 @@
 class StandardFinestLevelMeshGenerator : public MeshGenerator {
 
    // Variable specification from the base class
+   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
    using MeshGenerator::topology_;
    using MeshGenerator::tree_;
-   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
 
    // Self defined variables
    std::array<unsigned int, 3> const number_of_nodes_on_level_zero_;
@@ -113,8 +113,8 @@ class StandardFinestLevelMeshGenerator : public MeshGenerator {
    std::array<unsigned long long int, 2> GetLocalNumberOfVerticesAndStartIndex() const;
 
    // virtual functions required from the base class to compute data to hdf5 file
-   void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
+   void DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const override;
+   void DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const override;
 
    // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
@@ -131,11 +131,11 @@ public:
                                               Tree const& flower,
                                               double const dimensionalized_node_size_on_level_zero,
                                               std::array<unsigned int, 3> const number_of_nodes_on_level_zero );
-   virtual ~StandardFinestLevelMeshGenerator() = default;
+   virtual ~StandardFinestLevelMeshGenerator()                                 = default;
    StandardFinestLevelMeshGenerator( StandardFinestLevelMeshGenerator const& ) = delete;
    StandardFinestLevelMeshGenerator& operator=( StandardFinestLevelMeshGenerator const& ) = delete;
-   StandardFinestLevelMeshGenerator( StandardFinestLevelMeshGenerator&& ) = delete;
+   StandardFinestLevelMeshGenerator( StandardFinestLevelMeshGenerator&& )                 = delete;
    StandardFinestLevelMeshGenerator& operator=( StandardFinestLevelMeshGenerator&& ) = delete;
 };
 
-#endif // FINEST_LEVEL_MESH_GENERATOR_H
+#endif// FINEST_LEVEL_MESH_GENERATOR_H

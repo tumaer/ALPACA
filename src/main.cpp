@@ -66,7 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include <mpi.h>
-#include <fenv.h> // Floating-Point raising exceptions.
+#include <fenv.h>// Floating-Point raising exceptions.
 #ifdef __APPLE__
 #include <xmmintrin.h>
 #endif
@@ -74,7 +74,6 @@
 #include "initialization/input_output/initialization_input_reader.h"
 #include "log_writer.h"
 #include "simulation_runner.h"
-
 
 /**
  * @brief Starting function of ALPACA, called from the operating system.
@@ -93,7 +92,7 @@ int main( int argc, char* argv[] ) {
    feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 #endif
 #ifdef __APPLE__
-   _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID);
+   _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
 #endif
 #endif
 
@@ -106,14 +105,13 @@ int main( int argc, char* argv[] ) {
       logger.LogMessage( "Using inputfile : " + input_file );
 
       // determine the name of the executable and write it to the logger
-      std::string const  executable_name( argv[0] );
+      std::string const executable_name( argv[0] );
       logger.LogMessage( "Using executable: " + executable_name );
 
       // Instance to provide interface to the input file/data
       InputReader const input_reader( Initialization::InitializeInputReader( input_file ) );
 
       Simulation::Run( input_reader );
-
    }
 
    MPI_Finalize();

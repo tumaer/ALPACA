@@ -76,17 +76,15 @@
  * @param materials The materials which are present in this node.
  * @param initial_interface_tag Uniform initial interface tag of the node.
  */
-Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag) :
-   node_size_(DomainSizeOfId(id,node_size_on_level_zero)),
-   node_x_coordinate_(DomainCoordinatesOfId(id,node_size_)[0])
-{
-   for(MaterialName const& material : materials) {
-      phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
+Node::Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
+                                                                                                                                                                 node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ) {
+   for( MaterialName const& material : materials ) {
+      phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
    }
 
-   for(unsigned int i = 0; i < CC::TCX(); ++i) {
-      for(unsigned int j = 0; j < CC::TCY(); ++j) {
-         for(unsigned int k = 0; k < CC::TCZ(); ++k) {
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
             interface_tags_[i][j][k] = initial_interface_tag;
          }
       }
@@ -100,19 +98,17 @@ Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::ve
  * @param initial_interface_tags Buffer containing the full field of interface tags for this node.
  * @param interface_block Interface block that is added to the node.
  */
-Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
-   std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block) :
-   node_size_(DomainSizeOfId(id,node_size_on_level_zero)),
-   node_x_coordinate_(DomainCoordinatesOfId(id,node_size_)[0]),
-   interface_block_(std::move(interface_block))
-{
-   for(MaterialName const& material : materials) {
-      phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
+Node::Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
+            std::int8_t const ( &initial_interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
+                                                                                                                                                node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ),
+                                                                                                                                                interface_block_( std::move( interface_block ) ) {
+   for( MaterialName const& material : materials ) {
+      phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
    }
 
-   for(unsigned int i = 0; i < CC::TCX(); ++i) {
-      for(unsigned int j = 0; j < CC::TCY(); ++j) {
-         for(unsigned int k = 0; k < CC::TCZ(); ++k) {
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
             interface_tags_[i][j][k] = initial_interface_tags[i][j][k];
          }
       }
@@ -149,11 +145,11 @@ double Node::GetCellSize() const {
  */
 Block& Node::GetSinglePhase() {
 #ifndef PERFORMANCE
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have a single block");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have a single block" );
    }
 #endif
-   return std::get<1>(*phases_.begin());
+   return std::get<1>( *phases_.begin() );
 }
 
 /**
@@ -161,11 +157,11 @@ Block& Node::GetSinglePhase() {
  */
 Block const& Node::GetSinglePhase() const {
 #ifndef PERFORMANCE
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have a single block");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have a single block" );
    }
 #endif
-   return std::get<1>(*phases_.cbegin());
+   return std::get<1>( *phases_.cbegin() );
 }
 
 /**
@@ -174,11 +170,11 @@ Block const& Node::GetSinglePhase() const {
  */
 MaterialName Node::GetSinglePhaseMaterial() const {
 #ifndef PERFORMANCE
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have a single material");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have a single material" );
    }
 #endif
-   return std::get<0>(*phases_.cbegin());
+   return std::get<0>( *phases_.cbegin() );
 }
 
 /**
@@ -187,9 +183,9 @@ MaterialName Node::GetSinglePhaseMaterial() const {
  */
 std::vector<MaterialName> Node::GetMaterials() const {
    std::vector<MaterialName> materials;
-   materials.reserve(phases_.size());
-   for(auto const& phase : phases_) {
-      materials.push_back(phase.first);
+   materials.reserve( phases_.size() );
+   for( auto const& phase : phases_ ) {
+      materials.push_back( phase.first );
    }
    return materials;
 }
@@ -214,32 +210,32 @@ std::unordered_map<MaterialName, Block> const& Node::GetPhases() const {
  * @param material Name of the material for which the block should be returned.
  * @return The material data as bundled in a Block object.
  */
-Block& Node::GetPhaseByMaterial(MaterialName const material) {
-   return phases_.at(material);
+Block& Node::GetPhaseByMaterial( MaterialName const material ) {
+   return phases_.at( material );
 }
 
 /**
  * @brief Const overload.
  */
-Block const& Node::GetPhaseByMaterial(MaterialName const material) const {
-   return phases_.at(material);
+Block const& Node::GetPhaseByMaterial( MaterialName const material ) const {
+   return phases_.at( material );
 }
 
 /**
  * @brief Adds an empty block for the given material to the phases of this node.
  * @param material .
  */
-void Node::AddPhase(MaterialName const material) {
+void Node::AddPhase( MaterialName const material ) {
    // does not test if the material is already present
-   phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
+   phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
 }
 
 /**
  * @brief Removes the block for the given material from the phases of this node.
  * @param material .
  */
-void Node::RemovePhase(MaterialName const material) {
-   phases_.erase(material);
+void Node::RemovePhase( MaterialName const material ) {
+   phases_.erase( material );
 }
 
 /**
@@ -247,8 +243,8 @@ void Node::RemovePhase(MaterialName const material) {
  * @param material The material identifier to be checked for.
  * @return True if the material exists in this node. False otherwise.
  */
-bool Node::ContainsMaterial(MaterialName const material) const {
-   if(phases_.find(material) == phases_.end()) { //C++20 provides a contains function ...
+bool Node::ContainsMaterial( MaterialName const material ) const {
+   if( phases_.find( material ) == phases_.end() ) {//C++20 provides a contains function ...
       return false;
    } else {
       return true;
@@ -261,8 +257,8 @@ bool Node::ContainsMaterial(MaterialName const material) const {
  */
 InterfaceBlock& Node::GetInterfaceBlock() {
 #ifndef PERFORMANCE
-   if(interface_block_ == nullptr) {
-      throw std::logic_error("Do not request a InterfaceBlock on a Node that does not have one");
+   if( interface_block_ == nullptr ) {
+      throw std::logic_error( "Do not request a InterfaceBlock on a Node that does not have one" );
    } else {
       return *interface_block_;
    }
@@ -276,8 +272,8 @@ InterfaceBlock& Node::GetInterfaceBlock() {
  */
 InterfaceBlock const& Node::GetInterfaceBlock() const {
 #ifndef PERFORMANCE
-   if(interface_block_ == nullptr) {
-      throw std::logic_error("Do not request a InterfaceBlock on a Node that does not have one");
+   if( interface_block_ == nullptr ) {
+      throw std::logic_error( "Do not request a InterfaceBlock on a Node that does not have one" );
    } else {
       return *interface_block_;
    }
@@ -290,8 +286,8 @@ InterfaceBlock const& Node::GetInterfaceBlock() const {
  * @brief Sets the levelset block of this node. If nullptr is given (default) the current levelset block is released.
  * @param interface_block The new levelset block for this node or empty.
  */
-void Node::SetInterfaceBlock(std::unique_ptr<InterfaceBlock> interface_block) {
-   interface_block_ = std::move(interface_block);
+void Node::SetInterfaceBlock( std::unique_ptr<InterfaceBlock> interface_block ) {
+   interface_block_ = std::move( interface_block );
 }
 
 /**
@@ -299,10 +295,10 @@ void Node::SetInterfaceBlock(std::unique_ptr<InterfaceBlock> interface_block) {
  * @return The representative interface tag for this node.
  */
 std::int8_t Node::GetUniformInterfaceTag() const {
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have uniform tags");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have uniform tags" );
    } else {
-      return interface_tags_[CC::FICX()][CC::FICY()][CC::FICZ()]; //NH: We just return the corner. This seems to be the safest option.
+      return interface_tags_[CC::FICX()][CC::FICY()][CC::FICZ()];//NH: We just return the corner. This seems to be the safest option.
    }
 }
 
@@ -310,14 +306,14 @@ std::int8_t Node::GetUniformInterfaceTag() const {
  * @brief Gives the Interface Tag Buffer.
  * @return Interface tag buffer.
  */
-auto Node::GetInterfaceTags() -> std::int8_t (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto Node::GetInterfaceTags() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return interface_tags_;
 }
 
 /**
  * @brief Const overlaod. See in non-const for details.
  */
-auto Node::GetInterfaceTags() const -> std::int8_t const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto Node::GetInterfaceTags() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return interface_tags_;
 }
 
@@ -328,4 +324,3 @@ auto Node::GetInterfaceTags() const -> std::int8_t const (&)[CC::TCX()][CC::TCY(
 bool Node::HasLevelset() const {
    return interface_block_ == nullptr ? false : true;
 }
-

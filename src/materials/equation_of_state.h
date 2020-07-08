@@ -77,18 +77,18 @@
 class EquationOfState {
 
    // functions required to be implented from the derivwed class
-   virtual double DoGetPressure   ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
-   virtual double DoGetEnthalpy   ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
-   virtual double DoGetEnergy     ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const = 0;
+   virtual double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
+   virtual double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
+   virtual double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const = 0;
    virtual double DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
 #ifndef PERFORMANCE
       // Avoids compiler warnings (here we use the PERFORMANCE flags to avoid compiler warnings to explicitly name the variables that should
       // be used for derived classes)
-      ( void ) density;
-      ( void ) momentum_x;
-      ( void ) momentum_y;
-      ( void ) momentum_z;
-      ( void ) energy;
+      (void)density;
+      (void)momentum_x;
+      (void)momentum_y;
+      (void)momentum_z;
+      (void)energy;
 #endif
       return -1.0;
    }
@@ -111,10 +111,10 @@ protected:
    explicit EquationOfState() = default;
 
 public:
-   virtual ~EquationOfState() = default;
+   virtual ~EquationOfState()                = default;
    EquationOfState( EquationOfState const& ) = delete;
    EquationOfState& operator=( EquationOfState const& ) = delete;
-   EquationOfState( EquationOfState&& ) = delete;
+   EquationOfState( EquationOfState&& )                 = delete;
    EquationOfState& operator=( EquationOfState&& ) = delete;
 
    /**
@@ -223,4 +223,4 @@ public:
    }
 };
 
-#endif //EQUATION_OF_STATE_H
+#endif//EQUATION_OF_STATE_H

@@ -81,7 +81,6 @@
 #include "weno5_hm.h"
 #include "fourth_order_central.h"
 
-
 /**
  * @brief A namespace to get a ReconstructionStencil type based on a specified constexpr.
  */
@@ -173,6 +172,6 @@ namespace ReconstructionStencilSetup {
       typedef WENO5HM type;
    };
 
-}
+}// namespace ReconstructionStencilSetup
 
-#endif // RECONSTRUCTION_STENCIL_SETUP_H
+#endif// RECONSTRUCTION_STENCIL_SETUP_H

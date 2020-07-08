@@ -87,7 +87,7 @@ class RestartManager {
    // Instance for logging to terminal/file
    LogWriter& logger_;
    // Instance to provide access to hdf5 functionality
-   Hdf5Manager & hdf5_manager_;
+   Hdf5Manager& hdf5_manager_;
 
    unsigned int const maximum_level_;
    double const length_reference_;
@@ -97,11 +97,11 @@ class RestartManager {
 
 public:
    RestartManager() = delete;
-   explicit RestartManager( UnitHandler const& unit_handler, TopologyManager & topology_manager, Tree & tree, unsigned int const maximum_level );
-   ~RestartManager() = default;
+   explicit RestartManager( UnitHandler const& unit_handler, TopologyManager& topology_manager, Tree& tree, unsigned int const maximum_level );
+   ~RestartManager()                       = default;
    RestartManager( RestartManager const& ) = delete;
    RestartManager& operator=( RestartManager const& ) = delete;
-   RestartManager( RestartManager&& ) = delete;
+   RestartManager( RestartManager&& )                 = delete;
    RestartManager& operator=( RestartManager&& ) = delete;
 
    // Functions to restore simulation or write restart file
@@ -109,4 +109,4 @@ public:
    std::string WriteRestartFile( double const timestep, std::string const& filename_without_extension ) const;
 };
 
-#endif // RESTART_MANAGER_H
+#endif// RESTART_MANAGER_H

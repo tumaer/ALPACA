@@ -82,11 +82,11 @@ private:
    static MaterialName negative_material_;
 
 public:
-   MaterialSignCapsule() = delete;
-   ~MaterialSignCapsule() = default;
+   MaterialSignCapsule()                             = delete;
+   ~MaterialSignCapsule()                            = default;
    MaterialSignCapsule( MaterialSignCapsule const& ) = delete;
    MaterialSignCapsule& operator=( MaterialSignCapsule const& ) = delete;
-   MaterialSignCapsule( MaterialSignCapsule&& ) = delete;
+   MaterialSignCapsule( MaterialSignCapsule&& )                 = delete;
    MaterialSignCapsule& operator=( MaterialSignCapsule&& ) = delete;
 
    MaterialSignCapsule( MaterialName const positive_material, MaterialName const negative_material ) {
@@ -116,4 +116,4 @@ public:
    static inline std::int8_t SignOfMaterial( MaterialName const material ) { return material == PositiveMaterial() ? 1 : -1; }
 };
 
-#endif // MATERIAL_SIGN_CAPSULE_H
+#endif// MATERIAL_SIGN_CAPSULE_H

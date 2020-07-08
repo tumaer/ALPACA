@@ -72,7 +72,6 @@
 #include "weno_iterative_levelset_reinitializer.h"
 #include "min_iterative_levelset_reinitializer.h"
 
-
 /**
  * @brief A namespace to get a LevelsetReinitializer type based on a specified constexpr.
  */
@@ -100,6 +99,6 @@ namespace LevelsetReinitializerSetup {
       typedef MinIterativeLevelsetReinitializer type;
    };
 
-}
+}// namespace LevelsetReinitializerSetup
 
-#endif // LEVELSET_REINITIALIZER_SETUP_H
+#endif// LEVELSET_REINITIALIZER_SETUP_H

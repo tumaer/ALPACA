@@ -76,8 +76,7 @@
  * @brief Overload of signum function for positive only types ( e.g. unsigned int ).
  */
 template<typename T>
-typename std::enable_if<std::is_unsigned<T>::value, int>::type
-constexpr Signum( T const x ) {
+typename std::enable_if<std::is_unsigned<T>::value, int>::type constexpr Signum( T const x ) {
    return T( 0 ) < x;
 }
 
@@ -85,8 +84,7 @@ constexpr Signum( T const x ) {
  * @brief Computes the signum, i. e. -1,0,1 of the given input. Not to be mistaken for sgn function which only gives +/- 1.
  */
 template<typename T>
-typename std::enable_if<std::is_signed<T>::value, int>::type
-constexpr Signum( T const x ) {
+typename std::enable_if<std::is_signed<T>::value, int>::type constexpr Signum( T const x ) {
    return ( T( 0 ) < x ) - ( x < T( 0 ) );
 }
 
@@ -107,7 +105,7 @@ T constexpr IntegerPow( [[maybe_unused]] T const x ) {
       return x;
    }
    if constexpr( Exponent > 1 ) {
-      return IntegerPow<Exponent-1>(x) * x;
+      return IntegerPow<Exponent - 1>( x ) * x;
    }
    // else: Exponent == 0
    return T( 1 );
@@ -119,10 +117,10 @@ T constexpr IntegerPow( [[maybe_unused]] T const x ) {
  */
 constexpr double ConsistencyManagedSum( double const a, double const b, double const c ) {
    if constexpr( CC::FUSY() ) {
-      double const sum1 = (a + b) + c;
-      double const sum2 = (a + c) + b;
-      double const sum3 = (b + c) + a;
-      return 0.5 * ( std::min({sum1, sum2, sum3}) + std::max({sum1, sum2, sum3}) );
+      double const sum1 = ( a + b ) + c;
+      double const sum2 = ( a + c ) + b;
+      double const sum3 = ( b + c ) + a;
+      return 0.5 * ( std::min( { sum1, sum2, sum3 } ) + std::max( { sum1, sum2, sum3 } ) );
    } else {
       return a + b + c;
    }
@@ -149,10 +147,10 @@ constexpr double DimensionAwareConsistencyManagedSum( double const a, double con
  */
 constexpr double ConsistencyManagedSum( double const a, double const b, double const c, double const d ) {
    if constexpr( CC::FUSY() ) {
-      double const sum1 = (a + b) + (c + d);
-      double const sum2 = (a + c) + (b + d);
-      double const sum3 = (a + d) + (b + c);
-      return 0.5 * ( std::min({sum1, sum2, sum3}) + std::max({sum1, sum2, sum3}) );
+      double const sum1 = ( a + b ) + ( c + d );
+      double const sum2 = ( a + c ) + ( b + d );
+      double const sum3 = ( a + d ) + ( b + c );
+      return 0.5 * ( std::min( { sum1, sum2, sum3 } ) + std::max( { sum1, sum2, sum3 } ) );
    } else {
       return a + b + c + d;
    }
@@ -213,8 +211,8 @@ inline double L2Norm( std::array<double, 3> const vector ) {
  * @return cross product between the two vectors.
  */
 constexpr std::array<double, 3> CrossProduct( std::array<double, 3> const vector1, std::array<double, 3> const vector2 ) {
-   return { vector1[1] * vector2[2] - vector1[2] * vector2[1] ,
-            vector1[2] * vector2[0] - vector1[0] * vector2[2] ,
+   return { vector1[1] * vector2[2] - vector1[2] * vector2[1],
+            vector1[2] * vector2[0] - vector1[0] * vector2[2],
             vector1[0] * vector2[1] - vector1[1] * vector2[0] };
 }
 
@@ -224,8 +222,8 @@ constexpr std::array<double, 3> CrossProduct( std::array<double, 3> const vector
  * @param value_2 The second value.
  * @return The result of the Min-Mod operation.
  */
-inline double MinMod(double const value_1, double const value_2) {
-   return 0.5 * ( Signum(value_1) + Signum(value_2) ) * std::min(std::abs(value_1),std::abs(value_2));
+inline double MinMod( double const value_1, double const value_2 ) {
+   return 0.5 * ( Signum( value_1 ) + Signum( value_2 ) ) * std::min( std::abs( value_1 ), std::abs( value_2 ) );
 }
 
 /**
@@ -237,9 +235,9 @@ inline double MinMod(double const value_1, double const value_2) {
  */
 template<typename T>
 constexpr T Abs( T const value ) noexcept {
-  return value >= static_cast<T>(0) ? value : ( -value );
+   return value >= static_cast<T>( 0 ) ? value : ( -value );
 }
 
-double GodunovHamiltonian( double const (&derivatives)[DTI( CC::DIM() )][2], double const  old_levelset_sign );
+double GodunovHamiltonian( double const ( &derivatives )[DTI( CC::DIM() )][2], double const old_levelset_sign );
 
-#endif // MATHEMATICAL_FUNCTIONS_H
+#endif// MATHEMATICAL_FUNCTIONS_H

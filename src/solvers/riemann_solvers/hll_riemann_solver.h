@@ -84,31 +84,29 @@ class HllRiemannSolver : public RiemannSolver<HllRiemannSolver> {
 
    // is used to distinguish principal and secondary momenta such that one single Riemann solver
    // routine can be used for all three spatial directions
-   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = {{
-      {ETI(Equation::MomentumX), ETI(Equation::MomentumY), ETI(Equation::MomentumZ)},
-      {ETI(Equation::MomentumY), ETI(Equation::MomentumX), ETI(Equation::MomentumZ)},
-      {ETI(Equation::MomentumZ), ETI(Equation::MomentumX), ETI(Equation::MomentumY)}
-   }};
+   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = { { { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ) },
+                                                                                     { ETI( Equation::MomentumY ), ETI( Equation::MomentumX ), ETI( Equation::MomentumZ ) },
+                                                                                     { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ) } } };
 
    template<Direction DIR>
-   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double const (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double const cell_size ) const;
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double const cell_size ) const;
 
    void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-      double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const;
+                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
 
 public:
    HllRiemannSolver() = delete;
    explicit HllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
-   ~HllRiemannSolver() = default;
+   ~HllRiemannSolver()                         = default;
    HllRiemannSolver( HllRiemannSolver const& ) = delete;
    HllRiemannSolver& operator=( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver( HllRiemannSolver&& ) = delete;
+   HllRiemannSolver( HllRiemannSolver&& )                 = delete;
    HllRiemannSolver& operator=( HllRiemannSolver&& ) = delete;
 };
 
-#endif // HLL_RIEMANN_SOLVER_H
+#endif// HLL_RIEMANN_SOLVER_H

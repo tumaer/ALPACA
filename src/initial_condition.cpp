@@ -89,16 +89,15 @@ InitialCondition::InitialCondition( std::vector<std::string> const& material_ini
                                     std::string const& variable_name_levelset,
                                     double const dimensionalized_node_size_on_level_zero,
                                     unsigned int const maximum_level,
-                                    UnitHandler const& unit_handler ) :
-   // Start initializer list
-   unit_handler_( unit_handler ),
-   material_initial_expressions_( material_initial_expressions ),
-   levelset_initial_expressions_( levelset_initial_expressions ),
-   material_names_( material_names ),
-   variable_names_prime_states_( variable_names_prime_states ),
-   variable_name_levelset_( variable_name_levelset ),
-   dimensionalized_node_size_on_level_zero_( dimensionalized_node_size_on_level_zero ),
-   maximum_level_( maximum_level ) {
+                                    UnitHandler const& unit_handler ) :// Start initializer list
+                                                                        unit_handler_( unit_handler ),
+                                                                        material_initial_expressions_( material_initial_expressions ),
+                                                                        levelset_initial_expressions_( levelset_initial_expressions ),
+                                                                        material_names_( material_names ),
+                                                                        variable_names_prime_states_( variable_names_prime_states ),
+                                                                        variable_name_levelset_( variable_name_levelset ),
+                                                                        dimensionalized_node_size_on_level_zero_( dimensionalized_node_size_on_level_zero ),
+                                                                        maximum_level_( maximum_level ) {
    /** Empty besides initializer list */
 }
 
@@ -113,8 +112,8 @@ InitialCondition::InitialCondition( std::vector<std::string> const& material_ini
  */
 std::unique_ptr<UserExpression const> InitialCondition::CreateInputExpression( std::string const& expression,
                                                                                std::vector<std::string> const& variables_out,
-                                                                               double &x, double &y, double &z ) const {
-   std::vector<std::tuple<std::string,double&>> variables_in;
+                                                                               double& x, double& y, double& z ) const {
+   std::vector<std::tuple<std::string, double&>> variables_in;
    variables_in.push_back( std::make_tuple( std::string( variable_name_x_ ), std::ref( x ) ) );
    variables_in.push_back( std::make_tuple( std::string( variable_name_y_ ), std::ref( y ) ) );
    variables_in.push_back( std::make_tuple( std::string( variable_name_z_ ), std::ref( z ) ) );
@@ -133,12 +132,12 @@ void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
                                               double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    // get the origin of this node id
-   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
+   std::array<double, 3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // cell_size on level
    double const cell_size = dimensionalized_node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
 
    // Obtain the correct initial condition string for the material
-   std::string const initial_condition_input( material_initial_expressions_[MTI( material )]);
+   std::string const initial_condition_input( material_initial_expressions_[MTI( material )] );
 
    // TP here we need non-const variables as UserExpression stores references to them in order to reflect changes
    double running_x;
@@ -158,7 +157,7 @@ void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
                // If the variable name is not empty obtain value from expression.
                if( !variable_names_prime_states_[PTI( p )].empty() ) {
                   initial_values[PTI( p )][i][j][k] = unit_handler_.NonDimensionalizeValue( input_expression->GetValue( variable_names_prime_states_[PTI( p )] ), MF::FieldUnit( p ) );
-               } else { // Otherwise set zero value
+               } else {// Otherwise set zero value
                   initial_values[PTI( p )][i][j][k] = 0.0;
                }
             }
@@ -174,9 +173,9 @@ void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
  */
 void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
    // get the origin of this node id
-   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
+   std::array<double, 3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // cell_size on level zero divided by 2^level
-   double const cell_size = dimensionalized_node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
+   double const cell_size     = dimensionalized_node_size_on_level_zero_ / double( CC::ICX() ) / double( 1 << LevelOfNode( node_id ) );
    double const one_cell_size = 1.0 / cell_size;
 
    // NOTE: This must be changed for Multi-material approach (all initial levelset should be referenced to material1 as done in GetInitialMaterials)
@@ -210,7 +209,7 @@ void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double (
  */
 std::vector<MaterialName> InitialCondition::GetInitialMaterials( std::uint64_t const node_id ) const {
    // get the origin of this node id
-   std::array<double,3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
+   std::array<double, 3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // bit shift is of type "( unsigned? ) int"
    unsigned int const level_factor = ( 1 << ( maximum_level_ - LevelOfNode( node_id ) ) );
    // cell size on maximum level
@@ -241,7 +240,7 @@ std::vector<MaterialName> InitialCondition::GetInitialMaterials( std::uint64_t c
       }
 
       // Level factors for difference between current node level and maximum level of simulation
-      unsigned int const level_factor_y = CC::DIM() != Dimension::One   ? level_factor : 1;
+      unsigned int const level_factor_y = CC::DIM() != Dimension::One ? level_factor : 1;
       unsigned int const level_factor_z = CC::DIM() == Dimension::Three ? level_factor : 1;
 
       // variables required to identify correct assignment of present materials
@@ -271,7 +270,7 @@ std::vector<MaterialName> InitialCondition::GetInitialMaterials( std::uint64_t c
                      if( cell_contains_negative_material ) {
                         throw std::logic_error( "Error! At least two materials have negative levelset values in the same cell. "
                                                 "Check initial levelset conditions for all materials!" );
-                     } else { // Otherwise take the negative and assign it
+                     } else {// Otherwise take the negative and assign it
                         cell_contains_negative_material = true;
                         // Only set the flag and append to final vector if not already done for this material
                         if( !materials_present[levelset_counter] ) {

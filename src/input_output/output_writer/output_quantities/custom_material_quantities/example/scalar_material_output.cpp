@@ -78,17 +78,16 @@
  * @note {row, colmun} = {1,1} marks that the quantity is a scalar.
  */
 ScalarMaterialOutput::ScalarMaterialOutput( UnitHandler const& unit_handler,
-                                      MaterialManager const& material_manager,
-                                      std::string const& quantity_name,
-                                      std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
+                                            MaterialManager const& material_manager,
+                                            std::string const& quantity_name,
+                                            std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { 1, 1 } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
     */
@@ -97,8 +96,8 @@ void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<doub
    // Different behavior dependent on interface presence or not
    if( node.HasLevelset() ) {
       // Use the interface tags and levelset to differ between different states
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
 
       /**
        * Declare here all buffers that are used for this quantity from the material fields
@@ -119,18 +118,18 @@ void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<doub
                 * Option 2: No preparation has been done. Differ between materials at this stage
                 */
                // Use data from the negative material buffer
-               if ( interface_tags[i][j][k] < 0 || ( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) && levelset[i][j][k] < 0.0 ) ) {
-                   cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
+               if( interface_tags[i][j][k] < 0 || ( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) && levelset[i][j][k] < 0.0 ) ) {
+                  cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
                }
                // otherwise positive
                else {
-                   cell_data[cell_data_counter++] = -1.0 * dimensionalization_factor;
+                  cell_data[cell_data_counter++] = -1.0 * dimensionalization_factor;
                }
 
                /**
                 * Option 1: Already all buffers has been prepared. Simply add to the final data vector
                 */
-                cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
+               cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
             }
          }
       }
@@ -138,8 +137,8 @@ void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<doub
       // Extract the single material present on this node
       // No interface node -> interface tags/material is the same everywhere
       MaterialName const material = node.GetSinglePhaseMaterial();
-      Block const& block = node.GetPhaseByMaterial( material );
-      (void) block;
+      Block const& block          = node.GetPhaseByMaterial( material );
+      (void)block;
       /**
        * Declare here all buffers that are used for this quantity from the material fields
        */
@@ -151,7 +150,7 @@ void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<doub
                /**
                 * Simply add to the final data vector
                 */
-                cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
+               cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
             }
          }
       }
@@ -164,7 +163,7 @@ void ScalarMaterialOutput::DoComputeCellData( Node const& node, std::vector<doub
  * @note Attention: In case prime state, parameter  variables are used, pay attention that they only exist on leave nodes. In case a division is made on non-leave nodes
  *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes.
  */
-void ScalarMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
+void ScalarMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const {
 
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
@@ -190,7 +189,7 @@ void ScalarMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector
                /**
                 * Simply add to the final data vector
                 */
-                cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
+               cell_data[cell_data_counter++] = 1.0 * dimensionalization_factor;
             }
          }
       }
@@ -203,7 +202,7 @@ void ScalarMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector
                /**
                 * Default value if material is not contained in node
                 */
-                cell_data[cell_data_counter++] = -1.0;
+               cell_data[cell_data_counter++] = -1.0;
             }
          }
       }

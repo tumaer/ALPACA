@@ -77,14 +77,12 @@
  * @param id The id of the node to be created.
  * @param rank Rank holding the node to be created.
  */
-TopologyNode::TopologyNode( std::uint64_t const id, int const rank ) :
-   unique_id_( id ),
-   current_rank_( rank ),
-   future_rank_( -1 ),
-   children_{},
-   is_leaf_( true ),
-   materials_{}
-{
+TopologyNode::TopologyNode( std::uint64_t const id, int const rank ) : unique_id_( id ),
+                                                                       current_rank_( rank ),
+                                                                       future_rank_( -1 ),
+                                                                       children_{},
+                                                                       is_leaf_( true ),
+                                                                       materials_{} {
    // Empty Constructor, besides initializer list.
 }
 
@@ -106,7 +104,7 @@ void TopologyNode::Refine( std::uint64_t const id ) {
  * @brief Refines the current leaf, i.e. inserts children as leaves and changes status away from leaf.
  */
 void TopologyNode::Refine() {
-   is_leaf_ = false;
+   is_leaf_                 = false;
    std::uint64_t working_id = unique_id_ << 3;
    for( unsigned int i = 0; i < CC::NOC(); i++ ) {
       children_.emplace_back( TopologyNode( working_id + i, current_rank_ ) );
@@ -126,7 +124,7 @@ void TopologyNode::Coarse( std::uint64_t const id ) {
       is_leaf_ = true;
       children_.clear();
    } else {
-      if( !is_leaf_ ) { //coarsening might happen on more than one level, do nothing if already coarsened
+      if( !is_leaf_ ) {//coarsening might happen on more than one level, do nothing if already coarsened
          GetChildWithId( id ).Coarse( id );
       }
    }
@@ -140,7 +138,7 @@ void TopologyNode::NodeLeafCount( std::pair<unsigned int, unsigned int>& nodes_a
    nodes_and_leaves.first += 1;
    if( is_leaf_ )
       nodes_and_leaves.second += 1;
-   else{
+   else {
       for( TopologyNode const& child : children_ ) {
          child.NodeLeafCount( nodes_and_leaves );
       }
@@ -157,8 +155,7 @@ void TopologyNode::NodeInterfaceLeafCount( std::pair<unsigned int, unsigned int>
       if( materials_.size() != 1 ) {
          nodes_and_leaves.second += 1;
       }
-   }
-   else{
+   } else {
       for( TopologyNode const& child : children_ ) {
          child.NodeInterfaceLeafCount( nodes_and_leaves );
       }
@@ -171,8 +168,8 @@ void TopologyNode::NodeInterfaceLeafCount( std::pair<unsigned int, unsigned int>
  */
 void TopologyNode::RankWiseNodeLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const {
 
-   if( static_cast<int>( nodes_leaves_per_rank.size() ) < current_rank_ + 1 ) { // length starts with 0, int due to MPI
-      nodes_leaves_per_rank.resize( current_rank_ + 1, std::make_pair( 0,0 ) );
+   if( static_cast<int>( nodes_leaves_per_rank.size() ) < current_rank_ + 1 ) {// length starts with 0, int due to MPI
+      nodes_leaves_per_rank.resize( current_rank_ + 1, std::make_pair( 0, 0 ) );
    }
 
    nodes_leaves_per_rank[current_rank_].first += 1;
@@ -191,8 +188,8 @@ void TopologyNode::RankWiseNodeLeafCount( std::vector<std::pair<unsigned int, un
  */
 void TopologyNode::RankWiseNodeInterfaceLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const {
 
-   if( static_cast<int>( nodes_leaves_per_rank.size() ) < current_rank_ + 1 ) { // length starts with 0, int due to MPI
-      nodes_leaves_per_rank.resize( current_rank_ + 1, std::make_pair( 0,0 ) );
+   if( static_cast<int>( nodes_leaves_per_rank.size() ) < current_rank_ + 1 ) {// length starts with 0, int due to MPI
+      nodes_leaves_per_rank.resize( current_rank_ + 1, std::make_pair( 0, 0 ) );
    }
 
    nodes_leaves_per_rank[current_rank_].first += 1;
@@ -243,8 +240,8 @@ unsigned int TopologyNode::MultiPhaseNodeCount() const {
  */
 void TopologyNode::RankWiseNodeBlockCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank ) const {
 
-   if( static_cast<int>( nodes_blocks_per_rank.size() ) < current_rank_ + 1 ) { // length starts with 0, int due to MPI
-      nodes_blocks_per_rank.resize( current_rank_ + 1, std::make_pair( 0,0 ) );
+   if( static_cast<int>( nodes_blocks_per_rank.size() ) < current_rank_ + 1 ) {// length starts with 0, int due to MPI
+      nodes_blocks_per_rank.resize( current_rank_ + 1, std::make_pair( 0, 0 ) );
    }
 
    nodes_blocks_per_rank[current_rank_].first += 1;
@@ -270,7 +267,7 @@ unsigned int TopologyNode::GetDepth() const {
       for( TopologyNode const& child : children_ ) {
          child_depth.emplace_back( child.GetDepth() );
       }
-      return 1 + *std::max_element( child_depth.begin(),child_depth.end() );
+      return 1 + *std::max_element( child_depth.begin(), child_depth.end() );
    }
 }
 
@@ -279,12 +276,12 @@ unsigned int TopologyNode::GetDepth() const {
  * @param level The level of interest
  * @param ids Indirect return parameter
  */
-void TopologyNode::IdsOnLevel( unsigned int const level,std::vector<std::uint64_t>& ids ) const {
+void TopologyNode::IdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids ) const {
    if( LevelOfNode( unique_id_ ) == level ) {
       ids.emplace_back( unique_id_ );
    } else {
       for( TopologyNode const& child : children_ ) {
-         child.IdsOnLevel( level,ids );
+         child.IdsOnLevel( level, ids );
       }
    }
 }
@@ -294,7 +291,7 @@ void TopologyNode::IdsOnLevel( unsigned int const level,std::vector<std::uint64_
  * @param level Level of interest.
  * @param ids Indirect return parameter.
  */
-void TopologyNode::LocalIdsOnLevel( unsigned int const level,std::vector<std::uint64_t>& ids, int const local_rank ) const {
+void TopologyNode::LocalIdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids, int const local_rank ) const {
    if( LevelOfNode( unique_id_ ) == level && current_rank_ == local_rank ) {
       ids.emplace_back( unique_id_ );
    } else {
@@ -368,14 +365,14 @@ unsigned int TopologyNode::LocalInterfaceLeaves( std::vector<std::uint64_t>& loc
  * @param rank The id of the local rank.
  */
 void TopologyNode::LocalNodes( std::vector<std::uint64_t>& local_nodes, int const rank ) const {
-   // Add always this node 
+   // Add always this node
    if( current_rank_ == rank ) {
       local_nodes.push_back( unique_id_ );
    }
-   // Loop through all children and add them subsequently 
+   // Loop through all children and add them subsequently
    for( TopologyNode const& child : children_ ) {
       child.LocalNodes( local_nodes, rank );
-   }   
+   }
 }
 
 /**
@@ -405,17 +402,17 @@ unsigned int TopologyNode::GetLeafIds( std::vector<std::uint64_t>& leaves ) cons
  * @return The number of local leaves.
  */
 unsigned int TopologyNode::LocalLeavesOnLevel( std::vector<std::uint64_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level ) const {
-   if( current_level==level ){
+   if( current_level == level ) {
       if( is_leaf_ && current_rank_ == rank ) {
          local_leaves.push_back( unique_id_ );
          return 1;
-      }else{
+      } else {
          return 0;
       }
    } else {
       int sum = 0;
       for( TopologyNode const& child : children_ ) {
-         sum += child.LocalLeavesOnLevel( local_leaves, rank, level, current_level+1 );
+         sum += child.LocalLeavesOnLevel( local_leaves, rank, level, current_level + 1 );
       }
       return sum;
    }
@@ -428,17 +425,17 @@ unsigned int TopologyNode::LocalLeavesOnLevel( std::vector<std::uint64_t>& local
  * @return The number of leaves.
  */
 unsigned int TopologyNode::GetLeafIdsOnLevel( std::vector<std::uint64_t>& leaves, unsigned int const level, unsigned int const current_level ) const {
-   if( current_level==level ){
+   if( current_level == level ) {
       if( is_leaf_ ) {
          leaves.push_back( unique_id_ );
          return 1;
-      }else{
+      } else {
          return 0;
       }
    } else {
       int sum = 0;
       for( TopologyNode const& child : children_ ) {
-         sum += child.GetLeafIdsOnLevel( leaves, level, current_level+1 );
+         sum += child.GetLeafIdsOnLevel( leaves, level, current_level + 1 );
       }
       return sum;
    }
@@ -479,7 +476,7 @@ bool TopologyNode::NodeIsLeaf( std::uint64_t const id ) const {
  * @return The node with given id.
  * @note Does not directly return the correct value, gives a value for recursive search. I.e. if a grand-child is searched this function returns the mother of the grandchild.
  */
-TopologyNode& TopologyNode::GetChildWithId(std::uint64_t const id) {
+TopologyNode& TopologyNode::GetChildWithId( std::uint64_t const id ) {
    // We have to search through the ancestor of the searched node until we find the child of the current one (recursive calls, remember...)
    std::uint64_t id_on_child_level = id;
    while( LevelOfNode( id_on_child_level ) > ( LevelOfNode( unique_id_ ) + 1 ) ) {
@@ -491,7 +488,7 @@ TopologyNode& TopologyNode::GetChildWithId(std::uint64_t const id) {
 /**
  * @brief Const variant of GetChildWithId(std::uint64_t const id), see there for details.
  */
-TopologyNode const& TopologyNode::GetChildWithId(std::uint64_t const id) const {
+TopologyNode const& TopologyNode::GetChildWithId( std::uint64_t const id ) const {
    // We have to search through the ancestor of the searched node until we find the child of the current one (recursive calls, remember...)
    std::uint64_t id_on_child_level = id;
    while( LevelOfNode( id_on_child_level ) > ( LevelOfNode( unique_id_ ) + 1 ) ) {
@@ -506,7 +503,7 @@ TopologyNode const& TopologyNode::GetChildWithId(std::uint64_t const id) const {
  */
 unsigned int TopologyNode::Weight() const {
    if( is_leaf_ ) {
-      return materials_.size()*materials_.size();
+      return materials_.size() * materials_.size();
    } else {
       return materials_.size();
    }
@@ -531,14 +528,14 @@ int TopologyNode::BalanceTargetRanks() {
       return future_rank_;
 #endif
 
-   }else {
+   } else {
       std::vector<int> child_ranks;
       child_ranks.reserve( CC::NOC() );
       for( TopologyNode& child : children_ ) {
          child_ranks.push_back( child.BalanceTargetRanks() );
       }
       //Creates a count list, i .e child_on_rank_count[pos] = 4 tells that four children are on the rank on which children_[pos] resides on.
-      std::vector<unsigned int> child_on_rank_count( CC::NOC(),0 );
+      std::vector<unsigned int> child_on_rank_count( CC::NOC(), 0 );
       unsigned int last_unique_rank_position = 0;
 
       for( unsigned int i = 0; i < children_.size(); ++i ) {
@@ -553,7 +550,7 @@ int TopologyNode::BalanceTargetRanks() {
          }
       }
       // We retrive the rank of highest count.
-      future_rank_ = child_ranks[std::distance( child_on_rank_count.begin(),std::max_element( child_on_rank_count.begin(),child_on_rank_count.end() ) )];
+      future_rank_ = child_ranks[std::distance( child_on_rank_count.begin(), std::max_element( child_on_rank_count.begin(), child_on_rank_count.end() ) )];
    }
    return future_rank_;
 }
@@ -563,7 +560,7 @@ int TopologyNode::BalanceTargetRanks() {
  * @param count_rank_map Information bundle mapping the current load "count" to the ranks.
  * @param level The level where the future rank is reassigned
  */
-void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, unsigned int const level) {
+void TopologyNode::SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, unsigned int const level ) {
 
    // tuple is [level](<count, rank>)
    // Runs through list, if a rank is already full it is taken out of the list and the following nodes are assigned to the next element with enough room and so on.
@@ -571,12 +568,12 @@ void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsig
       bool assigned = false;
       // loop until this node is assigned to a rank ( hence, until a rank with enough room for this node is found )
       double const weight = Weight();
-      while ( !assigned ) {
+      while( !assigned ) {
          if( std::get<0>( count_rank_map[level].back() ) >= weight ) {
             // there's enough room for the current node on this rank, so assign it
             std::get<0>( count_rank_map[level].back() ) -= weight;
             future_rank_ = std::get<1>( count_rank_map[level].back() );
-            assigned = true;
+            assigned     = true;
          } else {
             // there's not enough room for the current node, so take the ( possible ) overhead and carry it over to the next rank
             // ( assignment is tried again in next loop )
@@ -586,11 +583,10 @@ void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsig
          }
       }
    } else {
-      for( unsigned int i=0;i<children_.size();i++ ) {
-         children_[i].SetTargetRankForLeaf( count_rank_map, level+1 );
+      for( unsigned int i = 0; i < children_.size(); i++ ) {
+         children_[i].SetTargetRankForLeaf( count_rank_map, level + 1 );
       }
    }
-
 }
 
 /**
@@ -599,7 +595,7 @@ void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsig
  * @param HilbertPosition The position.
  * @param level The level where the future rank is reassigned
  */
-void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, const HilbertPosition position, unsigned int const level){
+void TopologyNode::SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, const HilbertPosition position, unsigned int const level ) {
 
    // tuple is [level](<count, rank>)
    // Runs through list, if a rank is already full it is taken out of the list and the following nodes are assigned to the next element with enough room and so on.
@@ -607,12 +603,12 @@ void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsig
       bool assigned = false;
       // loop until this node is assigned to a rank ( hence, until a rank with enough room for this node is found )
       double const weight = Weight();
-      while ( !assigned ) {
+      while( !assigned ) {
          if( std::get<0>( count_rank_map[level].back() ) >= weight ) {
             // there's enough room for the current node on this rank, so assign it
             std::get<0>( count_rank_map[level].back() ) -= weight;
             future_rank_ = std::get<1>( count_rank_map[level].back() );
-            assigned = true;
+            assigned     = true;
          } else {
             // there's not enough room for the current node, so take the ( possible ) overhead and carry it over to the next rank
             // ( assignment is tried again in next loop )
@@ -622,14 +618,13 @@ void TopologyNode::SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsig
          }
       }
    } else {
-      std::array<HilbertPosition,8> const replacement = SpaceFillingCurves::GetHilbertReplacement( position );
-      std::array<unsigned short,8> const order = SpaceFillingCurves::GetHilbertOrder( position );
-      for( unsigned int i=0; i < children_.size(); i++ ) {
-         children_[order[i]].SetTargetRankForLeaf( count_rank_map, replacement[i], level+1 );
+      std::array<HilbertPosition, 8> const replacement = SpaceFillingCurves::GetHilbertReplacement( position );
+      std::array<unsigned short, 8> const order        = SpaceFillingCurves::GetHilbertOrder( position );
+      for( unsigned int i = 0; i < children_.size(); i++ ) {
+         children_[order[i]].SetTargetRankForLeaf( count_rank_map, replacement[i], level + 1 );
       }
    }
 }
-
 
 /**
  * @brief Assigns the given rank to the node with the given id.
@@ -654,7 +649,7 @@ void TopologyNode::SetCurrentRankOfLeaf( std::uint64_t const id, int const rank 
  * @param ids_current_future_rank_map Indirect return parameter, giving a list of all nodes that need to be shifted fomr one mpi rank to another.
  *        The entries are as the name suggest id - current rank - future rank.
  */
-void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const,int const,int const>>& ids_current_future_rank_map ) {
+void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map ) {
    if( future_rank_ != current_rank_ ) {
       ids_current_future_rank_map.push_back( std::make_tuple( unique_id_, current_rank_, future_rank_ ) );
       current_rank_ = future_rank_;
@@ -675,9 +670,9 @@ void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t con
 void TopologyNode::ChildWeight( std::vector<unsigned int>& weights_on_level, unsigned int const current_level ) const {
    if( is_leaf_ ) {
       weights_on_level[current_level] += Weight();
-   } else{
+   } else {
       for( TopologyNode const& node : children_ ) {
-         node.ChildWeight( weights_on_level, current_level+1 );
+         node.ChildWeight( weights_on_level, current_level + 1 );
       }
    }
 }
@@ -701,7 +696,7 @@ void TopologyNode::AddMaterial( std::uint64_t const id, MaterialName const mater
  */
 void TopologyNode::AddMaterial( MaterialName const material ) {
    materials_.emplace_back( material );
-   std::sort( materials_.begin(), materials_.end(), []( MaterialName const a, MaterialName const b ){return MTI( a ) < MTI( b );} );
+   std::sort( materials_.begin(), materials_.end(), []( MaterialName const a, MaterialName const b ) { return MTI( a ) < MTI( b ); } );
 }
 
 /**
@@ -723,7 +718,7 @@ void TopologyNode::RemoveMaterial( std::uint64_t const id, MaterialName const ma
  */
 void TopologyNode::RemoveMaterial( MaterialName const material ) {
    materials_.erase( std::remove( materials_.begin(), materials_.end(), material ), materials_.end() );
-   std::sort( materials_.begin(), materials_.end(), []( MaterialName const a, MaterialName const b ){return MTI( a ) < MTI( b );} );
+   std::sort( materials_.begin(), materials_.end(), []( MaterialName const a, MaterialName const b ) { return MTI( a ) < MTI( b ); } );
 }
 
 /**

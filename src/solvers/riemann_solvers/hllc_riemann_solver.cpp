@@ -76,9 +76,7 @@
  * @param material_manager .
  * @param eigendecomposition_calculator .
  */
-HllcRiemannSolver::HllcRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) :
-   RiemannSolver( material_manager, eigendecomposition_calculator )
-{
+HllcRiemannSolver::HllcRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : RiemannSolver( material_manager, eigendecomposition_calculator ) {
    /* Empty besides initializer list*/
 }
 
@@ -88,13 +86,13 @@ HllcRiemannSolver::HllcRiemannSolver( MaterialManager const& material_manager, E
  *        See base class.
  */
 void HllcRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-   double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const {
+                                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
 
-   double  roe_eigenvectors_left[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()];
-   double roe_eigenvectors_right[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()];
-   double        roe_eigenvalues[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()];
+   double roe_eigenvectors_left[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
+   double roe_eigenvectors_right[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
+   double roe_eigenvalues[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()];
 
    // Resetting the eigenvectors, eigenvalues is necessary for two-phase simulations.
    for( unsigned int i = 0; i < CC::ICX() + 1; ++i ) {
@@ -102,7 +100,7 @@ void HllcRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Bloc
          for( unsigned int k = 0; k < CC::ICZ() + 1; ++k ) {
             for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
                for( unsigned int f = 0; f < MF::ANOE(); ++f ) {
-                  roe_eigenvectors_left[i][j][k][e][f] = 0.0;
+                  roe_eigenvectors_left[i][j][k][e][f]  = 0.0;
                   roe_eigenvectors_right[i][j][k][e][f] = 0.0;
                }
                roe_eigenvalues[i][j][k][e] = 0.0;
@@ -137,47 +135,47 @@ void HllcRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Bloc
  */
 template<Direction DIR>
 void HllcRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-   double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double const (&Roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-   double const (&Roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-   double const cell_size ) const {
+                                       double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                       double const cell_size ) const {
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
 
    // declaration of applied vectors
-   std::vector<double> state_face_left( MF::ANOE() );             //variable vector containing interpolated states of left patch of cell face i/j/k+1/2
-   std::vector<double> state_face_right( MF::ANOE() );            //variable vector containing interpolated states of right patch of cell face i/j/k+1/2
-   std::array<double, ReconstructionStencil::StencilSize()> u_characteristic;    //temp storage for characteristic decomposition
-   std::vector<double> characteristic_average_plus( MF::ANOE() ); // state_face_left  in characteristic space
-   std::vector<double> characteristic_average_minus( MF::ANOE() );// state_face_right in characteristic space
-   std::vector<double> q_star_left( MF::ANOE() );                 // intermediate state vector between left-going wave and contact-interface
-   std::vector<double> q_star_right( MF::ANOE() );                // intermediate state vector between contact-interface and right-going wave
-   std::vector<double> flux_left( MF::ANOE() );                   // F(state_face_left)
-   std::vector<double> flux_right( MF::ANOE() );                  // F(state_face_right)
+   std::vector<double> state_face_left( MF::ANOE() );                        //variable vector containing interpolated states of left patch of cell face i/j/k+1/2
+   std::vector<double> state_face_right( MF::ANOE() );                       //variable vector containing interpolated states of right patch of cell face i/j/k+1/2
+   std::array<double, ReconstructionStencil::StencilSize()> u_characteristic;//temp storage for characteristic decomposition
+   std::vector<double> characteristic_average_plus( MF::ANOE() );            // state_face_left  in characteristic space
+   std::vector<double> characteristic_average_minus( MF::ANOE() );           // state_face_right in characteristic space
+   std::vector<double> q_star_left( MF::ANOE() );                            // intermediate state vector between left-going wave and contact-interface
+   std::vector<double> q_star_right( MF::ANOE() );                           // intermediate state vector between contact-interface and right-going wave
+   std::vector<double> flux_left( MF::ANOE() );                              // F(state_face_left)
+   std::vector<double> flux_right( MF::ANOE() );                             // F(state_face_right)
 
-   constexpr unsigned int principal_momentum = momentum_order_[DTI(DIR)][0];
+   constexpr unsigned int principal_momentum = momentum_order_[DTI( DIR )][0];
 
-   constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX()-1 : CC::FICX();
-   constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY()-1 : CC::FICY();
-   constexpr unsigned int z_start = DIR == Direction::Z ? CC::FICZ()-1 : CC::FICZ();
+   constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
+   constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
+   constexpr unsigned int z_start = DIR == Direction::Z ? CC::FICZ() - 1 : CC::FICZ();
 
-   constexpr unsigned int x_reconstruction_offset  = DIR == Direction::X ? 1 : 0;
-   constexpr unsigned int y_reconstruction_offset  = DIR == Direction::Y ? 1 : 0;
-   constexpr unsigned int z_reconstruction_offset  = DIR == Direction::Z ? 1 : 0;
+   constexpr unsigned int x_reconstruction_offset = DIR == Direction::X ? 1 : 0;
+   constexpr unsigned int y_reconstruction_offset = DIR == Direction::Y ? 1 : 0;
+   constexpr unsigned int z_reconstruction_offset = DIR == Direction::Z ? 1 : 0;
 
    constexpr unsigned int x_end = CC::LICX();
    constexpr unsigned int y_end = CC::LICY();
    constexpr unsigned int z_end = CC::LICZ();
 
-   constexpr int total_to_internal_offset_x = CC::FICX()-1 ;
-   constexpr int total_to_internal_offset_y = CC::DIM() != Dimension::One   ? static_cast<int>( CC::FICY() ) - 1 : -1;
+   constexpr int total_to_internal_offset_x = CC::FICX() - 1;
+   constexpr int total_to_internal_offset_y = CC::DIM() != Dimension::One ? static_cast<int>( CC::FICY() ) - 1 : -1;
    constexpr int total_to_internal_offset_z = CC::DIM() == Dimension::Three ? static_cast<int>( CC::FICZ() ) - 1 : -1;
 
    // Access the pair's elements directly.
    auto const& [material, block] = mat_block;
 
    // To check for invalid cells due to ghost fluid method
-   double const B = material_manager_.GetMaterial(material).GetEquationOfState().GetB();
+   double const B = material_manager_.GetMaterial( material ).GetEquationOfState().GetB();
 
    // For Toro signal speeds
    double const gamma = material_manager_.GetMaterial( material ).GetEquationOfState().GetGamma();
@@ -186,69 +184,58 @@ void HllcRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> cons
       for( unsigned int j = y_start; j <= y_end; ++j ) {
          for( unsigned int k = z_start; k <= z_end; ++k ) {
             // Shifted indices to match block index system and roe-ev index system
-            int const i_index = i-total_to_internal_offset_x;
-            int const j_index = j-total_to_internal_offset_y;
-            int const k_index = k-total_to_internal_offset_z;
+            int const i_index = i - total_to_internal_offset_x;
+            int const j_index = j - total_to_internal_offset_y;
+            int const k_index = k - total_to_internal_offset_z;
 
             // Reconstruct conservative values at cell face using characteristic decomposition in combination with WENO stencil
-            for( unsigned int n = 0; n < MF::ANOE(); ++n ) { // n is index of characteristic field (eigenvalue, eigenvector)
+            for( unsigned int n = 0; n < MF::ANOE(); ++n ) {// n is index of characteristic field (eigenvalue, eigenvector)
                //characteristic decomposition
                for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
                   u_characteristic[m] = 0.0;
                   // Compute characteristics for U
-                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
+                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI( DIR )] ) {// l is index of conservative equation, iterated in symmetry-preserving sequence
                      u_characteristic[m] += Roe_eigenvectors_left[i_index][j_index][k_index][n][l] *
-                        block.GetAverageBuffer( MF::ASOE()[l] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
-                                                               [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())]
-                                                               [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize())];
-                  } // L-Loop
-               } // M-Loop
+                                            block.GetAverageBuffer( MF::ASOE()[l] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
+                                                                                   [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
+                                                                                   [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )];
+                  }// L-Loop
+               }   // M-Loop
 
                //apply reconstruction scheme to characteristic values
-               characteristic_average_minus[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( u_characteristic, cell_size );
-               characteristic_average_plus[n]   = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( u_characteristic, cell_size );
-            } // N-Loop
+               characteristic_average_minus[n] = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( u_characteristic, cell_size );
+               characteristic_average_plus[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( u_characteristic, cell_size );
+            }// N-Loop
 
             // back-transformation into physical space
             for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
                state_face_left[l]  = 0.0;
                state_face_right[l] = 0.0;
-               for( unsigned int const n : characteristic_field_summation_sequence_[DTI(DIR)] ) {
-                  state_face_left[l]  += characteristic_average_minus[n] * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
-                  state_face_right[l] += characteristic_average_plus[n]  * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
-               } // N-Loop
+               for( unsigned int const n : characteristic_field_summation_sequence_[DTI( DIR )] ) {
+                  state_face_left[l] += characteristic_average_minus[n] * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
+                  state_face_right[l] += characteristic_average_plus[n] * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
+               }// N-Loop
                // Non-linear contributions have to be added together to maintain full symmetry
-               state_face_left [l] += (characteristic_average_minus[0]            * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
-                                       characteristic_average_minus[MF::ANOE()-1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE()-1]);
-               state_face_right[l] += (characteristic_average_plus[0]             * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
-                                       characteristic_average_plus[MF::ANOE()-1]  * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE()-1]);
-            } // L-Loop
+               state_face_left[l] += ( characteristic_average_minus[0] * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
+                                       characteristic_average_minus[MF::ANOE() - 1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE() - 1] );
+               state_face_right[l] += ( characteristic_average_plus[0] * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
+                                        characteristic_average_plus[MF::ANOE() - 1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE() - 1] );
+            }// L-Loop
 
             // Check for invalid cells due to ghost fluid method
             if( state_face_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || state_face_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
 
             // Compute pressure, velocity and speed of sound for both cells for reconstructed values
-            double const pressure_left  = material_manager_.GetMaterial(material).GetEquationOfState().GetPressure(
-                                                                         state_face_left[ETI(Equation::Mass)],
-                                                                         state_face_left[ETI(Equation::MomentumX)],
-                                         CC::DIM()  > Dimension::One   ? state_face_left[ETI(Equation::MomentumY)] : 0.0,
-                                         CC::DIM() == Dimension::Three ? state_face_left[ETI(Equation::MomentumZ)] : 0.0,
-                                                                         state_face_left[ETI(Equation::Energy)] );
-            double const pressure_right = material_manager_.GetMaterial(material).GetEquationOfState().GetPressure(
-                                                                         state_face_right[ETI(Equation::Mass)],
-                                                                         state_face_right[ETI(Equation::MomentumX)],
-                                         CC::DIM()  > Dimension::One   ? state_face_right[ETI(Equation::MomentumY)] : 0.0,
-                                         CC::DIM() == Dimension::Three ? state_face_right[ETI(Equation::MomentumZ)] : 0.0,
-                                                                         state_face_right[ETI(Equation::Energy)] );
+            double const pressure_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetPressure( state_face_left[ETI( Equation::Mass )], state_face_left[ETI( Equation::MomentumX )], CC::DIM() > Dimension::One ? state_face_left[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? state_face_left[ETI( Equation::MomentumZ )] : 0.0, state_face_left[ETI( Equation::Energy )] );
+            double const pressure_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetPressure( state_face_right[ETI( Equation::Mass )], state_face_right[ETI( Equation::MomentumX )], CC::DIM() > Dimension::One ? state_face_right[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? state_face_right[ETI( Equation::MomentumZ )] : 0.0, state_face_right[ETI( Equation::Energy )] );
 
             // Check for invalid cells due to ghost fluid method
             if( pressure_left <= -B || pressure_right <= -B ) continue;
 
-            double const velocity_left  = state_face_left [principal_momentum] / state_face_left [ETI(Equation::Mass)];
-            double const velocity_right = state_face_right[principal_momentum] / state_face_right[ETI(Equation::Mass)];
-            double const speed_of_sound_left  = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(state_face_left[ ETI(Equation::Mass)], pressure_left );
-            double const speed_of_sound_right = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(state_face_right[ETI(Equation::Mass)], pressure_right );
-
+            double const velocity_left        = state_face_left[principal_momentum] / state_face_left[ETI( Equation::Mass )];
+            double const velocity_right       = state_face_right[principal_momentum] / state_face_right[ETI( Equation::Mass )];
+            double const speed_of_sound_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_left[ETI( Equation::Mass )], pressure_left );
+            double const speed_of_sound_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_right[ETI( Equation::Mass )], pressure_right );
 
             // Calculation of signal speeds
             auto const [wave_speed_left_simple, wave_speed_right_simple] = CalculateSignalSpeed( state_face_left[ETI( Equation::Mass )], state_face_right[ETI( Equation::Mass )],
@@ -257,48 +244,44 @@ void HllcRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> cons
                                                                                                  speed_of_sound_left, speed_of_sound_right,
                                                                                                  gamma );
 
-            double const wave_speed_contact  = ( (pressure_right - pressure_left)
-                                                + (state_face_left[ETI(Equation::Mass)]  * velocity_left  * (wave_speed_left_simple  - velocity_left )
-                                                -  state_face_right[ETI(Equation::Mass)] * velocity_right * (wave_speed_right_simple - velocity_right)) )
-                                                / (state_face_left[ETI(Equation::Mass)] * (wave_speed_left_simple - velocity_left) - state_face_right[ETI(Equation::Mass)] * (wave_speed_right_simple - velocity_right));
-            double const wave_speed_left  = std::min( wave_speed_left_simple, 0.0 );
-            double const wave_speed_right = std::max( wave_speed_right_simple, 0.0 );
+            double const wave_speed_contact = ( ( pressure_right - pressure_left ) + ( state_face_left[ETI( Equation::Mass )] * velocity_left * ( wave_speed_left_simple - velocity_left ) - state_face_right[ETI( Equation::Mass )] * velocity_right * ( wave_speed_right_simple - velocity_right ) ) ) / ( state_face_left[ETI( Equation::Mass )] * ( wave_speed_left_simple - velocity_left ) - state_face_right[ETI( Equation::Mass )] * ( wave_speed_right_simple - velocity_right ) );
+            double const wave_speed_left    = std::min( wave_speed_left_simple, 0.0 );
+            double const wave_speed_right   = std::max( wave_speed_right_simple, 0.0 );
 
-            double const chi_star_left  = (wave_speed_left_simple  - velocity_left ) / (wave_speed_left_simple  - wave_speed_contact);
-            double const chi_star_right = (wave_speed_right_simple - velocity_right) / (wave_speed_right_simple - wave_speed_contact);
+            double const chi_star_left  = ( wave_speed_left_simple - velocity_left ) / ( wave_speed_left_simple - wave_speed_contact );
+            double const chi_star_right = ( wave_speed_right_simple - velocity_right ) / ( wave_speed_right_simple - wave_speed_contact );
 
             // Compute intermediate states (Toro 10.71 10.72 10.73) and calculate F(q)
-            q_star_left[ETI(Equation::Mass)]    = state_face_left[ ETI(Equation::Mass)] * chi_star_left;
-            q_star_left[principal_momentum]     = state_face_left[ ETI(Equation::Mass)] * chi_star_left * wave_speed_contact;
-            q_star_left[ETI(Equation::Energy)]  = state_face_left[ ETI(Equation::Mass)] * chi_star_left * (state_face_left[ETI(Equation::Energy)] / state_face_left[ETI(Equation::Mass)] + (wave_speed_contact - velocity_left) * (wave_speed_contact + pressure_left / (state_face_left[ETI(Equation::Mass)] * (wave_speed_left - velocity_left))));
-            q_star_right[ETI(Equation::Mass)]   = state_face_right[ETI(Equation::Mass)] * chi_star_right;
-            q_star_right[principal_momentum]    = state_face_right[ETI(Equation::Mass)] * chi_star_right * wave_speed_contact;
-            q_star_right[ETI(Equation::Energy)] = state_face_right[ETI(Equation::Mass)] * chi_star_right * (state_face_right[ETI(Equation::Energy)] / state_face_right[ETI(Equation::Mass)] + (wave_speed_contact - velocity_right) * (wave_speed_contact + pressure_right / (state_face_right[ETI(Equation::Mass)] * (wave_speed_right - velocity_right))));
+            q_star_left[ETI( Equation::Mass )]    = state_face_left[ETI( Equation::Mass )] * chi_star_left;
+            q_star_left[principal_momentum]       = state_face_left[ETI( Equation::Mass )] * chi_star_left * wave_speed_contact;
+            q_star_left[ETI( Equation::Energy )]  = state_face_left[ETI( Equation::Mass )] * chi_star_left * ( state_face_left[ETI( Equation::Energy )] / state_face_left[ETI( Equation::Mass )] + ( wave_speed_contact - velocity_left ) * ( wave_speed_contact + pressure_left / ( state_face_left[ETI( Equation::Mass )] * ( wave_speed_left - velocity_left ) ) ) );
+            q_star_right[ETI( Equation::Mass )]   = state_face_right[ETI( Equation::Mass )] * chi_star_right;
+            q_star_right[principal_momentum]      = state_face_right[ETI( Equation::Mass )] * chi_star_right * wave_speed_contact;
+            q_star_right[ETI( Equation::Energy )] = state_face_right[ETI( Equation::Mass )] * chi_star_right * ( state_face_right[ETI( Equation::Energy )] / state_face_right[ETI( Equation::Mass )] + ( wave_speed_contact - velocity_right ) * ( wave_speed_contact + pressure_right / ( state_face_right[ETI( Equation::Mass )] * ( wave_speed_right - velocity_right ) ) ) );
 
-            flux_left[ETI(Equation::Mass)]      = state_face_left[principal_momentum];
-            flux_left[principal_momentum]       = ((state_face_left[principal_momentum] * state_face_left[principal_momentum]) / state_face_left[ETI(Equation::Mass)]) + pressure_left;
-            flux_left[ETI(Equation::Energy)]    = velocity_left * (state_face_left[ETI(Equation::Energy)] + pressure_left);
-            flux_right[ETI(Equation::Mass)]     = state_face_right[principal_momentum];
-            flux_right[principal_momentum]      = ((state_face_right[principal_momentum] * state_face_right[principal_momentum]) / state_face_right[ETI(Equation::Mass)]) + pressure_right;
-            flux_right[ETI(Equation::Energy)]   = velocity_right * (state_face_right[ETI(Equation::Energy)] + pressure_right);
+            flux_left[ETI( Equation::Mass )]    = state_face_left[principal_momentum];
+            flux_left[principal_momentum]       = ( ( state_face_left[principal_momentum] * state_face_left[principal_momentum] ) / state_face_left[ETI( Equation::Mass )] ) + pressure_left;
+            flux_left[ETI( Equation::Energy )]  = velocity_left * ( state_face_left[ETI( Equation::Energy )] + pressure_left );
+            flux_right[ETI( Equation::Mass )]   = state_face_right[principal_momentum];
+            flux_right[principal_momentum]      = ( ( state_face_right[principal_momentum] * state_face_right[principal_momentum] ) / state_face_right[ETI( Equation::Mass )] ) + pressure_right;
+            flux_right[ETI( Equation::Energy )] = velocity_right * ( state_face_right[ETI( Equation::Energy )] + pressure_right );
 
             // Momenta besides principal momentum (start iterating at 1)
-            for( unsigned int d = 1; d < DTI(CC::DIM()); ++d ) {
-               q_star_left[ momentum_order_[DTI(DIR)][d]] = state_face_left[ ETI(Equation::Mass)] * chi_star_left  * (state_face_left[ momentum_order_[DTI(DIR)][d]] / state_face_left[ ETI(Equation::Mass)]);
-               q_star_right[momentum_order_[DTI(DIR)][d]] = state_face_right[ETI(Equation::Mass)] * chi_star_right * (state_face_right[momentum_order_[DTI(DIR)][d]] / state_face_right[ETI(Equation::Mass)]);
+            for( unsigned int d = 1; d < DTI( CC::DIM() ); ++d ) {
+               q_star_left[momentum_order_[DTI( DIR )][d]]  = state_face_left[ETI( Equation::Mass )] * chi_star_left * ( state_face_left[momentum_order_[DTI( DIR )][d]] / state_face_left[ETI( Equation::Mass )] );
+               q_star_right[momentum_order_[DTI( DIR )][d]] = state_face_right[ETI( Equation::Mass )] * chi_star_right * ( state_face_right[momentum_order_[DTI( DIR )][d]] / state_face_right[ETI( Equation::Mass )] );
 
-               flux_left[ momentum_order_[DTI(DIR)][d]]   = velocity_left  * state_face_left[ momentum_order_[DTI(DIR)][d]];
-               flux_right[momentum_order_[DTI(DIR)][d]]   = velocity_right * state_face_right[momentum_order_[DTI(DIR)][d]];
+               flux_left[momentum_order_[DTI( DIR )][d]]  = velocity_left * state_face_left[momentum_order_[DTI( DIR )][d]];
+               flux_right[momentum_order_[DTI( DIR )][d]] = velocity_right * state_face_right[momentum_order_[DTI( DIR )][d]];
             }
 
             for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
-               double const flux_star_left  = flux_left [n] + (wave_speed_left  * (q_star_left [n] - state_face_left [n]));
-               double const flux_star_right = flux_right[n] + (wave_speed_right * (q_star_right[n] - state_face_right[n]));
+               double const flux_star_left  = flux_left[n] + ( wave_speed_left * ( q_star_left[n] - state_face_left[n] ) );
+               double const flux_star_right = flux_right[n] + ( wave_speed_right * ( q_star_right[n] - state_face_right[n] ) );
                // Attention plus used for fluxes as other terms will also increment elements.
-               fluxes[n][i_index][j_index][k_index] += (0.5 * (1.0 + Signum( wave_speed_contact )) * flux_star_left
-                                                      + 0.5 * (1.0 - Signum( wave_speed_contact )) * flux_star_right);
+               fluxes[n][i_index][j_index][k_index] += ( 0.5 * ( 1.0 + Signum( wave_speed_contact ) ) * flux_star_left + 0.5 * ( 1.0 - Signum( wave_speed_contact ) ) * flux_star_right );
             }
-         } // k
-      } // j
-   } // i
+         }// k
+      }   // j
+   }      // i
 }

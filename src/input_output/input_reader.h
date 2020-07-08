@@ -85,15 +85,14 @@
  * @brief The input reader class serves as a holder for all base class readers that can be used to read data from the input file.
  *        THe input reader does not read any data but serves as a distributor of all different readers.
  */
-class InputReader{
+class InputReader {
 
 private:
-   // Member to store the input type and filename 
+   // Member to store the input type and filename
    std::string const input_filename_;
    InputType const input_type_;
 
-
-   // All readere that are required from base class 
+   // All readere that are required from base class
    std::unique_ptr<MaterialReader const> const material_reader_;
    std::unique_ptr<BoundaryConditionReader const> const boundary_condition_reader_;
    std::unique_ptr<InitialConditionReader const> const initial_condition_reader_;
@@ -105,25 +104,25 @@ private:
    std::unique_ptr<TimeControlReader const> const time_control_reader_;
 
 public:
-   explicit InputReader( std::string const& input_filename, 
+   explicit InputReader( std::string const& input_filename,
                          InputType const input_type,
-                         std::unique_ptr<MaterialReader const> material_reader, 
+                         std::unique_ptr<MaterialReader const> material_reader,
                          std::unique_ptr<BoundaryConditionReader const> boundary_condition_reader,
-                         std::unique_ptr<InitialConditionReader const> initial_condition_reader, 
+                         std::unique_ptr<InitialConditionReader const> initial_condition_reader,
                          std::unique_ptr<MultiResolutionReader const> multi_resolution_reader,
-                         std::unique_ptr<DimensionalizationReader const> dimensionalization_reader, 
+                         std::unique_ptr<DimensionalizationReader const> dimensionalization_reader,
                          std::unique_ptr<OutputReader const> output_reader,
-                         std::unique_ptr<RestartReader const> restart_reader, 
-                         std::unique_ptr<SourceTermReader const> source_term_reader, 
+                         std::unique_ptr<RestartReader const> restart_reader,
+                         std::unique_ptr<SourceTermReader const> source_term_reader,
                          std::unique_ptr<TimeControlReader const> time_control_reader );
-   InputReader() = delete;
-   virtual ~InputReader() = default;
+   InputReader()                     = delete;
+   virtual ~InputReader()            = default;
    InputReader( InputReader const& ) = delete;
    InputReader& operator=( InputReader const& ) = delete;
-   InputReader( InputReader&& ) = delete;
+   InputReader( InputReader&& )                 = delete;
    InputReader& operator=( InputReader&& ) = delete;
 
-   // Return functions of the input reader 
+   // Return functions of the input reader
    std::string GetInputFile() const;
    InputType GetInputType() const;
    MaterialReader const& GetMaterialReader() const;
@@ -136,4 +135,4 @@ public:
    SourceTermReader const& GetSourceTermReader() const;
    TimeControlReader const& GetTimeControlReader() const;
 };
-#endif // INPUT_READER_H
+#endif// INPUT_READER_H

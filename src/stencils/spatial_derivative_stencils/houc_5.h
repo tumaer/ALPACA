@@ -79,7 +79,7 @@ class HOUC5 : public Stencil<HOUC5> {
 
    static constexpr StencilType stencil_type_ = StencilType::Derivative;
 
-   static constexpr unsigned int stencil_size_ = 7;
+   static constexpr unsigned int stencil_size_            = 7;
    static constexpr unsigned int downstream_stencil_size_ = 3;
 
    static constexpr double one_sixtieth = 1.0 / 60.0;
@@ -111,12 +111,11 @@ class HOUC5 : public Stencil<HOUC5> {
 
 public:
    explicit constexpr HOUC5() = default;
-   ~HOUC5() = default;
-   HOUC5( HOUC5 const& ) = delete;
+   ~HOUC5()                   = default;
+   HOUC5( HOUC5 const& )      = delete;
    HOUC5& operator=( HOUC5 const& ) = delete;
-   HOUC5( HOUC5&& ) = delete;
-   HOUC5& operator=( HOUC5&&) = delete;
+   HOUC5( HOUC5&& )                 = delete;
+   HOUC5& operator=( HOUC5&& ) = delete;
 };
 
-
-#endif //HOUC_5_H
+#endif//HOUC_5_H

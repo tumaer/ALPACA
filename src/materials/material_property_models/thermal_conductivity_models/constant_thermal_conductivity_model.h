@@ -82,7 +82,7 @@ class ConstantThermalConductivityModel : public ConstantMaterialParameterModel<C
    friend ConstantMaterialParameterModel;
 
    // Definition of parameters needed in the base class for the computations
-   static constexpr Parameter parameter_buffer_type_ = Parameter::ThermalConductivity; // buffer that is modified by the model
+   static constexpr Parameter parameter_buffer_type_ = Parameter::ThermalConductivity;// buffer that is modified by the model
 
    // member variables needed for the model calculation
    double const lambda_constant_;
@@ -94,14 +94,14 @@ public:
    ConstantThermalConductivityModel() = delete;
    explicit ConstantThermalConductivityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                               UnitHandler const& unit_handler );
-   virtual ~ConstantThermalConductivityModel() = default;
+   virtual ~ConstantThermalConductivityModel()                                 = default;
    ConstantThermalConductivityModel( const ConstantThermalConductivityModel& ) = delete;
    ConstantThermalConductivityModel& operator=( const ConstantThermalConductivityModel& ) = delete;
-   ConstantThermalConductivityModel( ConstantThermalConductivityModel&& ) = delete;
+   ConstantThermalConductivityModel( ConstantThermalConductivityModel&& )                 = delete;
    ConstantThermalConductivityModel& operator=( ConstantThermalConductivityModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // CONSTANT_THERMAL_CONDUCTIVITY_MODEL_H
+#endif// CONSTANT_THERMAL_CONDUCTIVITY_MODEL_H

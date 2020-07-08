@@ -81,28 +81,28 @@
  *        It serves as a proxy class for different material reader types (xml,...) that only read the actual data. 
  *        Here, consistency checks are done that all read data are valid.  
  */
-class MaterialReader{
+class MaterialReader {
 
 protected:
-   // function to create the input tag of a given number of material indices 
+   // function to create the input tag of a given number of material indices
    std::string MaterialInputTag( std::vector<unsigned int> const& material_indices ) const;
 
    // Functions that must be implemented by the derived classes
-   virtual int DoReadNumberOfMaterials() const = 0;
-   virtual std::string DoReadEquationOfStateName( unsigned int const material_index ) const = 0;
-   virtual std::unordered_map<std::string, double> DoReadEquationOfStateData( unsigned int const material_index ) const = 0;
-   virtual double DoReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const = 0;
-   virtual std::string DoReadModelName( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const = 0;
+   virtual int DoReadNumberOfMaterials() const                                                                                                                 = 0;
+   virtual std::string DoReadEquationOfStateName( unsigned int const material_index ) const                                                                    = 0;
+   virtual std::unordered_map<std::string, double> DoReadEquationOfStateData( unsigned int const material_index ) const                                        = 0;
+   virtual double DoReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const                                 = 0;
+   virtual std::string DoReadModelName( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const                             = 0;
    virtual std::unordered_map<std::string, double> DoReadModelData( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const = 0;
 
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit MaterialReader() = default;
 
 public:
-   virtual ~MaterialReader() = default;
+   virtual ~MaterialReader()               = default;
    MaterialReader( MaterialReader const& ) = delete;
    MaterialReader& operator=( MaterialReader const& ) = delete;
-   MaterialReader( MaterialReader&& ) = delete;
+   MaterialReader( MaterialReader&& )                 = delete;
    MaterialReader& operator=( MaterialReader&& ) = delete;
 
    // functions that return the different parameters
@@ -114,4 +114,4 @@ public:
    std::unordered_map<std::string, double> ReadModelData( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const;
 };
 
-#endif // MATERIAL_READER_H
+#endif// MATERIAL_READER_H

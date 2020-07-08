@@ -69,7 +69,7 @@
 #include <catch.hpp>
 
 #include <mpi.h>
-#include <fenv.h> // Floating-Point raising exceptions.
+#include <fenv.h>// Floating-Point raising exceptions.
 #ifdef __APPLE__
 #include <xmmintrin.h>
 #endif
@@ -93,17 +93,17 @@ std::pair<int, int> StartUpMpiAndReportRankAndSize( int argc, char* argv[] ) {
  */
 void PrintStartupMessage( int const rank ) {
    if( rank == 0 ) {
-      std::cout << "\n" <<
-                   "                                  \\\\\n" <<
-                   "                                  l '>\n" <<
-                   "                                  | |\n" <<
-                   "                                  | |\n" <<
-                   "                                  |   Paco~\n" <<
-                   "                                  ||    || \n" <<
-                   "                                  ''    '' \n" <<
-                   "                                     \n" <<
-                   "          THE AGE OF BUGS HAS GONE - THE AGE OF UNIT-TESTS HAS COME\n" <<
-                   "\n";
+      std::cout << "\n"
+                << "                                  \\\\\n"
+                << "                                  l '>\n"
+                << "                                  | |\n"
+                << "                                  | |\n"
+                << "                                  |   Paco~\n"
+                << "                                  ||    || \n"
+                << "                                  ''    '' \n"
+                << "                                     \n"
+                << "          THE AGE OF BUGS HAS GONE - THE AGE OF UNIT-TESTS HAS COME\n"
+                << "\n";
    }
 }
 
@@ -116,9 +116,8 @@ void PrintStartupMessage( int const rank ) {
 std::pair<bool, std::string> ProvidedTagsAreValid( int argc, char* argv[], int const number_of_ranks ) {
    std::vector<std::string> arguments( argv + 1, argv + argc );
    arguments.erase( std::remove_if( std::begin( arguments ), std::end( arguments ),
-                                    []( std::string const& s ) { return !std::regex_search( s, std::regex( "\\[.*\\]" ) ); }
-                                  ),
-                                  std::end( arguments ) );
+                                    []( std::string const& s ) { return !std::regex_search( s, std::regex( "\\[.*\\]" ) ); } ),
+                    std::end( arguments ) );
    if( arguments.size() == 0 ) {
       return std::make_pair( false, "Paco needs a tag argument to run the correct suite of tests" );
    }
@@ -159,7 +158,7 @@ int main( int argc, char* argv[] ) {
    feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 #endif
 #ifdef __APPLE__
-   _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID);
+   _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
 #endif
 #endif
 

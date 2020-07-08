@@ -86,38 +86,34 @@ class EigenDecomposition {
 
    MaterialManager const& material_manager_;
 
-   static constexpr std::array<std::array<unsigned int, 3>, 3> direction_momentum_indices_ = {{
-      {0, 1, 2},
-      {1, 0, 2},
-      {2, 0, 1}
-   }};
-   static constexpr std::array<std::array<unsigned int, 3>, 3> direction_eigenvector_indices_ = {{
-      {1, 2, 3},
-      {2, 1, 3},
-      {3, 1, 2}
-   }};
+   static constexpr std::array<std::array<unsigned int, 3>, 3> direction_momentum_indices_    = { { { 0, 1, 2 },
+                                                                                                 { 1, 0, 2 },
+                                                                                                 { 2, 0, 1 } } };
+   static constexpr std::array<std::array<unsigned int, 3>, 3> direction_eigenvector_indices_ = { { { 1, 2, 3 },
+                                                                                                    { 2, 1, 3 },
+                                                                                                    { 3, 1, 2 } } };
 
    // Using static to cheat constness (for this global variable okay - don't do this at home (we are what you a call Experts) ;)
-   static double global_eigenvalues_[DTI(CC::DIM())][MF::ANOE()];
+   static double global_eigenvalues_[DTI( CC::DIM() )][MF::ANOE()];
 
 public:
    EigenDecomposition() = delete;
-   explicit EigenDecomposition( MaterialManager const& material_manager);
-   ~EigenDecomposition() = default;
+   explicit EigenDecomposition( MaterialManager const& material_manager );
+   ~EigenDecomposition()                           = default;
    EigenDecomposition( EigenDecomposition const& ) = delete;
    EigenDecomposition& operator=( EigenDecomposition const& ) = delete;
-   EigenDecomposition( EigenDecomposition&& ) = delete;
+   EigenDecomposition( EigenDecomposition&& )                 = delete;
    EigenDecomposition& operator=( EigenDecomposition&& ) = delete;
 
    template<Direction DIR>
    void ComputeRoeEigendecomposition( std::pair<MaterialName const, Block> const& mat_block,
-      double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-      double (&fluxfunction_eigenvalues)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()] ) const;
+                                      double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                      double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                      double ( &fluxfunction_eigenvalues )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const;
 
-   void ComputeMaxEigenvaluesOnBlock(std::pair<MaterialName const, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const;
-   void SetGlobalEigenvalues(double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const;
-   auto GetGlobalEigenvalues() const -> double const (&)[DTI(CC::DIM())][MF::ANOE()];
+   void ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
+   void SetGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
+   auto GetGlobalEigenvalues() const -> double const ( & )[DTI( CC::DIM() )][MF::ANOE()];
 };
 
 namespace {
@@ -129,14 +125,14 @@ namespace {
     * @param u .
     * @param u_plus_c .
     */
-   inline void SaveForAllFields(double (&eigenvalues)[MF::ANOE()], double const u_minus_c, double const u, double const u_plus_c){
-      eigenvalues[0]            = u_minus_c;
-      eigenvalues[MF::ANOE()-1] = u_plus_c;
-      for(unsigned int l = 1; l < MF::ANOE()-1; ++l) {
+   inline void SaveForAllFields( double ( &eigenvalues )[MF::ANOE()], double const u_minus_c, double const u, double const u_plus_c ) {
+      eigenvalues[0]              = u_minus_c;
+      eigenvalues[MF::ANOE() - 1] = u_plus_c;
+      for( unsigned int l = 1; l < MF::ANOE() - 1; ++l ) {
          eigenvalues[l] = u;
       }
    }
-}
+}// namespace
 
 /**
  * @brief Computes the Roe left and right eigenvectors and the Roe eigenvalues in x-direction according to \cite Fedkiw1999a.
@@ -148,13 +144,13 @@ namespace {
  */
 template<Direction DIR>
 void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName const, Block> const& mat_block,
-   double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-   double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-   double (&fluxfunction_eigenvalues)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()] ) const {
+                                                       double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                                       double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                                       double ( &fluxfunction_eigenvalues )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const {
 
    constexpr int total_to_internal_offset_x = CC::FICX() - 1;
-   constexpr int total_to_internal_offset_y = CC::DIM() != Dimension::One   ? int(CC::FICY()) - 1 : -1;
-   constexpr int total_to_internal_offset_z = CC::DIM() == Dimension::Three ? int(CC::FICZ()) - 1 : -1;
+   constexpr int total_to_internal_offset_y = CC::DIM() != Dimension::One ? int( CC::FICY() ) - 1 : -1;
+   constexpr int total_to_internal_offset_z = CC::DIM() == Dimension::Three ? int( CC::FICZ() ) - 1 : -1;
 
    constexpr unsigned int start_x = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
    constexpr unsigned int start_y = DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
@@ -165,31 +161,32 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
    constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
 
    // indices of principal and first/second minor momentum/velocity within the three-packs MF::AME and MF::AV
-   constexpr unsigned int principal = direction_momentum_indices_[DTI(DIR)][0];
-   constexpr unsigned int minor1    = direction_momentum_indices_[DTI(DIR)][1];
-   constexpr unsigned int minor2    = direction_momentum_indices_[DTI(DIR)][2];
+   constexpr unsigned int principal = direction_momentum_indices_[DTI( DIR )][0];
+   constexpr unsigned int minor1    = direction_momentum_indices_[DTI( DIR )][1];
+   constexpr unsigned int minor2    = direction_momentum_indices_[DTI( DIR )][2];
 
    // Indices of eigenvectors for characteristic fields due to principal and first/second minor momentum
-   constexpr unsigned int ev_principal = direction_eigenvector_indices_[DTI(DIR)][0];
-   constexpr unsigned int ev_minor1    = direction_eigenvector_indices_[DTI(DIR)][1];
-   constexpr unsigned int ev_minor2    = direction_eigenvector_indices_[DTI(DIR)][2];
+   constexpr unsigned int ev_principal = direction_eigenvector_indices_[DTI( DIR )][0];
+   constexpr unsigned int ev_minor1    = direction_eigenvector_indices_[DTI( DIR )][1];
+   constexpr unsigned int ev_minor2    = direction_eigenvector_indices_[DTI( DIR )][2];
 
    // Access the pair's elements directly.
    auto const& [material, block] = mat_block;
 
    // We need to use the conservative buffer for density as the prime state is only consistent (if zero) after last RK stage
-   Conservatives const& conservatives = block.GetAverageBuffer();
-   double const (&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Mass);
-   double const (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
+   Conservatives const& conservatives                        = block.GetAverageBuffer();
+   double const( &density )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
+   double const( &energy )[CC::TCX()][CC::TCY()][CC::TCZ()]  = block.GetAverageBuffer( Equation::Energy );
 
-   PrimeStates const& prime_states = block.GetPrimeStateBuffer();
-   double const (&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer(PrimeState::Pressure);
+   PrimeStates const& prime_states                            = block.GetPrimeStateBuffer();
+   double const( &pressure )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Pressure );
 
-   double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen();
+   double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().GetGruneisen();
 
    for( unsigned int i = start_x; i <= CC::LICX(); ++i ) {
       for( unsigned int j = start_y; j <= CC::LICY(); ++j ) {
          for( unsigned int k = start_z; k <= CC::LICZ(); ++k ) {
+            // clang-format off
             // Indices of neighbor cell
             unsigned int const in = i + x_varying;
             unsigned int const jn = j + y_varying;
@@ -410,9 +407,11 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
                   eigenvalues[l] = global_eigenvalues_[0][l];
                }
             }
-         }
-      }
-   }
+
+            // clang-format on
+         }// k
+      }   // j
+   }      // i
 }
 
-#endif // EIGENVALUE_CALCULATOR_H
+#endif// EIGENVALUE_CALCULATOR_H

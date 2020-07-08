@@ -82,17 +82,17 @@ private:
 public:
    HeatFluxes() = delete;
    explicit HeatFluxes( MaterialManager const& material_manager );
-   ~HeatFluxes() = default;
+   ~HeatFluxes()                   = default;
    HeatFluxes( HeatFluxes const& ) = delete;
-   HeatFluxes( HeatFluxes&& ) = delete;
+   HeatFluxes( HeatFluxes&& )      = delete;
    HeatFluxes& operator=( HeatFluxes const& ) = delete;
    HeatFluxes& operator=( HeatFluxes&& ) = delete;
 
    void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-      double (&heat_fluxes_x)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&heat_fluxes_y)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&heat_fluxes_z)[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double const cell_size ) const;
+                       double ( &heat_fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double ( &heat_fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double ( &heat_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double const cell_size ) const;
 };
 
-#endif //HEAT_FLUXES_H
+#endif//HEAT_FLUXES_H

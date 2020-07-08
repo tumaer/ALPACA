@@ -76,19 +76,18 @@
  * @brief Default constructor.
  * @param parser A parser for the user input file.
  */
-UnitHandler::UnitHandler( double const density_reference, double const velocity_reference, double const length_reference, double const temperature_reference ) :
-   density_reference_( density_reference ),
-   velocity_reference_( velocity_reference ),
-   length_reference_( length_reference ),
-   temperature_reference_( temperature_reference ),
-   time_reference_( length_reference_ / velocity_reference_ ),
-   mass_reference_( density_reference_ * length_reference_ * length_reference_ * length_reference_ ),
-   momentum_reference_( density_reference_ * velocity_reference_ ),
-   pressure_reference_( density_reference_ * velocity_reference_ * velocity_reference_ ),
-   energy_reference_( density_reference_ * velocity_reference_ * velocity_reference_ ),
-   viscosity_reference_( density_reference_ * velocity_reference_ * length_reference_ ),
-   thermal_conductivity_reference_( density_reference_ * velocity_reference_ * velocity_reference_ * velocity_reference_ * length_reference_ / temperature_reference_ ),
-   surface_tension_coefficient_reference_( density_reference_ * velocity_reference_ * velocity_reference_ * length_reference_ ) {
+UnitHandler::UnitHandler( double const density_reference, double const velocity_reference, double const length_reference, double const temperature_reference ) : density_reference_( density_reference ),
+                                                                                                                                                                 velocity_reference_( velocity_reference ),
+                                                                                                                                                                 length_reference_( length_reference ),
+                                                                                                                                                                 temperature_reference_( temperature_reference ),
+                                                                                                                                                                 time_reference_( length_reference_ / velocity_reference_ ),
+                                                                                                                                                                 mass_reference_( density_reference_ * length_reference_ * length_reference_ * length_reference_ ),
+                                                                                                                                                                 momentum_reference_( density_reference_ * velocity_reference_ ),
+                                                                                                                                                                 pressure_reference_( density_reference_ * velocity_reference_ * velocity_reference_ ),
+                                                                                                                                                                 energy_reference_( density_reference_ * velocity_reference_ * velocity_reference_ ),
+                                                                                                                                                                 viscosity_reference_( density_reference_ * velocity_reference_ * length_reference_ ),
+                                                                                                                                                                 thermal_conductivity_reference_( density_reference_ * velocity_reference_ * velocity_reference_ * velocity_reference_ * length_reference_ / temperature_reference_ ),
+                                                                                                                                                                 surface_tension_coefficient_reference_( density_reference_ * velocity_reference_ * velocity_reference_ * length_reference_ ) {
    /** Empty besides initializer list */
 }
 
@@ -100,48 +99,48 @@ UnitHandler::UnitHandler( double const density_reference, double const velocity_
  */
 double UnitHandler::NonDimensionalizeValue( double const value, UnitType const unit_type ) const {
    switch( unit_type ) {
-      case UnitType::Unitless  : {
+      case UnitType::Unitless: {
          return value;
       }
-      case UnitType::Length : {
+      case UnitType::Length: {
          return value / length_reference_;
       }
-      case UnitType::Time : {
+      case UnitType::Time: {
          return value / time_reference_;
       }
-      case UnitType::Mass : {
+      case UnitType::Mass: {
          return value / mass_reference_;
       }
-      case UnitType::Density : {
+      case UnitType::Density: {
          return value / density_reference_;
       }
-      case UnitType::Velocity : {
+      case UnitType::Velocity: {
          return value / velocity_reference_;
       }
-      case UnitType::Momentum : {
+      case UnitType::Momentum: {
          return value / momentum_reference_;
       }
-      case UnitType::Pressure : {
+      case UnitType::Pressure: {
          return value / pressure_reference_;
       }
-      case UnitType::Temperature : {
+      case UnitType::Temperature: {
          return value / temperature_reference_;
       }
-      case UnitType::Energy : {
+      case UnitType::Energy: {
          return value / energy_reference_;
       }
-      case UnitType::Viscosity  : {
+      case UnitType::Viscosity: {
          return value / viscosity_reference_;
       }
-      case UnitType::ThermalConductivity  : {
+      case UnitType::ThermalConductivity: {
          return value / thermal_conductivity_reference_;
       }
-      case UnitType::SurfaceTensionCoefficient  : {
+      case UnitType::SurfaceTensionCoefficient: {
          return value / surface_tension_coefficient_reference_;
       }
-      default : {
+      default: {
          throw std::logic_error( "UnitType " + std::to_string( static_cast<int>( unit_type ) ) + " is unknown and cannot be non-dimensionalized" );
-      } //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
+      }//suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
    }
 }
 
@@ -153,48 +152,48 @@ double UnitHandler::NonDimensionalizeValue( double const value, UnitType const u
  */
 double UnitHandler::DimensionalizeValue( double const value, UnitType const unit_type ) const {
    switch( unit_type ) {
-      case UnitType::Unitless : {
+      case UnitType::Unitless: {
          return value;
       }
-      case UnitType::Length : {
+      case UnitType::Length: {
          return value * length_reference_;
       }
-      case UnitType::Time : {
+      case UnitType::Time: {
          return value * time_reference_;
       }
-      case UnitType::Mass : {
+      case UnitType::Mass: {
          return value * mass_reference_;
       }
-      case UnitType::Density : {
+      case UnitType::Density: {
          return value * density_reference_;
       }
-      case UnitType::Velocity : {
+      case UnitType::Velocity: {
          return value * velocity_reference_;
       }
-      case UnitType::Momentum : {
+      case UnitType::Momentum: {
          return value * momentum_reference_;
       }
-      case UnitType::Pressure : {
+      case UnitType::Pressure: {
          return value * pressure_reference_;
       }
-      case UnitType::Temperature : {
+      case UnitType::Temperature: {
          return value * temperature_reference_;
       }
-      case UnitType::Energy : {
+      case UnitType::Energy: {
          return value * energy_reference_;
       }
-      case UnitType::Viscosity  : {
+      case UnitType::Viscosity: {
          return value * viscosity_reference_;
       }
-      case UnitType::ThermalConductivity  : {
+      case UnitType::ThermalConductivity: {
          return value * thermal_conductivity_reference_;
       }
-      case UnitType::SurfaceTensionCoefficient  : {
+      case UnitType::SurfaceTensionCoefficient: {
          return value * surface_tension_coefficient_reference_;
       }
-      default : {
+      default: {
          throw std::logic_error( "UnitType " + std::to_string( static_cast<int>( unit_type ) ) + " is unknown and cannot be dimensionalized" );
-      } //suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
+      }//suppresses Compiler Warning "control reaches end of non-void function [-Wreturn-type]"
    }
 }
 
@@ -207,7 +206,7 @@ double UnitHandler::DimensionalizeValue( double const value, UnitType const unit
  */
 double UnitHandler::NonDimensionalizeValue( double const value, std::vector<UnitType> const& nominator_units, std::vector<UnitType> const& denominator_units ) const {
    // declare nominator and denominator values
-   double nominator = 1.0;
+   double nominator   = 1.0;
    double denominator = 1.0;
    // Loop through all nominator and get nominator value (use dimensionalize function since the multiplication is required)
    for( UnitType const& unit_type : nominator_units ) {
@@ -230,7 +229,7 @@ double UnitHandler::NonDimensionalizeValue( double const value, std::vector<Unit
  */
 double UnitHandler::DimensionalizeValue( double const value, std::vector<UnitType> const& nominator_units, std::vector<UnitType> const& denominator_units ) const {
    // declare nominator and denominator values
-   double nominator = 1.0;
+   double nominator   = 1.0;
    double denominator = 1.0;
    // Loop through all nominator and get nominator value (use dimensionalize function since the multiplication is required)
    for( UnitType const& unit_type : nominator_units ) {

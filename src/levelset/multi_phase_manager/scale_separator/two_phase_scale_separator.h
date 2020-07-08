@@ -68,7 +68,6 @@
 #ifndef TWO_PHASE_SCALE_SEPARATOR_H
 #define TWO_PHASE_SCALE_SEPARATOR_H
 
-
 #include "scale_separator.h"
 
 /**
@@ -79,16 +78,12 @@ class TwoPhaseScaleSeparator : public ScaleSeparator<TwoPhaseScaleSeparator> {
    friend ScaleSeparator;
 
 private:
-
-   void SeparateScalesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void SeparateScalesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
 
 public:
-
    TwoPhaseScaleSeparator() = delete;
-   explicit TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager & halo_manager );
+   explicit TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager );
    ~TwoPhaseScaleSeparator() = default;
-
 };
 
-
-#endif //TWO_PHASE_SCALE_SEPARATOR_H
+#endif//TWO_PHASE_SCALE_SEPARATOR_H

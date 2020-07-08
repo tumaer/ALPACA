@@ -68,7 +68,7 @@
 #ifndef ID_PERIODIC_INFORMATION_H
 #define ID_PERIODIC_INFORMATION_H
 
-#include <cstdint> //64bit ensured ints
+#include <cstdint>//64bit ensured ints
 #include <array>
 #include "boundary_condition/boundary_specifications.h"
 
@@ -76,7 +76,9 @@
  * @brief Unique Identifier for the location of the periodic boundaries. Designed to use as bitmask for finding if the x, y or z axis are periodic.
  */
 enum PeriodicBoundariesLocations : unsigned int {
-   EastWest = 1<<0, NorthSouth = 1<<1, TopBottom = 1<<2
+   EastWest   = 1 << 0,
+   NorthSouth = 1 << 1,
+   TopBottom  = 1 << 2
 };
 
 std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const level_zero_blocks_xyz,
@@ -84,4 +86,4 @@ std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation co
 bool PeriodicIsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const level_zero_blocks_xyz,
                                  unsigned int const active_periodic_locations );
 
-#endif // ID_PERIODIC_INFORMATION_H
+#endif// ID_PERIODIC_INFORMATION_H

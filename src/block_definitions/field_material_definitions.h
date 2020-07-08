@@ -78,12 +78,16 @@
 /**
  * @brief Unique identifier for the conservative buffer type, i.e. the average, right-hand side, or initial buffer.
  */
-enum class ConservativeBufferType { Average, RightHandSide, Initial };
+enum class ConservativeBufferType { Average,
+                                    RightHandSide,
+                                    Initial };
 
 /**
  * @brief Unique Identifier for the material Field type, i.e. a conservative, a prime-state or a parameter field.
  */
-enum class MaterialFieldType { Conservatives, PrimeStates, Parameters };
+enum class MaterialFieldType { Conservatives,
+                               PrimeStates,
+                               Parameters };
 
 class MaterialFieldsDefinitions {
 
@@ -92,31 +96,35 @@ class MaterialFieldsDefinitions {
    static constexpr auto active_prime_states_ = IndexSequenceToEnumArray<PrimeState>( std::make_index_sequence<FieldDetails::ActivePrimeStates::Count>{} );
    static constexpr auto active_parameters_   = IndexSequenceToEnumArray<Parameter>( std::make_index_sequence<FieldDetails::ActiveParameters::Count>{} );
 
-   static constexpr std::array<Equation,DTI( CC::DIM() )> const active_momenta_ = { Equation::MomentumX
-#if DIMENSION!=1
-      ,Equation::MomentumY
+   static constexpr std::array<Equation, DTI( CC::DIM() )> const active_momenta_ = { Equation::MomentumX
+#if DIMENSION != 1
+                                                                                     ,
+                                                                                     Equation::MomentumY
 #endif
-#if DIMENSION==3
-      ,Equation::MomentumZ
+#if DIMENSION == 3
+                                                                                     ,
+                                                                                     Equation::MomentumZ
 #endif
    };
 
-   static constexpr std::array<PrimeState,DTI( CC::DIM() )> const active_velocities_ = { PrimeState::VelocityX
-#if DIMENSION!=1
-      ,PrimeState::VelocityY
+   static constexpr std::array<PrimeState, DTI( CC::DIM() )> const active_velocities_ = { PrimeState::VelocityX
+#if DIMENSION != 1
+                                                                                          ,
+                                                                                          PrimeState::VelocityY
 #endif
-#if DIMENSION==3
-      ,PrimeState::VelocityZ
+#if DIMENSION == 3
+                                                                                          ,
+                                                                                          PrimeState::VelocityZ
 #endif
    };
-   static constexpr std::array<Equation, 2> wavelet_analysis_equations_ { Equation::Mass, Equation::Energy };
+   static constexpr std::array<Equation, 2> wavelet_analysis_equations_{ Equation::Mass, Equation::Energy };
 
 public:
-   MaterialFieldsDefinitions() = delete;
-   ~MaterialFieldsDefinitions() = default;
+   MaterialFieldsDefinitions()                                   = delete;
+   ~MaterialFieldsDefinitions()                                  = default;
    MaterialFieldsDefinitions( MaterialFieldsDefinitions const& ) = delete;
    MaterialFieldsDefinitions& operator=( MaterialFieldsDefinitions const& ) = delete;
-   MaterialFieldsDefinitions( MaterialFieldsDefinitions&& ) = delete;
+   MaterialFieldsDefinitions( MaterialFieldsDefinitions&& )                 = delete;
    MaterialFieldsDefinitions& operator=( MaterialFieldsDefinitions&& ) = delete;
 
    /**
@@ -127,13 +135,13 @@ public:
     */
    static constexpr bool IsFieldActive( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case MaterialFieldType::Conservatives : {
+         case MaterialFieldType::Conservatives: {
             return field_index < FieldDetails::ActiveEquations::InactiveFieldOffset;
          }
-         case MaterialFieldType::Parameters : {
+         case MaterialFieldType::Parameters: {
             return field_index < FieldDetails::ActiveParameters::InactiveFieldOffset;
          }
-         default : { // MaterialFieldType::PrimeStates
+         default: {// MaterialFieldType::PrimeStates
             return field_index < FieldDetails::ActivePrimeStates::InactiveFieldOffset;
          }
       }
@@ -174,13 +182,13 @@ public:
     */
    static constexpr auto InputName( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case MaterialFieldType::Conservatives : {
+         case MaterialFieldType::Conservatives: {
             return FieldDetails::ActiveEquations::GetInputName( field_index );
          }
-         case MaterialFieldType::Parameters : {
+         case MaterialFieldType::Parameters: {
             return FieldDetails::ActiveParameters::GetInputName( field_index );
          }
-         default : { // MaterialFieldType::PrimeStates
+         default: {// MaterialFieldType::PrimeStates
             return FieldDetails::ActivePrimeStates::GetInputName( field_index );
          }
       }
@@ -221,13 +229,13 @@ public:
     */
    static constexpr auto FieldUnit( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case MaterialFieldType::Conservatives : {
+         case MaterialFieldType::Conservatives: {
             return FieldDetails::ActiveEquations::GetUnit( field_index );
          }
-         case MaterialFieldType::Parameters : {
+         case MaterialFieldType::Parameters: {
             return FieldDetails::ActiveParameters::GetUnit( field_index );
          }
-         default : { // MaterialFieldType::PrimeStates
+         default: {// MaterialFieldType::PrimeStates
             return FieldDetails::ActivePrimeStates::GetUnit( field_index );
          }
       }
@@ -295,13 +303,13 @@ public:
     */
    static constexpr unsigned int ANOF( MaterialFieldType const field_type ) {
       switch( field_type ) {
-         case MaterialFieldType::Conservatives : {
+         case MaterialFieldType::Conservatives: {
             return ANOE();
          }
-         case MaterialFieldType::Parameters : {
+         case MaterialFieldType::Parameters: {
             return ANOPA();
          }
-         default : { // MaterialFieldType::PrimeStates
+         default: {// MaterialFieldType::PrimeStates
             return ANOP();
          }
       }
@@ -348,7 +356,6 @@ public:
 
 using MF = MaterialFieldsDefinitions;
 
-
 static_assert( std::make_pair( MF::AME()[0], MF::AV()[0] ) == std::make_pair( Equation::MomentumX, PrimeState::VelocityX ), "MF::AME()[0] and MF::AV()[0] have to consistently return MomentumX and VelocityX" );
 #if DIMENSION != 1
 static_assert( std::make_pair( MF::AME()[1], MF::AV()[1] ) == std::make_pair( Equation::MomentumY, PrimeState::VelocityY ), "MF::AME()[1] and MF::AV()[1] have to consistently return MomentumY and VelocityY" );
@@ -357,4 +364,4 @@ static_assert( std::make_pair( MF::AME()[1], MF::AV()[1] ) == std::make_pair( Eq
 static_assert( std::make_pair( MF::AME()[2], MF::AV()[2] ) == std::make_pair( Equation::MomentumZ, PrimeState::VelocityZ ), "MF::AME()[2] and MF::AV()[2] have to consistently return MomentumZ and VelocityZ" );
 #endif
 
-#endif // FIELDS_MATERIAL_DEFINITONS_H
+#endif// FIELDS_MATERIAL_DEFINITONS_H

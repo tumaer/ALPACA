@@ -78,7 +78,7 @@ class ExactIterativeInterfaceRiemannSolver : public IterativeInterfaceRiemannSol
    friend IterativeInterfaceRiemannSolver;
 
    std::array<double, 2> ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-      double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
+                                                                    double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
 
 public:
    ExactIterativeInterfaceRiemannSolver() = delete;
@@ -88,13 +88,11 @@ public:
     * @param[in]  material_manager  The material manager.
     */
    ExactIterativeInterfaceRiemannSolver( MaterialManager const& material_manager ) : IterativeInterfaceRiemannSolver<ExactIterativeInterfaceRiemannSolver>( material_manager ) {}
-   ~ExactIterativeInterfaceRiemannSolver() = default;
+   ~ExactIterativeInterfaceRiemannSolver()                                             = default;
    ExactIterativeInterfaceRiemannSolver( ExactIterativeInterfaceRiemannSolver const& ) = delete;
    ExactIterativeInterfaceRiemannSolver operator=( ExactIterativeInterfaceRiemannSolver const& ) = delete;
-   ExactIterativeInterfaceRiemannSolver( ExactIterativeInterfaceRiemannSolver&& ) = delete;
+   ExactIterativeInterfaceRiemannSolver( ExactIterativeInterfaceRiemannSolver&& )                = delete;
    ExactIterativeInterfaceRiemannSolver& operator=( ExactIterativeInterfaceRiemannSolver&& ) = delete;
 };
 
-
-
-#endif //EXACT_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
+#endif//EXACT_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H

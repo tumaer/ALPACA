@@ -72,13 +72,11 @@
  * @param material_manager The material manager object provides the correct equation of state for the given material.
  * @param gravity Three-dimensional array holding the gravitational pull in x-, y-, z-direction.
  */
-SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std::array<double, 3> const gravity ) :
-   gravity_(gravity),
-   viscous_fluxes_(material_manager),
-   heat_fluxes_(material_manager),
-   axisymmetric_fluxes_(),
-   axisymmetric_viscous_volume_forces_( material_manager )
-{
+SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std::array<double, 3> const gravity ) : gravity_( gravity ),
+                                                                                                                     viscous_fluxes_( material_manager ),
+                                                                                                                     heat_fluxes_( material_manager ),
+                                                                                                                     axisymmetric_fluxes_(),
+                                                                                                                     axisymmetric_viscous_volume_forces_( material_manager ) {
    /* Empty besides initializer list*/
 }
 
@@ -90,24 +88,24 @@ SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std
  * @param face_fluxes_x, face_fluxes_y, face_fluxes_z Fluxes across the cell face.
  * @param volume_forces The volume forces acting at the cell center of the node.
  */
-void SourceTermSolver::Sources(std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
-   double (&face_fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&face_fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&face_fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&volume_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]       ) const {
+void SourceTermSolver::Sources( std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
+                                double ( &face_fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                double ( &face_fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                double ( &face_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    //compute dissipative fluxes
-   if constexpr( CC::ViscosityIsActive() ){
+   if constexpr( CC::ViscosityIsActive() ) {
       viscous_fluxes_.ComputeFluxes( mat_block, face_fluxes_x, face_fluxes_y, face_fluxes_z, cell_size );
    }
 
    //compute changes due to gravity
-   if constexpr( CC::GravityIsActive() ){
+   if constexpr( CC::GravityIsActive() ) {
       gravity_.ComputeForces( mat_block.second, volume_forces );
    }
 
    //compute terms for axisymmetric simulations
-   if constexpr( CC::Axisymmetric() ){
+   if constexpr( CC::Axisymmetric() ) {
       axisymmetric_fluxes_.ComputeAxisymmetricContributions( mat_block.second, volume_forces, cell_size, node_origin_x );
    }
 

@@ -77,27 +77,27 @@
  *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
  *        Here, consistency checks are done that all read data are valid.  
  */
-class MultiResolutionReader{
+class MultiResolutionReader {
 
 protected:
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit MultiResolutionReader() = default;
 
    // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const = 0;
+   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
    virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const = 0;
-   virtual double DoReadEpsilonReference() const = 0;
-   virtual int DoReadEpsilonLevelReference() const = 0;
+   virtual int DoReadMaximumLevel() const                             = 0;
+   virtual double DoReadEpsilonReference() const                      = 0;
+   virtual int DoReadEpsilonLevelReference() const                    = 0;
 
 public:
-   virtual ~MultiResolutionReader() = default;
+   virtual ~MultiResolutionReader()                      = default;
    MultiResolutionReader( MultiResolutionReader const& ) = delete;
    MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& ) = delete;
+   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
    MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
 
-   // Function to return values with additional checks 
+   // Function to return values with additional checks
    double ReadNodeSizeOnLevelZero() const;
    unsigned int ReadNumberOfNodes( Direction const direction ) const;
    unsigned int ReadMaximumLevel() const;
@@ -105,4 +105,4 @@ public:
    unsigned int ReadEpsilonLevelReference() const;
 };
 
-#endif // MULTI_RESOLUTION_READER_H
+#endif// MULTI_RESOLUTION_READER_H

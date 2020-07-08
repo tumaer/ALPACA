@@ -86,7 +86,7 @@ class MeshGenerator {
 
 private:
    // Naming of the vertex IDs and coordinates in the final file
-   std::string const vertex_ids_name_ = "cell_vertex_IDs";
+   std::string const vertex_ids_name_         = "cell_vertex_IDs";
    std::string const vertex_coordinates_name_ = "cell_vertex_coordinates";
 
 protected:
@@ -102,13 +102,13 @@ protected:
     * @param vertex_ids Vector for the vertex IDs (indirect return).
     * @note Pure virtual function that is required from derived class.
     */
-   virtual void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const = 0;
+   virtual void DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const = 0;
    /**
     * @brief Appends the vertex coordinates to the given vector.
     * @param vertex_coordinates Vector for the vertex coordinates (indirect return).
     * @note Pure virtual function that is required from derived class.
     */
-   virtual void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const = 0;
+   virtual void DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const = 0;
 
    /**
     * @brief See public function for reference.
@@ -145,11 +145,11 @@ protected:
    explicit MeshGenerator( TopologyManager const& topology_manager, Tree const& flower, double const dimensionalized_node_size_on_level_zero );
 
 public:
-   MeshGenerator() = delete;
-   virtual ~MeshGenerator() = default;
+   MeshGenerator()                       = delete;
+   virtual ~MeshGenerator()              = default;
    MeshGenerator( MeshGenerator const& ) = delete;
    MeshGenerator& operator=( MeshGenerator const& ) = delete;
-   MeshGenerator( MeshGenerator&& ) = delete;
+   MeshGenerator( MeshGenerator&& )                 = delete;
    MeshGenerator& operator=( MeshGenerator&& ) = delete;
 
    /**
@@ -255,12 +255,12 @@ public:
    }
 
    // Functions to append vertex IDs and coordinatesS
-   void ComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const;
-   void ComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const;
+   void ComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const;
+   void ComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const;
 
    // Creates the appropriate strings for the topology (vertex ids) and geometry (vertex coordinates)
    std::string GetXdmfTopologyString( std::string const& filename, std::string const& group_name ) const;
    std::string GetXdmfGeometryString( std::string const& filename, std::string const& group_name ) const;
 };
 
-#endif // MESH_QUANTITY_H
+#endif// MESH_QUANTITY_H

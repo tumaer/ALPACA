@@ -81,8 +81,8 @@ class CrossShearViscosityModel : public ShearRateMaterialParameterModel<CrossShe
    friend ShearRateMaterialParameterModel;
 
    // Definition of parameters needed in the base class for the computations
-   static constexpr Parameter parameter_buffer_type_ = Parameter::ShearViscosity; // buffer that is modified by the model
-   static constexpr DerivativeStencils derivative_stencil_ = viscous_fluxes_derivative_stencil_cell_center; // stencil required for the shear rate
+   static constexpr Parameter parameter_buffer_type_       = Parameter::ShearViscosity;                    // buffer that is modified by the model
+   static constexpr DerivativeStencils derivative_stencil_ = viscous_fluxes_derivative_stencil_cell_center;// stencil required for the shear rate
 
    // member variables needed for the model calculation
    double const mu_infinite_shear_rates_;
@@ -100,14 +100,14 @@ public:
    CrossShearViscosityModel() = delete;
    explicit CrossShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                       UnitHandler const& unit_handler );
-   virtual ~CrossShearViscosityModel() = default;
+   virtual ~CrossShearViscosityModel()                         = default;
    CrossShearViscosityModel( const CrossShearViscosityModel& ) = delete;
    CrossShearViscosityModel& operator=( const CrossShearViscosityModel& ) = delete;
-   CrossShearViscosityModel( CrossShearViscosityModel&& ) = delete;
+   CrossShearViscosityModel( CrossShearViscosityModel&& )                 = delete;
    CrossShearViscosityModel& operator=( CrossShearViscosityModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // CROSS_SHEAR_VISCOSITY_MODEL_H
+#endif// CROSS_SHEAR_VISCOSITY_MODEL_H

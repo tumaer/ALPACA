@@ -83,9 +83,9 @@ SCENARIO( "Material is constructed and its properties are queried", "[1rank]" ) 
       WHEN( "All parameters are set to non-zero values" ) {
 
          // Define material properties and initialize material
-         double const shear_viscosity = 1.0;
-         double const bulk_viscosity = 2.0;
-         double const specific_heat_capacity = 3.0;
+         double const shear_viscosity           = 1.0;
+         double const bulk_viscosity            = 2.0;
+         double const specific_heat_capacity    = 3.0;
          double const thermal_heat_conductivity = 4.0;
 
          // Instantiate a random eos and parameter model to check if the pointer movement works properly

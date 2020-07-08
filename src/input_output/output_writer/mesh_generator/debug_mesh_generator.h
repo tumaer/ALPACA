@@ -79,16 +79,16 @@
 class DebugMeshGenerator : public MeshGenerator {
 
    // Variable specification from the base class
+   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
    using MeshGenerator::topology_;
    using MeshGenerator::tree_;
-   using MeshGenerator::dimensionalized_node_size_on_level_zero_;
 
    // Additional parameter for the offset of different levels in the output
    double const z_coordinates_offset_;
 
    // virtual functions required from the base class to compute data to hdf5 file
-   void DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const override;
-   void DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const override;
+   void DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const override;
+   void DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const override;
 
    // virtual dimension functions required from base class
    std::vector<std::reference_wrapper<Node const>> DoGetLocalNodes() const override;
@@ -105,11 +105,11 @@ public:
                                 Tree const& flower,
                                 double const dimensionalized_node_size_on_level_zero,
                                 unsigned int const number_of_z_nodes_on_level_zero );
-   virtual ~DebugMeshGenerator() = default;
+   virtual ~DebugMeshGenerator()                   = default;
    DebugMeshGenerator( DebugMeshGenerator const& ) = delete;
    DebugMeshGenerator& operator=( DebugMeshGenerator const& ) = delete;
-   DebugMeshGenerator( DebugMeshGenerator&& ) = delete;
+   DebugMeshGenerator( DebugMeshGenerator&& )                 = delete;
    DebugMeshGenerator& operator=( DebugMeshGenerator&& ) = delete;
 };
 
-#endif // DEBUG_MESH_GENERATOR_H
+#endif// DEBUG_MESH_GENERATOR_H

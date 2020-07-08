@@ -75,7 +75,9 @@
  *        and 'FinestLevel' indicates that the ids correspond to the IDs a mesh would have if all nodes would lie on the finest level. 'Off' represents the
  *        same approach as for the  'Mpi' type but without the mpi-communication for the vertex filter.
  */
-enum class VertexFilterType { Off, Mpi, FinestLevel };
+enum class VertexFilterType { Off,
+                              Mpi,
+                              FinestLevel };
 
 /**
  * @brief Converts the vertex filter type into an appropriate string.
@@ -83,7 +85,7 @@ enum class VertexFilterType { Off, Mpi, FinestLevel };
  * @return  String for the filter type.
  */
 inline std::string VertexFilterTypeToString( VertexFilterType const filter ) {
-   switch ( filter ) {
+   switch( filter ) {
       case VertexFilterType::Off:
          return "Off";
       case VertexFilterType::Mpi:
@@ -95,4 +97,4 @@ inline std::string VertexFilterTypeToString( VertexFilterType const filter ) {
    }
 }
 
-#endif // VERTEX_FILTER_TYPE_H
+#endif// VERTEX_FILTER_TYPE_H

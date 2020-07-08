@@ -90,54 +90,48 @@ namespace ApplyUtilities {
     */
    template<>
    constexpr std::array<int const, 2> GetStencilParameters<SP::UpwindLeft>() {
-      return {0, 1};
+      return { 0, 1 };
    }
    /**
     * @brief Implementation for UpwindRight.
     */
    template<>
    constexpr std::array<int const, 2> GetStencilParameters<SP::UpwindRight>() {
-      return {1, -1};
+      return { 1, -1 };
    }
    /**
     * @brief Implementation for Central.
     */
    template<>
    constexpr std::array<int const, 2> GetStencilParameters<SP::Central>() {
-      return {0, 0};
+      return { 0, 0 };
    }
 
    /**
     * @brief Implementation for the x-direction. See GetValueVectorFromBuffer for details.
     */
    template<typename S>
-   constexpr void GetValueVectorFromBufferX( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k ) {
-      for(unsigned int s = 0; s < S::StencilSize(); ++s) {
-         array[s] = buffer[i + (-S::DownstreamStencilSize() + s)][j][k];
+   constexpr void GetValueVectorFromBufferX( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k ) {
+      for( unsigned int s = 0; s < S::StencilSize(); ++s ) {
+         array[s] = buffer[i + ( -S::DownstreamStencilSize() + s )][j][k];
       }
    }
    /**
     * @brief Implementation for the y-direction. See GetValueVectorFromBuffer for details.
     */
    template<typename S>
-   constexpr void GetValueVectorFromBufferY( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k ) {
-      for(unsigned int s = 0; s < S::StencilSize(); ++s) {
-         array[s] = buffer[i][j + (-S::DownstreamStencilSize() + s)][k];
+   constexpr void GetValueVectorFromBufferY( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k ) {
+      for( unsigned int s = 0; s < S::StencilSize(); ++s ) {
+         array[s] = buffer[i][j + ( -S::DownstreamStencilSize() + s )][k];
       }
    }
    /**
     * @brief Implementation for the z-direction. See GetValueVectorFromBuffer for details.
     */
    template<typename S>
-   constexpr void GetValueVectorFromBufferZ( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k ) {
-      for(unsigned int s = 0; s < S::StencilSize(); ++s) {
-         array[s] = buffer[i][j][k + (-S::DownstreamStencilSize() + s)];
+   constexpr void GetValueVectorFromBufferZ( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k ) {
+      for( unsigned int s = 0; s < S::StencilSize(); ++s ) {
+         array[s] = buffer[i][j][k + ( -S::DownstreamStencilSize() + s )];
       }
    }
 
@@ -150,13 +144,17 @@ namespace ApplyUtilities {
     * @tparam D The direction in which the stencil should be evaluated.
     */
    template<typename S, Direction D>
-   constexpr void GetValueVectorFromBuffer( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k ) {
-      switch (D) {
-         case Direction::X: GetValueVectorFromBufferX<S>(array, buffer, i, j, k); break;
-         case Direction::Y: GetValueVectorFromBufferY<S>(array, buffer, i, j, k); break;
-         default: GetValueVectorFromBufferZ<S>(array, buffer, i, j, k); break;
+   constexpr void GetValueVectorFromBuffer( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k ) {
+      switch( D ) {
+         case Direction::X:
+            GetValueVectorFromBufferX<S>( array, buffer, i, j, k );
+            break;
+         case Direction::Y:
+            GetValueVectorFromBufferY<S>( array, buffer, i, j, k );
+            break;
+         default:
+            GetValueVectorFromBufferZ<S>( array, buffer, i, j, k );
+            break;
       }
    }
 
@@ -164,41 +162,30 @@ namespace ApplyUtilities {
     * @brief Implementation for the x-direction. See GetDifferenceVectorFromBuffer for details.
     */
    template<typename S>
-   constexpr void GetDifferenceVectorFromBufferX( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k
-         , double const cell_size ) {
+   constexpr void GetDifferenceVectorFromBufferX( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k, double const cell_size ) {
       double const one_cell_size = 1.0 / cell_size;
-      for(unsigned int s = 0; s < S::StencilSize(); ++s) {
-         array[s] = ( buffer[i + ( - S::DownstreamStencilSize() + s )][j][k] - buffer[i + ( -1 - S::DownstreamStencilSize() + s )][j][k] ) * one_cell_size;
+      for( unsigned int s = 0; s < S::StencilSize(); ++s ) {
+         array[s] = ( buffer[i + ( -S::DownstreamStencilSize() + s )][j][k] - buffer[i + ( -1 - S::DownstreamStencilSize() + s )][j][k] ) * one_cell_size;
       }
    }
    /**
     * @brief Implementation for the y-direction. See GetDifferenceVectorFromBuffer for details.
     */
    template<typename S>
-   constexpr void GetDifferenceVectorFromBufferY( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k
-         , double const cell_size ) {
+   constexpr void GetDifferenceVectorFromBufferY( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k, double const cell_size ) {
       double const one_cell_size = 1.0 / cell_size;
-      for(unsigned int s = 0; s < S::StencilSize(); ++s) {
-         array[s] = ( buffer[i][j + (   - S::DownstreamStencilSize() + s)][k]
-                      - buffer[i][j + (-1 - S::DownstreamStencilSize() + s)][k] ) * one_cell_size;
+      for( unsigned int s = 0; s < S::StencilSize(); ++s ) {
+         array[s] = ( buffer[i][j + ( -S::DownstreamStencilSize() + s )][k] - buffer[i][j + ( -1 - S::DownstreamStencilSize() + s )][k] ) * one_cell_size;
       }
    }
    /**
     * @brief Implementation for the z-direction. See GetDifferenceVectorFromBuffer for details.
     */
    template<typename S>
-   constexpr void GetDifferenceVectorFromBufferZ( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k
-         , double const cell_size ) {
+   constexpr void GetDifferenceVectorFromBufferZ( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k, double const cell_size ) {
       double const one_cell_size = 1.0 / cell_size;
-      for(unsigned int s = 0; s < S::StencilSize(); ++s) {
-         array[s] = ( buffer[i][j][k + (   - S::DownstreamStencilSize() + s)]
-                      - buffer[i][j][k + (-1 - S::DownstreamStencilSize() + s)] ) * one_cell_size;
+      for( unsigned int s = 0; s < S::StencilSize(); ++s ) {
+         array[s] = ( buffer[i][j][k + ( -S::DownstreamStencilSize() + s )] - buffer[i][j][k + ( -1 - S::DownstreamStencilSize() + s )] ) * one_cell_size;
       }
    }
 
@@ -211,14 +198,17 @@ namespace ApplyUtilities {
     * @tparam D The direction in which the stencil should be evaluated.
     */
    template<typename S, Direction D>
-   constexpr void GetDifferenceVectorFromBuffer( std::array<double, S::StencilSize()> & array
-         , double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()]
-         , unsigned int const i, unsigned int const j, unsigned int const k
-         , double const cell_size ) {
-      switch (D) {
-         case Direction::X: GetDifferenceVectorFromBufferX<S>(array, buffer, i, j, k, cell_size); break;
-         case Direction::Y: GetDifferenceVectorFromBufferY<S>(array, buffer, i, j, k, cell_size); break;
-         default: GetDifferenceVectorFromBufferZ<S>(array, buffer, i, j, k, cell_size); break;
+   constexpr void GetDifferenceVectorFromBuffer( std::array<double, S::StencilSize()>& array, double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const i, unsigned int const j, unsigned int const k, double const cell_size ) {
+      switch( D ) {
+         case Direction::X:
+            GetDifferenceVectorFromBufferX<S>( array, buffer, i, j, k, cell_size );
+            break;
+         case Direction::Y:
+            GetDifferenceVectorFromBufferY<S>( array, buffer, i, j, k, cell_size );
+            break;
+         default:
+            GetDifferenceVectorFromBufferZ<S>( array, buffer, i, j, k, cell_size );
+            break;
       }
    }
 
@@ -235,13 +225,13 @@ namespace ApplyUtilities {
     * @return The result of the stencil.
     */
    template<typename S, StencilProperty P, Direction D>
-   constexpr double Apply(double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, double const cell_size) {
+   constexpr double Apply( double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, double const cell_size ) {
 
       constexpr S stencil = S();
 
       std::array<double, S::StencilSize()> array;
-      ApplyUtilities::GetValueVectorFromBuffer<S, D>(array, buffer, i, j, k);
-      return stencil.template Apply<S>(array, GetStencilParameters<P>(), cell_size);
+      ApplyUtilities::GetValueVectorFromBuffer<S, D>( array, buffer, i, j, k );
+      return stencil.template Apply<S>( array, GetStencilParameters<P>(), cell_size );
    }
 
    /**
@@ -257,13 +247,13 @@ namespace ApplyUtilities {
     * @return The result of the stencil.
     */
    template<typename S, StencilProperty P, Direction D>
-   constexpr double ApplyHjWeno(double const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, double const cell_size) {
+   constexpr double ApplyHjWeno( double const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int i, unsigned int j, unsigned int k, double const cell_size ) {
 
       constexpr S stencil = S();
 
       std::array<double, S::StencilSize()> array;
-      GetDifferenceVectorFromBuffer<S, D>(array, buffer, i, j, k, cell_size);
-      return stencil.template Apply<S>(array, GetStencilParameters<P>(), cell_size);
+      GetDifferenceVectorFromBuffer<S, D>( array, buffer, i, j, k, cell_size );
+      return stencil.template Apply<S>( array, GetStencilParameters<P>(), cell_size );
    }
 
    /**
@@ -276,10 +266,10 @@ namespace ApplyUtilities {
     * @return The result of the stencil.
     */
    template<typename S, StencilProperty P, typename T>
-   constexpr T Apply( std::array<double, S::StencilSize()> const& array, double const cell_size) {
+   constexpr T Apply( std::array<double, S::StencilSize()> const& array, double const cell_size ) {
       constexpr S stencil = S();
-      return stencil.template Apply<S>(array, ApplyUtilities::GetStencilParameters<P>(), cell_size);
+      return stencil.template Apply<S>( array, ApplyUtilities::GetStencilParameters<P>(), cell_size );
    }
-}
+}// namespace ApplyUtilities
 
-#endif // APPLY_WRAPPER_H
+#endif// APPLY_WRAPPER_H

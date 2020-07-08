@@ -80,42 +80,42 @@ class WENO5 : public Stencil<WENO5> {
    static constexpr StencilType stencil_type_ = StencilType::Reconstruction;
 
    // Coefficients for WENO5 scheme
-   static constexpr double coef_smoothness_1_  = 13.0/12.0;
-   static constexpr double coef_smoothness_2_  = 0.25;
+   static constexpr double coef_smoothness_1_ = 13.0 / 12.0;
+   static constexpr double coef_smoothness_2_ = 0.25;
 
-   static constexpr double coef_smoothness_11_ =  1.0;
+   static constexpr double coef_smoothness_11_ = 1.0;
    static constexpr double coef_smoothness_12_ = -2.0;
-   static constexpr double coef_smoothness_13_ =  1.0;
-   static constexpr double coef_smoothness_14_ =  1.0;
+   static constexpr double coef_smoothness_13_ = 1.0;
+   static constexpr double coef_smoothness_14_ = 1.0;
    static constexpr double coef_smoothness_15_ = -4.0;
-   static constexpr double coef_smoothness_16_ =  3.0;
+   static constexpr double coef_smoothness_16_ = 3.0;
 
-   static constexpr double coef_smoothness_21_ =  1.0;
+   static constexpr double coef_smoothness_21_ = 1.0;
    static constexpr double coef_smoothness_22_ = -2.0;
-   static constexpr double coef_smoothness_23_ =  1.0;
-   static constexpr double coef_smoothness_24_ =  1.0;
+   static constexpr double coef_smoothness_23_ = 1.0;
+   static constexpr double coef_smoothness_24_ = 1.0;
    static constexpr double coef_smoothness_25_ = -1.0;
 
-   static constexpr double coef_smoothness_31_ =  1.0;
+   static constexpr double coef_smoothness_31_ = 1.0;
    static constexpr double coef_smoothness_32_ = -2.0;
-   static constexpr double coef_smoothness_33_ =  1.0;
-   static constexpr double coef_smoothness_34_ =  3.0;
+   static constexpr double coef_smoothness_33_ = 1.0;
+   static constexpr double coef_smoothness_34_ = 3.0;
    static constexpr double coef_smoothness_35_ = -4.0;
-   static constexpr double coef_smoothness_36_ =  1.0;
+   static constexpr double coef_smoothness_36_ = 1.0;
 
    static constexpr double coef_weights_1_ = 0.1;
    static constexpr double coef_weights_2_ = 0.6;
    static constexpr double coef_weights_3_ = 0.3;
 
-   static constexpr double coef_stencils_1_ =  2.0/6.0;
-   static constexpr double coef_stencils_2_ = -7.0/6.0;
-   static constexpr double coef_stencils_3_ = 11.0/6.0;
-   static constexpr double coef_stencils_4_ = -1.0/6.0;
-   static constexpr double coef_stencils_5_ =  5.0/6.0;
-   static constexpr double coef_stencils_6_ =  2.0/6.0;
-   static constexpr double coef_stencils_7_ =  2.0/6.0;
-   static constexpr double coef_stencils_8_ =  5.0/6.0;
-   static constexpr double coef_stencils_9_ = -1.0/6.0;
+   static constexpr double coef_stencils_1_ = 2.0 / 6.0;
+   static constexpr double coef_stencils_2_ = -7.0 / 6.0;
+   static constexpr double coef_stencils_3_ = 11.0 / 6.0;
+   static constexpr double coef_stencils_4_ = -1.0 / 6.0;
+   static constexpr double coef_stencils_5_ = 5.0 / 6.0;
+   static constexpr double coef_stencils_6_ = 2.0 / 6.0;
+   static constexpr double coef_stencils_7_ = 2.0 / 6.0;
+   static constexpr double coef_stencils_8_ = 5.0 / 6.0;
+   static constexpr double coef_stencils_9_ = -1.0 / 6.0;
 
    // Small values to avoid division by 0, but also to adjust dissipation.
    static constexpr double epsilon_weno5_ = 1.0e-6;
@@ -153,29 +153,27 @@ class WENO5 : public Stencil<WENO5> {
       double const s3 = epsilon_weno5_ + coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
 
       // Compute weights
-      double const a1 = coef_weights_1_ / (s1 * s1);
-      double const a2 = coef_weights_2_ / (s2 * s2);
-      double const a3 = coef_weights_3_ / (s3 * s3);
+      double const a1 = coef_weights_1_ / ( s1 * s1 );
+      double const a2 = coef_weights_2_ / ( s2 * s2 );
+      double const a3 = coef_weights_3_ / ( s3 * s3 );
 
-      double const one_a_sum = 1.0 / (a1 + a2 + a3);
+      double const one_a_sum = 1.0 / ( a1 + a2 + a3 );
 
       double const w1 = a1 * one_a_sum;
       double const w2 = a2 * one_a_sum;
       double const w3 = a3 * one_a_sum;
 
       // Return weighted average
-      return  w1 * (coef_stencils_1_ * v1 + coef_stencils_2_ * v2 + coef_stencils_3_ * v3)
-            + w2 * (coef_stencils_4_ * v2 + coef_stencils_5_ * v3 + coef_stencils_6_ * v4)
-            + w3 * (coef_stencils_7_ * v3 + coef_stencils_8_ * v4 + coef_stencils_9_ * v5);
+      return w1 * ( coef_stencils_1_ * v1 + coef_stencils_2_ * v2 + coef_stencils_3_ * v3 ) + w2 * ( coef_stencils_4_ * v2 + coef_stencils_5_ * v3 + coef_stencils_6_ * v4 ) + w3 * ( coef_stencils_7_ * v3 + coef_stencils_8_ * v4 + coef_stencils_9_ * v5 );
    }
 
 public:
    explicit constexpr WENO5() = default;
-   ~WENO5() = default;
-   WENO5( WENO5 const& ) = delete;
+   ~WENO5()                   = default;
+   WENO5( WENO5 const& )      = delete;
    WENO5& operator=( WENO5 const& ) = delete;
-   WENO5( WENO5&& ) = delete;
+   WENO5( WENO5&& )                 = delete;
    WENO5& operator=( WENO5&& ) = delete;
 };
 
-#endif // STENCIL_WENO5_H
+#endif// STENCIL_WENO5_H

@@ -79,7 +79,7 @@ class TwoRarefactionIterativeInterfaceRiemannSolver : public IterativeInterfaceR
    friend IterativeInterfaceRiemannSolver;
 
    std::array<double, 2> ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-      double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
+                                                                    double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
 
 public:
    TwoRarefactionIterativeInterfaceRiemannSolver() = delete;
@@ -88,16 +88,13 @@ public:
     *
     * @param[in]  material_manager  The material manager.
     */
-   explicit TwoRarefactionIterativeInterfaceRiemannSolver( MaterialManager const& material_manager ) :
-      IterativeInterfaceRiemannSolver<TwoRarefactionIterativeInterfaceRiemannSolver>(material_manager)
-   { /* Empty besides initialliser list */}
-   ~TwoRarefactionIterativeInterfaceRiemannSolver() = default;
+   explicit TwoRarefactionIterativeInterfaceRiemannSolver( MaterialManager const& material_manager ) : IterativeInterfaceRiemannSolver<TwoRarefactionIterativeInterfaceRiemannSolver>( material_manager ) { /* Empty besides initialliser list */
+   }
+   ~TwoRarefactionIterativeInterfaceRiemannSolver()                                                      = default;
    TwoRarefactionIterativeInterfaceRiemannSolver( TwoRarefactionIterativeInterfaceRiemannSolver const& ) = delete;
    TwoRarefactionIterativeInterfaceRiemannSolver& operator=( TwoRarefactionIterativeInterfaceRiemannSolver const& ) = delete;
-   TwoRarefactionIterativeInterfaceRiemannSolver( TwoRarefactionIterativeInterfaceRiemannSolver&& ) = delete;
+   TwoRarefactionIterativeInterfaceRiemannSolver( TwoRarefactionIterativeInterfaceRiemannSolver&& )                 = delete;
    TwoRarefactionIterativeInterfaceRiemannSolver& operator=( TwoRarefactionIterativeInterfaceRiemannSolver&& ) = delete;
 };
 
-
-
-#endif //TWO_RAREFACTION_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
+#endif//TWO_RAREFACTION_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H

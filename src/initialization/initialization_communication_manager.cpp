@@ -74,9 +74,8 @@ namespace Initialization {
     * @param topology_manager Class providing global (on all ranks) node information.
     * @return The fully initialized CommunicationManager class.
     */
-   CommunicationManager InitializeCommunicationManager( TopologyManager & topology_manager ) {
+   CommunicationManager InitializeCommunicationManager( TopologyManager& topology_manager ) {
 
       return CommunicationManager( topology_manager, topology_manager.GetMaximumLevel() );
-
    }
-}
+}// namespace Initialization

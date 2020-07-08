@@ -68,7 +68,6 @@
 #include "input_output/input_reader/material_reader/material_reader.h"
 #include "user_specifications/compile_time_constants.h"
 
-
 /**
  * @brief Converts a given number of indices into a proper string used as an input tag of the material.
  * @param material_indices Indices to be converted.

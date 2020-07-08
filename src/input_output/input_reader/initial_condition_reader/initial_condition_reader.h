@@ -76,7 +76,7 @@
  *        It serves as a proxy class for different initial condition reader types (xml,...) that only read the actual data.
  *        Here, consistency checks are done that all read data are valid.
  */
-class InitialConditionReader{
+class InitialConditionReader {
 
 protected:
    // constructor can only be called from derived classes
@@ -87,10 +87,10 @@ protected:
    virtual std::string DoReadLevelsetInitialConditions( unsigned int const levelset_index ) const = 0;
 
 public:
-   virtual ~InitialConditionReader() = default;
+   virtual ~InitialConditionReader()                       = default;
    InitialConditionReader( InitialConditionReader const& ) = delete;
    InitialConditionReader& operator=( InitialConditionReader const& ) = delete;
-   InitialConditionReader( InitialConditionReader&& ) = delete;
+   InitialConditionReader( InitialConditionReader&& )                 = delete;
    InitialConditionReader& operator=( InitialConditionReader&& ) = delete;
 
    // return functions of the reader class
@@ -98,4 +98,4 @@ public:
    std::string ReadLevelsetInitialConditions( unsigned int const levelset_index ) const;
 };
 
-#endif // INITIAL_CONDITION_READER_H
+#endif// INITIAL_CONDITION_READER_H

@@ -103,9 +103,8 @@ class InitialCondition {
    double const dimensionalized_node_size_on_level_zero_;
    unsigned int const maximum_level_;
 
-
    // local function to create expression that can be evaluated
-   std::unique_ptr<UserExpression const> CreateInputExpression( std::string const& expression, std::vector<std::string> const& variables_out, double &x, double &y, double &z ) const;
+   std::unique_ptr<UserExpression const> CreateInputExpression( std::string const& expression, std::vector<std::string> const& variables_out, double& x, double& y, double& z ) const;
 
 public:
    InitialCondition() = delete;
@@ -117,18 +116,18 @@ public:
                               double const node_size_on_level_zero_,
                               unsigned int const maximum_level,
                               UnitHandler const& unit_handler );
-   ~InitialCondition() = default;
+   ~InitialCondition()                         = default;
    InitialCondition( InitialCondition const& ) = delete;
    InitialCondition& operator=( InitialCondition const& ) = delete;
-   InitialCondition( InitialCondition&& ) = delete;
+   InitialCondition( InitialCondition&& )                 = delete;
    InitialCondition& operator=( InitialCondition&& ) = delete;
 
    // Fills the prime state buffer with appropriate values of the input expression
-   void GetInitialPrimeStates( std::uint64_t const node_id, MaterialName const material, double (&initial_values)[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
+   void GetInitialPrimeStates( std::uint64_t const node_id, MaterialName const material, double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
    // Fills the levelset buffer with appropriate value of the input expressions
-   void GetInitialLevelset( std::uint64_t const node_id, double (&initial_levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   void GetInitialLevelset( std::uint64_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
    // Gives the initial materials present
    std::vector<MaterialName> GetInitialMaterials( std::uint64_t const node_id ) const;
 };
 
-#endif // INITIAL_CONDITION_H
+#endif// INITIAL_CONDITION_H

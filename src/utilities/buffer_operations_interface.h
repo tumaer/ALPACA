@@ -87,9 +87,9 @@ namespace BufferOperations {
       template<InterfaceDescriptionBufferType SourceBuffer, InterfaceDescriptionBufferType TargetBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
       inline void CopyInterfaceDescriptionBufferForNode( Node& node ) {
          // Get the source and target buffers
-         InterfaceBlock& interface_block = node.GetInterfaceBlock();
-         double const (&source_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<SourceBuffer>()[Type];
-         double (&target_description)[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<TargetBuffer>()[Type];
+         InterfaceBlock& interface_block                                      = node.GetInterfaceBlock();
+         double const( &source_description )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer<SourceBuffer>()[Type];
+         double( &target_description )[CC::TCX()][CC::TCY()][CC::TCZ()]       = interface_block.GetInterfaceDescriptionBuffer<TargetBuffer>()[Type];
          // Copy the values
          BO::CopySingleBuffer( source_description, target_description );
       }
@@ -119,9 +119,9 @@ namespace BufferOperations {
        * @param node The node for which the buffers are swapped.
        */
       template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
-      inline void SwapInterfaceDescriptionBufferForNode( Node & node ) {
-         double (&first_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<FirstBuffer>()[Type];
-         double (&second_description_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<SecondBuffer>()[Type];
+      inline void SwapInterfaceDescriptionBufferForNode( Node& node ) {
+         double( &first_description_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()]  = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<FirstBuffer>()[Type];
+         double( &second_description_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<SecondBuffer>()[Type];
          BO::SwapSingleBuffer( first_description_buffer, second_description_buffer );
       }
 
@@ -135,13 +135,13 @@ namespace BufferOperations {
        */
       template<InterfaceDescriptionBufferType FirstBuffer, InterfaceDescriptionBufferType SecondBuffer, InterfaceDescription Type = InterfaceDescription::Levelset>
       inline void SwapInterfaceDescriptionBufferForNodeList( std::vector<std::reference_wrapper<Node>> const& nodes ) {
-         for( Node & node : nodes ) {
+         for( Node& node : nodes ) {
             SwapInterfaceDescriptionBufferForNode<FirstBuffer, SecondBuffer, Type>( node );
          }
       }
 
-   } // namespace Interface
+   }// namespace Interface
 
-} // namespace BufferOperations
+}// namespace BufferOperations
 
-#endif // BUFFER_OPERATIONS_INTERFACE_H
+#endif// BUFFER_OPERATIONS_INTERFACE_H

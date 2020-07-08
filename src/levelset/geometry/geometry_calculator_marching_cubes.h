@@ -78,7 +78,6 @@
 class GeometryCalculatorMarchingCubes : public GeometryCalculator<GeometryCalculatorMarchingCubes> {
 
 private:
-
    /**
     * Bool that indicates whether geometric quantities are calculated cell based. The defaults setting is false, and geometric calculations
     * are performed sub-cell based. I.e., A 3-D cell is split into 8 sub cells.
@@ -86,20 +85,19 @@ private:
    static constexpr bool cell_based_geometry_calculations_ = false;
 
 public:
-   explicit GeometryCalculatorMarchingCubes() = default;
-   ~GeometryCalculatorMarchingCubes() = default;
+   explicit GeometryCalculatorMarchingCubes()                                = default;
+   ~GeometryCalculatorMarchingCubes()                                        = default;
    GeometryCalculatorMarchingCubes( GeometryCalculatorMarchingCubes const& ) = delete;
    GeometryCalculatorMarchingCubes& operator=( GeometryCalculatorMarchingCubes const& ) = delete;
-   GeometryCalculatorMarchingCubes( GeometryCalculatorMarchingCubes&& ) = delete;
-   GeometryCalculatorMarchingCubes& operator= ( GeometryCalculatorMarchingCubes&& ) = delete;
+   GeometryCalculatorMarchingCubes( GeometryCalculatorMarchingCubes&& )                 = delete;
+   GeometryCalculatorMarchingCubes& operator=( GeometryCalculatorMarchingCubes&& ) = delete;
 
-   std::array<double, 6> ComputeCellFaceApertureImplementation(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1) const;
+   std::array<double, 6> ComputeCellFaceApertureImplementation( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                                unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1 ) const;
 
-   double ComputeVolumeFractionImplementation(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      unsigned int const i, unsigned int const j, unsigned int const k,
-      std::int8_t const material_sign = 1) const;
+   double ComputeVolumeFractionImplementation( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                               unsigned int const i, unsigned int const j, unsigned int const k,
+                                               std::int8_t const material_sign = 1 ) const;
 };
 
-
-#endif //GEOMETRY_CALCULATOR_MARCHING_CUBES_H
+#endif//GEOMETRY_CALCULATOR_MARCHING_CUBES_H

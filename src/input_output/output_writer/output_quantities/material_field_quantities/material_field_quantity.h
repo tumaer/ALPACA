@@ -87,8 +87,8 @@ private:
    ConservativeBufferType const buffer_type_;
 
    // Append functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    MaterialFieldQuantity() = delete;
@@ -98,11 +98,11 @@ public:
                                    std::array<bool, 3> const output_flags,
                                    MaterialFieldQuantityData const& quantity_data,
                                    ConservativeBufferType const buffer_type = ConservativeBufferType::Average );
-   virtual ~MaterialFieldQuantity() = default;
+   virtual ~MaterialFieldQuantity()                      = default;
    MaterialFieldQuantity( MaterialFieldQuantity const& ) = delete;
    MaterialFieldQuantity& operator=( MaterialFieldQuantity const& ) = delete;
-   MaterialFieldQuantity( MaterialFieldQuantity&& ) = delete;
+   MaterialFieldQuantity( MaterialFieldQuantity&& )                 = delete;
    MaterialFieldQuantity& operator=( MaterialFieldQuantity&& ) = delete;
 };
 
-#endif // MATERIAL_FIELD_QUANTITY_H
+#endif// MATERIAL_FIELD_QUANTITY_H

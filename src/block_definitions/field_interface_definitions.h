@@ -78,29 +78,34 @@
 /**
  * @brief Unique identifier for the interface description buffer type, i.e. the base, right-hand side, reinitialized or initial buffer.
  */
-enum class InterfaceDescriptionBufferType { Base, RightHandSide, Reinitialized, Initial };
+enum class InterfaceDescriptionBufferType { Base,
+                                            RightHandSide,
+                                            Reinitialized,
+                                            Initial };
 
 /**
  * @brief Unique Identifier for the interface field type, i.e. a interface description, a interface state or a interface parameter field.
  */
-enum class InterfaceFieldType { Description, States, Parameters };
+enum class InterfaceFieldType { Description,
+                                States,
+                                Parameters };
 
 class InterfaceFieldsDefinitions {
 
    // get arrays of the consecutively ordered active fields
-   static constexpr auto active_description_  = IndexSequenceToEnumArray<InterfaceDescription>( std::make_index_sequence<FieldDetails::ActiveInterfaceDescriptions::Count>{} );
-   static constexpr auto active_states_       = IndexSequenceToEnumArray<InterfaceState>( std::make_index_sequence<FieldDetails::ActiveInterfaceStates::Count>{} );
-   static constexpr auto active_parameters_   = IndexSequenceToEnumArray<InterfaceParameter>( std::make_index_sequence<FieldDetails::ActiveInterfaceParameters::Count>{} );
+   static constexpr auto active_description_ = IndexSequenceToEnumArray<InterfaceDescription>( std::make_index_sequence<FieldDetails::ActiveInterfaceDescriptions::Count>{} );
+   static constexpr auto active_states_      = IndexSequenceToEnumArray<InterfaceState>( std::make_index_sequence<FieldDetails::ActiveInterfaceStates::Count>{} );
+   static constexpr auto active_parameters_  = IndexSequenceToEnumArray<InterfaceParameter>( std::make_index_sequence<FieldDetails::ActiveInterfaceParameters::Count>{} );
    // definition of interface states and parameters (the indices) which should be extended
-   static constexpr std::array<InterfaceState, 1> states_to_extend_= { InterfaceState::Velocity };
-   static constexpr std::array<InterfaceParameter, 1> parameters_to_extend_= { InterfaceParameter::SurfaceTensionCoefficient };
+   static constexpr std::array<InterfaceState, 1> states_to_extend_         = { InterfaceState::Velocity };
+   static constexpr std::array<InterfaceParameter, 1> parameters_to_extend_ = { InterfaceParameter::SurfaceTensionCoefficient };
 
 public:
-   InterfaceFieldsDefinitions() = delete;
-   ~InterfaceFieldsDefinitions() = default;
+   InterfaceFieldsDefinitions()                                    = delete;
+   ~InterfaceFieldsDefinitions()                                   = default;
    InterfaceFieldsDefinitions( InterfaceFieldsDefinitions const& ) = delete;
    InterfaceFieldsDefinitions& operator=( InterfaceFieldsDefinitions const& ) = delete;
-   InterfaceFieldsDefinitions( InterfaceFieldsDefinitions&& ) = delete;
+   InterfaceFieldsDefinitions( InterfaceFieldsDefinitions&& )                 = delete;
    InterfaceFieldsDefinitions& operator=( InterfaceFieldsDefinitions&& ) = delete;
 
    /**
@@ -111,13 +116,13 @@ public:
     */
    static constexpr bool IsFieldActive( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case InterfaceFieldType::Description : {
+         case InterfaceFieldType::Description: {
             return field_index < FieldDetails::ActiveInterfaceDescriptions::InactiveFieldOffset;
          }
-         case InterfaceFieldType::Parameters : {
+         case InterfaceFieldType::Parameters: {
             return field_index < FieldDetails::ActiveInterfaceParameters::InactiveFieldOffset;
          }
-         default : { // InterfaceFieldType::States
+         default: {// InterfaceFieldType::States
             return field_index < FieldDetails::ActiveInterfaceStates::InactiveFieldOffset;
          }
       }
@@ -158,13 +163,13 @@ public:
     */
    static constexpr auto InputName( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case InterfaceFieldType::Description : {
+         case InterfaceFieldType::Description: {
             return FieldDetails::ActiveInterfaceDescriptions::GetInputName( field_index );
          }
-         case InterfaceFieldType::Parameters : {
+         case InterfaceFieldType::Parameters: {
             return FieldDetails::ActiveInterfaceParameters::GetInputName( field_index );
          }
-         default : { // InterfaceFieldType::States
+         default: {// InterfaceFieldType::States
             return FieldDetails::ActiveInterfaceStates::GetInputName( field_index );
          }
       }
@@ -205,13 +210,13 @@ public:
     */
    static constexpr auto FieldUnit( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case InterfaceFieldType::Description : {
+         case InterfaceFieldType::Description: {
             return FieldDetails::ActiveInterfaceDescriptions::GetUnit( field_index );
          }
-         case InterfaceFieldType::Parameters : {
+         case InterfaceFieldType::Parameters: {
             return FieldDetails::ActiveInterfaceParameters::GetUnit( field_index );
          }
-         default : { // InterfaceFieldType::States
+         default: {// InterfaceFieldType::States
             return FieldDetails::ActiveInterfaceStates::GetUnit( field_index );
          }
       }
@@ -275,13 +280,13 @@ public:
     */
    static constexpr auto ANOF( InterfaceFieldType const field_type ) {
       switch( field_type ) {
-         case InterfaceFieldType::Description : {
+         case InterfaceFieldType::Description: {
             return ANOD();
          }
-         case InterfaceFieldType::Parameters : {
+         case InterfaceFieldType::Parameters: {
             return ANOPA();
          }
-         default : { // InterfaceFieldType::States
+         default: {// InterfaceFieldType::States
             return ANOS();
          }
       }
@@ -357,18 +362,18 @@ public:
     */
    static constexpr auto NOFTE( InterfaceFieldType const field_type ) {
       switch( field_type ) {
-         case InterfaceFieldType::Parameters : {
+         case InterfaceFieldType::Parameters: {
             return NOPATE();
          }
 #ifndef PERFORMANCE
-         case InterfaceFieldType::States : {
+         case InterfaceFieldType::States: {
             return NOSTE();
          }
-         default : {
+         default: {
             throw std::logic_error( "Interface field type not known!" );
          }
 #else
-         default : { // InterfaceFieldType::States
+         default: {// InterfaceFieldType::States
             return NOSTE();
          }
 #endif
@@ -386,18 +391,18 @@ public:
     */
    static constexpr auto FITE( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
-         case InterfaceFieldType::Parameters : {
+         case InterfaceFieldType::Parameters: {
             return IPTI( parameters_to_extend_[field_index] );
          }
 #ifndef PERFORMANCE
-         case InterfaceFieldType::States : {
+         case InterfaceFieldType::States: {
             return ISTI( states_to_extend_[field_index] );
          }
-         default : {
+         default: {
             throw std::logic_error( "Interface field type not known!" );
          }
 #else
-         default : { // InterfaceFieldType::States
+         default: {// InterfaceFieldType::States
             return ISTI( states_to_extend_[field_index] );
          }
 #endif
@@ -407,4 +412,4 @@ public:
 
 using IF = InterfaceFieldsDefinitions;
 
-#endif // FIELD_INTERFACE_DEFINITIONS_H
+#endif// FIELD_INTERFACE_DEFINITIONS_H

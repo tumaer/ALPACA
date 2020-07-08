@@ -68,7 +68,6 @@
 #ifndef HLLC_INTERFACE_RIEMANN_SOLVER_H
 #define HLLC_INTERFACE_RIEMANN_SOLVER_H
 
-
 #include "interface_riemann_solver.h"
 
 /**
@@ -80,19 +79,18 @@ class HllcInterfaceRiemannSolver : public InterfaceRiemannSolver<HllcInterfaceRi
 
    friend InterfaceRiemannSolver;
 
-   std::array<double, 3> SolveInterfaceRiemannProblemImplementation( double const rho_left,  double const p_left,  double const velocity_normal_left,  MaterialName const material_left,
-      double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
-      double const delta_p ) const;
+   std::array<double, 3> SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
+                                                                     double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
+                                                                     double const delta_p ) const;
 
 public:
    explicit HllcInterfaceRiemannSolver() = delete;
    HllcInterfaceRiemannSolver( MaterialManager const& material_manager );
-   ~HllcInterfaceRiemannSolver() = default;
+   ~HllcInterfaceRiemannSolver()                                   = default;
    HllcInterfaceRiemannSolver( HllcInterfaceRiemannSolver const& ) = delete;
    HllcInterfaceRiemannSolver& operator=( HllcInterfaceRiemannSolver const& ) = delete;
-   HllcInterfaceRiemannSolver( HllcInterfaceRiemannSolver&& ) = delete;
+   HllcInterfaceRiemannSolver( HllcInterfaceRiemannSolver&& )                 = delete;
    HllcInterfaceRiemannSolver& operator=( HllcInterfaceRiemannSolver&& ) = delete;
 };
 
-
-#endif //HLLC_INTERFACE_RIEMANN_SOLVER_H
+#endif//HLLC_INTERFACE_RIEMANN_SOLVER_H

@@ -81,18 +81,18 @@ class WENO3 : public Stencil<WENO3> {
 
    // Coefficients for WENO3 scheme
    static constexpr double coef_smoothness_11_ = -1.0;
-   static constexpr double coef_smoothness_12_ =  1.0;
+   static constexpr double coef_smoothness_12_ = 1.0;
 
    static constexpr double coef_smoothness_21_ = -1.0;
-   static constexpr double coef_smoothness_22_ =  1.0;
+   static constexpr double coef_smoothness_22_ = 1.0;
 
-   static constexpr double coef_weights_1_ = 1.0/3.0;
-   static constexpr double coef_weights_2_ = 2.0/3.0;
+   static constexpr double coef_weights_1_ = 1.0 / 3.0;
+   static constexpr double coef_weights_2_ = 2.0 / 3.0;
 
-   static constexpr double coef_stencils_1_ = -1.0/2.0;
-   static constexpr double coef_stencils_2_ =  3.0/2.0;
-   static constexpr double coef_stencils_3_ =  1.0/2.0;
-   static constexpr double coef_stencils_4_ =  1.0/2.0;
+   static constexpr double coef_stencils_1_ = -1.0 / 2.0;
+   static constexpr double coef_stencils_2_ = 3.0 / 2.0;
+   static constexpr double coef_stencils_3_ = 1.0 / 2.0;
+   static constexpr double coef_stencils_4_ = 1.0 / 2.0;
 
    // Small values to avoid division by 0, but also to adjust dissipation. Optimized according to F. Schranner (same as WENO5)
    static constexpr double epsilon_1_ = 1.0e-6;
@@ -120,26 +120,25 @@ class WENO3 : public Stencil<WENO3> {
       double const s2  = s21 * s21 + epsilon_;
 
       // Compute weights
-      double const a1 = coef_weights_1_ / (s1 * s1);
-      double const a2 = coef_weights_2_ / (s2 * s2);
+      double const a1 = coef_weights_1_ / ( s1 * s1 );
+      double const a2 = coef_weights_2_ / ( s2 * s2 );
 
-      double const one_a_sum = 1.0 / (a1 + a2);
+      double const one_a_sum = 1.0 / ( a1 + a2 );
 
       double const w1 = a1 * one_a_sum;
       double const w2 = a2 * one_a_sum;
 
       // Return weighted average
-      return  w1 * (coef_stencils_1_ * v1 + coef_stencils_2_ * v2)
-            + w2 * (coef_stencils_3_ * v2 + coef_stencils_4_ * v3);
+      return w1 * ( coef_stencils_1_ * v1 + coef_stencils_2_ * v2 ) + w2 * ( coef_stencils_3_ * v2 + coef_stencils_4_ * v3 );
    }
 
 public:
    explicit constexpr WENO3() = default;
-   ~WENO3() = default;
-   WENO3( WENO3 const& ) = delete;
+   ~WENO3()                   = default;
+   WENO3( WENO3 const& )      = delete;
    WENO3& operator=( WENO3 const& ) = delete;
-   WENO3( WENO3&& ) = delete;
+   WENO3( WENO3&& )                 = delete;
    WENO3& operator=( WENO3&& ) = delete;
 };
 
-#endif // STENCIL_WENO3_H
+#endif// STENCIL_WENO3_H

@@ -79,10 +79,10 @@ namespace Initialization {
     * @return The fully initialized HaloManager class.
     */
    HaloManager InitializeHaloManager( TopologyManager const& topology_manager,
-                                      Tree & tree,
+                                      Tree& tree,
                                       ExternalHaloManager const& external_halo_manager,
-                                      InternalHaloManager & internal_halo_manager,
-                                      CommunicationManager & communication_manager ) {
+                                      InternalHaloManager& internal_halo_manager,
+                                      CommunicationManager& communication_manager ) {
 
       // return the initializedhalo manager
       return HaloManager( tree,
@@ -91,4 +91,4 @@ namespace Initialization {
                           communication_manager,
                           topology_manager.GetMaximumLevel() );
    }
-}
+}// namespace Initialization

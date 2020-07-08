@@ -68,51 +68,48 @@
 #include "solvers/riemann_solvers/roe_riemann_solver.h"
 #include "stencils/stencil_utilities.h"
 
-
 namespace {
-/**
+   /**
  * @brief Computes the advection within the provided block.
  * @param block Block of the phase under consideration.
  * @param advection Reference to an array which will be filled with the advection (indirect return parameter).
  * @tparam DIR Indicates which spatial direction is to be computed.
  * @note Hotpath function.
  */
-template<Direction DIR>
-void ComputeAdvection( Block const& block, double (&advection)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()] ) {
+   template<Direction DIR>
+   void ComputeAdvection( Block const& block, double ( &advection )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()] ) {
 
-   PrimeStates const& prime_states = block.GetPrimeStateBuffer();
-   double const (&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer(Equation::Energy);
-   double const (&direction_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = prime_states[MF::AV()[DTI(DIR)]];
+      PrimeStates const& prime_states                                      = block.GetPrimeStateBuffer();
+      double const( &energy )[CC::TCX()][CC::TCY()][CC::TCZ()]             = block.GetAverageBuffer( Equation::Energy );
+      double const( &direction_velocity )[CC::TCX()][CC::TCY()][CC::TCZ()] = prime_states[MF::AV()[DTI( DIR )]];
 
-   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-            double const cell_rho      = prime_states[PrimeState::Density][i][j][k];
-            double const cell_pressure = prime_states[PrimeState::Pressure][i][j][k];
-            double const cell_energy   = energy[i][j][k];
+      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+               double const cell_rho      = prime_states[PrimeState::Density][i][j][k];
+               double const cell_pressure = prime_states[PrimeState::Pressure][i][j][k];
+               double const cell_energy   = energy[i][j][k];
 
-            advection[ETI(Equation::Mass)][i][j][k]      = cell_rho * direction_velocity[i][j][k];
-            advection[ETI(Equation::Energy)][i][j][k]    = (cell_energy + cell_pressure) * direction_velocity[i][j][k];
+               advection[ETI( Equation::Mass )][i][j][k]   = cell_rho * direction_velocity[i][j][k];
+               advection[ETI( Equation::Energy )][i][j][k] = ( cell_energy + cell_pressure ) * direction_velocity[i][j][k];
 
-            for( unsigned int d = 0; d < DTI(CC::DIM()); ++d ) {
-               advection[ETI(MF::AME()[d])][i][j][k]     = cell_rho * (direction_velocity[i][j][k] * prime_states[MF::AV()[d]][i][j][k]);
-            }
-            // Add pressure to convective flux-term of momentum
-            advection[ETI(MF::AME()[DTI(DIR)])][i][j][k] += cell_pressure;
-         } //Z-Loop
-      } //Y-Loop
-   } //X-Loop
-}
-}
+               for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
+                  advection[ETI( MF::AME()[d] )][i][j][k] = cell_rho * ( direction_velocity[i][j][k] * prime_states[MF::AV()[d]][i][j][k] );
+               }
+               // Add pressure to convective flux-term of momentum
+               advection[ETI( MF::AME()[DTI( DIR )] )][i][j][k] += cell_pressure;
+            }//Z-Loop
+         }   //Y-Loop
+      }      //X-Loop
+   }
+}// namespace
 
 /**
  * @brief Standard constructor using an already existing MaterialManager and EigenDecomposition object.
  * @param material_manager .
  * @param eigendecomposition_calculator .
  */
-RoeRiemannSolver::RoeRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) :
-   RiemannSolver( material_manager, eigendecomposition_calculator )
-{
+RoeRiemannSolver::RoeRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : RiemannSolver( material_manager, eigendecomposition_calculator ) {
    /* Empty besides initializer list*/
 }
 
@@ -122,16 +119,16 @@ RoeRiemannSolver::RoeRiemannSolver( MaterialManager const& material_manager, Eig
  * @note Hotpath function.
  */
 void RoeRiemannSolver::UpdateImplementation(
-   std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-   double (&fluxes_x)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&fluxes_y)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&fluxes_z)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1] ) const {
+      std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+      double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
 
    double advection_contribution[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()];
 
-   double   roe_eigenvectors_left[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()];
-   double  roe_eigenvectors_right[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()];
-   double fluxfunction_wavespeeds[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()];
+   double roe_eigenvectors_left[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
+   double roe_eigenvectors_right[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
+   double fluxfunction_wavespeeds[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()];
 
    // NH This gives performance. Not sure why, propably first touch 'problems'.
    for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -150,7 +147,7 @@ void RoeRiemannSolver::UpdateImplementation(
          for( unsigned int k = 0; k < CC::ICZ() + 1; ++k ) {
             for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
                for( unsigned int f = 0; f < MF::ANOE(); ++f ) {
-                  roe_eigenvectors_left[i][j][k][e][f] = 0.0;
+                  roe_eigenvectors_left[i][j][k][e][f]  = 0.0;
                   roe_eigenvectors_right[i][j][k][e][f] = 0.0;
                }
                fluxfunction_wavespeeds[i][j][k][e] = 0.0;
@@ -161,7 +158,7 @@ void RoeRiemannSolver::UpdateImplementation(
 
    eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::X>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, fluxfunction_wavespeeds );
    ComputeAdvection<Direction::X>( mat_block.second, advection_contribution );
-   ComputeFluxes<Direction::X>( mat_block.second, fluxes_x, advection_contribution, cell_size,roe_eigenvectors_left, roe_eigenvectors_right, fluxfunction_wavespeeds );
+   ComputeFluxes<Direction::X>( mat_block.second, fluxes_x, advection_contribution, cell_size, roe_eigenvectors_left, roe_eigenvectors_right, fluxfunction_wavespeeds );
 
    if constexpr( CC::DIM() != Dimension::One ) {
       eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::Y>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, fluxfunction_wavespeeds );
@@ -190,18 +187,18 @@ void RoeRiemannSolver::UpdateImplementation(
  */
 template<Direction DIR>
 void RoeRiemannSolver::ComputeFluxes( Block const& block,
-   double (&fluxes)[MF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-   double (&advection)[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
-   double (&roe_eigenvectors_left)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-   double (&roe_eigenvectors_right)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()][MF::ANOE()],
-   double (&fluxfunction_wavespeed)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][MF::ANOE()] ) const {
+                                      double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                      double ( &advection )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
+                                      double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                      double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                      double ( &fluxfunction_wavespeed )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const {
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
 
    // Index shift for eigenvalues and fluxes
-   constexpr int offset_x = CC::FICX()-1;
-   constexpr int offset_y = CC::DIM() != Dimension::One   ? CC::FICY()-1 : -1;
-   constexpr int offset_z = CC::DIM() == Dimension::Three ? CC::FICZ()-1 : -1;
+   constexpr int offset_x = CC::FICX() - 1;
+   constexpr int offset_y = CC::DIM() != Dimension::One ? CC::FICY() - 1 : -1;
+   constexpr int offset_z = CC::DIM() == Dimension::Three ? CC::FICZ() - 1 : -1;
 
    constexpr unsigned int x_varying = DIR == Direction::X ? 1 : 0;
    constexpr unsigned int y_varying = DIR == Direction::Y ? 1 : 0;
@@ -210,17 +207,17 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
    unsigned int const reconstruction_stencil_downstream_size = ReconstructionStencil::DownstreamStencilSize();
 
    //NH Compiler likes loops counters to be fixed - so we help him.
-   constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX()-1 : CC::FICX();
-   constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY()-1 : CC::FICY();
-   constexpr unsigned int z_start = DIR == Direction::Z ? CC::FICZ()-1 : CC::FICZ();
-   constexpr unsigned int x_end = CC::LICX();
-   constexpr unsigned int y_end = CC::LICY();
-   constexpr unsigned int z_end = CC::LICZ();
+   constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
+   constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
+   constexpr unsigned int z_start = DIR == Direction::Z ? CC::FICZ() - 1 : CC::FICZ();
+   constexpr unsigned int x_end   = CC::LICX();
+   constexpr unsigned int y_end   = CC::LICY();
+   constexpr unsigned int z_end   = CC::LICZ();
 
    std::array<double, ReconstructionStencil::StencilSize()> positive_characteristic_flux;
    std::array<double, ReconstructionStencil::StencilSize()> negative_characteristic_flux;
 
-   double alpha_fluxvectorsplitting[MF::ANOE()]; // artificial viscosity / alpha of flux-vector splitting f(u) +- alpha u
+   double alpha_fluxvectorsplitting[MF::ANOE()];// artificial viscosity / alpha of flux-vector splitting f(u) +- alpha u
    double physical_flux[MF::ANOE()][MF::ANOE()];
 
    auto const& conservatives = block.GetAverageBuffer();
@@ -249,28 +246,26 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
             }
 
             // reconstruct fluxes at face i+1/2 by characteristic decomposition and applying an WENO scheme to smoothen stencils
-            for( unsigned int n = 0; n < MF::ANOE(); ++n ) { // n is index of characteristic field (eigenvalue, eigenvector)
+            for( unsigned int n = 0; n < MF::ANOE(); ++n ) {// n is index of characteristic field (eigenvalue, eigenvector)
                auto const& roe_eigenvector_left_temp = roe_eigenvectors_left[i_index][j_index][k_index][n];
 
                for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
                   // This resetting is necessary!
                   positive_characteristic_flux[m] = 0.0;
                   negative_characteristic_flux[m] = 0.0;
-                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI(DIR)] ) { // l is index of conservative equation, iterated in symmetry-preserving sequence
+                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI( DIR )] ) {// l is index of conservative equation, iterated in symmetry-preserving sequence
                      // Compute characteristics for U and advection
-                     double const u_characteristic_temp         = conservatives[l][i + x_varying * (m - reconstruction_stencil_downstream_size)][j + y_varying * (m - reconstruction_stencil_downstream_size)][k + z_varying * (m - reconstruction_stencil_downstream_size)] * roe_eigenvector_left_temp[l];
-                     double const advection_characteristic_temp =     advection[l][i + x_varying * (m - reconstruction_stencil_downstream_size)][j + y_varying * (m - reconstruction_stencil_downstream_size)][k + z_varying * (m - reconstruction_stencil_downstream_size)] * roe_eigenvector_left_temp[l];
+                     double const u_characteristic_temp         = conservatives[l][i + x_varying * ( m - reconstruction_stencil_downstream_size )][j + y_varying * ( m - reconstruction_stencil_downstream_size )][k + z_varying * ( m - reconstruction_stencil_downstream_size )] * roe_eigenvector_left_temp[l];
+                     double const advection_characteristic_temp = advection[l][i + x_varying * ( m - reconstruction_stencil_downstream_size )][j + y_varying * ( m - reconstruction_stencil_downstream_size )][k + z_varying * ( m - reconstruction_stencil_downstream_size )] * roe_eigenvector_left_temp[l];
 
                      // Compute characteristic advections to compute fluxes from left and right side of the face i+1/2
-                     positive_characteristic_flux[m]  += (advection_characteristic_temp + alpha_fluxvectorsplitting[n]*u_characteristic_temp);
-                     negative_characteristic_flux[m]  += (advection_characteristic_temp - alpha_fluxvectorsplitting[n]*u_characteristic_temp);
-
+                     positive_characteristic_flux[m] += ( advection_characteristic_temp + alpha_fluxvectorsplitting[n] * u_characteristic_temp );
+                     negative_characteristic_flux[m] += ( advection_characteristic_temp - alpha_fluxvectorsplitting[n] * u_characteristic_temp );
                   }
                }
 
                //apply WENO scheme to compute characteristic fluxes
-               double const characteristic_flux = 0.5 * ( SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( positive_characteristic_flux, cell_size )
-                                                        + SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( negative_characteristic_flux, cell_size ) );
+               double const characteristic_flux = 0.5 * ( SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( positive_characteristic_flux, cell_size ) + SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( negative_characteristic_flux, cell_size ) );
 
                // back-transformation into physical space
                for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
@@ -282,12 +277,12 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
             for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
                double flux = 0.0;
                // n is index of conservative equation, l is index of characteristic field
-               for( unsigned int const n : characteristic_field_summation_sequence_[DTI(DIR)] ) {
+               for( unsigned int const n : characteristic_field_summation_sequence_[DTI( DIR )] ) {
                   // first sum contributions of eigenvalues u in prescribed order
                   flux += physical_flux[l][n];
                }
                // Non-linear contributions (corresponding to eigenvalues u-c and u+c) have to be added separately to maintain full symmetry
-               flux += (physical_flux[l][0] + physical_flux[l][MF::ANOE()-1]);
+               flux += ( physical_flux[l][0] + physical_flux[l][MF::ANOE() - 1] );
 
                fluxes[l][i_index][j_index][k_index] += flux;
             }

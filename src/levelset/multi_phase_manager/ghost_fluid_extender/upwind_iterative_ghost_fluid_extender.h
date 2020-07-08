@@ -84,39 +84,38 @@ class UpwindGhostFluidExtender : public GhostFluidExtender<UpwindGhostFluidExten
 
 private:
    // Taking some variables from the base class
+   using GhostFluidExtenderSpecification::epsilon_;
    using GhostFluidExtenderSpecification::field_type_;
    using GhostFluidExtenderSpecification::number_of_convergence_tracking_quantities_;
-   using GhostFluidExtenderSpecification::epsilon_;
    static constexpr unsigned int stencil_width_ = 2;
-   static constexpr unsigned int i_offset_ = CC::HS() - stencil_width_;
-   static constexpr unsigned int j_offset_ = CC::DIM() != Dimension::One   ? CC::HS() - stencil_width_ : 0;
-   static constexpr unsigned int k_offset_ = CC::DIM() == Dimension::Three ? CC::HS() - stencil_width_ : 0;
-   static constexpr unsigned int repetition_ = CC::HS() / stencil_width_;
+   static constexpr unsigned int i_offset_      = CC::HS() - stencil_width_;
+   static constexpr unsigned int j_offset_      = CC::DIM() != Dimension::One ? CC::HS() - stencil_width_ : 0;
+   static constexpr unsigned int k_offset_      = CC::DIM() == Dimension::Three ? CC::HS() - stencil_width_ : 0;
+   static constexpr unsigned int repetition_    = CC::HS() / stencil_width_;
 
 protected:
-
    /**
     * @brief Extend to cut-cell neighbors and extension band iteratively.
     * @param node The node which is extended.
     * @param convergence_tracking_quantities An array holding information about the convergence status of the iterative extension method.
     */
-   void IterativeExtension( Node& node, double (&convergence_tracking_quantities)[2][number_of_convergence_tracking_quantities_] ) const {
+   void IterativeExtension( Node& node, double ( &convergence_tracking_quantities )[2][number_of_convergence_tracking_quantities_] ) const {
 
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-      double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
 
       // Loop through all materials of the node
       for( auto& phase : node.GetPhases() ) {
 
-         std::int8_t const material_sign = MaterialSignCapsule::SignOfMaterial( phase.first );
-         unsigned int const material_index = phase.first == MaterialSignCapsule::PositiveMaterial() ? 0 : 1;
+         std::int8_t const material_sign        = MaterialSignCapsule::SignOfMaterial( phase.first );
+         unsigned int const material_index      = phase.first == MaterialSignCapsule::PositiveMaterial() ? 0 : 1;
          double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
-         double const material_sign_double = double( material_sign );
+         double const material_sign_double      = double( material_sign );
 
          double extension_rhs[MF::ANOF( field_type_ )][CC::TCX()][CC::TCY()][CC::TCZ()];
          double one_normalization_constant[MF::ANOF( field_type_ )];
-         for(unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); ++field_index) {
+         for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); ++field_index ) {
             one_normalization_constant[field_index] = 1.0 / ( std::max( epsilon_, convergence_tracking_quantities[material_index][field_index] ) );
          }
 
@@ -124,29 +123,29 @@ protected:
             /**
              * Setting the extension_rhs buffer to zero is crucial!
              */
-            for( unsigned int field_index = 0; field_index < MF::ANOF(field_type_); field_index++ ) {
+            for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                      for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                         extension_rhs[field_index][i][j][k] = 0.0;
-                     } // k
-                  } // j
-               } // i
-            } // fields of field_type
+                     }// k
+                  }   // j
+               }      // i
+            }         // fields of field_type
 
-            std::array<double, DTI(CC::DIM())> rhs_contributions;
+            std::array<double, DTI( CC::DIM() )> rhs_contributions;
 
-            unsigned int derivative_indices[DTI(CC::DIM())][2];
-            for( unsigned int d = 0; d < DTI(CC::DIM()); ++d ) {
+            unsigned int derivative_indices[DTI( CC::DIM() )][2];
+            for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
                for( unsigned int l = 0; l < 2; ++l ) {
                   derivative_indices[d][l] = 0;
                }
             }
 
             // Loop through internal block - finally, fill extension band and cut-cell neighbors
-            for( unsigned int i = CC::FICX()-i_offset_; i <= CC::LICX()+i_offset_; ++i ) {
-               for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
-                  for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
+            for( unsigned int i = CC::FICX() - i_offset_; i <= CC::LICX() + i_offset_; ++i ) {
+               for( unsigned int j = CC::FICY() - j_offset_; j <= CC::LICY() + j_offset_; ++j ) {
+                  for( unsigned int k = CC::FICZ() - k_offset_; k <= CC::LICZ() + k_offset_; ++k ) {
                      double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
                      /**
                       * We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
@@ -165,7 +164,7 @@ protected:
                         }
 
                         if constexpr( CC::DIM() != Dimension::One ) {
-                           if(normal[1] > 0.0) {
+                           if( normal[1] > 0.0 ) {
                               derivative_indices[1][0] = j + 1;
                               derivative_indices[1][1] = j;
                            } else {
@@ -175,7 +174,7 @@ protected:
                         }
 
                         if constexpr( CC::DIM() == Dimension::Three ) {
-                           if(normal[2] > 0.0) {
+                           if( normal[2] > 0.0 ) {
                               derivative_indices[2][0] = k + 1;
                               derivative_indices[2][1] = k;
                            } else {
@@ -186,7 +185,7 @@ protected:
 
                         //calculate gradients
                         for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
-                           double const (&cell)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
+                           double const( &cell )[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
 
                            rhs_contributions[0] = cell[derivative_indices[0][0]][j][k] - cell[derivative_indices[0][1]][j][k];
                            rhs_contributions[0] *= levelset[derivative_indices[0][0]][j][k] - levelset[derivative_indices[0][1]][j][k];
@@ -204,41 +203,39 @@ protected:
                            extension_rhs[field_index][i][j][k] = ConsistencyManagedSum( rhs_contributions ) * ExtensionConstants::Dtau * material_sign_double;
 
                            if( ExtensionConstants::TrackConvergence && std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ExtensionBand ) ) {
-                              convergence_tracking_quantities[material_index][MF::ANOF( field_type_ )] = std::max(convergence_tracking_quantities[material_index][MF::ANOF( field_type_ )], std::abs( extension_rhs[field_index][i][j][k] * one_normalization_constant[field_index] ) );
+                              convergence_tracking_quantities[material_index][MF::ANOF( field_type_ )] = std::max( convergence_tracking_quantities[material_index][MF::ANOF( field_type_ )], std::abs( extension_rhs[field_index][i][j][k] * one_normalization_constant[field_index] ) );
                            }
 
-                        } // fields of field_type
-                     } // cells to extend
-                  } // k
-               } // j
-            } // i
+                        }// fields of field_type
+                     }   // cells to extend
+                  }      // k
+               }         // j
+            }            // i
 
             for( unsigned int field_index = 0; field_index < MF::ANOF( field_type_ ); field_index++ ) {
-               double (&extension_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
-               for( unsigned int i = CC::FICX()-i_offset_; i <= CC::LICX()+i_offset_; ++i ) {
-                  for( unsigned int j = CC::FICY()-j_offset_; j <= CC::LICY()+j_offset_; ++j ) {
-                     for( unsigned int k = CC::FICZ()-k_offset_; k <= CC::LICZ()+k_offset_; ++k ) {
+               double( &extension_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.second.GetFieldBuffer( field_type_, field_index );
+               for( unsigned int i = CC::FICX() - i_offset_; i <= CC::LICX() + i_offset_; ++i ) {
+                  for( unsigned int j = CC::FICY() - j_offset_; j <= CC::LICY() + j_offset_; ++j ) {
+                     for( unsigned int k = CC::FICZ() - k_offset_; k <= CC::LICZ() + k_offset_; ++k ) {
                         extension_buffer[i][j][k] += extension_rhs[field_index][i][j][k];
-                     } // k
-                  } // j
-               } // i
-            } // fields of field_type
+                     }// k
+                  }   // j
+               }      // i
+            }         // fields of field_type
          }
       }
    }
 
 public:
    UpwindGhostFluidExtender() = delete;
-   explicit UpwindGhostFluidExtender( MaterialManager const& material_manager, HaloManager & halo_manager ) :
-      GhostFluidExtenderSpecification( material_manager, halo_manager ) {
+   explicit UpwindGhostFluidExtender( MaterialManager const& material_manager, HaloManager& halo_manager ) : GhostFluidExtenderSpecification( material_manager, halo_manager ) {
       // Empty Constructor, besides call of base class constructor.
    }
-   ~UpwindGhostFluidExtender() = default;
+   ~UpwindGhostFluidExtender()                                 = default;
    UpwindGhostFluidExtender( UpwindGhostFluidExtender const& ) = delete;
    UpwindGhostFluidExtender& operator=( UpwindGhostFluidExtender const& ) = delete;
-   UpwindGhostFluidExtender( UpwindGhostFluidExtender&& ) = delete;
+   UpwindGhostFluidExtender( UpwindGhostFluidExtender&& )                 = delete;
    UpwindGhostFluidExtender operator=( UpwindGhostFluidExtender&& ) = delete;
 };
 
-
-#endif //UPWIND_GHOST_FLUID_EXTENDER_H
+#endif//UPWIND_GHOST_FLUID_EXTENDER_H

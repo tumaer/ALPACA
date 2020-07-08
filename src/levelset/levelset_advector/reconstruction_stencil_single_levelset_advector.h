@@ -80,13 +80,12 @@ class ReconstructionStencilSingleLevelsetAdvector : public LevelsetAdvector<Reco
    void AdvectImplementation( Node& node ) const;
 
 public:
-   explicit ReconstructionStencilSingleLevelsetAdvector() = default;
-   ~ReconstructionStencilSingleLevelsetAdvector() = default;
+   explicit ReconstructionStencilSingleLevelsetAdvector()                                            = default;
+   ~ReconstructionStencilSingleLevelsetAdvector()                                                    = default;
    ReconstructionStencilSingleLevelsetAdvector( ReconstructionStencilSingleLevelsetAdvector const& ) = delete;
    ReconstructionStencilSingleLevelsetAdvector& operator=( ReconstructionStencilSingleLevelsetAdvector const& ) = delete;
-   ReconstructionStencilSingleLevelsetAdvector( ReconstructionStencilSingleLevelsetAdvector&& ) = delete;
+   ReconstructionStencilSingleLevelsetAdvector( ReconstructionStencilSingleLevelsetAdvector&& )                 = delete;
    ReconstructionStencilSingleLevelsetAdvector& operator=( ReconstructionStencilSingleLevelsetAdvector&& ) = delete;
 };
 
-
-#endif //RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
+#endif//RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H

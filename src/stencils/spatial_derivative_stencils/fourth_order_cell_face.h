@@ -68,7 +68,6 @@
 #ifndef FOURTH_ORDER_CELL_FACE_H
 #define FOURTH_ORDER_CELL_FACE_H
 
-
 #include "stencils/stencil.h"
 
 /**
@@ -81,24 +80,22 @@ class FourthOrderCellFace : public Stencil<FourthOrderCellFace> {
 
    static constexpr StencilType stencil_type_ = StencilType::Derivative;
 
-   static constexpr unsigned int stencil_size_ = 4;
+   static constexpr unsigned int stencil_size_            = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
    /**
     * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
     * @note Hotpath function.
     */
-   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const cell_size ) const {
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const, double const cell_size ) const {
       double const denominator = cell_size * 24.0;
-      double const result = 27.0 * ( array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ + 0] ) - ( array[downstream_stencil_size_ + 2] - array[downstream_stencil_size_ - 1] );
+      double const result      = 27.0 * ( array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ + 0] ) - ( array[downstream_stencil_size_ + 2] - array[downstream_stencil_size_ - 1] );
       return result / denominator;
    }
 
 public:
    explicit constexpr FourthOrderCellFace() = default;
-   ~FourthOrderCellFace() = default;
-
+   ~FourthOrderCellFace()                   = default;
 };
 
-
-#endif //FOURTH_ORDER_CELL_FACE_H
+#endif//FOURTH_ORDER_CELL_FACE_H

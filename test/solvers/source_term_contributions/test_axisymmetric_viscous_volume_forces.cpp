@@ -81,20 +81,20 @@ namespace {
       std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
 
       // Define material properties and initialize material
-      double const specific_heat_capacity = 3.0;
+      double const specific_heat_capacity    = 3.0;
       double const thermal_heat_conductivity = 4.0;
 
       // Instantiate material
       std::vector<Material> materials;
       materials.emplace_back( Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
-                                       nullptr, nullptr, unit_handler ) );
+                                        nullptr, nullptr, unit_handler ) );
 
       // Instantiate material pairing
       std::vector<MaterialPairing> material_pairings;
 
       return MaterialManager( std::move( materials ), std::move( material_pairings ) );
    }
-}
+}// namespace
 
 SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
 
@@ -111,8 +111,8 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
 
       constexpr double cell_size = 1.0;
       WHEN( "The shear and bulk viscosity are zero" ) {
-         constexpr double node_origin_x = 0.0;
-         MaterialManager const material_manager = ReturnMaterialManagerWithViscosities( 0.0, 0.0 );
+         constexpr double node_origin_x                    = 0.0;
+         MaterialManager const material_manager            = ReturnMaterialManagerWithViscosities( 0.0, 0.0 );
          AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( material_manager );
          double volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -121,20 +121,20 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
                   for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
                      volume_forces[e][i][j][k] = 0.0;
                   }
-               } //j
-            } //i
-         } //equation
+               }//j
+            }   //i
+         }      //equation
 
          forces_calculator.ComputeForces( mat_block, volume_forces, cell_size, node_origin_x );
 
          THEN( "The volume forces are zero" ) {
-             for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
-                for( unsigned int i = 0; i < CC::ICX(); ++i ) {
-                   for( unsigned int j = 0; j < CC::ICY(); ++j ) {
-                      REQUIRE( volume_forces[e][i][j][0] == Approx( 0.0 ) );
-                   } //j
-                } //i
-             } //equation
+            for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
+               for( unsigned int i = 0; i < CC::ICX(); ++i ) {
+                  for( unsigned int j = 0; j < CC::ICY(); ++j ) {
+                     REQUIRE( volume_forces[e][i][j][0] == Approx( 0.0 ) );
+                  }//j
+               }   //i
+            }      //equation
          }
       }
       WHEN( "Viscosities are twice different" ) {
@@ -145,30 +145,30 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
                for( unsigned int j = 0; j < CC::ICY(); ++j ) {
                   for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
-                     first_volume_forces[e][i][j][k] = 0.0;
+                     first_volume_forces[e][i][j][k]  = 0.0;
                      second_volume_forces[e][i][j][k] = 0.0;
                   }
-               } //j
-            } //i
-         } //equation
-         MaterialManager const first_material_manager = ReturnMaterialManagerWithViscosities( 3.4, 0.0 );
+               }//j
+            }   //i
+         }      //equation
+         MaterialManager const first_material_manager            = ReturnMaterialManagerWithViscosities( 3.4, 0.0 );
          AxisymmetricViscousVolumeForces first_forces_calculator = AxisymmetricViscousVolumeForces( first_material_manager );
-         first_forces_calculator.ComputeForces(mat_block, first_volume_forces, cell_size, node_origin_x);
-         MaterialManager const second_material_manager = ReturnMaterialManagerWithViscosities( 6.8, 0.0 );
+         first_forces_calculator.ComputeForces( mat_block, first_volume_forces, cell_size, node_origin_x );
+         MaterialManager const second_material_manager            = ReturnMaterialManagerWithViscosities( 6.8, 0.0 );
          AxisymmetricViscousVolumeForces second_forces_calculator = AxisymmetricViscousVolumeForces( second_material_manager );
-         second_forces_calculator.ComputeForces(mat_block, second_volume_forces, cell_size, node_origin_x);
+         second_forces_calculator.ComputeForces( mat_block, second_volume_forces, cell_size, node_origin_x );
          THEN( "Volume forces are twice different" ) {
-             for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
-                for( unsigned int i = 0; i < CC::ICX(); ++i ) {
-                   for( unsigned int j = 0; j < CC::ICY(); ++j ) {
-                       REQUIRE( 2.0 * first_volume_forces[e][i][j][0] == Approx( second_volume_forces[e][i][j][0] ) );
-                   } //j
-                } //i
-             } //equation
+            for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
+               for( unsigned int i = 0; i < CC::ICX(); ++i ) {
+                  for( unsigned int j = 0; j < CC::ICY(); ++j ) {
+                     REQUIRE( 2.0 * first_volume_forces[e][i][j][0] == Approx( second_volume_forces[e][i][j][0] ) );
+                  }//j
+               }   //i
+            }      //equation
          }
       }
       WHEN( "Cell-center coordinates are twice different due to the difference of the block position" ) {
-         constexpr double first_node_origin_x = 0.0;
+         constexpr double first_node_origin_x  = 0.0;
          constexpr double second_node_origin_x = 4.5;
          double first_volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          double second_volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
@@ -176,13 +176,13 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
                for( unsigned int j = 0; j < CC::ICY(); ++j ) {
                   for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
-                     first_volume_forces[e][i][j][k] = 0.0;
+                     first_volume_forces[e][i][j][k]  = 0.0;
                      second_volume_forces[e][i][j][k] = 0.0;
                   }
-               } //j
-            } //i
-         } //equation
-         MaterialManager const material_manager = ReturnMaterialManagerWithViscosities( 5.0, 0.0 );
+               }//j
+            }   //i
+         }      //equation
+         MaterialManager const material_manager            = ReturnMaterialManagerWithViscosities( 5.0, 0.0 );
          AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( material_manager );
          forces_calculator.ComputeForces( mat_block, first_volume_forces, cell_size, first_node_origin_x );
          forces_calculator.ComputeForces( mat_block, second_volume_forces, cell_size, second_node_origin_x );
@@ -191,8 +191,8 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
                for( unsigned int j = 0; j < CC::ICY(); ++j ) {
                   REQUIRE( first_volume_forces[ETI( Equation::MomentumY )][i][j][0] == Approx( 2.0 * second_volume_forces[ETI( Equation::MomentumY )][i][j][0] ) );
-               } //j
-            } //i
+               }//j
+            }   //i
          }
       }
    }

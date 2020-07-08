@@ -78,22 +78,21 @@
 class MaterialParameterModel {
 
 protected:
-
    // required functions needed in derived classes
-   virtual void DoUpdateParameter( Block & block, double const cell_size ) const = 0;
-   virtual void DoUpdateParameter( Block & block,
+   virtual void DoUpdateParameter( Block& block, double const cell_size ) const = 0;
+   virtual void DoUpdateParameter( Block& block,
                                    double const cell_size,
-                                   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                   std::int8_t const material_sign ) const = 0;
+                                   std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                   std::int8_t const material_sign ) const      = 0;
 
    // protected default constructor (can only be called from derived classes)
    explicit MaterialParameterModel() = default;
 
 public:
-   virtual ~MaterialParameterModel() = default;
+   virtual ~MaterialParameterModel()                       = default;
    MaterialParameterModel( MaterialParameterModel const& ) = delete;
    MaterialParameterModel& operator=( MaterialParameterModel const& ) = delete;
-   MaterialParameterModel( MaterialParameterModel&& ) = delete;
+   MaterialParameterModel( MaterialParameterModel&& )                 = delete;
    MaterialParameterModel& operator=( MaterialParameterModel&& ) = delete;
 
    /**
@@ -101,7 +100,7 @@ public:
     * @param block Block on which parameters are calculated (indirect return).
     * @param cell_size Size of the cell of given block.
     */
-   void UpdateParameter( Block & block, double const cell_size ) const {
+   void UpdateParameter( Block& block, double const cell_size ) const {
       DoUpdateParameter( block, cell_size );
    }
 
@@ -112,12 +111,12 @@ public:
     * @param interface_tags Interface tags to specify location of the interface on the given block.
     * @param material_sign Sign of the material for identification on interface tags.
     */
-   void UpdateParameter( Block & block,
+   void UpdateParameter( Block& block,
                          double const cell_size,
-                         std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
+                         std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
                          std::int8_t const material_sign ) const {
       DoUpdateParameter( block, cell_size, interface_tags, material_sign );
    }
 };
 
-#endif //MATERIAL_PARAMETER_MODEL_H
+#endif//MATERIAL_PARAMETER_MODEL_H

@@ -80,10 +80,9 @@
  */
 MaterialPairing::MaterialPairing( double const dimensional_surface_tension_coefficient,
                                   std::unique_ptr<InterfaceParameterModel const> surface_tension_coefficient_model,
-                                  UnitHandler const& unit_handler ) :
-   // Start initializer list
-   surface_tension_coefficient_( unit_handler.NonDimensionalizeValue( dimensional_surface_tension_coefficient, UnitType::SurfaceTensionCoefficient ) ),
-   surface_tension_coefficient_model_( std::move( surface_tension_coefficient_model ) ) {
+                                  UnitHandler const& unit_handler ) :// Start initializer list
+                                                                      surface_tension_coefficient_( unit_handler.NonDimensionalizeValue( dimensional_surface_tension_coefficient, UnitType::SurfaceTensionCoefficient ) ),
+                                                                      surface_tension_coefficient_model_( std::move( surface_tension_coefficient_model ) ) {
    /** Empty besides initializer list */
 }
 
@@ -91,9 +90,8 @@ MaterialPairing::MaterialPairing( double const dimensional_surface_tension_coeff
  * @brief Sets up a material pairing with no input data
  * @note Function can be removed when the surface tension coefficient hard coding is removed from the capillary pressure calculator.
  */
-MaterialPairing::MaterialPairing() :
-   surface_tension_coefficient_( -1.0 ),
-   surface_tension_coefficient_model_( nullptr ) {
+MaterialPairing::MaterialPairing() : surface_tension_coefficient_( -1.0 ),
+                                     surface_tension_coefficient_model_( nullptr ) {
    /** Empty besides initializer list */
 }
 
@@ -101,10 +99,9 @@ MaterialPairing::MaterialPairing() :
  * @brief Move constructor.
  * @param pairing Material pairing from which the data are moved.
  */
-MaterialPairing::MaterialPairing( MaterialPairing && pairing ) :
-   // Start initializer list
-   surface_tension_coefficient_( pairing.surface_tension_coefficient_ ),
-   surface_tension_coefficient_model_( std::move( pairing.surface_tension_coefficient_model_ ) ) {
+MaterialPairing::MaterialPairing( MaterialPairing&& pairing ) :// Start initializer list
+                                                                surface_tension_coefficient_( pairing.surface_tension_coefficient_ ),
+                                                                surface_tension_coefficient_model_( std::move( pairing.surface_tension_coefficient_model_ ) ) {
    /** Empty besides initializer list */
 }
 

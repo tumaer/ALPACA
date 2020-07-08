@@ -68,7 +68,6 @@
 #ifndef TWO_PHASE_MANAGER_H
 #define TWO_PHASE_MANAGER_H
 
-
 #include "multi_phase_manager.h"
 #include "buffer_handler.h"
 
@@ -80,13 +79,12 @@ class TwoPhaseManager : public MultiPhaseManager<TwoPhaseManager> {
    friend MultiPhaseManager;
 
 private:
-
    void SetVolumeFractionBuffer( Node& node ) const;
    void UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
 
    void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
-   void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
@@ -94,12 +92,12 @@ private:
 
 public:
    TwoPhaseManager() = delete;
-   explicit TwoPhaseManager( MaterialManager const& material_manager, HaloManager & halo_manager );
-   ~TwoPhaseManager() = default;
+   explicit TwoPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager );
+   ~TwoPhaseManager()                        = default;
    TwoPhaseManager( TwoPhaseManager const& ) = delete;
    TwoPhaseManager& operator=( TwoPhaseManager const& ) = delete;
-   TwoPhaseManager( TwoPhaseManager&& ) = delete;
+   TwoPhaseManager( TwoPhaseManager&& )                 = delete;
    TwoPhaseManager& operator=( TwoPhaseManager&& ) = delete;
 };
 
-#endif //TWO_PHASE_MANAGER_H
+#endif//TWO_PHASE_MANAGER_H

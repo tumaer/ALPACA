@@ -77,22 +77,22 @@
  */
 class VortexDilatationOutput : public OutputQuantity {
 
-private: 
+private:
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;   
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    VortexDilatationOutput() = delete;
-   explicit VortexDilatationOutput( UnitHandler const& unit_handler, 
-                                    MaterialManager const& material_manager, 
+   explicit VortexDilatationOutput( UnitHandler const& unit_handler,
+                                    MaterialManager const& material_manager,
                                     std::string const& quantity_name,
                                     std::array<bool, 3> const output_flags );
-   virtual ~VortexDilatationOutput() = default;
+   virtual ~VortexDilatationOutput()                       = default;
    VortexDilatationOutput( VortexDilatationOutput const& ) = delete;
    VortexDilatationOutput& operator=( VortexDilatationOutput const& ) = delete;
-   VortexDilatationOutput( VortexDilatationOutput&& ) = delete;
+   VortexDilatationOutput( VortexDilatationOutput&& )                 = delete;
    VortexDilatationOutput& operator=( VortexDilatationOutput&& ) = delete;
 };
 
-#endif // VORTEX_DILATATION_OUTPUT_H
+#endif// VORTEX_DILATATION_OUTPUT_H

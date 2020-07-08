@@ -82,15 +82,14 @@
 MatrixTensorMaterialOutput::MatrixTensorMaterialOutput( UnitHandler const& unit_handler,
                                                         MaterialManager const& material_manager,
                                                         std::string const& quantity_name,
-                                                        std::array<bool, 3> const output_flags ) :
-   OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { DTI( CC::DIM() ), DTI( CC::DIM() ) } ) {
+                                                        std::array<bool, 3> const output_flags ) : OutputQuantity( unit_handler, material_manager, quantity_name, output_flags, { DTI( CC::DIM() ), DTI( CC::DIM() ) } ) {
    /** Empty besides initializer list */
 }
 
 /**
  * @brief see base class definition.
  */
-void MatrixTensorMaterialOutput::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void MatrixTensorMaterialOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
     */
@@ -99,8 +98,8 @@ void MatrixTensorMaterialOutput::DoComputeCellData( Node const& node, std::vecto
    // Different behavior dependent on interface presence or not
    if( node.HasLevelset() ) {
       // Use the interface tags and levelset to differ between different states
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
 
       /**
        * Declare here all buffers that are used for this quantity from the material fields
@@ -133,7 +132,7 @@ void MatrixTensorMaterialOutput::DoComputeCellData( Node const& node, std::vecto
                       */
 
                      // Use data from the negative material buffer
-                     if ( interface_tags[i][j][k] < 0 || ( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) && levelset[i][j][k] < 0.0 ) ) {
+                     if( interface_tags[i][j][k] < 0 || ( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) && levelset[i][j][k] < 0.0 ) ) {
                         cell_data[cell_data_counter++] = ( 2.0 * double( row + 1 ) + double( col + 1 ) ) * dimensionalization_factor;
                      }
                      // otherwise positive
@@ -162,8 +161,8 @@ void MatrixTensorMaterialOutput::DoComputeCellData( Node const& node, std::vecto
       // Extract the single material present on this node
       // No interface node -> interface tags/material is the same everywhere
       MaterialName const material = node.GetSinglePhaseMaterial();
-      Block const& block = node.GetPhaseByMaterial( material );
-      (void) block;
+      Block const& block          = node.GetPhaseByMaterial( material );
+      (void)block;
       /**
        * Declare here all buffers that are used for this quantity from the material fields
        */
@@ -192,7 +191,7 @@ void MatrixTensorMaterialOutput::DoComputeCellData( Node const& node, std::vecto
  * @note Attention: In case prime state, parameter  variables are used, pay attention that they only exist on leave nodes. In case a division is made on non-leave nodes
  *       a floating point exception is caused. Therefore, only use the debug output if it is ensured that this cannot happen. Conservatives can be used since they are present on all nodes.
  */
-void MatrixTensorMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
+void MatrixTensorMaterialOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const {
 
    /**
     * Use the unit handler to specify the correct dimensionalization factor for the quantity
@@ -220,7 +219,7 @@ void MatrixTensorMaterialOutput::DoComputeDebugCellData( Node const& node, std::
                      /**
                       * Simply add to the final data vector
                       */
-                      cell_data[cell_data_counter++] = ( 2.0 * double( row + 1 ) + double( col + 1 ) ) * dimensionalization_factor;
+                     cell_data[cell_data_counter++] = ( 2.0 * double( row + 1 ) + double( col + 1 ) ) * dimensionalization_factor;
                   }
                }
             }
@@ -236,7 +235,7 @@ void MatrixTensorMaterialOutput::DoComputeDebugCellData( Node const& node, std::
                      /**
                       * Default value if material is not contained in node
                       */
-                      cell_data[cell_data_counter++] = -1.0;
+                     cell_data[cell_data_counter++] = -1.0;
                   }
                }
             }

@@ -71,7 +71,6 @@
 #include "user_specifications/numerical_setup.h"
 #include "two_phase_interface_extender.h"
 
-
 /**
  * @brief A namespace to get a InterfaceExtender type based on a specified constexpr.
  */
@@ -82,18 +81,18 @@ namespace InterfaceExtenderSetup {
     *
     * @tparam InterfaceExtenders The constexpr template parameter to specify the exact InterfaceExtender type.
     */
-   template<InterfaceExtenders >
+   template<InterfaceExtenders>
    struct Concretize;
 
    /**
     * @brief See generic implementation.
     */
    template<>
-   struct Concretize< InterfaceExtenders::TwoPhase > {
-      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::States > type_states;
-      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::Parameters > type_parameters;
+   struct Concretize<InterfaceExtenders::TwoPhase> {
+      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::States> type_states;
+      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::Parameters> type_parameters;
    };
 
-}
+}// namespace InterfaceExtenderSetup
 
-#endif // INTERFACE_EXTENDER_SETUP_H
+#endif// INTERFACE_EXTENDER_SETUP_H

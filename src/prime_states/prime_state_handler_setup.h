@@ -93,6 +93,6 @@ namespace PrimeStateHandlerSetup {
       typedef EulerPrimeStateHandler type;
    };
 
-}
+}// namespace PrimeStateHandlerSetup
 
-#endif // PRIME_STATE_HANDLER_SETUP_H
+#endif// PRIME_STATE_HANDLER_SETUP_H

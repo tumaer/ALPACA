@@ -85,18 +85,17 @@ MaterialFieldQuantity::MaterialFieldQuantity( UnitHandler const& unit_handler,
                                               std::string const& quantity_name,
                                               std::array<bool, 3> const output_flags,
                                               MaterialFieldQuantityData const& quantity_data,
-                                              ConservativeBufferType const buffer_type ) :
-   // Start initializer list
-   OutputQuantity( unit_handler, material_manager, quantity_name + SuffixOfConservativeBufferType( buffer_type ), output_flags, quantity_data.GetDimensions() ),
-   quantity_data_( quantity_data ),
-   buffer_type_( buffer_type ) {
+                                              ConservativeBufferType const buffer_type ) :// Start initializer list
+                                                                                           OutputQuantity( unit_handler, material_manager, quantity_name + SuffixOfConservativeBufferType( buffer_type ), output_flags, quantity_data.GetDimensions() ),
+                                                                                           quantity_data_( quantity_data ),
+                                                                                           buffer_type_( buffer_type ) {
    /** Empty besides initializer list and base class constructor call */
 }
 
 /**
  * @brief See base class definition.
  */
-void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const {
+void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
    // extract the correct field type
    MaterialFieldType const field_type = quantity_data_.field_type_;
@@ -104,8 +103,8 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
    // Change calls for levelset and non-levelset nodes
    if( node.HasLevelset() ) {
 
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
 
       // local counter
       unsigned long long int local_counter = 0;
@@ -115,10 +114,10 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
          // Get the correct field index
          unsigned int const field_index = quantity_data_.field_indices_[component];
          // Get buffers of both materials and other specifications
-         double const (&positive_field_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] =
-            node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetFieldBuffer( field_type, field_index, buffer_type_ );
-         double const (&negative_field_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] =
-            node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetFieldBuffer( field_type, field_index, buffer_type_ );
+         double const( &positive_field_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] =
+               node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetFieldBuffer( field_type, field_index, buffer_type_ );
+         double const( &negative_field_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] =
+               node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetFieldBuffer( field_type, field_index, buffer_type_ );
          // Dimensionalization factor for re-dimensionalization of variables
          double const dimensionalization_factor = unit_handler_.DimensionalizeValue( 1.0, MF::FieldUnit( field_type, field_index ) );
 
@@ -130,12 +129,12 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                   // Use negative material if interface tags are negative or in new cut cell band and negative levelset
-                  if ( interface_tags[i][j][k] < 0 || ( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) && levelset[i][j][k] < 0.0 ) ) {
-                      cell_data[local_counter] = negative_field_buffer[i][j][k] * dimensionalization_factor;
+                  if( interface_tags[i][j][k] < 0 || ( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::NewCutCell ) && levelset[i][j][k] < 0.0 ) ) {
+                     cell_data[local_counter] = negative_field_buffer[i][j][k] * dimensionalization_factor;
                   }
                   // otherwise positive
                   else {
-                      cell_data[local_counter] = positive_field_buffer[i][j][k] * dimensionalization_factor;
+                     cell_data[local_counter] = positive_field_buffer[i][j][k] * dimensionalization_factor;
                   }
 
                   local_counter += quantity_data_.field_indices_.size();
@@ -155,19 +154,19 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
       //Loop through all components
       for( std::size_t component = 0; component < quantity_data_.field_indices_.size(); component++ ) {
          // Get the correct buffer and dimensionalization factor
-         unsigned int const field_index = quantity_data_.field_indices_[component];
-         double const (&field_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( material ).GetFieldBuffer( field_type, field_index, buffer_type_ );
-         double const dimensionalization_factor = unit_handler_.DimensionalizeValue( 1.0, MF::FieldUnit( field_type, field_index ) );
+         unsigned int const field_index                                 = quantity_data_.field_indices_[component];
+         double const( &field_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( material ).GetFieldBuffer( field_type, field_index, buffer_type_ );
+         double const dimensionalization_factor                         = unit_handler_.DimensionalizeValue( 1.0, MF::FieldUnit( field_type, field_index ) );
 
          // set the local counter on original cell_data_counter + the component
          local_counter = cell_data_counter + component;
 
          // Loop through all internal cells in the block
-         for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
+         for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                   // add the dimensionalized value
-                   cell_data[local_counter] = field_buffer[i][j][k] * dimensionalization_factor;
+                  cell_data[local_counter] = field_buffer[i][j][k] * dimensionalization_factor;
 
                   local_counter += quantity_data_.field_indices_.size();
                }
@@ -180,7 +179,7 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
 /**
  * @brief See base class definition.
  */
-void MaterialFieldQuantity::DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const {
+void MaterialFieldQuantity::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const {
 
    // extract the correct field type
    MaterialFieldType const field_type = quantity_data_.field_type_;
@@ -193,9 +192,9 @@ void MaterialFieldQuantity::DoComputeDebugCellData( Node const& node, std::vecto
       for( std::size_t component = 0; component < quantity_data_.field_indices_.size(); component++ ) {
 
          // Get the correct buffer and dimensionalization factor
-         unsigned int const field_index = quantity_data_.field_indices_[component];
-         double const (&field_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( material ).GetFieldBuffer( field_type, field_index, buffer_type_ );
-         double const dimensionalization_factor = unit_handler_.DimensionalizeValue( 1.0, MF::FieldUnit( field_type, field_index ) );
+         unsigned int const field_index                                 = quantity_data_.field_indices_[component];
+         double const( &field_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( material ).GetFieldBuffer( field_type, field_index, buffer_type_ );
+         double const dimensionalization_factor                         = unit_handler_.DimensionalizeValue( 1.0, MF::FieldUnit( field_type, field_index ) );
 
          // set the local counter on original cell_data_counter + the component
          local_counter = cell_data_counter + component;
@@ -205,7 +204,7 @@ void MaterialFieldQuantity::DoComputeDebugCellData( Node const& node, std::vecto
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   // add the dimensionalized value
-                   cell_data[local_counter] = field_buffer[i][j][k] * dimensionalization_factor;
+                  cell_data[local_counter] = field_buffer[i][j][k] * dimensionalization_factor;
 
                   local_counter += quantity_data_.field_indices_.size();
                }
@@ -220,7 +219,7 @@ void MaterialFieldQuantity::DoComputeDebugCellData( Node const& node, std::vecto
             for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   // add the dimensionalized value
-                   cell_data[cell_data_counter++] = quantity_data_.debug_default_value_;
+                  cell_data[cell_data_counter++] = quantity_data_.debug_default_value_;
                }
             }
          }

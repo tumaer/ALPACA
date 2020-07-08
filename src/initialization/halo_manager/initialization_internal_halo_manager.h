@@ -77,10 +77,10 @@
 namespace Initialization {
 
    // Initialization function of the internal halo manager
-   InternalHaloManager InitializeInternalHaloManager( TopologyManager & topology_manager,
-                                                      Tree & tree,
-                                                      CommunicationManager & communication_manager,
+   InternalHaloManager InitializeInternalHaloManager( TopologyManager& topology_manager,
+                                                      Tree& tree,
+                                                      CommunicationManager& communication_manager,
                                                       MaterialManager const& material_manager );
-}
+}// namespace Initialization
 
-#endif // INITIALIZATION_INTERNAL_HALO_MANAGER_H
+#endif// INITIALIZATION_INTERNAL_HALO_MANAGER_H

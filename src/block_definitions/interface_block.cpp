@@ -73,7 +73,7 @@
  * @brief Constructor to create a interface block according to an already computed levelset field.
  * @param levelset_initial Reference to array holding the levelset field to be in this interface block.
  */
-InterfaceBlock::InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
+InterfaceBlock::InterfaceBlock( double const ( &levelset_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
 
    // In the base buffer all values are set to zero
    BO::SetFieldBuffer( GetBaseBuffer(), 0.0 );
@@ -88,7 +88,7 @@ InterfaceBlock::InterfaceBlock( double const (&levelset_initial)[CC::TCX()][CC::
    BO::SetFieldBuffer( GetInterfaceStateBuffer(), 0.0 );
 
    // Only set buffer of parameter to zero if they are present
-   if constexpr(CC::InterfaceParameterModelActive()) {
+   if constexpr( CC::InterfaceParameterModelActive() ) {
       BO::SetFieldBuffer( GetInterfaceParameterBuffer(), 0.0 );
    }
 }
@@ -113,7 +113,7 @@ InterfaceBlock::InterfaceBlock( double const levelset_initial ) {
    BO::SetFieldBuffer( GetInterfaceStateBuffer(), 0.0 );
 
    // Only set buffer of parameter to zero if they are present
-   if constexpr(CC::InterfaceParameterModelActive()) {
+   if constexpr( CC::InterfaceParameterModelActive() ) {
       BO::SetFieldBuffer( GetInterfaceParameterBuffer(), 0.0 );
    }
 }
@@ -125,15 +125,15 @@ InterfaceBlock::InterfaceBlock( double const levelset_initial ) {
  * @param buffer_type If a interface field is wanted, the interface buffer type. Defaults to InterfaceDescriptionBufferType::RightHandSide.
  * @return Reference to Array that is the requested buffer.
  */
-auto InterfaceBlock::GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    switch( field_type ) {
-      case InterfaceFieldType::Description : {
+      case InterfaceFieldType::Description: {
          return GetInterfaceDescriptionBuffer( buffer_type )[field_index];
       }
-      case InterfaceFieldType::Parameters : {
+      case InterfaceFieldType::Parameters: {
          return parameters_[field_index];
       }
-      default : {// InterfaceFieldType::States:
+      default: {// InterfaceFieldType::States:
          return states_[field_index];
       }
    }
@@ -142,15 +142,15 @@ auto InterfaceBlock::GetFieldBuffer( InterfaceFieldType const field_type, unsign
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetFieldBuffer( InterfaceFieldType const field_type, unsigned int const field_index, InterfaceDescriptionBufferType const buffer_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    switch( field_type ) {
-      case InterfaceFieldType::Description : {
+      case InterfaceFieldType::Description: {
          return GetInterfaceDescriptionBuffer( buffer_type )[field_index];
       }
-      case InterfaceFieldType::Parameters : {
+      case InterfaceFieldType::Parameters: {
          return parameters_[field_index];
       }
-      default : { // InterfaceFieldType::States:
+      default: {// InterfaceFieldType::States:
          return states_[field_index];
       }
    }
@@ -161,14 +161,14 @@ auto InterfaceBlock::GetFieldBuffer( InterfaceFieldType const field_type, unsign
  * @param interface_description Decider which buffer is to be returned.
  * @return Reference to the array, that is the requested buffer.
  */
-auto InterfaceBlock::GetBaseBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetBaseBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return base_[interface_description];
 }
 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetBaseBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetBaseBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return base_[interface_description];
 }
 
@@ -177,14 +177,14 @@ auto InterfaceBlock::GetBaseBuffer( InterfaceDescription const interface_descrip
  * @param interface_description Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto InterfaceBlock::GetRightHandSideBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetRightHandSideBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return right_hand_side_[interface_description];
 }
 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetRightHandSideBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetRightHandSideBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return right_hand_side_[interface_description];
 }
 
@@ -193,14 +193,14 @@ auto InterfaceBlock::GetRightHandSideBuffer( InterfaceDescription const interfac
  * @param interface_description Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto InterfaceBlock::GetReinitializedBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetReinitializedBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return reinitialized_[interface_description];
 }
 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetReinitializedBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetReinitializedBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return reinitialized_[interface_description];
 }
 
@@ -209,14 +209,14 @@ auto InterfaceBlock::GetReinitializedBuffer( InterfaceDescription const interfac
  * @param interface_description Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto InterfaceBlock::GetInitialBuffer( InterfaceDescription const interface_description ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetInitialBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return initial_[interface_description];
 }
 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetInitialBuffer( InterfaceDescription const interface_description ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetInitialBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return initial_[interface_description];
 }
 
@@ -359,16 +359,16 @@ InterfaceDescriptions const& InterfaceBlock::GetInitialBuffer() const {
  */
 InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type ) {
    switch( buffer_type ) {
-      case InterfaceDescriptionBufferType::RightHandSide : {
+      case InterfaceDescriptionBufferType::RightHandSide: {
          return right_hand_side_;
       }
-      case InterfaceDescriptionBufferType::Reinitialized : {
+      case InterfaceDescriptionBufferType::Reinitialized: {
          return reinitialized_;
       }
-      case InterfaceDescriptionBufferType::Base : {
+      case InterfaceDescriptionBufferType::Base: {
          return base_;
       }
-      default : { // case InterfaceDescriptionBufferType::Initial:
+      default: {// case InterfaceDescriptionBufferType::Initial:
          return initial_;
       }
    }
@@ -379,16 +379,16 @@ InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer( InterfaceD
  */
 InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type ) const {
    switch( buffer_type ) {
-      case InterfaceDescriptionBufferType::RightHandSide : {
+      case InterfaceDescriptionBufferType::RightHandSide: {
          return right_hand_side_;
       }
-      case InterfaceDescriptionBufferType::Reinitialized : {
+      case InterfaceDescriptionBufferType::Reinitialized: {
          return reinitialized_;
       }
-      case InterfaceDescriptionBufferType::Base : {
+      case InterfaceDescriptionBufferType::Base: {
          return base_;
       }
-      default : { // case InterfaceDescriptionBufferType::Initial:
+      default: {// case InterfaceDescriptionBufferType::Initial:
          return initial_;
       }
    }
@@ -399,14 +399,14 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer( Inte
  * @param state_type Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto InterfaceBlock::GetInterfaceStateBuffer( InterfaceState const state_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetInterfaceStateBuffer( InterfaceState const state_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return states_[state_type];
 }
 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetInterfaceStateBuffer( InterfaceState const state_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetInterfaceStateBuffer( InterfaceState const state_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return states_[state_type];
 }
 
@@ -430,14 +430,14 @@ InterfaceStates const& InterfaceBlock::GetInterfaceStateBuffer() const {
  * @param parameter_type Decider which buffer is to be returned.
  * @return Reference to Array that is the requested buffer.
  */
-auto InterfaceBlock::GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return parameters_[parameter_type];
 }
 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetInterfaceParameterBuffer( InterfaceParameter const parameter_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return parameters_[parameter_type];
 }
 
@@ -460,50 +460,49 @@ InterfaceParameters const& InterfaceBlock::GetInterfaceParameterBuffer() const {
  * @brief Gives the requested buffer of a specific single interface block buffer.
  * @param buffer_type type of the interface block buffer requested.
  */
-auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type ) -> double (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    switch( buffer_type ) {
       // interface descriptions
-      case InterfaceBlockBufferType::LevelsetBase : {
+      case InterfaceBlockBufferType::LevelsetBase: {
          return base_[InterfaceDescription::Levelset];
       }
-      case InterfaceBlockBufferType::VolumeFractionBase : {
+      case InterfaceBlockBufferType::VolumeFractionBase: {
          return base_[InterfaceDescription::VolumeFraction];
       }
-      case InterfaceBlockBufferType::LevelsetRightHandSide : {
+      case InterfaceBlockBufferType::LevelsetRightHandSide: {
          return right_hand_side_[InterfaceDescription::Levelset];
       }
-      case InterfaceBlockBufferType::VolumeFractionRightHandSide : {
+      case InterfaceBlockBufferType::VolumeFractionRightHandSide: {
          return right_hand_side_[InterfaceDescription::VolumeFraction];
       }
-      case InterfaceBlockBufferType::LevelsetReinitialized : {
+      case InterfaceBlockBufferType::LevelsetReinitialized: {
          return reinitialized_[InterfaceDescription::Levelset];
       }
-      case InterfaceBlockBufferType::VolumeFractionReinitialized : {
+      case InterfaceBlockBufferType::VolumeFractionReinitialized: {
          return reinitialized_[InterfaceDescription::VolumeFraction];
       }
       // interface states
-      case InterfaceBlockBufferType::InterfaceStateVelocity : {
+      case InterfaceBlockBufferType::InterfaceStateVelocity: {
          return states_[InterfaceState::Velocity];
       }
-      case InterfaceBlockBufferType::InterfaceStatePressurePositive : {
+      case InterfaceBlockBufferType::InterfaceStatePressurePositive: {
          return states_[InterfaceState::PressurePositive];
       }
-      case InterfaceBlockBufferType::InterfaceStatePressureNegative : {
+      case InterfaceBlockBufferType::InterfaceStatePressureNegative: {
          return states_[InterfaceState::PressureNegative];
       }
       // interface parameters
 #ifdef PERFORMANCE
-      default : {
-        return parameters_[InterfaceParameter::SurfaceTensionCoefficient];
-      }
-#else
-      case InterfaceBlockBufferType::InterfaceParameterSurfaceTensionCoefficient : {
+      default: {
          return parameters_[InterfaceParameter::SurfaceTensionCoefficient];
       }
-      default : {
-         throw std::invalid_argument("Requested buffer does not exist (impossible error");
+#else
+      case InterfaceBlockBufferType::InterfaceParameterSurfaceTensionCoefficient: {
+         return parameters_[InterfaceParameter::SurfaceTensionCoefficient];
       }
-      break;
+      default: {
+         throw std::invalid_argument( "Requested buffer does not exist (impossible error" );
+      } break;
 #endif
    }
 }
@@ -511,50 +510,49 @@ auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type ) -> 
 /**
  * @brief Const overload.
  */
-auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type) const -> double const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    switch( buffer_type ) {
       // interface description cases
-      case InterfaceBlockBufferType::LevelsetBase : {
+      case InterfaceBlockBufferType::LevelsetBase: {
          return base_[InterfaceDescription::Levelset];
       }
-      case InterfaceBlockBufferType::VolumeFractionBase : {
+      case InterfaceBlockBufferType::VolumeFractionBase: {
          return base_[InterfaceDescription::VolumeFraction];
       }
-      case InterfaceBlockBufferType::LevelsetRightHandSide : {
+      case InterfaceBlockBufferType::LevelsetRightHandSide: {
          return right_hand_side_[InterfaceDescription::Levelset];
       }
-      case InterfaceBlockBufferType::VolumeFractionRightHandSide : {
+      case InterfaceBlockBufferType::VolumeFractionRightHandSide: {
          return right_hand_side_[InterfaceDescription::VolumeFraction];
       }
-      case InterfaceBlockBufferType::LevelsetReinitialized : {
+      case InterfaceBlockBufferType::LevelsetReinitialized: {
          return reinitialized_[InterfaceDescription::Levelset];
       }
-      case InterfaceBlockBufferType::VolumeFractionReinitialized : {
+      case InterfaceBlockBufferType::VolumeFractionReinitialized: {
          return reinitialized_[InterfaceDescription::VolumeFraction];
       }
       // interface states
-      case InterfaceBlockBufferType::InterfaceStateVelocity : {
+      case InterfaceBlockBufferType::InterfaceStateVelocity: {
          return states_[InterfaceState::Velocity];
       }
-      case InterfaceBlockBufferType::InterfaceStatePressurePositive : {
+      case InterfaceBlockBufferType::InterfaceStatePressurePositive: {
          return states_[InterfaceState::PressurePositive];
       }
-      case InterfaceBlockBufferType::InterfaceStatePressureNegative : {
+      case InterfaceBlockBufferType::InterfaceStatePressureNegative: {
          return states_[InterfaceState::PressureNegative];
       }
       // interface parameters
 #ifdef PERFORMANCE
-      default : {
-        return parameters_[InterfaceParameter::SurfaceTensionCoefficient];
-      }
-#else
-      case InterfaceBlockBufferType::InterfaceParameterSurfaceTensionCoefficient : {
+      default: {
          return parameters_[InterfaceParameter::SurfaceTensionCoefficient];
       }
-      default : {
-         throw std::invalid_argument("Requested buffer does not exist (impossible error");
+#else
+      case InterfaceBlockBufferType::InterfaceParameterSurfaceTensionCoefficient: {
+         return parameters_[InterfaceParameter::SurfaceTensionCoefficient];
       }
-      break;
+      default: {
+         throw std::invalid_argument( "Requested buffer does not exist (impossible error" );
+      } break;
 #endif
    }
 }

@@ -81,9 +81,9 @@ class StiffenedGas : public EquationOfState {
    double const background_pressure_;
 
    // functions required from the base class
-   double DoGetPressure ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnthalpy ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnergy ( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
+   double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
    double DoGetGruneisen() const override;
    double DoGetPsi( double const pressure, double const one_density ) const override;
    double DoGetGamma() const override;
@@ -93,14 +93,14 @@ class StiffenedGas : public EquationOfState {
 public:
    StiffenedGas() = delete;
    explicit StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler );
-   virtual ~StiffenedGas() = default;
+   virtual ~StiffenedGas()             = default;
    StiffenedGas( const StiffenedGas& ) = delete;
    StiffenedGas& operator=( const StiffenedGas& ) = delete;
-   StiffenedGas( StiffenedGas&& ) = delete;
+   StiffenedGas( StiffenedGas&& )                 = delete;
    StiffenedGas& operator=( StiffenedGas&& ) = delete;
 
    // function for logging
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
 };
 
-#endif // STIFFENED_GAS_H
+#endif// STIFFENED_GAS_H

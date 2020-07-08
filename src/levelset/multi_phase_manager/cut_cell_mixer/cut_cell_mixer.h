@@ -68,11 +68,9 @@
 #ifndef CUT_CELL_MIXER_H
 #define CUT_CELL_MIXER_H
 
-
 #include "halo_manager.h"
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator_setup.h"
-
 
 using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geometry_calculator>::type;
 
@@ -83,7 +81,6 @@ using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geo
 template<typename DerivedCutCellMixer>
 class CutCellMixer {
 
-
 protected:
    const GeometryCalculatorConcretization geometry_calculator_;
    HaloManager& halo_manager_;
@@ -92,28 +89,25 @@ protected:
     * @brief Default constructor of the CutCellMixer class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit CutCellMixer( HaloManager & halo_manager ) :
-      geometry_calculator_(),
-      halo_manager_( halo_manager )
-   {
+   explicit CutCellMixer( HaloManager& halo_manager ) : geometry_calculator_(),
+                                                        halo_manager_( halo_manager ) {
       // Empty Constructor, besides initializer list.
    }
 
 public:
-   explicit CutCellMixer() = default;
-   ~CutCellMixer() = default;
+   explicit CutCellMixer()             = default;
+   ~CutCellMixer()                     = default;
    CutCellMixer( CutCellMixer const& ) = delete;
    CutCellMixer& operator=( CutCellMixer const& ) = delete;
-   CutCellMixer( CutCellMixer&& ) = delete;
+   CutCellMixer( CutCellMixer&& )                 = delete;
    CutCellMixer& operator=( CutCellMixer&& ) = delete;
    /**
     * @brief Provides functionality for a cut-cell mixing procedure.
     * @param node The node for which mixing has to be performed.
     */
-   void Mix(Node& node) const {
-      static_cast<DerivedCutCellMixer const&>(*this).MixImplementation(node );
+   void Mix( Node& node ) const {
+      static_cast<DerivedCutCellMixer const&>( *this ).MixImplementation( node );
    }
 };
 
-
-#endif //CUT_CELL_MIXER_H
+#endif//CUT_CELL_MIXER_H

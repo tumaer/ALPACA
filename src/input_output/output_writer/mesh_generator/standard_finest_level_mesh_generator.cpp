@@ -80,9 +80,8 @@
 StandardFinestLevelMeshGenerator::StandardFinestLevelMeshGenerator( TopologyManager const& topology_manager,
                                                                     Tree const& flower,
                                                                     double const dimensionalized_node_size_on_level_zero,
-                                                                    std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) :
-   MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ),
-   number_of_nodes_on_level_zero_( number_of_nodes_on_level_zero ) {
+                                                                    std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) : MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ),
+                                                                                                                                        number_of_nodes_on_level_zero_( number_of_nodes_on_level_zero ) {
    /** Empty besides call of base class constructor and initializer list */
 }
 
@@ -92,7 +91,7 @@ StandardFinestLevelMeshGenerator::StandardFinestLevelMeshGenerator( TopologyMana
  */
 std::array<unsigned long long int, 3> StandardFinestLevelMeshGenerator::GlobalNumberOfVerticesPerDimension() const {
 
-   unsigned long long int&& resolution = 1 << topology_.GetCurrentMaximumLevel();
+   unsigned long long int&& resolution     = 1 << topology_.GetCurrentMaximumLevel();
    unsigned long long int&& vertex_count_x = number_of_nodes_on_level_zero_[0] * resolution * CC::ICX() + 1;
    unsigned long long int&& vertex_count_y = number_of_nodes_on_level_zero_[1] * resolution * CC::ICY() + 1;
    unsigned long long int&& vertex_count_z = number_of_nodes_on_level_zero_[2] * resolution * CC::ICZ() + 1;
@@ -115,13 +114,13 @@ unsigned long long int StandardFinestLevelMeshGenerator::TotalNumberOfVerticesOn
 std::array<unsigned long long int, 2> StandardFinestLevelMeshGenerator::GetLocalNumberOfVerticesAndStartIndex() const {
    // Define the total number of vertices and current rank situation
    unsigned long long int total_number_vertices = TotalNumberOfVerticesOnFinestLevel();
-   int const rank = MpiUtilities::MyRankId();
-   int const number_of_ranks = MpiUtilities::NumberOfRanks();
+   int const rank                               = MpiUtilities::MyRankId();
+   int const number_of_ranks                    = MpiUtilities::NumberOfRanks();
    // Compute the number of local number of vertices and given start index
-   int const remainder = total_number_vertices % number_of_ranks;
+   int const remainder                          = total_number_vertices % number_of_ranks;
    unsigned long long int local_number_vertices = total_number_vertices / number_of_ranks;
-   unsigned long long int const start_index = local_number_vertices * rank + ( rank < remainder ? rank : remainder );
-   if(  rank  < remainder ) { local_number_vertices++; }
+   unsigned long long int const start_index     = local_number_vertices * rank + ( rank < remainder ? rank : remainder );
+   if( rank < remainder ) { local_number_vertices++; }
    return { local_number_vertices, start_index };
 }
 
@@ -157,14 +156,14 @@ hsize_t StandardFinestLevelMeshGenerator::DoGetLocalCellsStartIndex() const {
  * @brief See base class implementation.
  */
 std::vector<hsize_t> StandardFinestLevelMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinates() const {
-   return { hsize_t( TotalNumberOfVerticesOnFinestLevel() ), hsize_t ( 3 ) };
+   return { hsize_t( TotalNumberOfVerticesOnFinestLevel() ), hsize_t( 3 ) };
 }
 
 /**
  * @brief See base class implementation.
  */
 std::vector<hsize_t> StandardFinestLevelMeshGenerator::DoGetLocalDimensionsOfVertexCoordinates() const {
-   return { hsize_t( GetLocalNumberOfVerticesAndStartIndex()[0] ), hsize_t ( 3 ) };
+   return { hsize_t( GetLocalNumberOfVerticesAndStartIndex()[0] ), hsize_t( 3 ) };
 }
 
 /**
@@ -177,9 +176,9 @@ hsize_t StandardFinestLevelMeshGenerator::DoGetLocalVertexCoordinatesStartIndex(
 /**
  * @brief See base class definition.
  */
-void StandardFinestLevelMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const {
+void StandardFinestLevelMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
    // Obtain correct local number of vertices and start index
-   unsigned int const maximum_level = topology_.GetCurrentMaximumLevel();
+   unsigned int const maximum_level                                             = topology_.GetCurrentMaximumLevel();
    std::array<unsigned long long int, 2>&& local_number_vertices_and_startIndex = GetLocalNumberOfVerticesAndStartIndex();
 
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
@@ -188,20 +187,20 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexCoordinates( std::vector<d
    // Generate the vertex coordinates on the finest level
    // Remember: The mesh generator class already take the dimensionalized node size. Therfore, no additional dimensionalization is required.
    unsigned long long int const resolution = 1 << maximum_level;
-   double const cell_size_x = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICX();
-   double const cell_size_y = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICY();
-   double const cell_size_z = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICZ();
+   double const cell_size_x                = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICX();
+   double const cell_size_y                = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICY();
+   double const cell_size_z                = dimensionalized_node_size_on_level_zero_ / resolution / CC::ICZ();
 
    // Generate vertex coordinates
    std::array<unsigned long long int, 3> const global_number_of_vertices = GlobalNumberOfVerticesPerDimension();
    for( unsigned long long int local_vertex_index = 0; local_vertex_index < local_number_vertices_and_startIndex[0]; local_vertex_index++ ) {
       // The index in in the global vector of all vertices is defined by the start index plus the local running index
-      unsigned long long int  const global_vertex_index = local_vertex_index + local_number_vertices_and_startIndex[1];
+      unsigned long long int const global_vertex_index = local_vertex_index + local_number_vertices_and_startIndex[1];
       //invert 3D to 1D array indexing; global_vertex_index = x + X * y + X * Y * z
-      unsigned long int const x =   global_vertex_index %   global_number_of_vertices[0];
-      unsigned long int const y = ( global_vertex_index /   global_number_of_vertices[0] ) % global_number_of_vertices[1];
-      unsigned long int const z =   global_vertex_index / ( global_number_of_vertices[0]   * global_number_of_vertices[1] );
-      vertex_coordinates[local_vertex_index * 3    ] = x * cell_size_x;
+      unsigned long int const x                      = global_vertex_index % global_number_of_vertices[0];
+      unsigned long int const y                      = ( global_vertex_index / global_number_of_vertices[0] ) % global_number_of_vertices[1];
+      unsigned long int const z                      = global_vertex_index / ( global_number_of_vertices[0] * global_number_of_vertices[1] );
+      vertex_coordinates[local_vertex_index * 3]     = x * cell_size_x;
       vertex_coordinates[local_vertex_index * 3 + 1] = y * cell_size_y;
       vertex_coordinates[local_vertex_index * 3 + 2] = z * cell_size_z;
    }
@@ -210,7 +209,7 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexCoordinates( std::vector<d
 /**
  * @brief See base class definition.
  */
-void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const {
+void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const {
 
    // Resize Vertex ID vector ( 8 vertices span one cell )
    vertex_ids.resize( topology_.LocalLeafIds().size() * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock() * 8 );
@@ -223,15 +222,15 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned 
     * v( x,y,z ) = ( 0,0,1 )               -> ID: ( max +1 ) * ( max + 1 )
     * v( x,y,z ) = ( total, total, total ) -> ID: ( max + 1 ) * ( max + 1 ) * ( max + 1 )
     */
-   unsigned int maximum_level = topology_.GetCurrentMaximumLevel();
+   unsigned int maximum_level                                         = topology_.GetCurrentMaximumLevel();
    std::array<unsigned long long int, 3>&& vertex_count_per_dimension = GlobalNumberOfVerticesPerDimension();
-   unsigned long long int const vertex_count_x = vertex_count_per_dimension[0];
-   unsigned long long int const vertex_count_y = vertex_count_per_dimension[1];
+   unsigned long long int const vertex_count_x                        = vertex_count_per_dimension[0];
+   unsigned long long int const vertex_count_y                        = vertex_count_per_dimension[1];
 
    //iterate over all leafs to generate vertex ids
    unsigned long long int vertex_id_counter = 0;
-   unsigned long long int const resolution = 1 << maximum_level;
-   for( std::uint64_t const& id : topology_.LocalLeafIds() ){
+   unsigned long long int const resolution  = 1 << maximum_level;
+   for( std::uint64_t const& id : topology_.LocalLeafIds() ) {
       // Additional distance to be considered between current level of node and maximum level where IDs are specified
       unsigned long long int const level_factor = resolution >> LevelOfNode( id );
       //Find index of nodes domain by coordinates function; Cast from double to long! -> for indices greater 2^53 this is incorrect
@@ -239,33 +238,33 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned 
       for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
          for( unsigned int j = 0; j < CC::ICY(); ++j ) {
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
-               unsigned long long int vertex_index = 0;
+               unsigned long long int vertex_index  = 0;
                unsigned long long int const index_x = ( block_origin[0] * CC::ICX() + i ) * level_factor;
                unsigned long long int const index_y = ( block_origin[1] * CC::ICY() + j ) * level_factor;
                unsigned long long int const index_z = ( block_origin[2] * CC::ICZ() + k ) * level_factor;
 
-               vertex_index = index_x + index_y * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
+               vertex_index                  = index_x + index_y * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter] = vertex_index;
 
-               vertex_index = ( index_x + level_factor ) + index_y * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
+               vertex_index                      = ( index_x + level_factor ) + index_y * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 1] = vertex_index;
 
-               vertex_index = ( index_x + level_factor ) + ( index_y + level_factor ) * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
+               vertex_index                      = ( index_x + level_factor ) + ( index_y + level_factor ) * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 2] = vertex_index;
 
-               vertex_index = index_x + ( index_y + level_factor ) * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
+               vertex_index                      = index_x + ( index_y + level_factor ) * vertex_count_x + index_z * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 3] = vertex_index;
 
-               vertex_index = index_x + index_y * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
+               vertex_index                      = index_x + index_y * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 4] = vertex_index;
 
-               vertex_index = ( index_x + level_factor ) + index_y * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
+               vertex_index                      = ( index_x + level_factor ) + index_y * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 5] = vertex_index;
 
-               vertex_index = ( index_x + level_factor ) + ( index_y + level_factor ) * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
+               vertex_index                      = ( index_x + level_factor ) + ( index_y + level_factor ) * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 6] = vertex_index;
 
-               vertex_index = index_x + ( index_y + level_factor ) * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
+               vertex_index                      = index_x + ( index_y + level_factor ) * vertex_count_x + ( index_z + level_factor ) * vertex_count_x * vertex_count_y;
                vertex_ids[vertex_id_counter + 7] = vertex_index;
 
                vertex_id_counter += 8;

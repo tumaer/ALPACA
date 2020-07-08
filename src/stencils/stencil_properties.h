@@ -71,18 +71,22 @@
 /**
  * @brief Unique identifier whether a stencil is a derivative or reconstruction stencil.
  */
-enum class StencilType {Reconstruction, Derivative};
+enum class StencilType { Reconstruction,
+                         Derivative };
 
 /**
  * @brief Unique identifier to indicate whether a stencil should be applied UpwindLeft, UpwindRight or Central.
  */
-enum class StencilProperty {UpwindLeft, UpwindRight, Central};
+enum class StencilProperty { UpwindLeft,
+                             UpwindRight,
+                             Central };
 using SP = StencilProperty;
 
 /**
  * @brief Unique identifier to indicate whether a stencil should reconstruct based on cell-centered values or based
  *        on differences (HJ-WENO like reconstruction).
  */
-enum class ReconstructionType {Values, Differences};
+enum class ReconstructionType { Values,
+                                Differences };
 
-#endif // STENCIL_PROPERTIES_H
+#endif// STENCIL_PROPERTIES_H

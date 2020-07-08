@@ -73,28 +73,28 @@
  *        It serves as a proxy class for different time control reader types (xml,...) that only read the actual data. 
  *        Here, consistency checks are done that all read data are valid.  
  */
-class TimeControlReader{
+class TimeControlReader {
 
 protected:
    // Functions that must be implemented by the derived classes
    virtual double DoReadStartTime() const = 0;
-   virtual double DoReadEndTime() const = 0;
+   virtual double DoReadEndTime() const   = 0;
    virtual double DoReadCFLNumber() const = 0;
 
-   // constructor can only be called from derived classes 
+   // constructor can only be called from derived classes
    explicit TimeControlReader() = default;
 
 public:
-   virtual ~TimeControlReader() = default;
+   virtual ~TimeControlReader()                  = default;
    TimeControlReader( TimeControlReader const& ) = default;
    TimeControlReader& operator=( TimeControlReader const& ) = delete;
-   TimeControlReader( TimeControlReader&& ) = default;
+   TimeControlReader( TimeControlReader&& )                 = default;
    TimeControlReader& operator=( TimeControlReader&& ) = delete;
 
-   // Return functions with prepreparation of the data 
+   // Return functions with prepreparation of the data
    double ReadStartTime() const;
    double ReadEndTime() const;
    double ReadCFLNumber() const;
 };
 
-#endif // TIME_CONTROL_READER_H
+#endif// TIME_CONTROL_READER_H

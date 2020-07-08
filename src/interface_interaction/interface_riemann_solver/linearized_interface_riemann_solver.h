@@ -68,7 +68,6 @@
 #ifndef LINEARIZED_INTERFACE_RIEMANN_SOLVER_H
 #define LINEARIZED_INTERFACE_RIEMANN_SOLVER_H
 
-
 #include "interface_riemann_solver.h"
 
 /**
@@ -78,18 +77,17 @@ class LinearizedInterfaceRiemannSolver : public InterfaceRiemannSolver<Linearize
 
    friend InterfaceRiemannSolver;
 
-   std::array<double, 3> SolveInterfaceRiemannProblemImplementation(double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
-      double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
-      double const delta_p) const;
+   std::array<double, 3> SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
+                                                                     double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
+                                                                     double const delta_p ) const;
 
 public:
    LinearizedInterfaceRiemannSolver() = delete;
    explicit LinearizedInterfaceRiemannSolver( MaterialManager const& material_manager );
    LinearizedInterfaceRiemannSolver( LinearizedInterfaceRiemannSolver const& ) = delete;
    LinearizedInterfaceRiemannSolver& operator=( LinearizedInterfaceRiemannSolver const& ) = delete;
-   LinearizedInterfaceRiemannSolver( LinearizedInterfaceRiemannSolver&& ) = delete;
+   LinearizedInterfaceRiemannSolver( LinearizedInterfaceRiemannSolver&& )                 = delete;
    LinearizedInterfaceRiemannSolver& operator=( LinearizedInterfaceRiemannSolver&& ) = delete;
 };
 
-
-#endif //LINEARIZED_INTERFACE_RIEMANN_SOLVER_H
+#endif//LINEARIZED_INTERFACE_RIEMANN_SOLVER_H

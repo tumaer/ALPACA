@@ -91,13 +91,13 @@ class ConstantInterfaceParameterModel : public InterfaceParameterModel {
     * @brief Executes the actual parameter calculation on the complete block
     * @param node Node for which the parameter is computed
     */
-   void DoUpdateParameter( Node & node  ) const override {
+   void DoUpdateParameter( Node& node ) const override {
 
       // Obtain the interface tags and volume fraction
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
       // extract the parameter from the block, which should be computed
-      double (&parameter_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedConstantInterfaceParameterModel::parameter_buffer_type_ );
+      double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedConstantInterfaceParameterModel::parameter_buffer_type_ );
 
       // Compute the parameter based on constan values
       for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
@@ -106,13 +106,13 @@ class ConstantInterfaceParameterModel : public InterfaceParameterModel {
 
                // Only compute the parameter for cut cells. Average quantities based on the volume fraction
                if( interface_tags[i][j][k] == ITTI( IT::OldCutCell ) ) {
-                  parameter_buffer[i][j][k] = static_cast< DerivedConstantInterfaceParameterModel const& >( *this ).ComputeParameter();
+                  parameter_buffer[i][j][k] = static_cast<DerivedConstantInterfaceParameterModel const&>( *this ).ComputeParameter();
                } else {
                   parameter_buffer[i][j][k] = 0.0;
                }
-            } //k
-         } //j
-      }//i
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
@@ -124,12 +124,11 @@ class ConstantInterfaceParameterModel : public InterfaceParameterModel {
    }
 
 public:
-   virtual ~ConstantInterfaceParameterModel() = default;
+   virtual ~ConstantInterfaceParameterModel()                                = default;
    ConstantInterfaceParameterModel( ConstantInterfaceParameterModel const& ) = delete;
    ConstantInterfaceParameterModel& operator=( ConstantInterfaceParameterModel const& ) = delete;
-   ConstantInterfaceParameterModel( ConstantInterfaceParameterModel&& ) = delete;
+   ConstantInterfaceParameterModel( ConstantInterfaceParameterModel&& )                 = delete;
    ConstantInterfaceParameterModel& operator=( ConstantInterfaceParameterModel&& ) = delete;
-
 };
 
-#endif // CONSTANT_INTERFACE_PARAMETER_MODEL_H
+#endif// CONSTANT_INTERFACE_PARAMETER_MODEL_H

@@ -80,7 +80,6 @@ class InterfaceRiemannSolver {
    friend DerivedInterfaceRiemannSolver;
 
 protected:
-
    MaterialManager const& material_manager_;
 
    /**
@@ -92,11 +91,11 @@ protected:
    }
 
 public:
-   InterfaceRiemannSolver() = delete;
-   ~InterfaceRiemannSolver() = default;
+   InterfaceRiemannSolver()                                = delete;
+   ~InterfaceRiemannSolver()                               = default;
    InterfaceRiemannSolver( InterfaceRiemannSolver const& ) = delete;
    InterfaceRiemannSolver& operator=( InterfaceRiemannSolver const& ) = delete;
-   InterfaceRiemannSolver( InterfaceRiemannSolver&& ) = delete;
+   InterfaceRiemannSolver( InterfaceRiemannSolver&& )                 = delete;
    InterfaceRiemannSolver& operator=( InterfaceRiemannSolver&& ) = delete;
 
    /**
@@ -113,13 +112,12 @@ public:
     * @return An array that contains following information in the given order: interface_velocity, interface_pressure_positive, interface_pressure_negative.
     */
    std::array<double, 3> SolveInterfaceRiemannProblem( double const& rho_left, double const& p_left, double const& velocity_normal_left, MaterialName const& material_left,
-       double const& rho_right, double const& p_right, double const& velocity_normal_right, MaterialName const& material_right,
-       double const& delta_p ) const {
+                                                       double const& rho_right, double const& p_right, double const& velocity_normal_right, MaterialName const& material_right,
+                                                       double const& delta_p ) const {
       return static_cast<DerivedInterfaceRiemannSolver const&>( *this ).SolveInterfaceRiemannProblemImplementation( rho_left, p_left, velocity_normal_left, material_left,
-         rho_right, p_right, velocity_normal_right, material_right,
-         delta_p );
+                                                                                                                    rho_right, p_right, velocity_normal_right, material_right,
+                                                                                                                    delta_p );
    }
 };
 
-
-#endif //INTERFACE_RIEMANN_SOLVER_H
+#endif//INTERFACE_RIEMANN_SOLVER_H

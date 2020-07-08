@@ -91,19 +91,18 @@ InputReader::InputReader( std::string const& input_filename,
                           std::unique_ptr<OutputReader const> output_reader,
                           std::unique_ptr<RestartReader const> restart_reader,
                           std::unique_ptr<SourceTermReader const> source_term_reader,
-                          std::unique_ptr<TimeControlReader const> time_control_reader ) :
-   // Start initializer list
-   input_filename_( input_filename ),
-   input_type_( input_type ),
-   material_reader_( std::move( material_reader ) ),
-   boundary_condition_reader_( std::move( boundary_condition_reader ) ),
-   initial_condition_reader_( std::move( initial_condition_reader ) ),
-   multi_resolution_reader_( std::move( multi_resolution_reader ) ),
-   dimensionalization_reader_( std::move( dimensionalization_reader ) ),
-   output_reader_( std::move( output_reader ) ),
-   restart_reader_( std::move( restart_reader ) ),
-   source_term_reader_( std::move( source_term_reader ) ),
-   time_control_reader_( std::move( time_control_reader ) ) {
+                          std::unique_ptr<TimeControlReader const> time_control_reader ) :// Start initializer list
+                                                                                           input_filename_( input_filename ),
+                                                                                           input_type_( input_type ),
+                                                                                           material_reader_( std::move( material_reader ) ),
+                                                                                           boundary_condition_reader_( std::move( boundary_condition_reader ) ),
+                                                                                           initial_condition_reader_( std::move( initial_condition_reader ) ),
+                                                                                           multi_resolution_reader_( std::move( multi_resolution_reader ) ),
+                                                                                           dimensionalization_reader_( std::move( dimensionalization_reader ) ),
+                                                                                           output_reader_( std::move( output_reader ) ),
+                                                                                           restart_reader_( std::move( restart_reader ) ),
+                                                                                           source_term_reader_( std::move( source_term_reader ) ),
+                                                                                           time_control_reader_( std::move( time_control_reader ) ) {
    /** Empty besides initializer list */
 }
 

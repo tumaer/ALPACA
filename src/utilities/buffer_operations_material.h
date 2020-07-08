@@ -89,7 +89,7 @@ namespace BufferOperations {
          for( auto& mat_block : node.GetPhases() ) {
             // Get the source and target buffers
             Conservatives const& source_conservatives = mat_block.second.GetConservativeBuffer<SourceBuffer>();
-            Conservatives & target_conservatives = mat_block.second.GetConservativeBuffer<TargetBuffer>();
+            Conservatives& target_conservatives       = mat_block.second.GetConservativeBuffer<TargetBuffer>();
             // Copy the buffer
             BO::CopyFieldBuffer( source_conservatives, target_conservatives );
          }
@@ -118,10 +118,10 @@ namespace BufferOperations {
        * @param node The node for which the buffers are swapped.
        */
       template<ConservativeBufferType FirstBuffer, ConservativeBufferType SecondBuffer>
-      inline void SwapConservativeBuffersForNode( Node & node ) {
+      inline void SwapConservativeBuffersForNode( Node& node ) {
          for( auto& mat_block : node.GetPhases() ) {
-            Conservatives & first_conservatives  = mat_block.second.GetConservativeBuffer<FirstBuffer>();
-            Conservatives & second_conservatives = mat_block.second.GetConservativeBuffer<SecondBuffer>();
+            Conservatives& first_conservatives  = mat_block.second.GetConservativeBuffer<FirstBuffer>();
+            Conservatives& second_conservatives = mat_block.second.GetConservativeBuffer<SecondBuffer>();
             BO::SwapFieldBuffer( first_conservatives, second_conservatives );
          }
       }
@@ -135,13 +135,13 @@ namespace BufferOperations {
        */
       template<ConservativeBufferType FirstBuffer, ConservativeBufferType SecondBuffer>
       inline void SwapConservativeBuffersForNodeList( std::vector<std::reference_wrapper<Node>> const& nodes ) {
-         for( Node & node : nodes ) {
+         for( Node& node : nodes ) {
             SwapConservativeBuffersForNode<FirstBuffer, SecondBuffer>( node );
          }
       }
 
-   } // namespace Material
+   }// namespace Material
 
-} // namespace BufferOperations
+}// namespace BufferOperations
 
-#endif // BUFFER_OPERATIONS_MATERIAL_H
+#endif// BUFFER_OPERATIONS_MATERIAL_H

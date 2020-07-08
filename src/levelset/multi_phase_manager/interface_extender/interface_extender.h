@@ -68,7 +68,6 @@
 #ifndef INTERFACE_EXTENDER_H
 #define INTERFACE_EXTENDER_H
 
-
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator_marching_cubes.h"
 #include "halo_manager.h"
@@ -85,7 +84,7 @@ class InterfaceExtender {
    friend DerivedInterfaceExtender;
 
    // Class obtained from main
-   HaloManager & halo_manager_;
+   HaloManager& halo_manager_;
    LogWriter& logger_;
 
    // private variables required for definition on which material field type the extender works (static required for array definition)
@@ -93,7 +92,7 @@ class InterfaceExtender {
    /**
     * The number of quantities that are necessary to track convergence. Those are the maximum values of the quantities to extend and the residuum.
     */
-   static constexpr unsigned int number_of_convergence_tracking_quantities_ = IF::NOFTE(field_type_) + 1;
+   static constexpr unsigned int number_of_convergence_tracking_quantities_ = IF::NOFTE( field_type_ ) + 1;
    // numerical threshold
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
 
@@ -104,36 +103,36 @@ class InterfaceExtender {
     */
    void DetermineMaximumValueOfQuantitiesToExtend( Node const& node, std::vector<double>& convergence_tracking_quantities ) const {
 
-      std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
 
       for( unsigned int field_index = 0; field_index < IF::NOFTE( field_type_ ); ++field_index ) {
-         double const (&interface_field)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type_, IF::FITE( field_type_, field_index ) );
+         double const( &interface_field )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type_, IF::FITE( field_type_, field_index ) );
          for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
             for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
                for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                   if( std::abs( interface_tags[i][j][k] ) < ITTI( IT::BulkPhase ) && std::abs( interface_tags[i][j][k] ) > ITTI( IT::NewCutCell ) ) {
                      convergence_tracking_quantities[field_index] = std::max( convergence_tracking_quantities[field_index], std::abs( interface_field[i][j][k] ) );
                   }
-               } //k
-            } //j
-         } //i
-      } //field of interface field_type
+               }//k
+            }   //j
+         }      //i
+      }         //field of interface field_type
    }
 
    /**
     * @brief Default constructor of the InterfaceExtender class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit InterfaceExtender( HaloManager & halo_manager ) : halo_manager_( halo_manager ), logger_( LogWriter::Instance() ) {
+   explicit InterfaceExtender( HaloManager& halo_manager ) : halo_manager_( halo_manager ), logger_( LogWriter::Instance() ) {
       // Empty besides initializer list.
    }
 
 public:
-   InterfaceExtender() = delete;
-   ~InterfaceExtender() = default;
+   InterfaceExtender()                           = delete;
+   ~InterfaceExtender()                          = default;
    InterfaceExtender( InterfaceExtender const& ) = delete;
    InterfaceExtender& operator=( InterfaceExtender const& ) = delete;
-   InterfaceExtender( InterfaceExtender&& ) = delete;
+   InterfaceExtender( InterfaceExtender&& )                 = delete;
    InterfaceExtender& operator=( InterfaceExtender&& ) = delete;
 
    /**
@@ -150,10 +149,10 @@ public:
                convergence_tracking_quantities[field_index] = 0.0;
             }
             for( auto const& node : nodes ) {
-               DetermineMaximumValueOfQuantitiesToExtend(node, convergence_tracking_quantities);
+               DetermineMaximumValueOfQuantitiesToExtend( node, convergence_tracking_quantities );
             }
 
-            MPI_Allreduce(MPI_IN_PLACE, convergence_tracking_quantities.data(), number_of_convergence_tracking_quantities_, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+            MPI_Allreduce( MPI_IN_PLACE, convergence_tracking_quantities.data(), number_of_convergence_tracking_quantities_, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
 
             if( convergence_tracking_quantities[IF::NOFTE( field_type_ )] < InterfaceStateExtensionConstants::MaximumResiduum && iteration_number != 0 ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
@@ -165,7 +164,7 @@ public:
                   logger_.AppendDelayedLog( "IntExt: nc   !!!   " );
                }
             }
-            convergence_tracking_quantities[IF::NOFTE(field_type_)] = 0.0;
+            convergence_tracking_quantities[IF::NOFTE( field_type_ )] = 0.0;
          }
 
          // carry out the actual iterative extension on all nodes
@@ -181,5 +180,4 @@ public:
    }
 };
 
-
-#endif //INTERFACE_EXTENDER_H
+#endif//INTERFACE_EXTENDER_H

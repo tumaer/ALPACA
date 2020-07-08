@@ -79,8 +79,7 @@
  */
 InterfaceMeshGenerator::InterfaceMeshGenerator( TopologyManager const& topology_manager,
                                                 Tree const& flower,
-                                                double const dimensionalized_node_size_on_level_zero ) :
-   MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ) {
+                                                double const dimensionalized_node_size_on_level_zero ) : MeshGenerator( topology_manager, flower, dimensionalized_node_size_on_level_zero ) {
    /** Empty besides call of base class constructor */
 }
 
@@ -116,14 +115,14 @@ hsize_t InterfaceMeshGenerator::DoGetLocalCellsStartIndex() const {
  * @brief See base class implementation.
  */
 std::vector<hsize_t> InterfaceMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinates() const {
-   return { hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t ( 3 ) };
+   return { hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t( 3 ) };
 }
 
 /**
  * @brief See base class implementation.
  */
 std::vector<hsize_t> InterfaceMeshGenerator::DoGetLocalDimensionsOfVertexCoordinates() const {
-   return { hsize_t( topology_.LocalInterfaceLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t ( 3 ) };
+   return { hsize_t( topology_.LocalInterfaceLeafIds().size() ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t( 3 ) };
 }
 
 /**
@@ -136,7 +135,7 @@ hsize_t InterfaceMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
 /**
  * @brief See base class definition.
  */
-void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const {
+void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
 
    // get the correct number of interface leaves for the rank
    std::vector<std::uint64_t> local_interface_leaf_ids = topology_.LocalInterfaceLeafIds();
@@ -146,13 +145,13 @@ void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & v
    // Compute the correct coordinates of the vertices
    std::size_t vertex_counter = 0;
    for( auto const& id : local_interface_leaf_ids ) {
-      double const block_size = DomainSizeOfId( id, dimensionalized_node_size_on_level_zero_ );
-      double const cell_size = MeshGeneratorUtilities::CellSizeForBlockSize( block_size );
+      double const block_size            = DomainSizeOfId( id, dimensionalized_node_size_on_level_zero_ );
+      double const cell_size             = MeshGeneratorUtilities::CellSizeForBlockSize( block_size );
       std::array<double, 3> block_origin = DomainCoordinatesOfId( id, block_size );
       for( unsigned int k = 0; k <= CC::ICZ(); ++k ) {
          for( unsigned int j = 0; j <= CC::ICY(); ++j ) {
             for( unsigned int i = 0; i <= CC::ICX(); ++i ) {
-               vertex_coordinates[vertex_counter    ] = block_origin[0] + double( i ) * cell_size;
+               vertex_coordinates[vertex_counter]     = block_origin[0] + double( i ) * cell_size;
                vertex_coordinates[vertex_counter + 1] = block_origin[1] + double( j ) * cell_size;
                vertex_coordinates[vertex_counter + 2] = block_origin[2] + double( k ) * cell_size;
                vertex_counter += 3;
@@ -165,7 +164,7 @@ void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double> & v
 /**
  * @brief See base class definition.
  */
-void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const {
+void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const {
    /************************************************************************/
    /** 1. Create full set of vertices */
    // Local leave definitions
@@ -196,14 +195,14 @@ void InterfaceMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long 
                // Shift index for correct indexing in the global mesh (no duplicated IDs)
                unsigned long long int const shift = ( leaves_counter + offset ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock();
                // Add all vertices for one cell
-               vertex_ids[vertex_id_counter    ] =    i    +    j    * j_ids_skew +    k    * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 1] = ( i+1 ) +    j    * j_ids_skew +    k    * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 2] = ( i+1 ) + ( j+1 ) * j_ids_skew +    k    * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 3] =    i    + ( j+1 ) * j_ids_skew +    k    * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 4] =    i    +    j    * j_ids_skew + ( k+1 ) * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 5] = ( i+1 ) +    j    * j_ids_skew + ( k+1 ) * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 6] = ( i+1 ) + ( j+1 ) * j_ids_skew + ( k+1 ) * k_ids_skew + shift;
-               vertex_ids[vertex_id_counter + 7] =    i    + ( j+1 ) * j_ids_skew + ( k+1 ) * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter]     = i + j * j_ids_skew + k * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 1] = ( i + 1 ) + j * j_ids_skew + k * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 2] = ( i + 1 ) + ( j + 1 ) * j_ids_skew + k * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 3] = i + ( j + 1 ) * j_ids_skew + k * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 4] = i + j * j_ids_skew + ( k + 1 ) * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 5] = ( i + 1 ) + j * j_ids_skew + ( k + 1 ) * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 6] = ( i + 1 ) + ( j + 1 ) * j_ids_skew + ( k + 1 ) * k_ids_skew + shift;
+               vertex_ids[vertex_id_counter + 7] = i + ( j + 1 ) * j_ids_skew + ( k + 1 ) * k_ids_skew + shift;
                vertex_id_counter += 8;
             }
          }

@@ -94,10 +94,10 @@ class Tree {
 public:
    Tree() = delete;
    explicit Tree( TopologyManager const& topology, unsigned int const maximum_level, double const node_size_on_level_zero );
-   ~Tree() = default;
+   ~Tree()             = default;
    Tree( Tree const& ) = delete;
    Tree& operator=( Tree const& ) = delete;
-   Tree( Tree&& ) = delete;
+   Tree( Tree&& )                 = delete;
    Tree& operator=( Tree&& ) = delete;
 
    /**
@@ -109,7 +109,7 @@ public:
    }
 
    // Functions for manipulating the tree
-   Node& CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials, std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
+   Node& CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials, std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
                      std::unique_ptr<InterfaceBlock> interface_block = nullptr );
    Node& CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials );
    void RemoveNodeWithId( std::uint64_t const id );
@@ -150,4 +150,4 @@ public:
    inline std::vector<std::unordered_map<std::uint64_t, Node>> const& FullNodeList() const { return nodes_; }
 };
 
-#endif // TREE_H
+#endif// TREE_H

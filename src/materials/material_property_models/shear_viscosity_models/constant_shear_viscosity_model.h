@@ -82,7 +82,7 @@ class ConstantShearViscosityModel : public ConstantMaterialParameterModel<Consta
    friend ConstantMaterialParameterModel;
 
    // Definition of all parameters needed in the base class for the computations
-   static constexpr Parameter parameter_buffer_type_ = Parameter::ShearViscosity; // buffer that is modified by the model
+   static constexpr Parameter parameter_buffer_type_ = Parameter::ShearViscosity;// buffer that is modified by the model
 
    // member variables needed for the model calculation
    double const mu_constant_;
@@ -94,15 +94,14 @@ public:
    ConstantShearViscosityModel() = delete;
    explicit ConstantShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                          UnitHandler const& unit_handler );
-   virtual ~ConstantShearViscosityModel() = default;
+   virtual ~ConstantShearViscosityModel()                            = default;
    ConstantShearViscosityModel( const ConstantShearViscosityModel& ) = delete;
    ConstantShearViscosityModel& operator=( const ConstantShearViscosityModel& ) = delete;
-   ConstantShearViscosityModel( ConstantShearViscosityModel&& ) = delete;
+   ConstantShearViscosityModel( ConstantShearViscosityModel&& )                 = delete;
    ConstantShearViscosityModel& operator=( ConstantShearViscosityModel&& ) = delete;
 
    // logging function
    std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
-
 };
 
-#endif // CONSTANT_SHEAR_VISCOSITY_MODEL_H
+#endif// CONSTANT_SHEAR_VISCOSITY_MODEL_H

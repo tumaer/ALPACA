@@ -81,15 +81,15 @@ namespace Initialization {
 
    // Initialization function for the modular algorithm assembler
    ModularAlgorithmAssembler InitializeModularAlgorithmAssembler( InputReader const& input_reader,
-                                                                  TopologyManager & topology_manager,
-                                                                  Tree & tree,
-                                                                  CommunicationManager & communication_manager,
-                                                                  HaloManager & halo_manager,
+                                                                  TopologyManager& topology_manager,
+                                                                  Tree& tree,
+                                                                  CommunicationManager& communication_manager,
+                                                                  HaloManager& halo_manager,
                                                                   Multiresolution const& multiresolution,
                                                                   MaterialManager const& material_manager,
-                                                                  InputOutputManager & input_output_manager,
+                                                                  InputOutputManager& input_output_manager,
                                                                   InitialCondition const& initial_condition,
                                                                   UnitHandler const& unit_handler );
-} // namespace Initialization
+}// namespace Initialization
 
-#endif // INITIALIZATION_MODULAR_ALGORITHM_ASSEMBLER_H
+#endif// INITIALIZATION_MODULAR_ALGORITHM_ASSEMBLER_H

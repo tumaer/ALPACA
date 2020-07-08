@@ -74,11 +74,10 @@
  * @param flower The tree for the node informations on the current rank.
  * @param node_size_on_level_zero Already dimensionalized size of a single node on level zero.
  */
-MeshGenerator::MeshGenerator( TopologyManager const& topology_manager, Tree const& flower, double const dimensionalized_node_size_on_level_zero ) :
-   topology_( topology_manager ),
-   tree_( flower ),
-   dimensionalized_node_size_on_level_zero_( dimensionalized_node_size_on_level_zero ) {
-      /** Empty constructor besides initializer list */
+MeshGenerator::MeshGenerator( TopologyManager const& topology_manager, Tree const& flower, double const dimensionalized_node_size_on_level_zero ) : topology_( topology_manager ),
+                                                                                                                                                    tree_( flower ),
+                                                                                                                                                    dimensionalized_node_size_on_level_zero_( dimensionalized_node_size_on_level_zero ) {
+   /** Empty constructor besides initializer list */
 }
 
 /**
@@ -89,7 +88,7 @@ MeshGenerator::MeshGenerator( TopologyManager const& topology_manager, Tree cons
  */
 std::string MeshGenerator::GetXdmfTopologyString( std::string const& filename, std::string const& group_name ) const {
    hsize_t const global_number_cells = GetGlobalNumberOfCells();
-   std::string const data_item("<DataItem NumberType=\"Int\" Format=\"HDF\" Dimensions=\"" + std::to_string( global_number_cells ) + " 8\"> " + filename + ":/" + group_name + "/" + vertex_ids_name_ + " </DataItem>\n");
+   std::string const data_item( "<DataItem NumberType=\"Int\" Format=\"HDF\" Dimensions=\"" + std::to_string( global_number_cells ) + " 8\"> " + filename + ":/" + group_name + "/" + vertex_ids_name_ + " </DataItem>\n" );
    return XdmfUtilities::TopologyString( data_item, global_number_cells );
 }
 
@@ -101,7 +100,7 @@ std::string MeshGenerator::GetXdmfTopologyString( std::string const& filename, s
  */
 std::string MeshGenerator::GetXdmfGeometryString( std::string const& filename, std::string const& group_name ) const {
    hsize_t const global_number_vertices = GetGlobalDimensionsOfVertexCoordinates().front();
-   std::string const data_item("<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\"" + std::to_string( global_number_vertices ) + " 3\"> " + filename + ":/" + group_name + "/" + vertex_coordinates_name_ + " </DataItem>\n");
+   std::string const data_item( "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\"" + std::to_string( global_number_vertices ) + " 3\"> " + filename + ":/" + group_name + "/" + vertex_coordinates_name_ + " </DataItem>\n" );
    return XdmfUtilities::GeometryString( data_item, global_number_vertices );
 }
 
@@ -110,7 +109,7 @@ std::string MeshGenerator::GetXdmfGeometryString( std::string const& filename, s
  *        the cells, where one cell is built by 8 vertices.
  * @param vertex_ids Vector where all vertex IDs are written into (indirect return).
  */
-void MeshGenerator::ComputeVertexIDs( std::vector<unsigned long long int> & vertex_ids ) const {
+void MeshGenerator::ComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const {
    // Compute the vertex IDs in the derived class
    DoComputeVertexIDs( vertex_ids );
 }
@@ -119,7 +118,7 @@ void MeshGenerator::ComputeVertexIDs( std::vector<unsigned long long int> & vert
  * @brief Appends the vertex coordinates for the specific mesh generator to the hdf5 file.
  * @param vertex_coordinates Vector where all vertex coordinates are written into (indirect return).
  */
-void MeshGenerator::ComputeVertexCoordinates( std::vector<double> & vertex_coordinates ) const {
+void MeshGenerator::ComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
    // Compute the vertex coordinates in the derived class
    DoComputeVertexCoordinates( vertex_coordinates );
 }

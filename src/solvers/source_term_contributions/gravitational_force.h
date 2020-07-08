@@ -81,14 +81,13 @@ private:
 public:
    GravitationalForce() = delete;
    explicit GravitationalForce( std::array<double, 3> const gravity );
-   ~GravitationalForce() = default;
+   ~GravitationalForce()                           = default;
    GravitationalForce( GravitationalForce const& ) = delete;
-   GravitationalForce( GravitationalForce&& ) = delete;
+   GravitationalForce( GravitationalForce&& )      = delete;
    GravitationalForce& operator=( GravitationalForce const& ) = delete;
    GravitationalForce& operator=( GravitationalForce&& ) = delete;
 
-   void ComputeForces( Block const& block, double (&gravity_forces)[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const;
-
+   void ComputeForces( Block const& block, double ( &gravity_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 };
 
-#endif //GRAVITATIONAL_FORCE_H
+#endif//GRAVITATIONAL_FORCE_H

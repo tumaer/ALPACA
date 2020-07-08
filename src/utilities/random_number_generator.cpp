@@ -5,7 +5,7 @@
  * @param save_all_ranks Decider whether or not all ranks are to be logged. (Only relevant at first call!)
  * @return The logger instance.
  */
-RandomNumberGenerator& RandomNumberGenerator::Instance(int const rank_id) {
-   static RandomNumberGenerator instance_(rank_id);
+RandomNumberGenerator& RandomNumberGenerator::Instance( int const rank_id ) {
+   static RandomNumberGenerator instance_( rank_id );
    return instance_;
 }

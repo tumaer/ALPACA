@@ -90,15 +90,14 @@ Material::Material( std::unique_ptr<EquationOfState const> equation_of_state,
                     double const dimensional_specific_heat_capacity,
                     std::unique_ptr<MaterialParameterModel const> shear_viscosity_model,
                     std::unique_ptr<MaterialParameterModel const> thermal_conductivity_model,
-                    UnitHandler const& unit_handler ) :
-   // Start initializer list
-   equation_of_state_( std::move( equation_of_state ) ),
-   bulk_viscosity_( unit_handler.NonDimensionalizeValue( dimensional_bulk_viscosity, UnitType::Viscosity ) ),
-   shear_viscosity_( unit_handler.NonDimensionalizeValue( dimensional_shear_viscosity, UnitType::Viscosity ) ),
-   thermal_conductivity_( unit_handler.NonDimensionalizeValue( dimensional_thermal_conductivity, UnitType::ThermalConductivity ) ),
-   specific_heat_capacity_( unit_handler.NonDimensionalizeValue( dimensional_specific_heat_capacity, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ),
-   shear_viscosity_model_( std::move( shear_viscosity_model ) ),
-   thermal_conductivity_model_( std::move( thermal_conductivity_model ) ) {
+                    UnitHandler const& unit_handler ) :// Start initializer list
+                                                        equation_of_state_( std::move( equation_of_state ) ),
+                                                        bulk_viscosity_( unit_handler.NonDimensionalizeValue( dimensional_bulk_viscosity, UnitType::Viscosity ) ),
+                                                        shear_viscosity_( unit_handler.NonDimensionalizeValue( dimensional_shear_viscosity, UnitType::Viscosity ) ),
+                                                        thermal_conductivity_( unit_handler.NonDimensionalizeValue( dimensional_thermal_conductivity, UnitType::ThermalConductivity ) ),
+                                                        specific_heat_capacity_( unit_handler.NonDimensionalizeValue( dimensional_specific_heat_capacity, { UnitType::Velocity, UnitType::Velocity }, { UnitType::Temperature } ) ),
+                                                        shear_viscosity_model_( std::move( shear_viscosity_model ) ),
+                                                        thermal_conductivity_model_( std::move( thermal_conductivity_model ) ) {
    /** Empty besides initializer list */
 }
 
@@ -106,18 +105,16 @@ Material::Material( std::unique_ptr<EquationOfState const> equation_of_state,
  * @brief Move constructor.
  * @param material Material from which the data are moved.
  */
-Material::Material( Material && material ) :
-   // Start initializer list
-   equation_of_state_( std::move( material.equation_of_state_ ) ),
-   bulk_viscosity_( material.bulk_viscosity_ ),
-   shear_viscosity_( material.shear_viscosity_ ),
-   thermal_conductivity_( material.thermal_conductivity_ ),
-   specific_heat_capacity_( material.specific_heat_capacity_ ),
-   shear_viscosity_model_( std::move( material.shear_viscosity_model_ ) ),
-   thermal_conductivity_model_( std::move( material.thermal_conductivity_model_ ) ) {
+Material::Material( Material&& material ) :// Start initializer list
+                                            equation_of_state_( std::move( material.equation_of_state_ ) ),
+                                            bulk_viscosity_( material.bulk_viscosity_ ),
+                                            shear_viscosity_( material.shear_viscosity_ ),
+                                            thermal_conductivity_( material.thermal_conductivity_ ),
+                                            specific_heat_capacity_( material.specific_heat_capacity_ ),
+                                            shear_viscosity_model_( std::move( material.shear_viscosity_model_ ) ),
+                                            thermal_conductivity_model_( std::move( material.thermal_conductivity_model_ ) ) {
    /** Empty besides initializer list */
 }
-
 
 /**
  * @brief Gives an instance to the equation of state for the given material.

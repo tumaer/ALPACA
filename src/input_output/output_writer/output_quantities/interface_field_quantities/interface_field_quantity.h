@@ -87,8 +87,8 @@ private:
    InterfaceDescriptionBufferType const buffer_type_;
 
    // Compute functions required from base class
-   void DoComputeCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter ) const override;
-   void DoComputeDebugCellData( Node const& node, std::vector<double>&  cell_data, unsigned long long int & cell_data_counter, MaterialName const material ) const override;
+   void DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const override;
+   void DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const material ) const override;
 
 public:
    InterfaceFieldQuantity() = delete;
@@ -98,11 +98,11 @@ public:
                                     std::array<bool, 3> const output_flags,
                                     InterfaceFieldQuantityData const& quantity_data,
                                     InterfaceDescriptionBufferType const buffer_type = InterfaceDescriptionBufferType::Base );
-   virtual ~InterfaceFieldQuantity() = default;
+   virtual ~InterfaceFieldQuantity()                       = default;
    InterfaceFieldQuantity( InterfaceFieldQuantity const& ) = delete;
    InterfaceFieldQuantity& operator=( InterfaceFieldQuantity const& ) = delete;
-   InterfaceFieldQuantity( InterfaceFieldQuantity&& ) = delete;
+   InterfaceFieldQuantity( InterfaceFieldQuantity&& )                 = delete;
    InterfaceFieldQuantity& operator=( InterfaceFieldQuantity&& ) = delete;
 };
 
-#endif // INTERFACE_FIELD_QUANTITY_H
+#endif// INTERFACE_FIELD_QUANTITY_H
