@@ -112,7 +112,8 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
       constexpr double cell_size = 1.0;
       WHEN( "The shear and bulk viscosity are zero" ) {
          constexpr double node_origin_x = 0.0;
-         AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 0.0, 0.0 ) );
+         MaterialManager const material_manager = ReturnMaterialManagerWithViscosities( 0.0, 0.0 );
+         AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( material_manager );
          double volume_forces[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()];
          for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
             for( unsigned int i = 0; i < CC::ICX(); ++i ) {
@@ -150,9 +151,11 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
                } //j
             } //i
          } //equation
-         AxisymmetricViscousVolumeForces first_forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 3.4, 0.0 ) );
+         MaterialManager const first_material_manager = ReturnMaterialManagerWithViscosities( 3.4, 0.0 );
+         AxisymmetricViscousVolumeForces first_forces_calculator = AxisymmetricViscousVolumeForces( first_material_manager );
          first_forces_calculator.ComputeForces(mat_block, first_volume_forces, cell_size, node_origin_x);
-         AxisymmetricViscousVolumeForces second_forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 6.8, 0.0 ) );
+         MaterialManager const second_material_manager = ReturnMaterialManagerWithViscosities( 6.8, 0.0 );
+         AxisymmetricViscousVolumeForces second_forces_calculator = AxisymmetricViscousVolumeForces( second_material_manager );
          second_forces_calculator.ComputeForces(mat_block, second_volume_forces, cell_size, node_origin_x);
          THEN( "Volume forces are twice different" ) {
              for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
@@ -179,7 +182,8 @@ SCENARIO( "Volume Forces Calculation Correctness", "[1rank]" ) {
                } //j
             } //i
          } //equation
-         AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( ReturnMaterialManagerWithViscosities( 5.0, 0.0 ) );
+         MaterialManager const material_manager = ReturnMaterialManagerWithViscosities( 5.0, 0.0 );
+         AxisymmetricViscousVolumeForces forces_calculator = AxisymmetricViscousVolumeForces( material_manager );
          forces_calculator.ComputeForces( mat_block, first_volume_forces, cell_size, first_node_origin_x );
          forces_calculator.ComputeForces( mat_block, second_volume_forces, cell_size, second_node_origin_x );
 

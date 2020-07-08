@@ -199,18 +199,18 @@ constexpr double ConsistencyManagedSum( std::array<double, 4> const values ) {
 }
 
 /**
- * @brief Computes the L2 norm of vector 
- * @param vector Vector for which the L2 norm should be computed 
- * @return L2 norm of the vector 
+ * @brief Computes the L2 norm of vector.
+ * @param vector Vector for which the L2 norm should be computed.
+ * @return L2 norm of the vector.
  */
-constexpr double L2Norm( std::array<double, 3> const vector ) {
+inline double L2Norm( std::array<double, 3> const vector ) {
    return std::sqrt( DimensionAwareConsistencyManagedSum( vector[0] * vector[0], vector[1] * vector[1], vector[2] * vector[2] ) );
 }
 
 /**
- * @brief Computes the cross product between two vectors 
- * @param vector1, vector2 Two vectors for which the cross product should be computed 
- * @return cross product between the two vectors  
+ * @brief Computes the cross product between two vectors.
+ * @param vector1, vector2 Two vectors for which the cross product should be computed.
+ * @return cross product between the two vectors.
  */
 constexpr std::array<double, 3> CrossProduct( std::array<double, 3> const vector1, std::array<double, 3> const vector2 ) {
    return { vector1[1] * vector2[2] - vector1[2] * vector2[1] ,
@@ -226,6 +226,18 @@ constexpr std::array<double, 3> CrossProduct( std::array<double, 3> const vector
  */
 inline double MinMod(double const value_1, double const value_2) {
    return 0.5 * ( Signum(value_1) + Signum(value_2) ) * std::min(std::abs(value_1),std::abs(value_2));
+}
+
+/**
+ * @brief Computes the absolute value.
+ * @param value The value for which the absolute value should be obtained.
+ * @return The absolute value.
+ * @tparam T The type of the value.
+ * @note Since the abs function of the STL library does not provide a constexpr version, we implement our own constexpr noexcept version.
+ */
+template<typename T>
+constexpr T Abs( T const value ) noexcept {
+  return value >= static_cast<T>(0) ? value : ( -value );
 }
 
 double GodunovHamiltonian( double const (&derivatives)[DTI( CC::DIM() )][2], double const  old_levelset_sign );

@@ -71,6 +71,10 @@
 
 #include "stencils/stencil.h"
 
+/**
+ * @brief Discretization of the SpatialDerivativeStencil class to evaluate the stencil with a 4th order central differencing scheme on the cell face.
+ *        See also base class.
+ */
 class FourthOrderCellFace : public Stencil<FourthOrderCellFace> {
 
    friend Stencil;
@@ -80,10 +84,18 @@ class FourthOrderCellFace : public Stencil<FourthOrderCellFace> {
    static constexpr unsigned int stencil_size_ = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const;
+   /**
+    * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const , double const cell_size ) const {
+      double const denominator = cell_size * 24.0;
+      double const result = 27.0 * ( array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ + 0] ) - ( array[downstream_stencil_size_ + 2] - array[downstream_stencil_size_ - 1] );
+      return result / denominator;
+   }
 
 public:
-   explicit FourthOrderCellFace() = default;
+   explicit constexpr FourthOrderCellFace() = default;
    ~FourthOrderCellFace() = default;
 
 };

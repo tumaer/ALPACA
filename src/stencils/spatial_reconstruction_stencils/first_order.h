@@ -71,7 +71,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute first-order fluxes.
+ * @brief Discretization of the SpatialReconstructionStencil class to evaluate the stencil with a first-order scheme.
  */
 class FirstOrder : public Stencil<FirstOrder> {
 
@@ -83,10 +83,17 @@ class FirstOrder : public Stencil<FirstOrder> {
    static constexpr unsigned int stencil_size_            = 2;
    static constexpr unsigned int downstream_stencil_size_ = 0;
 
-   double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const;
+   /**
+    * @brief Evaluates the stencil according to a first order scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const ) const {
+      // Return left/right value
+      return array[evaluation_properties[0]];
+   }
 
 public:
-   explicit FirstOrder() = default;
+   explicit constexpr FirstOrder() = default;
    ~FirstOrder() = default;
    FirstOrder( FirstOrder const& ) = delete;
    FirstOrder& operator=( FirstOrder const&) = delete;

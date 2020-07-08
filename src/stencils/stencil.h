@@ -83,7 +83,7 @@ class Stencil {
 
    friend DerivedStencil;
 
-   explicit Stencil() = default;
+   explicit constexpr Stencil() = default;
 
 protected:
    static constexpr double epsilon_ = std::numeric_limits<double>::epsilon();
@@ -113,14 +113,15 @@ public:
 
    /**
     * @brief Applies the SpatialReconstructionStencil to the provided Array.
-    * @tparam P The manner in which the stencil is applied (UpwindLeft, UpwindRight or Central).
     * @param array The array on which to apply the spatial reconstruction stencil.
     * @param cell_size The cell size of the corresponding block.
     * @return Value at the position of interest.
+    * @tparam S The used stencil.
     * @note Hotpath function.
+    * @note The stencil template is used to instantiate the stencil on the fly.
     */
    template<typename S>
-   double Apply(std::array<double, S::StencilSize()> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
+   constexpr double Apply(std::array<double, S::StencilSize()> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size) const {
       return static_cast<DerivedStencil const&>(*this).ApplyImplementation(array, evaluation_properties, cell_size);
    }
 
