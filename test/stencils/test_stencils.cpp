@@ -107,7 +107,7 @@ void TestUnityOnUnitArrayWithMargin( double const allowed_margin ) {
 template<typename S>
 void TestWenoValuesLeftAndRightOfStepWithMargin( double const allowed_margin ) {
    WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-      unsigned int const size = S::StencilSize();
+      constexpr unsigned int size = S::StencilSize();
       std::array<double, size> step_array;
       step_array.fill( 1.0 );
       std::fill_n( step_array.begin(), size / 2, 0.0 );
@@ -122,7 +122,7 @@ void TestWenoValuesLeftAndRightOfStepWithMargin( double const allowed_margin ) {
 template<typename S>
 void TestZeronessOnUnitArrayWithMargin( double const allowed_margin ) {
    WHEN( "Stencil is applied to unit-array (with cell size one)" ) {
-      unsigned int const size = S::StencilSize();
+      constexpr unsigned int size = S::StencilSize();
       std::array<double, size> unit_array;
       unit_array.fill( 1.0 );
       constexpr double cell_size = 1.0;
@@ -207,7 +207,7 @@ SCENARIO( "Reconstruction stencil correctness", "[1rank]" ) {
       TestUnityOnUnitArrayWithMargin<FourthOrderCentral>( 1e-16 );
       //Central (as the name suggests) does not follow WENO-like upwinding
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-         unsigned int const size = FourthOrderCentral::StencilSize();
+         constexpr unsigned int size = FourthOrderCentral::StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2, 0.0 );
@@ -226,7 +226,7 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestStencilParameters( houc5, StencilType::Derivative, 7, 3 );
       TestZeronessOnUnitArrayWithMargin<HOUC5>( 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-         unsigned int const size = houc5.StencilSize();
+         constexpr unsigned int size = houc5.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2, 0.0 );
@@ -243,7 +243,7 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestStencilParameters( fourth_order_central_difference, StencilType::Derivative, 5, 2 );
       TestZeronessOnUnitArrayWithMargin<FourthOrderCentralDifference>( 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-         unsigned int const size = fourth_order_central_difference.StencilSize();
+         constexpr unsigned int size = fourth_order_central_difference.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2, 0.0 );
@@ -259,7 +259,7 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestStencilParameters( fourth_order_cell_face, StencilType::Derivative, 4, 1 );
       TestZeronessOnUnitArrayWithMargin<FourthOrderCellFace>( 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-         unsigned int const size = fourth_order_cell_face.StencilSize();
+         constexpr unsigned int size = fourth_order_cell_face.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2, 0.0 );
@@ -276,7 +276,7 @@ SCENARIO( "Derivative stencil correctness", "[1rank]" ) {
       TestStencilParameters( central_difference, StencilType::Derivative, 3, 1 );
       TestZeronessOnUnitArrayWithMargin<CentralDifference>( 1e-16 );
       WHEN( "Stencil is applied to unit step-function array (with cell size one)" ) {
-         unsigned int const size = central_difference.StencilSize();
+         constexpr unsigned int size = central_difference.StencilSize();
          std::array<double, size> step_array;
          step_array.fill( 1.0 );
          std::fill_n( step_array.begin(), size / 2, 0.0 );
