@@ -229,7 +229,7 @@ namespace ApplyUtilities {
 
       constexpr S stencil = S();
 
-      std::array<double, S::StencilSize()> array;
+      std::array<double, S::StencilSize()> array = std::array<double, S::StencilSize()>();
       ApplyUtilities::GetValueVectorFromBuffer<S, D>( array, buffer, i, j, k );
       return stencil.template Apply<S>( array, GetStencilParameters<P>(), cell_size );
    }
@@ -251,7 +251,7 @@ namespace ApplyUtilities {
 
       constexpr S stencil = S();
 
-      std::array<double, S::StencilSize()> array;
+      std::array<double, S::StencilSize()> array = std::array<double, S::StencilSize()>();
       GetDifferenceVectorFromBuffer<S, D>( array, buffer, i, j, k, cell_size );
       return stencil.template Apply<S>( array, GetStencilParameters<P>(), cell_size );
    }
