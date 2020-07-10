@@ -89,41 +89,17 @@ WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& d
 /**
  * @brief Computes pressure from inputs as A - B + B * ( rho / rho0 )^gamma.
  * @param density The density used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
  * @return Pressure according to Tait's equation of state.
  */
-double WaterlikeFluid::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-#ifndef PERFORMANCE
-   // Avoids compiler warnings
-   (void)momentum_x;
-   (void)momentum_y;
-   (void)momentum_z;
-   (void)energy;
-#endif
+double WaterlikeFluid::DoGetPressure( double const density, double const, double const, double const, double const ) const {
    return A_ - B_ + B_ * std::pow( density / rho0_, gamma_ );
 }
 
 /**
  * @brief Gives the enthalpy for the given inputs. ( Not available for classic Tait ).
- * @param density The density used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
  * @return Zero. This is according to Tait's equation of state correct.
  */
-double WaterlikeFluid::DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-#ifndef PERFORMANCE
-   // Avoids compiler warnings
-   (void)density;
-   (void)momentum_x;
-   (void)momentum_y;
-   (void)momentum_z;
-   (void)energy;
-#endif
+double WaterlikeFluid::DoGetEnthalpy( double const, double const, double const, double const, double const ) const {
    return 0.0;
 }
 

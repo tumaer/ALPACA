@@ -143,8 +143,8 @@ Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const&
  */
 std::vector<std::uint64_t> Tree::RefineNode( std::uint64_t const id ) {
 
-   unsigned int const level = LevelOfNode( id );
 #ifndef PERFORMANCE
+   unsigned int const level = LevelOfNode( id );
    if( level >= CC::AMNL() ) {
       throw std::invalid_argument( "Nodes on this level cannot be refined further" );
    }

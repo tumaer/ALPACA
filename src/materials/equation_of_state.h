@@ -80,16 +80,10 @@ class EquationOfState {
    virtual double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
    virtual double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
    virtual double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const = 0;
-   virtual double DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-#ifndef PERFORMANCE
-      // Avoids compiler warnings (here we use the PERFORMANCE flags to avoid compiler warnings to explicitly name the variables that should
-      // be used for derived classes)
-      (void)density;
-      (void)momentum_x;
-      (void)momentum_y;
-      (void)momentum_z;
-      (void)energy;
-#endif
+   // Here we use the [[maybe_unused]] syntax to explicitly name the variables that should be used for derived classes.
+   virtual double DoGetTemperature( [[maybe_unused]] double const density,
+                                    [[maybe_unused]] double const momentum_x, [[maybe_unused]] double const momentum_y, [[maybe_unused]] double const momentum_z,
+                                    [[maybe_unused]] double const energy ) const {
       return -1.0;
    }
 
