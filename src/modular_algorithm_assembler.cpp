@@ -1080,8 +1080,10 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
                            z_end     = CC::FICZ();
                            direction = 1.0;
                            break;
-#ifndef PERFORMANCE
                         default:
+#ifdef PERFORMANCE
+                           break;
+#else
                            throw std::invalid_argument( " Why, oh why, did my simulation break?" );
 #endif
                      }
