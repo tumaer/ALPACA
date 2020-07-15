@@ -131,16 +131,21 @@ class CompileTimeConstants {
    static constexpr double levelset_cutoff_factor_ = 8.0;
 
    /*
-    * Defines the threshold value for the extension into cut-cells for ghost fluid extension. If the volume fraction is lower than the given threshold, the extension
+    * Defines the threshold value for the mixing of and extension into cut-cells for ghost fluid extension. If the volume fraction is lower than the given threshold, the extension
     * procedure is enabled. The mixing threshold is only relevant for cut-cells. All other cells are not affected.
     */
+   // clang-format off
 #if DIMENSION == 1
-   static constexpr double mixing_threshold_ = 0.5;// 0.5 as mixing threshold for 1D is on purpose.
+   static constexpr double mixing_threshold_    = 0.5;// 0.5 as mixing threshold for 1D is on purpose.
+   static constexpr double extension_threshold_ = 0.5;
 #elif DIMENSION == 2
-   static constexpr double mixing_threshold_                             = 0.5;
+   static constexpr double mixing_threshold_    = 0.5;
+   static constexpr double extension_threshold_ = 0.5;
 #else
-   static constexpr double mixing_threshold_                              = 0.6;
+   static constexpr double mixing_threshold_    = 0.6;
+   static constexpr double extension_threshold_ = 0.6;
 #endif
+   // clang-format on
 
    // Width of the narrow band around cut-cells
    static constexpr unsigned int extension_band_        = 3;// Band for the ghost-fluid extension
@@ -519,10 +524,16 @@ public:
    static constexpr double LSCOF() { return levelset_cutoff_factor_; }
 
    /**
-    * @brief Gives the Mixing Threshold for mixing and extending into cut cells. "MITH = MIxing ThresHold".
+    * @brief Gives the Mixing Threshold for mixing of cut cells. "MITH = MIxing ThresHold".
     * @return mixing threshold value.
     */
    static constexpr double MITH() { return mixing_threshold_; }
+
+   /**
+    * @brief Gives the Extension Threshold for extending into cut cells. "ETH = Extension ThresHold".
+    * @return mixing threshold value.
+    */
+   static constexpr double ETH() { return extension_threshold_; }
 
    /**
     * @brief Gives the size of the extension band. "EBW = Extension band width".

@@ -180,7 +180,6 @@ void TwoPhaseBufferHandler::AdaptConservativesToWellResolvedDistanceFunctionImpl
 void TwoPhaseBufferHandler::CalculatePrimesFromIntegratedConservativesImplementation( Node& node ) const {
    InterfaceBlock const& interface_block                             = node.GetInterfaceBlock();
    double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer( InterfaceDescription::VolumeFraction );
-   double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]        = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
    for( auto& phase : node.GetPhases() ) {
       PrimeStates& prime_states              = phase.second.GetPrimeStateBuffer();
       MaterialName const material            = phase.first;
@@ -192,7 +191,7 @@ void TwoPhaseBufferHandler::CalculatePrimesFromIntegratedConservativesImplementa
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
                double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
-               if( material_sign * levelset[i][j][k] > 0.0 && cell_volume_fraction > CC::MITH() ) {
+               if( cell_volume_fraction > CC::ETH() ) {
                   prime_state_handler_.ConvertConservativesToPrimeStates( material, conservatives_rhs, prime_states, i, j, k );
                }//cells in which is not extended
             }   //k

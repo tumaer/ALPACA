@@ -151,7 +151,7 @@ protected:
                       * We also extend in the reinitialization band in order to have better convergence behaviour (Reduce influence of implicitly imposed boundary
                       * conditions at the end of the narrow band). The convergence criteria is only checked for the extension band.
                       */
-                     if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( material_sign * levelset[i][j][k] < 0.0 || cell_volume_fraction < CC::MITH() ) ) {
+                     if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( cell_volume_fraction <= CC::ETH() ) ) {
 
                         std::array<double, 3> const normal = GetNormal( levelset, i, j, k, material_sign );
 

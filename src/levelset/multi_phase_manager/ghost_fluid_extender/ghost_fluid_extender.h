@@ -108,9 +108,8 @@ private:
     */
    void DetermineMaximumValueOfQuantitiesToExtend( Node const& node, double ( &convergence_tracking_quantities )[2][number_of_convergence_tracking_quantities_] ) const {
 
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
-      double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]        = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
 
       // Loop through all materials on the node
       for( auto const& phase : node.GetPhases() ) {
@@ -128,7 +127,7 @@ private:
                   for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
                      double const cell_volume_fraction = reference_volume_fraction + material_sign_double * volume_fraction[i][j][k];
                      // Change the convergence of each field
-                     if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( material_sign * levelset_reinitialized[i][j][k] < 0.0 || cell_volume_fraction < CC::MITH() ) ) {
+                     if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ReinitializationBand ) && ( cell_volume_fraction <= CC::ETH() ) ) {
                         convergence_tracking_quantities[material_index][field_index] = std::max( convergence_tracking_quantities[material_index][field_index], std::abs( extension_buffer[i][j][k] ) );
                      }
                   }// k
