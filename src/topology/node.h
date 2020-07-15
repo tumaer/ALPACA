@@ -77,6 +77,7 @@
 #include "block_definitions/block.h"
 #include "block_definitions/interface_block.h"
 #include "enums/interface_tag_definition.h"
+#include "topology/id_information.h"
 
 /**
  * @brief Nodes are the members in the tree. A node holds a block for every phase it contains; the Block then holds the material data.
@@ -96,9 +97,9 @@ class Node {
 
 public:
    Node() = delete;
-   explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
+   explicit Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
                   std::int8_t const initial_interface_tag = ITTI( IT::OldCutCell ) );
-   explicit Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
+   explicit Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
                   std::int8_t const ( &initial_interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block = nullptr );
    Node( Node const& ) = delete;
    Node& operator=( Node const& ) = delete;

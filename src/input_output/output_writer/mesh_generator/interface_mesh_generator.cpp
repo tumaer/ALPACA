@@ -138,7 +138,7 @@ hsize_t InterfaceMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
 void InterfaceMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
 
    // get the correct number of interface leaves for the rank
-   std::vector<std::uint64_t> local_interface_leaf_ids = topology_.LocalInterfaceLeafIds();
+   std::vector<nid_t> local_interface_leaf_ids = topology_.LocalInterfaceLeafIds();
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_interface_leaf_ids.size() * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock() * 3 );
 

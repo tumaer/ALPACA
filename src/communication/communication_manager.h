@@ -88,14 +88,14 @@ class CommunicationManager : public CommunicationTypes {
    std::vector<unsigned int> partner_tag_map_;
 
    //Cache for Halo Update Pattern
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_mpi_;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> internal_multi_boundaries_;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> internal_multi_boundaries_mpi_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_mpi_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation>>> external_boundaries_;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> external_multi_boundaries_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_mpi_;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> internal_multi_boundaries_;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> internal_multi_boundaries_mpi_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_mpi_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation>>> external_boundaries_;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> external_multi_boundaries_;
 
    // Vector holding flags dor each level that the lists have been created successfully
    std::vector<bool> boundaries_valid_;
@@ -104,7 +104,7 @@ class CommunicationManager : public CommunicationTypes {
    std::vector<std::array<unsigned int, 3>> jump_send_count_;// [0]: Plane, [1]: Stick, [2]: cube
 
    // Function that gives all neighbor-location and external-location relations for a given global node
-   void NeighborsOfNode( std::uint64_t const global_id, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& external_boundaries );
+   void NeighborsOfNode( nid_t const global_id, std::vector<std::tuple<nid_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<nid_t, BoundaryLocation>>& external_boundaries );
 
 public:
    CommunicationManager() = delete;
@@ -119,14 +119,14 @@ public:
    void GenerateNeighborRelationForHaloUpdate( unsigned int const level );
 
    // return functions for the relation lists
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJumpMpi( unsigned level ) const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJump( unsigned level ) const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesMpi( unsigned level ) const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundaries( unsigned level ) const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundariesMpi() const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundaries() const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& ExternalBoundaries( unsigned level ) const;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& ExternalMultiBoundaries() const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJumpMpi( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJump( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesMpi( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundariesMpi() const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundaries() const;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> const& ExternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> const& ExternalMultiBoundaries() const;
 
    // Functions to get the status of the list creations and to empty the flags to regenerate the lists
    bool AreBoundariesValid( unsigned level ) const;

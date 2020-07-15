@@ -67,7 +67,6 @@
 *****************************************************************************************/
 #include "node.h"
 #include <utility>
-#include "id_information.h"
 
 /**
  * @brief Constructs a node object holding blocks for all specified materials.
@@ -76,8 +75,8 @@
  * @param materials The materials which are present in this node.
  * @param initial_interface_tag Uniform initial interface tag of the node.
  */
-Node::Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
-                                                                                                                                                                 node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ) {
+Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
+                                                                                                                                                         node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ) {
    for( MaterialName const& material : materials ) {
       phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
    }
@@ -98,7 +97,7 @@ Node::Node( std::uint64_t const id, double const node_size_on_level_zero, std::v
  * @param initial_interface_tags Buffer containing the full field of interface tags for this node.
  * @param interface_block Interface block that is added to the node.
  */
-Node::Node( std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
+Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
             std::int8_t const ( &initial_interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
                                                                                                                                                 node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ),
                                                                                                                                                 interface_block_( std::move( interface_block ) ) {

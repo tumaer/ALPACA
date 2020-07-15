@@ -84,9 +84,9 @@ namespace MpiVertexFilter {
     * @param direction Axis along which to send/receive.
     * @param topology The topology to get information about the MPI status of the simulation.
     */
-   void InitializeSendRecvRankLists( std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>>& send_list,
-                                     std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>>& recv_list,
-                                     std::vector<std::uint64_t> const& local_leaf_ids,
+   void InitializeSendRecvRankLists( std::vector<std::vector<std::pair<nid_t, nid_t>>>& send_list,
+                                     std::vector<std::vector<std::pair<nid_t, nid_t>>>& recv_list,
+                                     std::vector<nid_t> const& local_leaf_ids,
                                      Direction const direction,
                                      TopologyManager const& topology ) {
 
@@ -95,8 +95,8 @@ namespace MpiVertexFilter {
 
       //init array with empty vectors
       for( int r = 0; r < max_rank; r++ ) {
-         send_list[r] = std::vector<std::pair<std::uint64_t, std::uint64_t>>();
-         recv_list[r] = std::vector<std::pair<std::uint64_t, std::uint64_t>>();
+         send_list[r] = std::vector<std::pair<nid_t, nid_t>>();
+         recv_list[r] = std::vector<std::pair<nid_t, nid_t>>();
       }
 
       //init send recv direction
@@ -118,23 +118,23 @@ namespace MpiVertexFilter {
       }
 
       //iterate over all leaves to get target ranks
-      for( std::uint64_t const& node_id : local_leaf_ids ) {
+      for( nid_t const& node_id : local_leaf_ids ) {
          //set up send list
-         std::vector<std::uint64_t> send_id_list;
+         std::vector<nid_t> send_id_list;
          send_id_list = topology.GetNeighboringLeaves( node_id, send_direction );
          //add every neighbor
          for( auto const& target_id : send_id_list ) {
             int const target_rank = topology.GetRankOfNode( target_id );
-            std::pair<std::uint64_t, std::uint64_t> target_source_id( target_id, node_id );
+            std::pair<nid_t, nid_t> target_source_id( target_id, node_id );
             send_list[target_rank].push_back( target_source_id );
          }
          //set up recv list
-         std::vector<std::uint64_t> recv_id_list;
+         std::vector<nid_t> recv_id_list;
          recv_id_list = topology.GetNeighboringLeaves( node_id, recv_direction );
          //add every neighbor
          for( auto const& source_id : recv_id_list ) {
             int const source_rank = topology.GetRankOfNode( source_id );
-            std::pair<std::uint64_t, std::uint64_t> target_source_id( node_id, source_id );
+            std::pair<nid_t, nid_t> target_source_id( node_id, source_id );
             recv_list[source_rank].push_back( target_source_id );
          }
       }
@@ -153,13 +153,13 @@ namespace MpiVertexFilter {
     * @param direction Axis defining two dimensional offset in 3D space.
     * @return A 2D-Tuple corresponding to the 2D offset.
     */
-   std::pair<unsigned int, unsigned int> GetNeighborBlockOffset( std::uint64_t const neighbor_id, int const neighbor_level_diff, Direction const direction ) {
+   std::pair<unsigned int, unsigned int> GetNeighborBlockOffset( nid_t const neighbor_id, int const neighbor_level_diff, Direction const direction ) {
       unsigned int node_offset_1 = 0;
       unsigned int node_offset_2 = 0;
       int power_two              = 1;
       //set up location function dependend on direction
-      std::function<bool( std::uint64_t )> sibling_func_1;
-      std::function<bool( std::uint64_t )> sibling_func_2;
+      std::function<bool( nid_t )> sibling_func_1;
+      std::function<bool( nid_t )> sibling_func_2;
       switch( direction ) {
          case Direction::X: {
             sibling_func_1 = NorthInSiblingPack;
@@ -174,7 +174,7 @@ namespace MpiVertexFilter {
             sibling_func_2 = NorthInSiblingPack;
          }
       }
-      std::uint64_t i_node_id = neighbor_id;
+      nid_t i_node_id = neighbor_id;
       //calc offsets
       for( int l = 0; l < neighbor_level_diff; l++ ) {
          if( sibling_func_1( i_node_id ) ) node_offset_1 += power_two;
@@ -228,9 +228,9 @@ namespace MpiVertexFilter {
     * @param mpi_send_request_list All MPI request get appended to this list.
     * @param topology The topology to get information about the MPI status of the simulation.
     */
-   void SendFromNode( std::uint64_t const node_id, std::vector<std::uint64_t> const& send_id_list,
+   void SendFromNode( nid_t const node_id, std::vector<nid_t> const& send_id_list,
                       unsigned long long int const* send_buffer, Direction const direction,
-                      std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> const& send_list_per_rank,
+                      std::vector<std::vector<std::pair<nid_t, nid_t>>> const& send_list_per_rank,
                       std::vector<MPI_Request>& mpi_send_request_list,
                       TopologyManager const& topology ) {
 
@@ -323,8 +323,8 @@ namespace MpiVertexFilter {
 
          //send buffer
          int const target_rank = topology.GetRankOfNode( target_id );
-         std::pair<std::uint64_t, std::uint64_t> const target_source_id( target_id, node_id );
-         std::vector<std::pair<std::uint64_t, std::uint64_t>> const send_list_target_rank = send_list_per_rank[target_rank];
+         std::pair<nid_t, nid_t> const target_source_id( target_id, node_id );
+         std::vector<std::pair<nid_t, nid_t>> const send_list_target_rank = send_list_per_rank[target_rank];
          //look up rank in send_list; use its position as tag
          int const tag = std::distance( send_list_target_rank.begin(), lower_bound( send_list_target_rank.begin(), send_list_target_rank.end(), target_source_id ) ) % MpiUtilities::MpiTagUb();
 
@@ -346,9 +346,9 @@ namespace MpiVertexFilter {
     * @param recv_list_per_rank List of total communications of MPI rank to define a MPI tag.
     * @param topology The topology to get information about the MPI status of the simulation.
     */
-   void RecvToNode( std::uint64_t const node_id, std::vector<std::uint64_t> const& recv_id_list,
+   void RecvToNode( nid_t const node_id, std::vector<nid_t> const& recv_id_list,
                     unsigned long long int* boundary_buffer, Direction const direction,
-                    std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> const& recv_list_per_rank,
+                    std::vector<std::vector<std::pair<nid_t, nid_t>>> const& recv_list_per_rank,
                     TopologyManager const& topology ) {
 
       unsigned int cell_count_axis_1 = 1;
@@ -437,8 +437,8 @@ namespace MpiVertexFilter {
             MPI_Type_free( &mpi_stride_type );
          }
          MPI_Type_commit( &mpi_insert_type );
-         std::vector<std::pair<std::uint64_t, std::uint64_t>> const recv_list_source_rank = recv_list_per_rank[source_rank];
-         std::pair<std::uint64_t, std::uint64_t> const target_source_id( node_id, source_id );
+         std::vector<std::pair<nid_t, nid_t>> const recv_list_source_rank = recv_list_per_rank[source_rank];
+         std::pair<nid_t, nid_t> const target_source_id( node_id, source_id );
          //look up location in recv list for tag
          int const tag = distance( recv_list_source_rank.begin(), lower_bound( recv_list_source_rank.begin(), recv_list_source_rank.end(), target_source_id ) ) % MpiUtilities::MpiTagUb();
          //recv data

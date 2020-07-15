@@ -73,6 +73,7 @@
 #include <string>
 #include <memory>
 
+#include "topology/id_information.h"
 #include "unit_handler.h"
 #include "user_specifications/compile_time_constants.h"
 #include "block_definitions/field_material_definitions.h"
@@ -123,11 +124,11 @@ public:
    InitialCondition& operator=( InitialCondition&& ) = delete;
 
    // Fills the prime state buffer with appropriate values of the input expression
-   void GetInitialPrimeStates( std::uint64_t const node_id, MaterialName const material, double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
+   void GetInitialPrimeStates( nid_t const node_id, MaterialName const material, double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
    // Fills the levelset buffer with appropriate value of the input expressions
-   void GetInitialLevelset( std::uint64_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
+   void GetInitialLevelset( nid_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
    // Gives the initial materials present
-   std::vector<MaterialName> GetInitialMaterials( std::uint64_t const node_id ) const;
+   std::vector<MaterialName> GetInitialMaterials( nid_t const node_id ) const;
 };
 
 #endif// INITIAL_CONDITION_H

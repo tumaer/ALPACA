@@ -71,7 +71,7 @@
 #include "communication/mpi_utilities.h"
 
 namespace ExpectedSingleJumpHaloLists {
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> level_zero_externals = {
+   std::vector<std::tuple<nid_t, BoundaryLocation>> level_zero_externals = {
          { 0x1400000, BoundaryLocation::West },
          { 0x1400000, BoundaryLocation::South },
          { 0x1400000, BoundaryLocation::North },
@@ -82,7 +82,7 @@ namespace ExpectedSingleJumpHaloLists {
          { 0x1400001, BoundaryLocation::North },
          { 0x1400001, BoundaryLocation::Top },
          { 0x1400001, BoundaryLocation::Bottom } };
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> maximum_level_externals = {
+   std::vector<std::tuple<nid_t, BoundaryLocation>> maximum_level_externals = {
          { 0xA000008, BoundaryLocation::South },
          { 0xA000008, BoundaryLocation::Bottom },
          { 0xA000009, BoundaryLocation::East },
@@ -104,7 +104,7 @@ namespace ExpectedSingleJumpHaloLists {
          { 0xA00000F, BoundaryLocation::North },
          { 0xA00000F, BoundaryLocation::Top } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> maximum_level_externals_rank_one_of_three = {
+   std::vector<std::tuple<nid_t, BoundaryLocation>> maximum_level_externals_rank_one_of_three = {
          { 0xA000008, BoundaryLocation::South },
          { 0xA000008, BoundaryLocation::Bottom },
          { 0xA00000A, BoundaryLocation::North },
@@ -112,11 +112,11 @@ namespace ExpectedSingleJumpHaloLists {
          { 0xA00000E, BoundaryLocation::North },
          { 0xA00000E, BoundaryLocation::Top } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> level_zero_internals = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> level_zero_internals = {
          { 0x1400000, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
          { 0x1400001, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
    };
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals = {
          { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
@@ -174,7 +174,7 @@ namespace ExpectedSingleJumpHaloLists {
          { 0xA00000F, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal },
          { 0xA00000F, BoundaryLocation::WestSouthBottom, InternalBoundaryType::NoJumpBoundaryLocal } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_rank_one_of_three = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_rank_one_of_three = {
          { 0xA000008, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::TopNorth, InternalBoundaryType::NoJumpBoundaryLocal },
          { 0xA00000A, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
@@ -183,7 +183,7 @@ namespace ExpectedSingleJumpHaloLists {
          { 0xA00000E, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal },
    };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_mpi_rank_one_of_three = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_mpi_rank_one_of_three = {
          { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiSend },
          { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiRecv },
          { 0xA000008, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryMpiSend },
@@ -215,7 +215,7 @@ namespace ExpectedSingleJumpHaloLists {
          { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiSend },
          { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiRecv } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps = {
          { 0xA000008, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal },
@@ -233,13 +233,13 @@ namespace ExpectedSingleJumpHaloLists {
          { 0xA00000E, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal },
          { 0xA00000E, BoundaryLocation::WestSouthBottom, InternalBoundaryType::JumpBoundaryLocal } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_mpi_rank_one_of_three = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_mpi_rank_one_of_three = {
          { 167772172, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryMpiSend },
          { 167772172, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryMpiSend },
          { 167772172, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryMpiSend },
          { 167772172, BoundaryLocation::WestNorthBottom, InternalBoundaryType::JumpBoundaryMpiSend } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_rank_one_of_three = {
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_rank_one_of_three = {
          { 0xA000008, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal },
          { 0xA000008, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },

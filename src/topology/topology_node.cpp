@@ -68,8 +68,7 @@
 #include "topology_node.h"
 
 #include <algorithm>
-
-#include "id_information.h"
+#include "topology/id_information.h"
 #include "user_specifications/compile_time_constants.h"
 
 /**
@@ -77,12 +76,12 @@
  * @param id The id of the node to be created.
  * @param rank Rank holding the node to be created.
  */
-TopologyNode::TopologyNode( std::uint64_t const id, int const rank ) : unique_id_( id ),
-                                                                       current_rank_( rank ),
-                                                                       future_rank_( -1 ),
-                                                                       children_{},
-                                                                       is_leaf_( true ),
-                                                                       materials_{} {
+TopologyNode::TopologyNode( nid_t const id, int const rank ) : unique_id_( id ),
+                                                               current_rank_( rank ),
+                                                               future_rank_( -1 ),
+                                                               children_{},
+                                                               is_leaf_( true ),
+                                                               materials_{} {
    // Empty Constructor, besides initializer list.
 }
 
@@ -90,7 +89,7 @@ TopologyNode::TopologyNode( std::uint64_t const id, int const rank ) : unique_id
  * @brief Traces the child with the given id and triggers refinement.
  * @param id The id of the node that is to be refined.
  */
-void TopologyNode::Refine( std::uint64_t const id ) {
+void TopologyNode::Refine( nid_t const id ) {
    if( unique_id_ == id ) {
       if( is_leaf_ ) {
          Refine();
@@ -104,8 +103,8 @@ void TopologyNode::Refine( std::uint64_t const id ) {
  * @brief Refines the current leaf, i.e. inserts children as leaves and changes status away from leaf.
  */
 void TopologyNode::Refine() {
-   is_leaf_                 = false;
-   std::uint64_t working_id = unique_id_ << 3;
+   is_leaf_         = false;
+   nid_t working_id = unique_id_ << 3;
    for( unsigned int i = 0; i < CC::NOC(); i++ ) {
       children_.emplace_back( TopologyNode( working_id + i, current_rank_ ) );
    }
@@ -116,7 +115,7 @@ void TopologyNode::Refine() {
  * @brief Coarsens the node with the given id. I.e. removes all its descendants and sets its status to leaf.
  * @param id The id of the node to be made a leaf.
  */
-void TopologyNode::Coarse( std::uint64_t const id ) {
+void TopologyNode::Coarse( nid_t const id ) {
    if( unique_id_ == id ) {
       for( auto& child : children_ ) {
          child.Coarse( child.Id() );
@@ -276,7 +275,7 @@ unsigned int TopologyNode::GetDepth() const {
  * @param level The level of interest
  * @param ids Indirect return parameter
  */
-void TopologyNode::IdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids ) const {
+void TopologyNode::IdsOnLevel( unsigned int const level, std::vector<nid_t>& ids ) const {
    if( LevelOfNode( unique_id_ ) == level ) {
       ids.emplace_back( unique_id_ );
    } else {
@@ -291,7 +290,7 @@ void TopologyNode::IdsOnLevel( unsigned int const level, std::vector<std::uint64
  * @param level Level of interest.
  * @param ids Indirect return parameter.
  */
-void TopologyNode::LocalIdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids, int const local_rank ) const {
+void TopologyNode::LocalIdsOnLevel( unsigned int const level, std::vector<nid_t>& ids, int const local_rank ) const {
    if( LevelOfNode( unique_id_ ) == level && current_rank_ == local_rank ) {
       ids.emplace_back( unique_id_ );
    } else {
@@ -306,7 +305,7 @@ void TopologyNode::LocalIdsOnLevel( unsigned int const level, std::vector<std::u
  * @param id The id of the node of interest.
  * @return Current rank of the node.
  */
-int TopologyNode::GetRank( std::uint64_t const id ) const {
+int TopologyNode::GetRank( nid_t const id ) const {
    if( unique_id_ == id )
       return current_rank_;
    else
@@ -319,7 +318,7 @@ int TopologyNode::GetRank( std::uint64_t const id ) const {
  * @param rank The id of the local rank.
  * @return The number of found local leaves.
  */
-unsigned int TopologyNode::LocalLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const {
+unsigned int TopologyNode::LocalLeaves( std::vector<nid_t>& local_leaves, int const rank ) const {
    if( is_leaf_ ) {
       if( current_rank_ == rank ) {
          local_leaves.push_back( unique_id_ );
@@ -342,7 +341,7 @@ unsigned int TopologyNode::LocalLeaves( std::vector<std::uint64_t>& local_leaves
  * @param rank The id of the local rank.
  * @return The number of found local leaves.
  */
-unsigned int TopologyNode::LocalInterfaceLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const {
+unsigned int TopologyNode::LocalInterfaceLeaves( std::vector<nid_t>& local_leaves, int const rank ) const {
    if( is_leaf_ ) {
       if( current_rank_ == rank && materials_.size() != 1 ) {
          local_leaves.push_back( unique_id_ );
@@ -364,7 +363,7 @@ unsigned int TopologyNode::LocalInterfaceLeaves( std::vector<std::uint64_t>& loc
  * @param local_nodes Indirect return parameter: The found local nodes.
  * @param rank The id of the local rank.
  */
-void TopologyNode::LocalNodes( std::vector<std::uint64_t>& local_nodes, int const rank ) const {
+void TopologyNode::LocalNodes( std::vector<nid_t>& local_nodes, int const rank ) const {
    // Add always this node
    if( current_rank_ == rank ) {
       local_nodes.push_back( unique_id_ );
@@ -380,7 +379,7 @@ void TopologyNode::LocalNodes( std::vector<std::uint64_t>& local_nodes, int cons
  * @param leaves Indirect return parameter: The found leaves.
  * @return The number of leaves.
  */
-unsigned int TopologyNode::GetLeafIds( std::vector<std::uint64_t>& leaves ) const {
+unsigned int TopologyNode::GetLeafIds( std::vector<nid_t>& leaves ) const {
    if( is_leaf_ ) {
       leaves.push_back( unique_id_ );
       return 1;
@@ -401,7 +400,7 @@ unsigned int TopologyNode::GetLeafIds( std::vector<std::uint64_t>& leaves ) cons
  * @param currentLevel The recursion level.
  * @return The number of local leaves.
  */
-unsigned int TopologyNode::LocalLeavesOnLevel( std::vector<std::uint64_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level ) const {
+unsigned int TopologyNode::LocalLeavesOnLevel( std::vector<nid_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level ) const {
    if( current_level == level ) {
       if( is_leaf_ && current_rank_ == rank ) {
          local_leaves.push_back( unique_id_ );
@@ -424,7 +423,7 @@ unsigned int TopologyNode::LocalLeavesOnLevel( std::vector<std::uint64_t>& local
  * @param current_level The recursion level.
  * @return The number of leaves.
  */
-unsigned int TopologyNode::GetLeafIdsOnLevel( std::vector<std::uint64_t>& leaves, unsigned int const level, unsigned int const current_level ) const {
+unsigned int TopologyNode::GetLeafIdsOnLevel( std::vector<nid_t>& leaves, unsigned int const level, unsigned int const current_level ) const {
    if( current_level == level ) {
       if( is_leaf_ ) {
          leaves.push_back( unique_id_ );
@@ -446,7 +445,7 @@ unsigned int TopologyNode::GetLeafIdsOnLevel( std::vector<std::uint64_t>& leaves
  * @param id The id of interest.
  * @return True if the node exists, false otherwise ( If all children respond with false ).
  */
-bool TopologyNode::NodeExists( std::uint64_t const id ) const {
+bool TopologyNode::NodeExists( nid_t const id ) const {
    if( unique_id_ == id )
       return true;
    else {
@@ -462,7 +461,7 @@ bool TopologyNode::NodeExists( std::uint64_t const id ) const {
  * @param id The id of interest.
  * @return True if the node is a leaf, false otherwise.
  */
-bool TopologyNode::NodeIsLeaf( std::uint64_t const id ) const {
+bool TopologyNode::NodeIsLeaf( nid_t const id ) const {
    if( unique_id_ == id )
       return is_leaf_;
    else {
@@ -476,9 +475,9 @@ bool TopologyNode::NodeIsLeaf( std::uint64_t const id ) const {
  * @return The node with given id.
  * @note Does not directly return the correct value, gives a value for recursive search. I.e. if a grand-child is searched this function returns the mother of the grandchild.
  */
-TopologyNode& TopologyNode::GetChildWithId( std::uint64_t const id ) {
+TopologyNode& TopologyNode::GetChildWithId( nid_t const id ) {
    // We have to search through the ancestor of the searched node until we find the child of the current one (recursive calls, remember...)
-   std::uint64_t id_on_child_level = id;
+   nid_t id_on_child_level = id;
    while( LevelOfNode( id_on_child_level ) > ( LevelOfNode( unique_id_ ) + 1 ) ) {
       id_on_child_level = ParentIdOfNode( id_on_child_level );
    }
@@ -486,11 +485,11 @@ TopologyNode& TopologyNode::GetChildWithId( std::uint64_t const id ) {
 }
 
 /**
- * @brief Const variant of GetChildWithId(std::uint64_t const id), see there for details.
+ * @brief Const variant of GetChildWithId(nid_t const id), see there for details.
  */
-TopologyNode const& TopologyNode::GetChildWithId( std::uint64_t const id ) const {
+TopologyNode const& TopologyNode::GetChildWithId( nid_t const id ) const {
    // We have to search through the ancestor of the searched node until we find the child of the current one (recursive calls, remember...)
-   std::uint64_t id_on_child_level = id;
+   nid_t id_on_child_level = id;
    while( LevelOfNode( id_on_child_level ) > ( LevelOfNode( unique_id_ ) + 1 ) ) {
       id_on_child_level = ParentIdOfNode( id_on_child_level );
    }
@@ -631,7 +630,7 @@ void TopologyNode::SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsi
  * @param id The id of the node to be assigned to the given rank.
  * @param rank The rank the node is assigned to.
  */
-void TopologyNode::SetCurrentRankOfLeaf( std::uint64_t const id, int const rank ) {
+void TopologyNode::SetCurrentRankOfLeaf( nid_t const id, int const rank ) {
    if( id == unique_id_ ) {
 #ifndef PERFORMANCE
       if( !is_leaf_ ) {
@@ -649,7 +648,7 @@ void TopologyNode::SetCurrentRankOfLeaf( std::uint64_t const id, int const rank 
  * @param ids_current_future_rank_map Indirect return parameter, giving a list of all nodes that need to be shifted fomr one mpi rank to another.
  *        The entries are as the name suggest id - current rank - future rank.
  */
-void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map ) {
+void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<nid_t const, int const, int const>>& ids_current_future_rank_map ) {
    if( future_rank_ != current_rank_ ) {
       ids_current_future_rank_map.push_back( std::make_tuple( unique_id_, current_rank_, future_rank_ ) );
       current_rank_ = future_rank_;
@@ -682,7 +681,7 @@ void TopologyNode::ChildWeight( std::vector<unsigned int>& weights_on_level, uns
  * @param id The id of the node the material should be added to.
  * @param material The material to be added to the node.
  */
-void TopologyNode::AddMaterial( std::uint64_t const id, MaterialName const material ) {
+void TopologyNode::AddMaterial( nid_t const id, MaterialName const material ) {
    if( unique_id_ == id ) {
       AddMaterial( material );
    } else {
@@ -704,7 +703,7 @@ void TopologyNode::AddMaterial( MaterialName const material ) {
  * @param id The id of the node the material should be removed from.
  * @param material The material to be removed from the node.
  */
-void TopologyNode::RemoveMaterial( std::uint64_t const id, MaterialName const material ) {
+void TopologyNode::RemoveMaterial( nid_t const id, MaterialName const material ) {
    if( unique_id_ == id ) {
       RemoveMaterial( material );
    } else {
@@ -726,7 +725,7 @@ void TopologyNode::RemoveMaterial( MaterialName const material ) {
  * @param id The id of the node.
  * @return The materials of the given node.
  */
-std::vector<MaterialName> TopologyNode::GetMaterials( std::uint64_t const id ) const {
+std::vector<MaterialName> TopologyNode::GetMaterials( nid_t const id ) const {
    return unique_id_ == id ? GetMaterials() : GetChildWithId( id ).GetMaterials( id );
 }
 
@@ -742,7 +741,7 @@ std::vector<MaterialName> TopologyNode::GetMaterials() const {
  * @brief Returns the single material of a node based on its unique id.
  * @return The material name.
  */
-MaterialName TopologyNode::GetSingleMaterial( std::uint64_t const id ) const {
+MaterialName TopologyNode::GetSingleMaterial( nid_t const id ) const {
    return unique_id_ == id ? GetSingleMaterial() : GetChildWithId( id ).GetSingleMaterial( id );
 }
 

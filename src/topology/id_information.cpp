@@ -75,7 +75,7 @@ namespace {
  * Gives the initial id for the most bottom-south-west node on all levels (number must equal maximum number of allowed levels CC::AMNL())
  */
    // NH: DO NOT TOUCH UNLESS YOU HAVE MY WRITTEN PERMISSION!
-   constexpr std::array<std::uint64_t, CC::AMNL()> headbits =
+   constexpr std::array<nid_t, CC::AMNL()> headbits =
          { { 0x1400000, 0xA000000, 0x50000000, 0x280000000, 0x1400000000, 0xA000000000,
              0x50000000000, 0x280000000000, 0x1400000000000, 0xA000000000000, 0x50000000000000, 0x280000000000000,
              0x1400000000000000, 0xA000000000000000 } };
@@ -85,7 +85,7 @@ namespace {
  * @brief Gives the inital id seed. I. e. the id of the most bottom-south-west node on level zero.
  * @return seed.
  */
-std::uint64_t IdSeed() {
+nid_t IdSeed() {
    return headbits[0];
 }
 
@@ -95,7 +95,7 @@ std::uint64_t IdSeed() {
  * @param level Level on which the node lies.
  * @return Morton Id.
  */
-std::uint64_t CutHeadBit( std::uint64_t const id, unsigned int const level ) {
+nid_t CutHeadBit( nid_t const id, unsigned int const level ) {
    return id - headbits[level];
 }
 
@@ -105,7 +105,7 @@ std::uint64_t CutHeadBit( std::uint64_t const id, unsigned int const level ) {
  * @param level Level on which the node lies.
  * @return ALPACA Id.
  */
-std::uint64_t AddHeadBit( std::uint64_t const id, unsigned int const level ) {
+nid_t AddHeadBit( nid_t const id, unsigned int const level ) {
    return id + headbits[level];
 }
 
@@ -114,7 +114,7 @@ std::uint64_t AddHeadBit( std::uint64_t const id, unsigned int const level ) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of eastern neighbor.
  */
-std::uint64_t EastNeighborOfNodeWithId( std::uint64_t const id ) {
+nid_t EastNeighborOfNodeWithId( nid_t const id ) {
 
    unsigned int const level = LevelOfNode( id );
 
@@ -134,7 +134,7 @@ std::uint64_t EastNeighborOfNodeWithId( std::uint64_t const id ) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of western neighbor.
  */
-std::uint64_t WestNeighborOfNodeWithId( std::uint64_t const id ) {
+nid_t WestNeighborOfNodeWithId( nid_t const id ) {
 
    unsigned int const level = LevelOfNode( id );
 
@@ -154,7 +154,7 @@ std::uint64_t WestNeighborOfNodeWithId( std::uint64_t const id ) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of northern neighbor.
  */
-std::uint64_t NorthNeighborOfNodeWithId( std::uint64_t const id ) {
+nid_t NorthNeighborOfNodeWithId( nid_t const id ) {
 
    unsigned int const level = LevelOfNode( id );
 
@@ -174,7 +174,7 @@ std::uint64_t NorthNeighborOfNodeWithId( std::uint64_t const id ) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of southern neighbor.
  */
-std::uint64_t SouthNeighborOfNodeWithId( std::uint64_t const id ) {
+nid_t SouthNeighborOfNodeWithId( nid_t const id ) {
 
    unsigned int const level = LevelOfNode( id );
 
@@ -194,7 +194,7 @@ std::uint64_t SouthNeighborOfNodeWithId( std::uint64_t const id ) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of top neighbor.
  */
-std::uint64_t TopNeighborOfNodeWithId( std::uint64_t const id ) {
+nid_t TopNeighborOfNodeWithId( nid_t const id ) {
 
    unsigned int const level = LevelOfNode( id );
 
@@ -214,7 +214,7 @@ std::uint64_t TopNeighborOfNodeWithId( std::uint64_t const id ) {
  * @param id The id of the node whose neighbor is to be found.
  * @return Id of bottom neighbor.
  */
-std::uint64_t BottomNeighborOfNodeWithId( std::uint64_t const id ) {
+nid_t BottomNeighborOfNodeWithId( nid_t const id ) {
 
    unsigned int const level = LevelOfNode( id );
 
@@ -235,7 +235,7 @@ std::uint64_t BottomNeighborOfNodeWithId( std::uint64_t const id ) {
  * @param location Direction in which the neighbor is located.
  * @return Id of the neighbor.
  */
-std::uint64_t GetNeighborId( std::uint64_t const id, BoundaryLocation const location ) {
+nid_t GetNeighborId( nid_t const id, BoundaryLocation const location ) {
 
    switch( location ) {
       // Natural (planes)
@@ -315,7 +315,7 @@ std::uint64_t GetNeighborId( std::uint64_t const id, BoundaryLocation const loca
  * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
  * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations (e. g. NOT Top in 1D).
  */
-bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
+bool IsNaturalExternalBoundary( BoundaryLocation const location, nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
 
    std::bitset<64> input( CutHeadBit( id, LevelOfNode( id ) ) );
 
@@ -414,7 +414,7 @@ bool IsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t c
  * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
  * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations (e. g. NOT Top in 1D).
  */
-bool IsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
+bool IsExternalBoundary( BoundaryLocation const location, nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero ) {
    //natural | NH Such comparison are okay by (enforced) definiton of BoundaryLocation
    if( LTI( location ) <= LTI( BoundaryLocation::Bottom ) ) {
       return IsNaturalExternalBoundary( location, id, number_of_nodes_on_level_zero );

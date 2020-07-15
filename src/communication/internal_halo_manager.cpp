@@ -174,15 +174,15 @@ void InternalHaloManager::InterfaceHaloUpdateOnLevel( unsigned int const level, 
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void InternalHaloManager::UpdateMaterialJumpMpiRecv( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
+void InternalHaloManager::UpdateMaterialJumpMpiRecv( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
                                                      MaterialFieldType const field_type ) {
    Node& node = tree_.GetNodeWithId( id );
    //parent always contains material of child
    for( auto const material : topology_.GetMaterialsOfNode( id ) ) {
       Block& host_block = node.GetPhaseByMaterial( material );
 
-      std::uint64_t const parent_id = ParentIdOfNode( id );
-      int const sender_rank         = topology_.GetRankOfNode( parent_id );
+      nid_t const parent_id = ParentIdOfNode( id );
+      int const sender_rank = topology_.GetRankOfNode( parent_id );
 
       // MPI
       MPI_Datatype recv_type = communication_manager_.RecvDatatype( loc, DatatypeForMpi::Double );
@@ -213,15 +213,15 @@ void InternalHaloManager::UpdateMaterialJumpMpiRecv( std::uint64_t const id, std
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void InternalHaloManager::UpdateMaterialJumpNoMpi( std::uint64_t const id, BoundaryLocation const loc, MaterialFieldType const field_type ) {
+void InternalHaloManager::UpdateMaterialJumpNoMpi( nid_t const id, BoundaryLocation const loc, MaterialFieldType const field_type ) {
    Node& node = tree_.GetNodeWithId( id );
    //parent always contains material of child
    for( auto const material : topology_.GetMaterialsOfNode( id ) ) {
       Block& host_block = node.GetPhaseByMaterial( material );
 
-      std::uint64_t const parent_id = ParentIdOfNode( id );
-      auto const start_indices      = communication_manager_.GetStartIndicesHaloRecv( loc );
-      auto const halo_size          = communication_manager_.GetHaloSize( loc );
+      nid_t const parent_id    = ParentIdOfNode( id );
+      auto const start_indices = communication_manager_.GetStartIndicesHaloRecv( loc );
+      auto const halo_size     = communication_manager_.GetHaloSize( loc );
 
       Block const& parent_block = tree_.GetNodeWithId( parent_id ).GetPhaseByMaterial( material );
 
@@ -261,11 +261,11 @@ void InternalHaloManager::UpdateMaterialJumpNoMpi( std::uint64_t const id, Bound
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void InternalHaloManager::UpdateMaterialHaloCellsNoMpi( std::uint64_t const id, BoundaryLocation const loc, MaterialFieldType const field_type ) {
+void InternalHaloManager::UpdateMaterialHaloCellsNoMpi( nid_t const id, BoundaryLocation const loc, MaterialFieldType const field_type ) {
    Node& node                          = tree_.GetNodeWithId( id );
    unsigned int const number_of_fields = MF::ANOF( field_type );
    for( auto const material : topology_.GetMaterialsOfNode( id ) ) {
-      std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
+      nid_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
       if( topology_.NodeContainsMaterial( neighbor_id, material ) ) {
          Block& host_block = node.GetPhaseByMaterial( material );
 
@@ -287,11 +287,11 @@ void InternalHaloManager::UpdateMaterialHaloCellsNoMpi( std::uint64_t const id, 
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
+void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
                                                           MaterialFieldType const field_type ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
-   int const rank_of_neighbor      = topology_.GetRankOfNode( neighbor_id );
+   Node& node                 = tree_.GetNodeWithId( id );
+   nid_t const neighbor_id    = topology_.GetTopologyNeighborId( id, loc );
+   int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
 
    for( auto const material : topology_.GetMaterialsOfNode( id ) ) {
       if( topology_.NodeContainsMaterial( neighbor_id, material ) ) {
@@ -330,11 +330,11 @@ void InternalHaloManager::UpdateMaterialHaloCellsMpiSend( std::uint64_t const id
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void InternalHaloManager::UpdateMaterialHaloCellsMpiRecv( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
+void InternalHaloManager::UpdateMaterialHaloCellsMpiRecv( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc,
                                                           MaterialFieldType const field_type ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( id, loc );
-   int const rank_of_neighbor      = topology_.GetRankOfNode( neighbor_id );
+   Node& node                 = tree_.GetNodeWithId( id );
+   nid_t const neighbor_id    = topology_.GetTopologyNeighborId( id, loc );
+   int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
 
    for( auto const material : topology_.GetMaterialsOfNode( id ) ) {
       if( topology_.NodeContainsMaterial( neighbor_id, material ) ) {
@@ -411,11 +411,11 @@ inline void InternalHaloManager::ExtendClosestInternalValue( T ( &host_buffer )[
  * @param buffer_type Type of buffer on the levelset block that should be updated.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceHaloCellsMpiSend( std::uint64_t const id, std::vector<MPI_Request>& requests,
+void InternalHaloManager::UpdateInterfaceHaloCellsMpiSend( nid_t const id, std::vector<MPI_Request>& requests,
                                                            InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const host_id     = id;
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
+   Node& node              = tree_.GetNodeWithId( id );
+   nid_t const host_id     = id;
+   nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
    /*  NH TODO-19 "node.HasLevelset() if" should be avoided, therefore different neighbor relations
     *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
     */
@@ -434,11 +434,11 @@ void InternalHaloManager::UpdateInterfaceHaloCellsMpiSend( std::uint64_t const i
  * @param buffer_type Type of buffer on the levelset block that should be updated.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceHaloCellsMpiRecv( std::uint64_t const id, std::vector<MPI_Request>& requests,
+void InternalHaloManager::UpdateInterfaceHaloCellsMpiRecv( nid_t const id, std::vector<MPI_Request>& requests,
                                                            InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const host_id     = id;
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
+   Node& node              = tree_.GetNodeWithId( id );
+   nid_t const host_id     = id;
+   nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
    /*  NH TODO-19 "node.HasLevelset() if" should be avoided, therefore different neighbor relations
     *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
     */
@@ -461,10 +461,10 @@ void InternalHaloManager::UpdateInterfaceHaloCellsMpiRecv( std::uint64_t const i
  * @param buffer_type Type of buffer on the levelset block that should be updated.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( std::uint64_t const id, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const host_id     = id;
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
+void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( nid_t const id, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) {
+   Node& node              = tree_.GetNodeWithId( id );
+   nid_t const host_id     = id;
+   nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    /*  NH TODO-19 "node.HasLevelset() if" should be avoided, therefore different neighbor relations
     *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
@@ -491,10 +491,10 @@ void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( std::uint64_t const id,
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const host_id     = id;
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
+void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
+   Node& node              = tree_.GetNodeWithId( id );
+   nid_t const host_id     = id;
+   nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    int const rank_of_neighbor                                         = topology_.GetRankOfNode( neighbor_id );
    std::int8_t const( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
@@ -508,10 +508,10 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( std::uint64_t cons
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const host_id     = id;
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
+void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
+   Node& node              = tree_.GetNodeWithId( id );
+   nid_t const host_id     = id;
+   nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
 
@@ -525,10 +525,10 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( std::uint64_t cons
  * @param id The id of the node to be updated.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t const id, BoundaryLocation const loc ) {
-   Node& node                      = tree_.GetNodeWithId( id );
-   std::uint64_t const host_id     = id;
-   std::uint64_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
+void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( nid_t const id, BoundaryLocation const loc ) {
+   Node& node              = tree_.GetNodeWithId( id );
+   nid_t const host_id     = id;
+   nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    if( topology_.NodeExists( neighbor_id ) ) {
       std::int8_t( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()]          = node.GetInterfaceTags();
@@ -548,7 +548,7 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( std::uint64_t const 
  * @param loc BoundaryLocation to be updated.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-unsigned int InternalHaloManager::UpdateMaterialJumpMpiSend( std::uint64_t const id, std::vector<MPI_Request>& requests, std::uint64_t const remote_child_id,
+unsigned int InternalHaloManager::UpdateMaterialJumpMpiSend( nid_t const id, std::vector<MPI_Request>& requests, nid_t const remote_child_id,
                                                              void* send_buffer, BoundaryLocation const loc, MaterialFieldType const field_type ) {
    Node& node = tree_.GetNodeWithId( id );
 
@@ -607,7 +607,7 @@ unsigned int InternalHaloManager::UpdateMaterialJumpMpiSend( std::uint64_t const
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
 void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& requests,
-                                                     std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+                                                     std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                      std::vector<ExchangePlane>& jump_buffer_plane, std::vector<ExchangeStick>& jump_buffer_stick,
                                                      std::vector<ExchangeCube>& jump_buffer_cube, MaterialFieldType const field_type ) {
    unsigned int jump_send_counter_plane = 0;
@@ -615,7 +615,7 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
    unsigned int jump_send_counter_cube  = 0;
 
    for( auto const& boundary : boundaries ) {
-      std::uint64_t const id          = std::get<0>( boundary );
+      nid_t const id                  = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
 
       switch( std::get<2>( boundary ) ) {
@@ -626,7 +626,7 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
 #ifndef PERFORMANCE
          case InternalBoundaryType::JumpBoundaryMpiSend: {
             CommunicationStatistics::jump_halos_send_++;
-            std::uint64_t const parent_id = ParentIdOfNode( id );
+            nid_t const parent_id = ParentIdOfNode( id );
 
             // buffer size is dependent on jump location
             if( LTI( location ) <= LTI( BoundaryLocation::Bottom ) ) {
@@ -645,7 +645,7 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
 #else
          default: /* InternalBoundaryType::JumpBoundaryMpiSend */ {
             CommunicationStatistics::jump_halos_send_++;
-            std::uint64_t const parent_id = ParentIdOfNode( id );
+            nid_t const parent_id = ParentIdOfNode( id );
 
             // buffer size is dependent on jump location
             if( LTI( location ) <= LTI( BoundaryLocation::Bottom ) ) {
@@ -680,10 +680,10 @@ void InternalHaloManager::MpiMaterialHaloUpdateJump( std::vector<MPI_Request>& r
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
 void InternalHaloManager::MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>& requests,
-                                                       std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+                                                       std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                        MaterialFieldType const field_type ) {
    for( auto const& boundary : boundaries ) {
-      std::uint64_t id          = std::get<0>( boundary );
+      nid_t id                  = std::get<0>( boundary );
       BoundaryLocation location = std::get<1>( boundary );
 
       switch( std::get<2>( boundary ) ) {
@@ -713,11 +713,11 @@ void InternalHaloManager::MpiMaterialHaloUpdateNoJump( std::vector<MPI_Request>&
  * @param boundaries description of internal boundaries, either jump or no jump.
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
-void InternalHaloManager::NoMpiMaterialHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+void InternalHaloManager::NoMpiMaterialHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                    MaterialFieldType const field_type ) {
    for( auto const& boundary : boundaries ) {
       InternalBoundaryType const type = std::get<2>( boundary );
-      std::uint64_t const id          = std::get<0>( boundary );
+      nid_t const id                  = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
 
       switch( type ) {
@@ -742,9 +742,9 @@ void InternalHaloManager::NoMpiMaterialHaloUpdate( std::vector<std::tuple<std::u
  * @brief Executes the Interface tag halo update for all boundaries that do not need communication.
  * @param boundaries Boundaries to be updated.
  */
-void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries ) {
+void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries ) {
    for( auto const& boundary : boundaries ) {
-      std::uint64_t const id          = std::get<0>( boundary );
+      nid_t const id                  = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
       InternalBoundaryType const type = std::get<2>( boundary );
 
@@ -759,11 +759,11 @@ void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<st
  * @brief Executes the interface tag halo update for all boundaries that do need communication.
  * @param boundaries Boundaries to be updated.
  */
-void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                      std::vector<MPI_Request>& requests ) {
    for( auto const& boundary : boundaries ) {
       BoundaryLocation const location = std::get<1>( boundary );
-      std::uint64_t const id          = std::get<0>( boundary );
+      nid_t const id                  = std::get<0>( boundary );
 
       switch( std::get<2>( boundary ) ) {
          case InternalBoundaryType::NoJumpBoundaryMpiSend:
@@ -789,10 +789,10 @@ void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<std:
  * @param boundaries Boundaries to be updated.
  * @param buffer_type Type of buffer on the levelset block that should be updated.
  */
-void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                     InterfaceBlockBufferType const buffer_type ) {
    for( auto const& boundary : boundaries ) {
-      std::uint64_t const id          = std::get<0>( boundary );
+      nid_t const id                  = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
       InternalBoundaryType const type = std::get<2>( boundary );
 
@@ -808,11 +808,11 @@ void InternalHaloManager::NoMpiInterfaceHaloUpdate( std::vector<std::tuple<std::
  * @param boundaries Boundaries to be updated.
  * @param buffer_type Type of buffer on the levelset block that should be updated.
  */
-void InternalHaloManager::MpiInterfaceHaloUpdate( std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+void InternalHaloManager::MpiInterfaceHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
                                                   InterfaceBlockBufferType const buffer_type, std::vector<MPI_Request>& requests ) {
    for( auto const& boundary : boundaries ) {
       BoundaryLocation const location = std::get<1>( boundary );
-      std::uint64_t const id          = std::get<0>( boundary );
+      nid_t const id                  = std::get<0>( boundary );
 
       switch( std::get<2>( boundary ) ) {
          case InternalBoundaryType::NoJumpBoundaryMpiSend: {

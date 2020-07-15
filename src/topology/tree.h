@@ -87,9 +87,9 @@ class Tree {
    // size of a cubic block on level zero (non-dimensionalized)
    double const node_size_on_level_zero_;
    // all nodes contained in this tree ( current rank )
-   std::vector<std::unordered_map<std::uint64_t, Node>> nodes_;
+   std::vector<std::unordered_map<nid_t, Node>> nodes_;
 
-   void InsertNode( std::uint64_t const id, std::vector<MaterialName> const materials, std::int8_t const interface_tag );
+   void InsertNode( nid_t const id, std::vector<MaterialName> const materials, std::int8_t const interface_tag );
 
 public:
    Tree() = delete;
@@ -109,11 +109,11 @@ public:
    }
 
    // Functions for manipulating the tree
-   Node& CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials, std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
+   Node& CreateNode( nid_t const id, std::vector<MaterialName> const& materials, std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
                      std::unique_ptr<InterfaceBlock> interface_block = nullptr );
-   Node& CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials );
-   void RemoveNodeWithId( std::uint64_t const id );
-   std::vector<std::uint64_t> RefineNode( std::uint64_t const id );
+   Node& CreateNode( nid_t const id, std::vector<MaterialName> const& materials );
+   void RemoveNodeWithId( nid_t const id );
+   std::vector<nid_t> RefineNode( nid_t const id );
 
    // Functions to return leaf nodes
    std::vector<std::reference_wrapper<Node>> Leaves();
@@ -132,22 +132,22 @@ public:
    std::vector<std::reference_wrapper<Node const>> AllNodes() const;
 
    // Functions to return specific ndes
-   Node const& GetNodeWithId( std::uint64_t const id ) const;
-   Node& GetNodeWithId( std::uint64_t const id );
-   std::pair<std::uint64_t const, Node>& NodeIdPair( std::uint64_t const id );
-   std::pair<std::uint64_t const, Node> const& NodeIdPair( std::uint64_t const id ) const;
-   std::unordered_map<std::uint64_t, Node>& GetLevelContent( unsigned int const level );
-   std::unordered_map<std::uint64_t, Node> const& GetLevelContent( unsigned int const level ) const;
+   Node const& GetNodeWithId( nid_t const id ) const;
+   Node& GetNodeWithId( nid_t const id );
+   std::pair<nid_t const, Node>& NodeIdPair( nid_t const id );
+   std::pair<nid_t const, Node> const& NodeIdPair( nid_t const id ) const;
+   std::unordered_map<nid_t, Node>& GetLevelContent( unsigned int const level );
+   std::unordered_map<nid_t, Node> const& GetLevelContent( unsigned int const level ) const;
 
    /**
     * @brief Gives a reference to the complete node list in this tree instance, i e. the complete tree on current MPI rank.
     * @return List of nodes. An array for each level holding arbitrary number of nodes on each level.
     */
-   inline std::vector<std::unordered_map<std::uint64_t, Node>>& FullNodeList() { return nodes_; }
+   inline std::vector<std::unordered_map<nid_t, Node>>& FullNodeList() { return nodes_; }
    /**
     * @brief Const overload.
     */
-   inline std::vector<std::unordered_map<std::uint64_t, Node>> const& FullNodeList() const { return nodes_; }
+   inline std::vector<std::unordered_map<nid_t, Node>> const& FullNodeList() const { return nodes_; }
 };
 
 #endif// TREE_H

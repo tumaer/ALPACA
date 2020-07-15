@@ -140,10 +140,10 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
    }
 
    GIVEN( "The simplest all two-phase single-jump topology" ) {
-      constexpr unsigned int maximum_level   = 1;
-      TopologyManager simple_jump_topo       = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
-      constexpr std::uint64_t jump_parent_id = 0x1400001;
-      Tree tree                              = Tree( simple_jump_topo, maximum_level, 1.0 );
+      constexpr unsigned int maximum_level = 1;
+      TopologyManager simple_jump_topo     = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
+      constexpr nid_t jump_parent_id       = 0x1400001;
+      Tree tree                            = Tree( simple_jump_topo, maximum_level, 1.0 );
       if( simple_jump_topo.NodeIsOnRank( jump_parent_id, MpiUtilities::MyRankId() ) ) {
          simple_jump_topo.AddMaterialToNode( jump_parent_id, material_one );
          simple_jump_topo.AddMaterialToNode( jump_parent_id, material_two );

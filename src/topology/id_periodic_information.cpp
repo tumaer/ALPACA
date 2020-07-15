@@ -66,9 +66,8 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "topology/id_periodic_information.h"
-
+#include "topology/id_information.h"
 #include <bitset>
-#include "id_information.h"
 
 namespace {
 
@@ -81,7 +80,7 @@ namespace {
     * @param active_periodic_locations Active periodic locations for the simulation (1: East-West, 2:North-South, 4:Top-Bottom).
     * @return True if neighbor location is an external periodic boundary, otherwise False.
     */
-   bool NeighborIsExternalPeriodic( PeriodicBoundariesLocations const periodic_location, BoundaryLocation const neighbor_location, std::uint64_t const id,
+   bool NeighborIsExternalPeriodic( PeriodicBoundariesLocations const periodic_location, BoundaryLocation const neighbor_location, nid_t const id,
                                     std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
       return ( active_periodic_locations & periodic_location ) && IsNaturalExternalBoundary( neighbor_location, id, number_of_nodes_on_level_zero );
    }
@@ -92,8 +91,8 @@ namespace {
     * @param active_periodic_locations bitwise representation of the active periodic locations.
     * @return Id of eastern periodic neighbor.
     */
-   std::uint64_t EastPeriodicNeighborOfNodeWithId( std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
-                                                   unsigned int const active_periodic_locations ) {
+   nid_t EastPeriodicNeighborOfNodeWithId( nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
+                                           unsigned int const active_periodic_locations ) {
 
       if( NeighborIsExternalPeriodic( PeriodicBoundariesLocations::EastWest, BoundaryLocation::East, id, number_of_nodes_on_level_zero, active_periodic_locations ) ) {
          unsigned int const level = LevelOfNode( id );
@@ -112,8 +111,8 @@ namespace {
     * @param active_periodic_locations bitwise representation of the active periodic locations.
     * @return Id of western periodic neighbor.
     */
-   std::uint64_t WestPeriodicNeighborOfNodeWithId( std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
-                                                   unsigned int const active_periodic_locations ) {
+   nid_t WestPeriodicNeighborOfNodeWithId( nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
+                                           unsigned int const active_periodic_locations ) {
 
       if( NeighborIsExternalPeriodic( PeriodicBoundariesLocations::EastWest, BoundaryLocation::West, id, number_of_nodes_on_level_zero, active_periodic_locations ) ) {
          unsigned int const level = LevelOfNode( id );
@@ -134,8 +133,8 @@ namespace {
     * @param active_periodic_locations bitwise representation of the active periodic locations.
     * @return Id of northern periodic neighbor.
     */
-   std::uint64_t NorthPeriodicNeighborOfNodeWithId( std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
-                                                    unsigned int const active_periodic_locations ) {
+   nid_t NorthPeriodicNeighborOfNodeWithId( nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
+                                            unsigned int const active_periodic_locations ) {
 
       if( NeighborIsExternalPeriodic( PeriodicBoundariesLocations::NorthSouth, BoundaryLocation::North, id, number_of_nodes_on_level_zero, active_periodic_locations ) ) {
          unsigned int const level = LevelOfNode( id );
@@ -154,8 +153,8 @@ namespace {
     * @param active_periodic_locations bitwise representation of the active periodic locations.
     * @return Id of southern  periodic neighbor.
     */
-   std::uint64_t SouthPeriodicNeighborOfNodeWithId( std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
-                                                    unsigned int const active_periodic_locations ) {
+   nid_t SouthPeriodicNeighborOfNodeWithId( nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
+                                            unsigned int const active_periodic_locations ) {
 
       if( NeighborIsExternalPeriodic( PeriodicBoundariesLocations::NorthSouth, BoundaryLocation::South, id, number_of_nodes_on_level_zero, active_periodic_locations ) ) {
          unsigned int const level = LevelOfNode( id );
@@ -176,8 +175,8 @@ namespace {
     * @param active_periodic_locations bitwise representation of the active periodic locations.
     * @return Id of top periodic neighbor.
     */
-   std::uint64_t TopPeriodicNeighborOfNodeWithId( std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
-                                                  unsigned int const active_periodic_locations ) {
+   nid_t TopPeriodicNeighborOfNodeWithId( nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
+                                          unsigned int const active_periodic_locations ) {
 
       if( NeighborIsExternalPeriodic( PeriodicBoundariesLocations::TopBottom, BoundaryLocation::Top, id, number_of_nodes_on_level_zero, active_periodic_locations ) ) {
          unsigned int const level = LevelOfNode( id );
@@ -196,8 +195,8 @@ namespace {
     * @param active_periodic_locations bitwise representation of the active periodic locations.
     * @return Id of bottom periodic neighbor.
     */
-   std::uint64_t BottomPeriodicNeighborOfNodeWithId( std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
-                                                     unsigned int const active_periodic_locations ) {
+   nid_t BottomPeriodicNeighborOfNodeWithId( nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero,
+                                             unsigned int const active_periodic_locations ) {
 
       if( NeighborIsExternalPeriodic( PeriodicBoundariesLocations::TopBottom, BoundaryLocation::Bottom, id, number_of_nodes_on_level_zero, active_periodic_locations ) ) {
          unsigned int const level = LevelOfNode( id );
@@ -219,7 +218,7 @@ namespace {
     * @param setup The simulation settings as provided by the user.
     * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
     */
-   bool PeriodicIsNaturalExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
+   bool PeriodicIsNaturalExternalBoundary( BoundaryLocation const location, nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
 
       std::bitset<64> const input( CutHeadBit( id, LevelOfNode( id ) ) );
 
@@ -309,7 +308,7 @@ namespace {
  * @param active_periodic_locations bitwise representation of the active periodic locations.
  * @return Id of the periodic neighbor.
  */
-std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
+nid_t GetPeriodicNeighborId( nid_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
 
    switch( location ) {
       // Natural
@@ -400,7 +399,7 @@ std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation co
  * @param setup The simulation settings as provided by the user.
  * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
  */
-bool PeriodicIsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
+bool PeriodicIsExternalBoundary( BoundaryLocation const location, nid_t const id, std::array<unsigned int, 3> const number_of_nodes_on_level_zero, unsigned int const active_periodic_locations ) {
    //natural | NH Such comparison are okay by (enforced) definiton of BoundaryLocation
    if( LTI( location ) <= LTI( BoundaryLocation::Bottom ) ) {
       return PeriodicIsNaturalExternalBoundary( location, id, number_of_nodes_on_level_zero, active_periodic_locations );

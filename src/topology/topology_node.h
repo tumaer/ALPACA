@@ -70,9 +70,8 @@
 
 #include <vector>
 #include <tuple>
-#include <cstdint>
+#include "topology/node_id_type.h"
 #include "materials/material_definitions.h"
-
 #include "utilities/space_filling_curves.h"
 
 /**
@@ -80,7 +79,7 @@
  */
 class TopologyNode {
 
-   std::uint64_t const unique_id_;
+   nid_t const unique_id_;
    int current_rank_;
    int future_rank_;
    std::vector<TopologyNode> children_;
@@ -94,24 +93,24 @@ class TopologyNode {
    std::vector<MaterialName> GetMaterials() const;
    MaterialName GetSingleMaterial() const;
 
-   TopologyNode& GetChildWithId( std::uint64_t const id );
-   TopologyNode const& GetChildWithId( std::uint64_t const id ) const;
+   TopologyNode& GetChildWithId( nid_t const id );
+   TopologyNode const& GetChildWithId( nid_t const id ) const;
 
    unsigned int Weight() const;
 
 public:
    TopologyNode() = delete;
-   explicit TopologyNode( std::uint64_t const id, int const rank = -1 );
+   explicit TopologyNode( nid_t const id, int const rank = -1 );
    ~TopologyNode()                     = default;
    TopologyNode( TopologyNode const& ) = delete;
    TopologyNode& operator=( TopologyNode const& ) = delete;
    TopologyNode( TopologyNode&& )                 = default;//Needed for usage in vector.
    TopologyNode& operator=( TopologyNode&& ) = delete;
 
-   void Refine( std::uint64_t const id );
-   void Coarse( std::uint64_t const id );
+   void Refine( nid_t const id );
+   void Coarse( nid_t const id );
 
-   int GetRank( std::uint64_t const id ) const;
+   int GetRank( nid_t const id ) const;
    void NodeLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
    void NodeInterfaceLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
    void RankWiseNodeLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const;
@@ -121,40 +120,40 @@ public:
    void RankWiseNodeBlockCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank ) const;
    unsigned int GetDepth() const;
 
-   void IdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids ) const;
-   void LocalIdsOnLevel( unsigned int const level, std::vector<std::uint64_t>& ids, int const local_rank ) const;
+   void IdsOnLevel( unsigned int const level, std::vector<nid_t>& ids ) const;
+   void LocalIdsOnLevel( unsigned int const level, std::vector<nid_t>& ids, int const local_rank ) const;
 
-   unsigned int LocalLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const;
-   unsigned int LocalInterfaceLeaves( std::vector<std::uint64_t>& local_leaves, int const rank ) const;
-   unsigned int GetLeafIds( std::vector<std::uint64_t>& leaves ) const;
-   unsigned int LocalLeavesOnLevel( std::vector<std::uint64_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level = 0 ) const;
-   unsigned int GetLeafIdsOnLevel( std::vector<std::uint64_t>& leaves, unsigned int const level, unsigned int const current_level = 0 ) const;
+   unsigned int LocalLeaves( std::vector<nid_t>& local_leaves, int const rank ) const;
+   unsigned int LocalInterfaceLeaves( std::vector<nid_t>& local_leaves, int const rank ) const;
+   unsigned int GetLeafIds( std::vector<nid_t>& leaves ) const;
+   unsigned int LocalLeavesOnLevel( std::vector<nid_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level = 0 ) const;
+   unsigned int GetLeafIdsOnLevel( std::vector<nid_t>& leaves, unsigned int const level, unsigned int const current_level = 0 ) const;
 
-   void LocalNodes( std::vector<std::uint64_t>& local_nodes, int const rank ) const;
+   void LocalNodes( std::vector<nid_t>& local_nodes, int const rank ) const;
 
    void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, unsigned int const level = 0 );
    void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, const HilbertPosition position, unsigned int const level = 0 );
 
-   void ListUnbalancedNodes( std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map );
+   void ListUnbalancedNodes( std::vector<std::tuple<nid_t const, int const, int const>>& ids_current_future_rank_map );
 
    int BalanceTargetRanks();
-   void SetCurrentRankOfLeaf( std::uint64_t const id, int const rank );
+   void SetCurrentRankOfLeaf( nid_t const id, int const rank );
 
-   bool NodeExists( std::uint64_t const id ) const;
-   bool NodeIsLeaf( std::uint64_t const id ) const;
+   bool NodeExists( nid_t const id ) const;
+   bool NodeIsLeaf( nid_t const id ) const;
 
    void ChildWeight( std::vector<unsigned int>& weights_on_level, unsigned int const current_level = 0 ) const;
 
-   void AddMaterial( std::uint64_t const id, MaterialName const material );
-   void RemoveMaterial( std::uint64_t const id, MaterialName const material );
-   std::vector<MaterialName> GetMaterials( std::uint64_t const id ) const;
-   MaterialName GetSingleMaterial( std::uint64_t const id ) const;
+   void AddMaterial( nid_t const id, MaterialName const material );
+   void RemoveMaterial( nid_t const id, MaterialName const material );
+   std::vector<MaterialName> GetMaterials( nid_t const id ) const;
+   MaterialName GetSingleMaterial( nid_t const id ) const;
 
    /**
     * @brief Gives the id of this topology node.
     * @return id.
     */
-   inline std::uint64_t Id() const { return unique_id_; }
+   inline nid_t Id() const { return unique_id_; }
 
    /**
     * @brief Gives the current rank of the TopologyNode.
@@ -165,9 +164,9 @@ public:
    /**
     * @brief Specification of == operator for the id of topology nodes
     * @param rhs right hand side value of == operator
-    * @return True if Ids of two nodes are equal, False otherwise 
+    * @return True if Ids of two nodes are equal, False otherwise
     */
-   inline bool operator==( std::uint64_t const rhs ) { return ( rhs == unique_id_ ); }
+   inline bool operator==( nid_t const rhs ) { return ( rhs == unique_id_ ); }
    inline bool operator==( TopologyNode const& rhs ) { return ( rhs.Id() == unique_id_ ); }
 };
 

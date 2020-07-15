@@ -87,7 +87,7 @@ Multiresolution::Multiresolution( Thresholder&& thresholder ) : thresholder_( th
  * @param child_id The id of the child whose values are averaged into the parent.
  * @note Adds the average to the already present value in the parent buffer.
  */
-void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, SurfaceBuffer& parent_buffer, std::uint64_t const child_id ) {
+void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, SurfaceBuffer& parent_buffer, nid_t const child_id ) {
 
    //compute start index of second child in parent. 0 if dimension is not considered
    static constexpr int x_index = int( CC::ICX() ) / 2;
@@ -164,7 +164,7 @@ void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, Surf
  * @note No sanity checks on start or count values are done. Values in the child buffer are overriden.
  */
 void Multiresolution::Prediction( double const ( &parent_values )[CC::TCX()][CC::TCY()][CC::TCZ()], double ( &child_values )[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                  std::uint64_t const child_id, unsigned int const x_start, unsigned int const x_count, unsigned int const y_start,
+                                  nid_t const child_id, unsigned int const x_start, unsigned int const x_count, unsigned int const y_start,
                                   unsigned int const y_count, unsigned int const z_start, unsigned int const z_count ) {
 #ifndef PERFORMANCE
    if( x_start % 2 != 0 || y_start % 2 != 0 || z_start % 2 != 0 ) {
@@ -304,7 +304,7 @@ void Multiresolution::Prediction( double const ( &parent_values )[CC::TCX()][CC:
  * @brief Implementation of Meta function for L-infinity norm. See meta function.
  */
 template<>
-RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block const& parent, Block const& child, std::uint64_t const child_id ) const {
+RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block const& parent, Block const& child, nid_t const child_id ) const {
 
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
@@ -328,7 +328,7 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block co
  * @brief Implementation of meta function for L-one norm in three dimensions. See meta function.
  */
 template<>
-RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& parent, Block const& child, std::uint64_t const child_id ) const {
+RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& parent, Block const& child, nid_t const child_id ) const {
 
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
@@ -357,7 +357,7 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& 
  * @brief Implementation of meta function for L-two norm in three dimensions. See meta function.
  */
 template<>
-RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Ltwo>( Block const& parent, Block const& child, std::uint64_t const child_id ) const {
+RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Ltwo>( Block const& parent, Block const& child, nid_t const child_id ) const {
 
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
@@ -416,7 +416,7 @@ RemeshIdentifier Multiresolution::RemeshingDecision( double const detail, unsign
  * @note Not a real averaging. Only importance is that the cut cell markers are correctly propagated. Therefore a multiplication is (mis-)used.
  */
 void Multiresolution::PropagateCutCellTagsFromChildIntoParent( std::int8_t const ( &child_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                               std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::uint64_t const child_id ) {
+                                                               std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], nid_t const child_id ) {
 
    unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings( child_id )];
    unsigned int const y_start = CC::DIM() != Dimension::One ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings( child_id )] : 0;
@@ -469,7 +469,7 @@ void Multiresolution::PropagateCutCellTagsFromChildIntoParent( std::int8_t const
  * @param child_id The id of the child.
  */
 void Multiresolution::PropagateUniformTagsFromChildIntoParent( std::int8_t const child_tag, std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                               std::uint64_t const child_id ) {
+                                                               nid_t const child_id ) {
 
    unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings( child_id )];
    unsigned int const y_start = CC::DIM() != Dimension::One ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings( child_id )] : 0;

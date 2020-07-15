@@ -178,7 +178,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
 
    // Get the information for the number of nodes of the full topology and then read the nodes ids
    unsigned int const global_number_of_nodes = hdf5_manager_.GetDatasetExtent( "NodeIds" );
-   std::vector<std::uint64_t> node_ids( global_number_of_nodes );
+   std::vector<nid_t> node_ids( global_number_of_nodes );
    hdf5_manager_.ReadFullDataset( "NodeIds", node_ids.data(), H5T_NATIVE_ULLONG );
 
    // Get the information of all other required parameters (Consistency check on the given input data)

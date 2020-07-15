@@ -89,7 +89,7 @@ Tree::Tree( TopologyManager const& topology, unsigned int const maximum_level, d
  * @param materials Identifiers of the materials present in the node to be created.
  * @param interface_tag The interface tag present in all of the node.
  */
-void Tree::InsertNode( std::uint64_t const id, std::vector<MaterialName> const materials, std::int8_t const interface_tag ) {
+void Tree::InsertNode( nid_t const id, std::vector<MaterialName> const materials, std::int8_t const interface_tag ) {
    nodes_[LevelOfNode( id )].emplace( std::piecewise_construct, std::forward_as_tuple( id ), std::forward_as_tuple( id, node_size_on_level_zero_, materials, interface_tag ) );
 }
 
@@ -101,7 +101,7 @@ void Tree::InsertNode( std::uint64_t const id, std::vector<MaterialName> const m
  * @param interface_tags The interface tags to be contained in the new node.
  * @param interface_block The InterfaceBlock to be contained in the new node.
  */
-Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials,
+Node& Tree::CreateNode( nid_t const id, std::vector<MaterialName> const& materials,
                         std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) {
 
    unsigned int const level = LevelOfNode( id );
@@ -121,7 +121,7 @@ Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const&
  * @param id .
  * @param materials .
  */
-Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const& materials ) {
+Node& Tree::CreateNode( nid_t const id, std::vector<MaterialName> const& materials ) {
 
    unsigned int const level = LevelOfNode( id );
    auto entry_and_decision  = nodes_[level].emplace( std::piecewise_construct, std::forward_as_tuple( id ),
@@ -141,7 +141,7 @@ Node& Tree::CreateNode( std::uint64_t const id, std::vector<MaterialName> const&
  * @param id Id of the leaf which is to be refined, i.e. becomes a parent node.
  * @return List of childrens' ids.
  */
-std::vector<std::uint64_t> Tree::RefineNode( std::uint64_t const id ) {
+std::vector<nid_t> Tree::RefineNode( nid_t const id ) {
 
 #ifndef PERFORMANCE
    unsigned int const level = LevelOfNode( id );
@@ -150,8 +150,8 @@ std::vector<std::uint64_t> Tree::RefineNode( std::uint64_t const id ) {
    }
 #endif
 
-   std::vector<std::uint64_t> const children_ids = IdsOfChildren( id );//IdsOfChildren adjusts to 1D/2D.
-   Node const& node                              = GetNodeWithId( id );
+   std::vector<nid_t> const children_ids = IdsOfChildren( id );//IdsOfChildren adjusts to 1D/2D.
+   Node const& node                      = GetNodeWithId( id );
 
    for( std::int64_t const child_id : children_ids ) {
       // only single material nodes are supposed to be refined, hence the use of uniform interface tag is valid
@@ -166,7 +166,7 @@ std::vector<std::uint64_t> Tree::RefineNode( std::uint64_t const id ) {
  * @param id The identifier of the node to be removed.
  * @note Does not check for correctness. Node must be present otherwise undefiend behavior or exceptions will hunt you.
  */
-void Tree::RemoveNodeWithId( std::uint64_t const id ) {
+void Tree::RemoveNodeWithId( nid_t const id ) {
    unsigned int level = LevelOfNode( id );
    nodes_[level].erase( id );
 }
@@ -177,7 +177,7 @@ void Tree::RemoveNodeWithId( std::uint64_t const id ) {
  */
 std::vector<std::reference_wrapper<Node>> Tree::Leaves() {
 
-   std::vector<std::uint64_t> leaf_ids = topology_.LocalLeafIds();
+   std::vector<nid_t> leaf_ids = topology_.LocalLeafIds();
    std::vector<std::reference_wrapper<Node>> leaves;
    leaves.reserve( leaf_ids.size() );
 
@@ -192,7 +192,7 @@ std::vector<std::reference_wrapper<Node>> Tree::Leaves() {
  */
 std::vector<std::reference_wrapper<Node const>> Tree::Leaves() const {
 
-   std::vector<std::uint64_t> leaf_ids = topology_.LocalLeafIds();
+   std::vector<nid_t> leaf_ids = topology_.LocalLeafIds();
    std::vector<std::reference_wrapper<Node const>> leaves;
    leaves.reserve( leaf_ids.size() );
 
@@ -209,7 +209,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::Leaves() const {
  */
 std::vector<std::reference_wrapper<Node>> Tree::LeavesOnLevel( unsigned int const level ) {
 
-   std::vector<std::uint64_t> leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
+   std::vector<nid_t> leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
    std::vector<std::reference_wrapper<Node>> leaves;
    leaves.reserve( leaf_ids_on_level.size() );
 
@@ -224,7 +224,7 @@ std::vector<std::reference_wrapper<Node>> Tree::LeavesOnLevel( unsigned int cons
 */
 std::vector<std::reference_wrapper<Node const>> Tree::LeavesOnLevel( unsigned int const level ) const {
 
-   std::vector<std::uint64_t> leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
+   std::vector<nid_t> leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
    std::vector<std::reference_wrapper<Node const>> leaves;
    leaves.reserve( leaf_ids_on_level.size() );
 
@@ -240,7 +240,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::LeavesOnLevel( unsigned in
  * @return The requested node-list without levelset nodes
  */
 std::vector<std::reference_wrapper<Node>> Tree::NonLevelsetLeaves( unsigned int const level ) {
-   std::vector<std::uint64_t> const leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
+   std::vector<nid_t> const leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
    std::vector<std::reference_wrapper<Node>> non_levelset_leaves;
    non_levelset_leaves.reserve( leaf_ids_on_level.size() );
 
@@ -258,7 +258,7 @@ std::vector<std::reference_wrapper<Node>> Tree::NonLevelsetLeaves( unsigned int 
  * @brief Const overload.
  */
 std::vector<std::reference_wrapper<Node const>> Tree::NonLevelsetLeaves( unsigned int const level ) const {
-   std::vector<std::uint64_t> const leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
+   std::vector<nid_t> const leaf_ids_on_level = topology_.LocalLeafIdsOnLevel( level );
    std::vector<std::reference_wrapper<Node const>> non_levelset_leaves;
    non_levelset_leaves.reserve( leaf_ids_on_level.size() );
 
@@ -279,7 +279,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::NonLevelsetLeaves( unsigne
  */
 std::vector<std::reference_wrapper<Node const>> Tree::InterfaceLeaves() const {
 
-   std::vector<std::uint64_t> interface_leaf_ids = topology_.LocalInterfaceLeafIds();
+   std::vector<nid_t> interface_leaf_ids = topology_.LocalInterfaceLeafIds();
    std::vector<std::reference_wrapper<Node const>> interface_leaves;
    interface_leaves.reserve( interface_leaf_ids.size() );
 
@@ -337,7 +337,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::NodesOnLevel( unsigned int
  */
 std::vector<std::reference_wrapper<Node>> Tree::NodesWithLevelset() {
    //Levelset only on maximum level
-   std::unordered_map<std::uint64_t, Node>& maximum_level = nodes_.back();
+   std::unordered_map<nid_t, Node>& maximum_level = nodes_.back();
    std::vector<std::reference_wrapper<Node>> nodes;
    nodes.reserve( maximum_level.size() );
 
@@ -354,7 +354,7 @@ std::vector<std::reference_wrapper<Node>> Tree::NodesWithLevelset() {
  */
 std::vector<std::reference_wrapper<Node const>> Tree::NodesWithLevelset() const {
    //Levelset only on maximum level
-   std::unordered_map<std::uint64_t, Node> const& maximum_level = nodes_.back();
+   std::unordered_map<nid_t, Node> const& maximum_level = nodes_.back();
    std::vector<std::reference_wrapper<Node const>> nodes;
    nodes.reserve( maximum_level.size() );
 
@@ -372,7 +372,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::NodesWithLevelset() const 
  */
 std::vector<std::reference_wrapper<Node const>> Tree::AllNodes() const {
 
-   std::vector<std::uint64_t> node_ids = topology_.LocalNodeIds();
+   std::vector<nid_t> node_ids = topology_.LocalNodeIds();
    std::vector<std::reference_wrapper<Node const>> nodes;
    nodes.reserve( node_ids.size() );
 
@@ -389,7 +389,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::AllNodes() const {
  * @return Pointer to requested Node if existent. Throws exception otherwise.
  * @note Hotpath function.
  */
-Node& Tree::GetNodeWithId( std::uint64_t const id ) {
+Node& Tree::GetNodeWithId( nid_t const id ) {
    unsigned int const level = LevelOfNode( id );
    return nodes_[level].at( id );
 }
@@ -398,7 +398,7 @@ Node& Tree::GetNodeWithId( std::uint64_t const id ) {
  * @brief const overload.
  * @note Hotpath function.
  */
-Node const& Tree::GetNodeWithId( std::uint64_t const id ) const {
+Node const& Tree::GetNodeWithId( nid_t const id ) const {
    unsigned int const level = LevelOfNode( id );
    return nodes_[level].at( id );
 }
@@ -410,7 +410,7 @@ Node const& Tree::GetNodeWithId( std::uint64_t const id ) const {
  * @note Leads to undefined behaviour if called wiht non-exsiting id.
  */
 
-std::pair<std::uint64_t const, Node>& Tree::NodeIdPair( std::uint64_t const id ) {
+std::pair<nid_t const, Node>& Tree::NodeIdPair( nid_t const id ) {
    unsigned int const level = LevelOfNode( id );
    return *nodes_[level].find( id );
 }
@@ -418,7 +418,7 @@ std::pair<std::uint64_t const, Node>& Tree::NodeIdPair( std::uint64_t const id )
 /**
  * @brief const overload.
  */
-std::pair<std::uint64_t const, Node> const& Tree::NodeIdPair( std::uint64_t const id ) const {
+std::pair<nid_t const, Node> const& Tree::NodeIdPair( nid_t const id ) const {
    unsigned int const level = LevelOfNode( id );
    return *nodes_[level].find( id );
 }
@@ -428,7 +428,7 @@ std::pair<std::uint64_t const, Node> const& Tree::NodeIdPair( std::uint64_t cons
  * @param level The level of interest.
  * @return List of nodes.
  */
-std::unordered_map<std::uint64_t, Node>& Tree::GetLevelContent( unsigned int const level ) {
+std::unordered_map<nid_t, Node>& Tree::GetLevelContent( unsigned int const level ) {
 #ifndef PERFORMANCE
    if( level > nodes_.size() ) {
       throw std::invalid_argument( "Requested Level does not exist" );
@@ -440,7 +440,7 @@ std::unordered_map<std::uint64_t, Node>& Tree::GetLevelContent( unsigned int con
 /**
  * @brief const overload.
  */
-std::unordered_map<std::uint64_t, Node> const& Tree::GetLevelContent( unsigned int const level ) const {
+std::unordered_map<nid_t, Node> const& Tree::GetLevelContent( unsigned int const level ) const {
 #ifndef PERFORMANCE
    if( level > nodes_.size() ) {
       throw std::invalid_argument( "Requested Level does not exist" );
