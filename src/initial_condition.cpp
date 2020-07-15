@@ -68,7 +68,6 @@
 #include "initial_condition.h"
 
 #include <stdexcept>
-#include "topology/id_information.h"
 
 /**
  * @brief Default constructor for class Converting the user-expressions for the initial conditions.
@@ -127,7 +126,7 @@ std::unique_ptr<UserExpression const> InitialCondition::CreateInputExpression( s
  * @param material The material in the block to be filled with the returned data.
  * @param initial_values Reference to array holding the resulting density. Indirect return value.
  */
-void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
+void InitialCondition::GetInitialPrimeStates( nid_t const node_id,
                                               MaterialName const material,
                                               double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
@@ -171,7 +170,7 @@ void InitialCondition::GetInitialPrimeStates( std::uint64_t const node_id,
  * @param node_id The id of the node to be initialized.
  * @param initial_levelset Indirect return parameter for the determined levelset.
  */
-void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
+void InitialCondition::GetInitialLevelset( nid_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
    // get the origin of this node id
    std::array<double, 3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // cell_size on level zero divided by 2^level
@@ -207,7 +206,7 @@ void InitialCondition::GetInitialLevelset( std::uint64_t const node_id, double (
  * @param node_id The id of the node to be initialized.
  * @return A list of the materials present in the considered node.
  */
-std::vector<MaterialName> InitialCondition::GetInitialMaterials( std::uint64_t const node_id ) const {
+std::vector<MaterialName> InitialCondition::GetInitialMaterials( nid_t const node_id ) const {
    // get the origin of this node id
    std::array<double, 3> const origin = DomainCoordinatesOfId( node_id, DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero_ ) );
    // bit shift is of type "( unsigned? ) int"

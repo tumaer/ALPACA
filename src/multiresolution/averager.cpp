@@ -103,15 +103,15 @@ void Averager::AverageMaterial( std::vector<unsigned int> const& child_levels_de
 
    for( unsigned int const child_level : DescendingVectorWithoutZero( child_levels_descending ) ) {
 
-      std::vector<std::tuple<std::uint64_t, int, int>> child_parent_rank_relations;//id, rank-child, rank-parent
-      std::vector<std::uint64_t> no_mpi_list;
+      std::vector<std::tuple<nid_t, int, int>> child_parent_rank_relations;//id, rank-child, rank-parent
+      std::vector<nid_t> no_mpi_list;
       unsigned int send_counter = 0;
 
       //sort by mpi necessary or not
-      for( std::uint64_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
-         int const rank_of_child       = topology_.GetRankOfNode( child_id );
-         int const rank_of_parent      = topology_.GetRankOfNode( parent_id );
+      for( nid_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+         nid_t const parent_id    = ParentIdOfNode( child_id );
+         int const rank_of_child  = topology_.GetRankOfNode( child_id );
+         int const rank_of_parent = topology_.GetRankOfNode( parent_id );
 
          if( rank_of_child == communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
             no_mpi_list.push_back( child_id );
@@ -140,9 +140,9 @@ void Averager::AverageMaterial( std::vector<unsigned int> const& child_levels_de
                }
             }
          } else if( rank_of_child != communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
-            std::uint64_t const parent_id = ParentIdOfNode( child_id );
-            Node& parent                  = tree_.GetNodeWithId( parent_id );
-            unsigned int const pos        = PositionOfNodeAmongSiblings( child_id );
+            nid_t const parent_id  = ParentIdOfNode( child_id );
+            Node& parent           = tree_.GetNodeWithId( parent_id );
+            unsigned int const pos = PositionOfNodeAmongSiblings( child_id );
             for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
                communicator_.Recv( &parent.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), MF::ANOE(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_child, requests );
                if constexpr( DP::Profile() ) {
@@ -152,10 +152,10 @@ void Averager::AverageMaterial( std::vector<unsigned int> const& child_levels_de
          }
       }
 
-      for( std::uint64_t const child_id : no_mpi_list ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
-         Node& parent                  = tree_.GetNodeWithId( parent_id );
-         Node const& child             = tree_.GetNodeWithId( child_id );
+      for( nid_t const child_id : no_mpi_list ) {
+         nid_t const parent_id = ParentIdOfNode( child_id );
+         Node& parent          = tree_.GetNodeWithId( parent_id );
+         Node const& child     = tree_.GetNodeWithId( child_id );
          for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
             Multiresolution::Average( child.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), parent.GetPhaseByMaterial( material ).GetRightHandSideBuffer(), child_id );
          }
@@ -173,14 +173,14 @@ void Averager::AverageMaterial( std::vector<unsigned int> const& child_levels_de
 void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_with_updated_parents_descending ) const {
 
    for( unsigned int const child_level : DescendingVectorWithoutZero( levels_with_updated_parents_descending ) ) {
-      std::vector<std::tuple<std::uint64_t, int, int>> child_parent_rank_relations;//child-id, rank-child, rank-parent
-      std::vector<std::uint64_t> no_mpi_same_rank;
-      std::vector<std::uint64_t> no_mpi_uniform_child;
+      std::vector<std::tuple<nid_t, int, int>> child_parent_rank_relations;//child-id, rank-child, rank-parent
+      std::vector<nid_t> no_mpi_same_rank;
+      std::vector<nid_t> no_mpi_uniform_child;
       unsigned int send_counter = 0;
 
       //sort into list
-      for( std::uint64_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
+      for( nid_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+         nid_t const parent_id = ParentIdOfNode( child_id );
 
          // if the parent is NOT multi, the child is neither and we do not have to do anything with the tags
          if( topology_.IsNodeMultiPhase( parent_id ) ) {
@@ -221,16 +221,16 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
             send_counter++;
          } else if( rank_of_child != communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
             // Recv
-            std::uint64_t const parent_id = ParentIdOfNode( child_id );
-            Node& parent                  = tree_.GetNodeWithId( parent_id );
-            int const pos                 = PositionOfNodeAmongSiblings( child_id );
+            nid_t const parent_id = ParentIdOfNode( child_id );
+            Node& parent          = tree_.GetNodeWithId( parent_id );
+            int const pos         = PositionOfNodeAmongSiblings( child_id );
             communicator_.Recv( &parent.GetInterfaceTags(), 1, communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Byte ), rank_of_child, requests );
          }
       }
 
       // figure out the uniform tag of the child without MPI
       for( auto child_id : no_mpi_uniform_child ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
+         nid_t const parent_id         = ParentIdOfNode( child_id );
          Node& parent                  = tree_.GetNodeWithId( parent_id );
          std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( child_id ).back() ) * ITTI( IT::BulkPhase );
          Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags(), child_id );
@@ -238,8 +238,8 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
 
       // Non MPI Averaging
       for( auto const child_id : no_mpi_same_rank ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
-         Node& parent                  = tree_.GetNodeWithId( parent_id );
+         nid_t const parent_id = ParentIdOfNode( child_id );
+         Node& parent          = tree_.GetNodeWithId( parent_id );
          if( topology_.IsNodeMultiPhase( child_id ) ) {
             Node const& child = tree_.GetNodeWithId( child_id );
             Multiresolution::PropagateCutCellTagsFromChildIntoParent( child.GetInterfaceTags(), parent.GetInterfaceTags(), child_id );
@@ -264,15 +264,15 @@ void Averager::AverageParameters( std::vector<unsigned int> const child_levels_d
       if( child_level == 0 ) break;
 
       std::vector<MPI_Request> requests;
-      std::vector<std::tuple<std::uint64_t, int, int>> child_parent_rank_relations;//id, rank-child, rank-parent
+      std::vector<std::tuple<nid_t, int, int>> child_parent_rank_relations;//id, rank-child, rank-parent
       unsigned int sendcounter = 0;
-      std::vector<std::uint64_t> no_mpi_list;
+      std::vector<nid_t> no_mpi_list;
 
       //sort by mpi necessary or not
-      for( std::uint64_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
-         int const rank_of_child       = topology_.GetRankOfNode( child_id );
-         int const rank_of_parent      = topology_.GetRankOfNode( parent_id );
+      for( nid_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+         nid_t const parent_id    = ParentIdOfNode( child_id );
+         int const rank_of_child  = topology_.GetRankOfNode( child_id );
+         int const rank_of_parent = topology_.GetRankOfNode( parent_id );
 
          if( rank_of_child == communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
             //Non MPI Projection
@@ -292,9 +292,9 @@ void Averager::AverageParameters( std::vector<unsigned int> const child_levels_d
       sendcounter = 0;
 
       for( auto const& rank_relation : child_parent_rank_relations ) {
-         std::uint64_t const child_id = std::get<0>( rank_relation );
-         int const rank_of_child      = std::get<1>( rank_relation );
-         int const rank_of_parent     = std::get<2>( rank_relation );
+         nid_t const child_id     = std::get<0>( rank_relation );
+         int const rank_of_child  = std::get<1>( rank_relation );
+         int const rank_of_parent = std::get<2>( rank_relation );
 
          if( rank_of_child == communicator_.MyRankId() && rank_of_parent != communicator_.MyRankId() ) {
             // MPI_Send
@@ -312,9 +312,9 @@ void Averager::AverageParameters( std::vector<unsigned int> const child_levels_d
             }
          } else if( rank_of_child != communicator_.MyRankId() && rank_of_parent == communicator_.MyRankId() ) {
             //MPI_Recv
-            std::uint64_t const parent_id = ParentIdOfNode( child_id );
-            Node& parent                  = tree_.GetNodeWithId( parent_id );
-            unsigned int const pos        = PositionOfNodeAmongSiblings( child_id );
+            nid_t const parent_id  = ParentIdOfNode( child_id );
+            Node& parent           = tree_.GetNodeWithId( parent_id );
+            unsigned int const pos = PositionOfNodeAmongSiblings( child_id );
 
             for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
                communicator_.Recv( &parent.GetPhaseByMaterial( material ).GetParameterBuffer(), MF::ANOPA(), communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Double ), rank_of_child, requests );
@@ -325,10 +325,10 @@ void Averager::AverageParameters( std::vector<unsigned int> const child_levels_d
          }
       }
 
-      for( std::uint64_t const child_id : no_mpi_list ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
-         Node& parent                  = tree_.GetNodeWithId( parent_id );
-         Node const& child             = tree_.GetNodeWithId( child_id );
+      for( nid_t const child_id : no_mpi_list ) {
+         nid_t const parent_id = ParentIdOfNode( child_id );
+         Node& parent          = tree_.GetNodeWithId( parent_id );
+         Node const& child     = tree_.GetNodeWithId( child_id );
 
          for( auto const material : topology_.GetMaterialsOfNode( child_id ) ) {
             Multiresolution::Average( child.GetPhaseByMaterial( material ).GetParameterBuffer(), parent.GetPhaseByMaterial( material ).GetParameterBuffer(), child_id );

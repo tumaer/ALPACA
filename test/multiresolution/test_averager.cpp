@@ -76,8 +76,8 @@
 
 namespace {
    // Some useful constants
-   constexpr std::uint64_t root_id = 0x1400000;
-   auto const child_ids            = IdsOfChildren( root_id );
+   constexpr nid_t root_id = 0x1400000;
+   auto const child_ids    = IdsOfChildren( root_id );
 }// namespace
 
 namespace {

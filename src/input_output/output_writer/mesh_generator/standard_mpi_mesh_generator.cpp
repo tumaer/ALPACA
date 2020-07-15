@@ -141,7 +141,7 @@ hsize_t StandardMpiMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const 
  */
 void StandardMpiMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
    // get the correct number of leaves fo the rank
-   std::vector<std::uint64_t> local_leaf_ids = topology_.LocalLeafIds();
+   std::vector<nid_t> local_leaf_ids = topology_.LocalLeafIds();
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_leaf_ids.size() * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock() * 3 );
 
@@ -237,11 +237,11 @@ void StandardMpiMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long lon
 void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long int>& vertex_ids, std::vector<unsigned long long int> const& leave_offset ) const {
 
    //create list of send vectors to each other rank; this is introduced to deal with the creation of tags
-   std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> send_list_per_rank( MpiUtilities::NumberOfRanks() );
-   std::vector<std::vector<std::pair<std::uint64_t, std::uint64_t>>> recv_list_per_rank( MpiUtilities::NumberOfRanks() );
-   std::vector<MPI_Request> mpi_send_request_list;                            //vector to track all send requests
-   std::vector<std::uint64_t> const local_leaf_ids = topology_.LocalLeafIds();//get local leaves
-   unsigned int const number_of_local_leaves       = local_leaf_ids.size();
+   std::vector<std::vector<std::pair<nid_t, nid_t>>> send_list_per_rank( MpiUtilities::NumberOfRanks() );
+   std::vector<std::vector<std::pair<nid_t, nid_t>>> recv_list_per_rank( MpiUtilities::NumberOfRanks() );
+   std::vector<MPI_Request> mpi_send_request_list;                      //vector to track all send requests
+   std::vector<nid_t> const local_leaf_ids   = topology_.LocalLeafIds();//get local leaves
+   unsigned int const number_of_local_leaves = local_leaf_ids.size();
 
    //x-Direction ( send West to East )
    MpiVertexFilter::InitializeSendRecvRankLists( send_list_per_rank, recv_list_per_rank, local_leaf_ids, MpiVertexFilter::Direction::X, topology_ );
@@ -251,7 +251,7 @@ void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long i
 
    //send data
    for( unsigned int leaf_index = 0; leaf_index < number_of_local_leaves; leaf_index++ ) {
-      std::uint64_t node_id                      = local_leaf_ids[leaf_index];
+      nid_t node_id                              = local_leaf_ids[leaf_index];
       unsigned int send_buffer_offset            = leaf_index * x_boundary_size;
       unsigned long long int const vertex_offset = leave_offset[leaf_index];
       unsigned int const vertex_id_jump_y        = 8 * CC::ICX();
@@ -264,7 +264,7 @@ void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long i
 
    //recv data
    for( unsigned int leaf_index = 0; leaf_index < local_leaf_ids.size(); leaf_index++ ) {
-      std::uint64_t const node_id = local_leaf_ids[leaf_index];
+      nid_t const node_id = local_leaf_ids[leaf_index];
       std::vector<unsigned long long int> east_boundary_points( x_boundary_size );
       unsigned long long int const vertex_offset = leave_offset[leaf_index] + 8 * ( CC::ICX() - 1 );
       unsigned int const vertex_id_jump_y        = 8 * CC::ICX();
@@ -300,7 +300,7 @@ void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long i
       if( x_boundary_size != y_boundary_size )//only init new sendbuffer if size differs from existing one
          send_buffers.resize( number_of_local_leaves * y_boundary_size );
       for( unsigned int leaf_index = 0; leaf_index < number_of_local_leaves; leaf_index++ ) {
-         std::uint64_t const node_id                = local_leaf_ids[leaf_index];
+         nid_t const node_id                        = local_leaf_ids[leaf_index];
          unsigned int const send_buffer_offset      = leaf_index * y_boundary_size;
          unsigned long long int const vertex_offset = leave_offset[leaf_index];
          unsigned int const vertex_id_jump_x        = 8;
@@ -314,7 +314,7 @@ void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long i
 
       //recv all data
       for( unsigned int leaf_index = 0; leaf_index < local_leaf_ids.size(); leaf_index++ ) {
-         std::uint64_t const node_id = local_leaf_ids[leaf_index];
+         nid_t const node_id = local_leaf_ids[leaf_index];
          //init north vetrices
          std::vector<unsigned long long int> north_boundary_points( y_boundary_size );
          unsigned long long int const vertex_offset = leave_offset[leaf_index] + 8 * CC::ICX() * ( CC::ICY() - 1 );
@@ -347,7 +347,7 @@ void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long i
       if( y_boundary_size != z_boundary_size )
          send_buffers.resize( number_of_local_leaves * z_boundary_size );
       for( unsigned int leaf_index = 0; leaf_index < number_of_local_leaves; leaf_index++ ) {
-         std::uint64_t const node_id = local_leaf_ids[leaf_index];
+         nid_t const node_id = local_leaf_ids[leaf_index];
          //Do MPI communication of boundaries
          unsigned int const send_buffer_offset = leaf_index * z_boundary_size;
          //load inner points
@@ -361,7 +361,7 @@ void StandardMpiMeshGenerator::FilterVertexIDs( std::vector<unsigned long long i
 
       //recv all data
       for( unsigned int leaf_index = 0; leaf_index < local_leaf_ids.size(); leaf_index++ ) {
-         std::uint64_t const node_id = local_leaf_ids[leaf_index];
+         nid_t const node_id = local_leaf_ids[leaf_index];
          //init boundary buffer
          std::vector<unsigned long long int> top_boundary_points( z_boundary_size );
 

@@ -157,10 +157,10 @@ class ModularAlgorithmAssembler {
    void SenseVanishedInterface( std::vector<unsigned int> const levels_descending );
 
    void Remesh( std::vector<unsigned int> const levels_to_update_ascending );
-   void DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<std::uint64_t>& remove_list,
-                                 std::vector<std::uint64_t>& refine_list ) const;
+   void DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<nid_t>& remove_list,
+                                 std::vector<nid_t>& refine_list ) const;
 
-   void RefineNode( std::uint64_t const node_id );
+   void RefineNode( nid_t const node_id );
 
    void UpdateTopology();
 

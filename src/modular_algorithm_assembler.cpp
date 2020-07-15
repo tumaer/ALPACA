@@ -261,21 +261,21 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
    double levelset_temp[CC::TCX()][CC::TCY()][CC::TCZ()];
    std::int8_t initial_interface_tags[CC::TCX()][CC::TCY()][CC::TCZ()];
    std::vector<MaterialName> initial_materials;
-   std::vector<std::uint64_t> coarsable_list;
-   std::vector<std::uint64_t> globally_coarsable;
-   std::vector<std::uint64_t> parents_of_coarsable;
-   std::vector<std::uint64_t> refinement_list;//This list is only need as stub in this function.
+   std::vector<nid_t> coarsable_list;
+   std::vector<nid_t> globally_coarsable;
+   std::vector<nid_t> parents_of_coarsable;
+   std::vector<nid_t> refinement_list;//This list is only need as stub in this function.
 
    int const my_rank = communicator_.MyRankId();
    for( unsigned int level = 0; level <= all_levels_.back(); ++level ) {
       if( level > 0 ) {
-         for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level - 1, my_rank ) ) {//We refine the parent to get the level we want to work on
+         for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level - 1, my_rank ) ) {//We refine the parent to get the level we want to work on
             topology_.RefineNodeWithId( node_id );
          }
          UpdateTopology();
       }
-      for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
-         std::uint64_t parent_id = ParentIdOfNode( node_id );
+      for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
+         nid_t parent_id = ParentIdOfNode( node_id );
          if( level == 0 || topology_.IsNodeMultiPhase( parent_id ) ) {//Evaluated left to right, makes it safe on level zero
             // get the materials that initially exists in this node ( this is determined on the finest level to avoid losing structures that are unresolved by this node )
             initial_materials = initial_condition_.GetInitialMaterials( node_id );
@@ -314,7 +314,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
       UpdateTopology();
       if( level == all_levels_.back() ) {
          halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
-         for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
+         for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
             Node& node = tree_.GetNodeWithId( node_id );
             if( node.HasLevelset() ) {
                InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), node.GetInterfaceTags() );
@@ -322,7 +322,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          }
       }
       halo_manager_.InterfaceTagHaloUpdateOnLevelList( { level } );
-      for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
+      for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
          InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags() );
       }
       halo_manager_.InterfaceTagHaloUpdateOnLevelList( { level } );
@@ -340,7 +340,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
 
          // We get the parents, as coarsening is called on parents. Duplicates do not hurt ( TopologyManager handles them ).
          parents_of_coarsable = globally_coarsable;
-         std::for_each( parents_of_coarsable.begin(), parents_of_coarsable.end(), []( std::uint64_t& to_parent ) { to_parent = ParentIdOfNode( to_parent ); } );
+         std::for_each( parents_of_coarsable.begin(), parents_of_coarsable.end(), []( nid_t& to_parent ) { to_parent = ParentIdOfNode( to_parent ); } );
          for( auto const& coarsable_id : coarsable_list ) {
             if( topology_.NodeIsOnRank( coarsable_id, communicator_.MyRankId() ) ) {
                tree_.RemoveNodeWithId( coarsable_id );
@@ -348,7 +348,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          }
 
          // Update the topology
-         for( std::uint64_t const parent_id : parents_of_coarsable ) {
+         for( nid_t const parent_id : parents_of_coarsable ) {
             topology_.CoarseNodeWithId( parent_id );
          }
          if( !parents_of_coarsable.empty() ) {
@@ -853,7 +853,7 @@ void ModularAlgorithmAssembler::SenseApproachingInterface( std::vector<unsigned 
    bool interface_block_created = false;
    bool node_refined            = false;
    for( auto const& level : levels_ascending ) {
-      for( std::uint64_t const& node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
+      for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
          if( !topology_.IsNodeMultiPhase( node_id ) ) {
             Node& node = tree_.GetNodeWithId( node_id );
             // TODO-19 TP test total cells, but probably halo is enough for standard case ( no phase change in bulk ) --> OPTIMIZE?
@@ -964,9 +964,9 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
    // First the parents' jump buffers are filled form the childrens values.
    for( auto const& level : levels_averaging_down ) {
       for( auto const& child_id : topology_.GlobalIdsOnLevel( level ) ) {
-         std::uint64_t const parent_id = ParentIdOfNode( child_id );
-         int const rank_of_child       = topology_.GetRankOfNode( child_id );
-         int const rank_of_parent      = topology_.GetRankOfNode( parent_id );
+         nid_t const parent_id    = ParentIdOfNode( child_id );
+         int const rank_of_child  = topology_.GetRankOfNode( child_id );
+         int const rank_of_parent = topology_.GetRankOfNode( parent_id );
          if( rank_of_child == my_rank && rank_of_parent == my_rank ) {
             // Non MPI Averaging
             Node& parent      = tree_.GetNodeWithId( parent_id );
@@ -1002,11 +1002,11 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
     * 3. ) Its neighbor is not a leaf
     */
 
-   std::uint64_t neighbor_id;
+   nid_t neighbor_id;
    bool neighbor_exists;
    bool neighbor_is_leaf;
    BoundaryLocation neighbor_location;
-   std::vector<std::uint64_t> leaf_ids_on_level;
+   std::vector<nid_t> leaf_ids_on_level;
    unsigned int x_start;
    unsigned int x_end;
    unsigned int y_start;
@@ -1484,7 +1484,7 @@ void ModularAlgorithmAssembler::ResetJumpConservativeBuffers( std::vector<unsign
 void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const updated_levels_descending, bool const force ) {
    if( topology_.IsLoadBalancingNecessary() || force ) {
       //id - Current Rank - Future Rank
-      std::vector<std::tuple<std::uint64_t const, int const, int const>> const ids_rank_map = topology_.GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
+      std::vector<std::tuple<nid_t const, int const, int const>> const ids_rank_map = topology_.GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
       // ^ Changes the rank assignment in the Topology.
       communicator_.InvalidateCache();
 
@@ -1573,7 +1573,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
 
       //remove nodes only after Data was received by partner
       for( unsigned int i = 0; i < ids_rank_map.size(); i++ ) {//We traverse current topology
-         std::uint64_t const id = std::get<0>( ids_rank_map[i] );
+         nid_t const id         = std::get<0>( ids_rank_map[i] );
          int const current_rank = std::get<1>( ids_rank_map[i] );
          if( current_rank == my_rank_id ) {
             tree_.RemoveNodeWithId( id );
@@ -1652,8 +1652,8 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
    parent_levels.erase( std::remove_if( parent_levels.begin(), parent_levels.end(),
                                         [&]( unsigned int const level ) { return level >= topology_.GetCurrentMaximumLevel(); } ),
                         parent_levels.end() );
-   std::vector<std::uint64_t> nodes_to_be_coarsened;
-   std::vector<std::uint64_t> nodes_needing_refinement;
+   std::vector<nid_t> nodes_to_be_coarsened;
+   std::vector<nid_t> nodes_needing_refinement;
    DetermineRemeshingNodes( parent_levels, nodes_to_be_coarsened, nodes_needing_refinement );
 
    /* First we deal with the refinement. We keep the nodes to be coarsened until after the halo update, which is need in the refinement process,
@@ -1662,15 +1662,15 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
 
    // We need to cut all non-leaves and all Lmax-leaves from the refinement list.
    nodes_needing_refinement.erase( std::remove_if( nodes_needing_refinement.begin(), nodes_needing_refinement.end(),
-                                                   [&]( std::uint64_t const id ) { return ( !topology_.NodeIsLeaf( id ) || LevelOfNode( id ) == all_levels_.back() ); } ),
+                                                   [&]( nid_t const id ) { return ( !topology_.NodeIsLeaf( id ) || LevelOfNode( id ) == all_levels_.back() ); } ),
                                    nodes_needing_refinement.end() );
 
    // Global Distibution of the refine list
-   std::vector<std::uint64_t> global_refine_list;
+   std::vector<nid_t> global_refine_list;
    MpiUtilities::LocalToGlobalData( nodes_needing_refinement, MPI_LONG_LONG_INT, number_of_ranks, global_refine_list );
 
    // Duplicates can not exist - no check needed
-   for( std::uint64_t const leaf_id : global_refine_list ) {
+   for( nid_t const leaf_id : global_refine_list ) {
       if( topology_.NodeIsOnRank( leaf_id, communicator_.MyRankId() ) ) {
          RefineNode( leaf_id );
       }
@@ -1685,18 +1685,18 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
    /* Second we deal with coarsening*/
 
    // Global Distribution of the coarse list
-   std::vector<std::uint64_t> global_remove_list;
+   std::vector<nid_t> global_remove_list;
    MpiUtilities::LocalToGlobalData( nodes_to_be_coarsened, MPI_LONG_LONG_INT, number_of_ranks, global_remove_list );
 
    //Gives ALL local nodes which need to be deleted
-   std::vector<std::uint64_t> local_cut;
+   std::vector<nid_t> local_cut;
    std::copy_if( global_remove_list.begin(), global_remove_list.end(), std::back_inserter( local_cut ),
-                 [&]( std::uint64_t const id ) { return topology_.NodeIsOnRank( id, communicator_.MyRankId() ); } );
+                 [&]( nid_t const id ) { return topology_.NodeIsOnRank( id, communicator_.MyRankId() ); } );
 
    // Coarsening operation is called on parents, hence we convert the coarse list to a list of the respective parents.
    // NH TODO-19 this cumbersome step should go away
-   std::vector<std::uint64_t> parents_of_coarsened = global_remove_list;
-   std::for_each( parents_of_coarsened.begin(), parents_of_coarsened.end(), []( std::uint64_t& to_parent ) { to_parent = ParentIdOfNode( to_parent ); } );
+   std::vector<nid_t> parents_of_coarsened = global_remove_list;
+   std::for_each( parents_of_coarsened.begin(), parents_of_coarsened.end(), []( nid_t& to_parent ) { to_parent = ParentIdOfNode( to_parent ); } );
 
    // Housekeeping - Due to ancestors in list duplicates may arise - these need to be cut
    // Sort - Erase - Unique - Idiom
@@ -1704,11 +1704,11 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
    parents_of_coarsened.erase( std::unique( parents_of_coarsened.begin(), parents_of_coarsened.end() ), parents_of_coarsened.end() );
 
    // Level zero parents are not allowed, as this means a coarsening of level 1.
-   parents_of_coarsened.erase( std::remove_if( parents_of_coarsened.begin(), parents_of_coarsened.end(), [&]( std::uint64_t const parent_id ) { return LevelOfNode( parent_id ) == 0; } ),
+   parents_of_coarsened.erase( std::remove_if( parents_of_coarsened.begin(), parents_of_coarsened.end(), [&]( nid_t const parent_id ) { return LevelOfNode( parent_id ) == 0; } ),
                                parents_of_coarsened.end() );
 
    // Updating the topology ( light data )
-   for( std::uint64_t const parent_id : parents_of_coarsened ) {
+   for( nid_t const parent_id : parents_of_coarsened ) {
       topology_.CoarseNodeWithId( parent_id );
    }
    if( !parents_of_coarsened.empty() ) {
@@ -1722,9 +1722,9 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
    local_cut.erase( std::unique( local_cut.begin(), local_cut.end() ), local_cut.end() );
 
    // Level One may not be coarsened, ever.
-   local_cut.erase( std::remove_if( local_cut.begin(), local_cut.end(), [&]( std::uint64_t const id ) { return ( LevelOfNode( id ) == 1 ); } ), local_cut.end() );
-   for( auto const& id_to_be_removed : local_cut ) {
-      tree_.RemoveNodeWithId( id_to_be_removed );
+   local_cut.erase( std::remove_if( local_cut.begin(), local_cut.end(), [&]( nid_t const id ) { return ( LevelOfNode( id ) == 1 ); } ), local_cut.end() );
+   for( auto const& nid_to_be_removed : local_cut ) {
+      tree_.RemoveNodeWithId( nid_to_be_removed );
    }
 }
 
@@ -1734,8 +1734,8 @@ void ModularAlgorithmAssembler::Remesh( std::vector<unsigned int> const levels_t
  * @param remove_list A list of all ids of nodes which may be coarsened ( indirect return parameter ).
  * @param refine_list A list of all ids of nodes which must be refined ( indirect return parameter ).
  */
-void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<std::uint64_t>& remove_list,
-                                                         std::vector<std::uint64_t>& refine_list ) const {
+void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<nid_t>& remove_list,
+                                                         std::vector<nid_t>& refine_list ) const {
 
    std::vector<RemeshIdentifier> remesh_list;
    int const my_rank = communicator_.MyRankId();
@@ -1747,8 +1747,8 @@ void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned in
    MPI_Datatype const conservatives_struct_ = communicator_.ConservativesDatatype();
    for( auto const& level_of_parent : parent_levels ) {
       for( auto const& parent_id : topology_.GlobalIdsOnLevel( level_of_parent ) ) {
-         bool const parent_on_my_rank              = topology_.NodeIsOnRank( parent_id, my_rank );
-         std::vector<std::uint64_t> const children = IdsOfChildren( parent_id );
+         bool const parent_on_my_rank      = topology_.NodeIsOnRank( parent_id, my_rank );
+         std::vector<nid_t> const children = IdsOfChildren( parent_id );
          for( auto const& child_id : children ) {
             if( topology_.NodeExists( child_id ) ) {
                if( !topology_.IsNodeMultiPhase( child_id ) ) {// only single nodes may be coarsened or refined
@@ -1819,10 +1819,10 @@ void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned in
  * @brief Triggers the MPI consistent refinement of the node with the given id.
  * @param id Node identifier of the node to be refined.
  */
-void ModularAlgorithmAssembler::RefineNode( std::uint64_t const id ) {
+void ModularAlgorithmAssembler::RefineNode( nid_t const id ) {
    topology_.RefineNodeWithId( id );
-   std::vector<std::uint64_t> const ids_of_children = tree_.RefineNode( id );
-   Node const& parent                               = tree_.GetNodeWithId( id );
+   std::vector<nid_t> const ids_of_children = tree_.RefineNode( id );
+   Node const& parent                       = tree_.GetNodeWithId( id );
    for( auto const& child_id : ids_of_children ) {
       Node& child = tree_.GetNodeWithId( child_id );
       // only single material nodes are supposed to be refined, hence using the single phase block is valid

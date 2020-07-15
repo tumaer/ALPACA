@@ -8,7 +8,9 @@ mpich \
 libhdf5-mpich-dev \
 doxygen \
 cmake \
-clang-format \
+git \
+clang-10
+clang-format-10 \
 python3-pip \
 python3.6
 RUN pip3 install numpy

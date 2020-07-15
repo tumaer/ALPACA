@@ -140,8 +140,8 @@ void CommunicationManager::GenerateNeighborRelationForHaloUpdate( unsigned int c
 
    // Declare temporary variables and reserve maximum possible space for vectors
    jump_send_count_[level] = { 0, 0, 0 };
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> tmp_neighbor_location_vector;
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> tmp_external_id_location_vector;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> tmp_neighbor_location_vector;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> tmp_external_id_location_vector;
    tmp_neighbor_location_vector.reserve( 26 );
    tmp_external_id_location_vector.reserve( 6 );
    // Get List of Halos on this Level
@@ -226,7 +226,7 @@ namespace {
  * wsb, wst, wnb, wnt, esb, est, enb, ent, sw, se, nw, ne, tw, te, bw, be, ts, tn, bs, bn, b, t, s, n, w, e.
  * returns an unsigned int that has all bits set for a specific natural boundary location.
  */
-   constexpr std::array<std::uint64_t, 6> bitsets_for_natural_boundary_locations = {
+   constexpr std::array<nid_t, 6> bitsets_for_natural_boundary_locations = {
          0x3d5401, //east
          0x3c2a802,//west
          0xccc144, //north
@@ -242,7 +242,7 @@ namespace {
  * @param nodes_internal_boundaries output array for internal boundaries, all HaloBoundarySides are included that are not part of externals BC.
  * @param external_boundaries all external boundaries are included as natural Boundary Side e.g. east, west...
  */
-void CommunicationManager::NeighborsOfNode( std::uint64_t const global_id, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& external_boundaries ) {
+void CommunicationManager::NeighborsOfNode( nid_t const global_id, std::vector<std::tuple<nid_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<nid_t, BoundaryLocation>>& external_boundaries ) {
    std::bitset<26> sides( 0 );
    for( BoundaryLocation loc : CC::ANBS() ) {
       if( topology_.IsExternalTopologyBoundary( loc, global_id ) ) {
@@ -252,7 +252,7 @@ void CommunicationManager::NeighborsOfNode( std::uint64_t const global_id, std::
    }
    for( BoundaryLocation loc : CC::HBS() ) {
       if( !sides.test( LTI( loc ) ) ) {
-         std::uint64_t neighbor_id = topology_.GetTopologyNeighborId( global_id, loc );
+         nid_t neighbor_id = topology_.GetTopologyNeighborId( global_id, loc );
          nodes_internal_boundaries.push_back( std::make_tuple( neighbor_id, loc ) );
       }
    }
@@ -333,7 +333,7 @@ void CommunicationManager::ResetTagsForPartner() {
  * @param level Level for which the list should be returned.
  * @return List with relations for all internal mpi jump boundaries.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesJumpMpi( unsigned int const level ) const {
+std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesJumpMpi( unsigned int const level ) const {
    return internal_boundaries_jump_mpi_[level];
 }
 
@@ -342,7 +342,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
  * @param level Level for which the list should be returned.
  * @return List with relations for all internal no-mpi jump boundaries.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesJump( unsigned int const level ) const {
+std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesJump( unsigned int const level ) const {
    return internal_boundaries_jump_[level];
 }
 
@@ -351,7 +351,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
  * @param level Level for which the list should be returned.
  * @return List with relations for all internal mpi non-jump boundaries.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesMpi( unsigned int const level ) const {
+std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundariesMpi( unsigned int const level ) const {
    return internal_boundaries_mpi_[level];
 }
 
@@ -360,7 +360,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
  * @param level Level for which the list should be returned.
  * @return List with relations for all internal no-mpi non-jump boundaries.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundaries( unsigned int const level ) const {
+std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalBoundaries( unsigned int const level ) const {
    return internal_boundaries_[level];
 }
 
@@ -368,7 +368,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
  * @brief Gives a reference to the list of multi-material nodes holding all internal boundary relations that require mpi communication.
  * @return List with relations for all internal mpi multi-material boundaries.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalMultiBoundariesMpi() const {
+std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalMultiBoundariesMpi() const {
    return internal_multi_boundaries_mpi_;
 }
 
@@ -376,7 +376,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
  * @brief Gives a reference to the list of multi-material nodes holding all internal boundary relations that do not require mpi communication.
  * @return List with relations for all internal no-mpi multi-material boundaries.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalMultiBoundaries() const {
+std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& CommunicationManager::InternalMultiBoundaries() const {
    return internal_multi_boundaries_;
 }
 
@@ -385,7 +385,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> c
  * @param level Level for which the list should be returned.
  * @return List with relations for all external boundary nodes.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& CommunicationManager::ExternalBoundaries( unsigned int const level ) const {
+std::vector<std::tuple<nid_t, BoundaryLocation>> const& CommunicationManager::ExternalBoundaries( unsigned int const level ) const {
    return external_boundaries_[level];
 }
 
@@ -393,7 +393,7 @@ std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& CommunicationMan
  * @brief Gives a reference to the list of multi-material nodes on the maximum level holding all external boundary relations.
  * @return List with relations for all external boundary nodes.
  */
-std::vector<std::tuple<std::uint64_t, BoundaryLocation>> const& CommunicationManager::ExternalMultiBoundaries() const {
+std::vector<std::tuple<nid_t, BoundaryLocation>> const& CommunicationManager::ExternalMultiBoundaries() const {
    return external_multi_boundaries_;
 }
 

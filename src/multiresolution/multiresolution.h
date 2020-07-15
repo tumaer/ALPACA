@@ -68,7 +68,6 @@
 #ifndef MULTIRESOLUTION_H
 #define MULTIRESOLUTION_H
 
-#include <cstdint>
 #include "user_specifications/compile_time_constants.h"
 #include "enums/norms.h"
 #include "enums/remesh_identifier.h"
@@ -115,7 +114,7 @@ public:
     * @tparam N The Norm used to decide whether the children should be coarsened.
     */
    template<Norm N>
-   RemeshIdentifier ChildNeedsRemeshing( Block const& parent, Block const& child, std::uint64_t const child_id ) const;
+   RemeshIdentifier ChildNeedsRemeshing( Block const& parent, Block const& child, nid_t const child_id ) const;
 
    /**
     * @brief Averages the child values into the parent, i.e. conservative average of the eight (in 3D) child cells that make up one parent cell.
@@ -125,7 +124,7 @@ public:
     * @note Overrides the values in the parent buffer.
     */
    template<typename BufferType>
-   static void Average( BufferType const& child_buffer, BufferType& parent_buffer, std::uint64_t const child_id ) {
+   static void Average( BufferType const& child_buffer, BufferType& parent_buffer, nid_t const child_id ) {
 
       unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings( child_id )];
       unsigned int const y_start = CC::DIM() != Dimension::One ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings( child_id )] : 0;
@@ -175,15 +174,15 @@ public:
       }   //eq
    }
 
-   static void AverageJumpBuffer( SurfaceBuffer const& child_values, SurfaceBuffer& parent_values, std::uint64_t const child_id );
-   static void Prediction( double const ( &U_parent )[CC::TCX()][CC::TCY()][CC::TCZ()], double ( &U_child )[CC::TCX()][CC::TCY()][CC::TCZ()], std::uint64_t const child_id,
+   static void AverageJumpBuffer( SurfaceBuffer const& child_values, SurfaceBuffer& parent_values, nid_t const child_id );
+   static void Prediction( double const ( &U_parent )[CC::TCX()][CC::TCY()][CC::TCZ()], double ( &U_child )[CC::TCX()][CC::TCY()][CC::TCZ()], nid_t const child_id,
                            unsigned int const x_start = 0, unsigned int const x_count = CC::TCX(),
                            unsigned int const y_start = 0, unsigned int const y_count = CC::TCY(),
                            unsigned int const z_start = 0, unsigned int const z_count = CC::TCZ() );
    static void PropagateCutCellTagsFromChildIntoParent( std::int8_t const ( &child_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                        std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::uint64_t const child_id );
+                                                        std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], nid_t const child_id );
    static void PropagateUniformTagsFromChildIntoParent( std::int8_t const uniform_child_tag, std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                        std::uint64_t const child_id );
+                                                        nid_t const child_id );
 };
 
 #endif// MULTIRESOLUTION_H

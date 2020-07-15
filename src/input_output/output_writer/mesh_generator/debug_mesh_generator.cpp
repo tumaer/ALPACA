@@ -140,7 +140,7 @@ hsize_t DebugMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
 void DebugMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
 
    // get the correct number of leaves fo the rank
-   std::vector<std::uint64_t> local_node_ids = topology_.LocalNodeIds();
+   std::vector<nid_t> local_node_ids = topology_.LocalNodeIds();
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_node_ids.size() * MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock() * 3 );
 

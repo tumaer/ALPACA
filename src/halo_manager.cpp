@@ -134,7 +134,7 @@ void HaloManager::MaterialInternalHaloUpdateOnLevel( unsigned int const level, M
  * @param field_type The decider whether a halo update for conservatives or for prime states is done.
  */
 void HaloManager::MaterialExternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type ) const {
-   for( std::tuple<std::uint64_t, BoundaryLocation> const& boundary : communication_manager_.ExternalBoundaries( level ) ) {
+   for( std::tuple<nid_t, BoundaryLocation> const& boundary : communication_manager_.ExternalBoundaries( level ) ) {
       external_halo_manager_.UpdateMaterialExternal( tree_.GetNodeWithId( std::get<0>( boundary ) ), field_type, std::get<1>( boundary ) );
    }
 }
@@ -155,7 +155,7 @@ void HaloManager::MaterialHaloUpdateOnLmax( MaterialFieldType const field_type, 
  */
 void HaloManager::MaterialHaloUpdateOnLmaxMultis( MaterialFieldType const field_type ) const {
    internal_halo_manager_.MaterialHaloUpdateOnMultis( field_type );
-   for( std::tuple<std::uint64_t, BoundaryLocation> const& boundary : communication_manager_.ExternalMultiBoundaries() ) {
+   for( std::tuple<nid_t, BoundaryLocation> const& boundary : communication_manager_.ExternalMultiBoundaries() ) {
       external_halo_manager_.UpdateMaterialExternal( tree_.GetNodeWithId( std::get<0>( boundary ) ), field_type, std::get<1>( boundary ) );
    }
 }
@@ -176,7 +176,7 @@ void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> c
       internal_halo_manager_.InterfaceTagHaloUpdateOnLevel( level );
       // Update of domain boundaries
       for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
-         std::uint64_t const id          = std::get<0>( domain_boundary );
+         nid_t const id                  = std::get<0>( domain_boundary );
          BoundaryLocation const location = std::get<1>( domain_boundary );
          external_halo_manager_.UpdateInterfaceTagExternal( tree_.GetNodeWithId( id ), location );
       }
@@ -202,7 +202,7 @@ void HaloManager::InterfaceHaloUpdateOnLevelList( std::vector<unsigned int> cons
       internal_halo_manager_.InterfaceHaloUpdateOnLevel( level, type );
       // Update of domain boundaries
       for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
-         std::uint64_t const id          = std::get<0>( domain_boundary );
+         nid_t const id                  = std::get<0>( domain_boundary );
          BoundaryLocation const location = std::get<1>( domain_boundary );
          external_halo_manager_.UpdateLevelsetExternal( tree_.GetNodeWithId( id ), type, location );
       }

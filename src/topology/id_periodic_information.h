@@ -68,8 +68,8 @@
 #ifndef ID_PERIODIC_INFORMATION_H
 #define ID_PERIODIC_INFORMATION_H
 
-#include <cstdint>//64bit ensured ints
 #include <array>
+#include "topology/node_id_type.h"
 #include "boundary_condition/boundary_specifications.h"
 
 /**
@@ -81,9 +81,9 @@ enum PeriodicBoundariesLocations : unsigned int {
    TopBottom  = 1 << 2
 };
 
-std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const level_zero_blocks_xyz,
-                                     unsigned int const active_periodic_locations );
-bool PeriodicIsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const level_zero_blocks_xyz,
+nid_t GetPeriodicNeighborId( nid_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const level_zero_blocks_xyz,
+                             unsigned int const active_periodic_locations );
+bool PeriodicIsExternalBoundary( BoundaryLocation const location, nid_t const id, std::array<unsigned int, 3> const level_zero_blocks_xyz,
                                  unsigned int const active_periodic_locations );
 
 #endif// ID_PERIODIC_INFORMATION_H

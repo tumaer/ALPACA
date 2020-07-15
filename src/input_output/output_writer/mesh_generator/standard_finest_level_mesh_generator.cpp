@@ -230,7 +230,7 @@ void StandardFinestLevelMeshGenerator::DoComputeVertexIDs( std::vector<unsigned 
    //iterate over all leafs to generate vertex ids
    unsigned long long int vertex_id_counter = 0;
    unsigned long long int const resolution  = 1 << maximum_level;
-   for( std::uint64_t const& id : topology_.LocalLeafIds() ) {
+   for( nid_t const& id : topology_.LocalLeafIds() ) {
       // Additional distance to be considered between current level of node and maximum level where IDs are specified
       unsigned long long int const level_factor = resolution >> LevelOfNode( id );
       //Find index of nodes domain by coordinates function; Cast from double to long! -> for indices greater 2^53 this is incorrect
