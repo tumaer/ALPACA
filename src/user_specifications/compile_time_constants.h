@@ -167,7 +167,6 @@ class CompileTimeConstants {
 #elif DIMENSION == 2
    static constexpr Dimension dimension_of_simulation_                   = Dimension::Two;
 #else
-#define HILBERT//Hilbert Load Balancing is only meaningful in 3D Simulations
    static constexpr Dimension dimension_of_simulation_                    = Dimension::Three;
 #endif
 

@@ -134,7 +134,7 @@ SCENARIO( "Topology offsets work properly on differently configured topologies",
       }
       WHEN( "The nodes are distributed on 2 ranks" ) {
          // For load balancing to work, the nodes must have a weight = material inside them
-         AddMaterialToAllNodes( topology, MaterialName::MaterialOne );
+         // AddMaterialToAllNodes( topology, MaterialName::MaterialOne );
          topology.GetLoadBalancedTopology( 2 );
 
          THEN( "The offset of rank 0 is zero" ) {

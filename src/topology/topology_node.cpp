@@ -70,6 +70,7 @@
 #include <algorithm>
 #include "topology/id_information.h"
 #include "user_specifications/compile_time_constants.h"
+#include "utilities/container_operations.h"
 
 /**
  * @brief Standard constructor for a TopologyNode. Initializes the node as a leaf without children and without assigning a future rank.
@@ -497,18 +498,6 @@ TopologyNode const& TopologyNode::GetChildWithId( nid_t const id ) const {
 }
 
 /**
- * @brief Computes the weight of the node.
- * @return .
- */
-unsigned int TopologyNode::Weight() const {
-   if( is_leaf_ ) {
-      return materials_.size() * materials_.size();
-   } else {
-      return materials_.size();
-   }
-}
-
-/**
  * @brief Ensures that the load ( sum of weights ) is evenly distributed between the ranks
  *        Assigns the balanced topology to the future_rank_ member, which is then to be used in the actual redistribution in the LoadBalancing routine.
  * @return The rank to which this node should be moved.
@@ -533,95 +522,21 @@ int TopologyNode::BalanceTargetRanks() {
       for( TopologyNode& child : children_ ) {
          child_ranks.push_back( child.BalanceTargetRanks() );
       }
-      //Creates a count list, i .e child_on_rank_count[pos] = 4 tells that four children are on the rank on which children_[pos] resides on.
-      std::vector<unsigned int> child_on_rank_count( CC::NOC(), 0 );
-      unsigned int last_unique_rank_position = 0;
-
-      for( unsigned int i = 0; i < children_.size(); ++i ) {
-         for( unsigned int j = 0; j <= i; j++ ) {
-            if( child_ranks[i] == child_ranks[j] ) {
-               child_on_rank_count[j]++;
-               if( j > last_unique_rank_position ) {
-                  last_unique_rank_position = j;
-               }
-               break;
-            }
-         }
-      }
-      // We retrive the rank of highest count.
-      future_rank_ = child_ranks[std::distance( child_on_rank_count.begin(), std::max_element( child_on_rank_count.begin(), child_on_rank_count.end() ) )];
+      future_rank_ = ContainerOperations::MostFrequentElement( child_ranks );
    }
    return future_rank_;
 }
 
-/**
- * @brief Assigns the future ranks according to a homogeneous weight distribution to the leaf TopologyNodes.
- * @param count_rank_map Information bundle mapping the current load "count" to the ranks.
- * @param level The level where the future rank is reassigned
- */
-void TopologyNode::SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, unsigned int const level ) {
-
-   // tuple is [level](<count, rank>)
-   // Runs through list, if a rank is already full it is taken out of the list and the following nodes are assigned to the next element with enough room and so on.
-   if( is_leaf_ ) {
-      bool assigned = false;
-      // loop until this node is assigned to a rank ( hence, until a rank with enough room for this node is found )
-      double const weight = Weight();
-      while( !assigned ) {
-         if( std::get<0>( count_rank_map[level].back() ) >= weight ) {
-            // there's enough room for the current node on this rank, so assign it
-            std::get<0>( count_rank_map[level].back() ) -= weight;
-            future_rank_ = std::get<1>( count_rank_map[level].back() );
-            assigned     = true;
-         } else {
-            // there's not enough room for the current node, so take the ( possible ) overhead and carry it over to the next rank
-            // ( assignment is tried again in next loop )
-            int overhead = std::get<0>( count_rank_map[level].back() );
-            count_rank_map[level].pop_back();
-            std::get<0>( count_rank_map[level].back() ) += overhead;
-         }
+void TopologyNode::AssignTargetRankToLeaf( nid_t const id, int const rank ) {
+   if( id == unique_id_ ) {
+#ifndef PERFORMANCE
+      if( !is_leaf_ ) {
+         throw std::logic_error( "Avoid calling assinging ranks to non-leaves!" );
       }
+#endif
+      future_rank_ = rank;
    } else {
-      for( unsigned int i = 0; i < children_.size(); i++ ) {
-         children_[i].SetTargetRankForLeaf( count_rank_map, level + 1 );
-      }
-   }
-}
-
-/**
- * @brief Overloaded Version using a Hilbert Curve traversal for the load definition. See details in other function.
- * @param count_rank_map Information bundle mapping the current load "count" to the ranks.
- * @param HilbertPosition The position.
- * @param level The level where the future rank is reassigned
- */
-void TopologyNode::SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, const HilbertPosition position, unsigned int const level ) {
-
-   // tuple is [level](<count, rank>)
-   // Runs through list, if a rank is already full it is taken out of the list and the following nodes are assigned to the next element with enough room and so on.
-   if( is_leaf_ ) {
-      bool assigned = false;
-      // loop until this node is assigned to a rank ( hence, until a rank with enough room for this node is found )
-      double const weight = Weight();
-      while( !assigned ) {
-         if( std::get<0>( count_rank_map[level].back() ) >= weight ) {
-            // there's enough room for the current node on this rank, so assign it
-            std::get<0>( count_rank_map[level].back() ) -= weight;
-            future_rank_ = std::get<1>( count_rank_map[level].back() );
-            assigned     = true;
-         } else {
-            // there's not enough room for the current node, so take the ( possible ) overhead and carry it over to the next rank
-            // ( assignment is tried again in next loop )
-            int overhead = std::get<0>( count_rank_map[level].back() );
-            count_rank_map[level].pop_back();
-            std::get<0>( count_rank_map[level].back() ) += overhead;
-         }
-      }
-   } else {
-      std::array<HilbertPosition, 8> const replacement = SpaceFillingCurves::GetHilbertReplacement( position );
-      std::array<unsigned short, 8> const order        = SpaceFillingCurves::GetHilbertOrder( position );
-      for( unsigned int i = 0; i < children_.size(); i++ ) {
-         children_[order[i]].SetTargetRankForLeaf( count_rank_map, replacement[i], level + 1 );
-      }
+      GetChildWithId( id ).AssignTargetRankToLeaf( id, rank );
    }
 }
 
@@ -645,7 +560,7 @@ void TopologyNode::SetCurrentRankOfLeaf( nid_t const id, int const rank ) {
 
 /**
  * @brief Gives a list of all nodes which are to be moved from one MPI rank to another in order to achieve a better load balance.
- * @param ids_current_future_rank_map Indirect return parameter, giving a list of all nodes that need to be shifted fomr one mpi rank to another.
+ * @param ids_current_future_rank_map Indirect return parameter, giving a list of all nodes that need to be shifted from one mpi rank to another.
  *        The entries are as the name suggest id - current rank - future rank.
  */
 void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<nid_t const, int const, int const>>& ids_current_future_rank_map ) {
@@ -657,21 +572,6 @@ void TopologyNode::ListUnbalancedNodes( std::vector<std::tuple<nid_t const, int 
    if( !is_leaf_ ) {
       for( TopologyNode& child : children_ ) {
          child.ListUnbalancedNodes( ids_current_future_rank_map );
-      }
-   }
-}
-
-/**
- * @brief Gives a list holding the weight of the nodes ( children of root node ) on each level.
- * @param list Indirect return parameter. Lists the weight on each level.
- * @param currentLevel The level on which the current node resides on.
- */
-void TopologyNode::ChildWeight( std::vector<unsigned int>& weights_on_level, unsigned int const current_level ) const {
-   if( is_leaf_ ) {
-      weights_on_level[current_level] += Weight();
-   } else {
-      for( TopologyNode const& node : children_ ) {
-         node.ChildWeight( weights_on_level, current_level + 1 );
       }
    }
 }

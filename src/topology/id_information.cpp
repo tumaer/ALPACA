@@ -506,3 +506,11 @@ bool IsExternalBoundary( BoundaryLocation const location, nid_t const id, std::a
 #endif
    }
 }
+
+/**
+ * @brief Gives the equivalaent morton index of the id.
+ * @note Morton indices are only unique within one level.
+ */
+nid_t RawMortonIndexOfId( nid_t const id ) {
+   return CutHeadBit( id, LevelOfNode( id ) );
+}

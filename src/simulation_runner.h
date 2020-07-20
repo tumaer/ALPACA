@@ -85,6 +85,8 @@
 #include "initialization/initialization_unit_handler.h"
 #include "initialization/initialization_modular_algorithm_assembler.h"
 
+#include "user_specifications/space_filling_curve_settings.h"
+
 namespace Simulation {
 
    /**
@@ -97,11 +99,7 @@ namespace Simulation {
       int number_of_ranks = -1;
       MPI_Comm_size( MPI_COMM_WORLD, &number_of_ranks );
       logger.LogMessage( "Number of MPI ranks : " + std::to_string( number_of_ranks ) );
-#ifdef HILBERT
-      logger.LogMessage( "Load balancing      : Hilbert-Curve" );
-#else
-      logger.LogMessage( "Load Balancing      : Z-Curve" );
-#endif
+      logger.LogMessage( "Load balancing      : " + SpaceFillingCurveSettings::SpaceFillingCurveSelectionString() );
       logger.AddBreakLine( true );
 
       // Instance for dimensionalization and non-dimensionalization of variables

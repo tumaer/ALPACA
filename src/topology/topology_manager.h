@@ -100,9 +100,9 @@ class TopologyManager {
    int PositionOfNodeInZeroTopology( nid_t const id ) const;
    void AssignBalancedLoad();
    void ListNodeToBalance( std::vector<std::tuple<nid_t const, int const, int const>>& ids_current_future_rank_map );
-   void AssignTargetRankToLeaves( int const number_of_ranks );
 
-   std::vector<unsigned int> WeightsOnLevels() const;
+   void AssignTargetRanksToLeavesInList( std::vector<nid_t> const& leaves, int const number_of_ranks );
+   void AssignTargetRankToLeaves( int const number_of_ranks );
 
 public:
    explicit TopologyManager( std::array<unsigned int, 3> level_zero_blocks = { 1, 1, 1 }, unsigned int const maximum_level = 0, unsigned int active_periodic_locations = 0 );

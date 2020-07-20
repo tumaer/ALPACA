@@ -75,10 +75,31 @@
 #include <string>
 #include <numeric>
 #include <functional>
+#include <vector>
 
 #include "communication/mpi_utilities.h"
 #include "topology/id_information.h"
+#include "topology/node_id_type.h"
+#include "topology/space_filling_curve_order.h"
 #include "utilities/string_operations.h"
+
+namespace {
+   std::vector<std::size_t> ElementsPerRank( std::size_t const number_of_elements, int const number_of_ranks ) {
+      // Cast is save. Negative ranks indicate something is broken already anyways.
+      std::size_t rank_count = static_cast<std::size_t>( number_of_ranks );
+      std::size_t remainder  = number_of_elements % rank_count;
+      std::vector<std::size_t> elements_per_rank( rank_count );
+      for( std::size_t i = 0; i < rank_count; ++i ) {
+         std::size_t fraction = 0;
+         fraction += number_of_elements / rank_count;
+         if( i < remainder ) {
+            fraction++;
+         }
+         elements_per_rank[i] = fraction;
+      }
+      return elements_per_rank;
+   }
+}// namespace
 
 /**
  * @brief Default constructor. Creates the local and global Id list on level zero. Default arguments allow testability.
@@ -118,32 +139,19 @@ TopologyManager::TopologyManager( std::array<unsigned int, 3> const level_zero_b
    //Topology Tree Node creation
    forest_.shrink_to_fit();
 
-   int const number_of_ranks = MpiUtilities::NumberOfRanks();
-
-   // Now we distribute the global nodes accordingly:
-   unsigned int number_of_nodes = forest_.size();
-   int remainder                = number_of_nodes % number_of_ranks;
-   int fraction                 = 0;
-
-   std::vector<int> rank_map;
-
-   for( int i = 0; i < number_of_ranks; ++i ) {
-      fraction = 0;
-      fraction += number_of_nodes / number_of_ranks;
-      if( i < remainder ) {
-         fraction++;
-      }
-      rank_map.push_back( fraction );
-   }
+   int const number_of_ranks               = MpiUtilities::NumberOfRanks();
+   std::vector<std::size_t> const rank_map = ElementsPerRank( forest_.size(), number_of_ranks );
 
    //Topology Tree Rank setup
    int sum = 0;
    for( int i = 0; i < number_of_ranks; i++ ) {
-      for( int j = 0; j < rank_map[i]; j++ ) {
+      for( std::size_t j = 0; j < rank_map[i]; j++ ) {
          forest_[sum].SetCurrentRankOfLeaf( forest_[sum].Id(), i );
          sum++;
       }
    }
+
+   // TODO get rid of setCurrentRankFunctionalityt!
 }
 
 /**
@@ -455,6 +463,17 @@ std::vector<nid_t> TopologyManager::LeafIdsOnLevel( unsigned int const level ) c
    return leaves;
 }
 
+void TopologyManager::AssignTargetRanksToLeavesInList( std::vector<nid_t> const& leaves, int const number_of_ranks ) {
+   auto const elements_per_rank = ElementsPerRank( leaves.size(), number_of_ranks );
+   std::size_t start            = 0;
+   for( int rank_id = 0; rank_id < number_of_ranks; ++rank_id ) {
+      for( std::size_t i = start; i < start + elements_per_rank[rank_id]; ++i ) {
+         forest_[PositionOfNodeInZeroTopology( leaves[i] )].AssignTargetRankToLeaf( leaves[i], rank_id );
+      }
+      start += elements_per_rank[rank_id];
+   }
+}
+
 /**
  * @brief Assigns the target rank ( rank on which the node SHOULD reside ) to all leaf nodes.
  *        Uses either a linear or Hilbert Traversal to determine the target rank.
@@ -462,84 +481,21 @@ std::vector<nid_t> TopologyManager::LeafIdsOnLevel( unsigned int const level ) c
  */
 void TopologyManager::AssignTargetRankToLeaves( int const number_of_ranks ) {
 
-   std::vector<std::vector<std::tuple<unsigned int, int>>> ids_current_future_rank_map;//[level][( weight,rank )]
-   ids_current_future_rank_map.reserve( number_of_ranks );
-
-   std::vector<unsigned int> weight_list( WeightsOnLevels() );
-
-   for( unsigned int level = 0; level <= maximum_level_; level++ ) {
-      int const weight_per_rank = weight_list[level] / number_of_ranks;//Here normal ints due to MPI Standard. ( for ranks and number of ranks )
-      int const remainder       = weight_list[level] % number_of_ranks;
-      ids_current_future_rank_map.push_back( std::vector<std::tuple<unsigned int, int>>() );
-      for( int rank = 0; rank < number_of_ranks; rank++ ) {
-         if( rank < remainder ) {
-            ids_current_future_rank_map[level].push_back( std::make_tuple( weight_per_rank + 1, rank ) );
-         } else {
-            ids_current_future_rank_map[level].push_back( std::make_tuple( weight_per_rank, rank ) );
-         }
-      }
-      std::reverse( ids_current_future_rank_map[level].begin(), ids_current_future_rank_map[level].end() );
+   for( unsigned int level = 0; level <= maximum_level_; ++level ) {
+      std::vector<nid_t> leaves = LeafIdsOnLevel( level );
+      auto start_multi          = std::partition( std::begin( leaves ), std::end( leaves ), [this]( nid_t const node ) { return forest_[PositionOfNodeInZeroTopology( node )].GetMaterials( node ).size() == 1; } );
+      std::vector<nid_t> multiphase_leaves( start_multi, std::end( leaves ) );
+      leaves.erase( start_multi, std::end( leaves ) );
+      auto start_levelset = std::partition( std::begin( multiphase_leaves ), std::end( multiphase_leaves ), [this]( nid_t const node ) { return LevelOfNode( node ) < maximum_level_; } );
+      std::vector<nid_t> levelset_leaves( start_levelset, std::end( multiphase_leaves ) );
+      multiphase_leaves.erase( start_levelset, std::end( multiphase_leaves ) );
+      OrderNodeIdsBySpaceFillingCurve( leaves );
+      OrderNodeIdsBySpaceFillingCurve( multiphase_leaves );
+      OrderNodeIdsBySpaceFillingCurve( levelset_leaves );
+      AssignTargetRanksToLeavesInList( leaves, number_of_ranks );
+      AssignTargetRanksToLeavesInList( multiphase_leaves, number_of_ranks );
+      AssignTargetRanksToLeavesInList( levelset_leaves, number_of_ranks );
    }
-
-#ifndef HILBERT
-   for( TopologyNode& node : forest_ ) {
-      node.SetTargetRankForLeaf( ids_current_future_rank_map );
-   }
-#else
-
-   // We traverse the domain in a Hilbert curve traversal, as we have shadow levels, however, some considerations on the forest_ have to be
-   // done so the curve is correct.
-
-   bool x_inverse = false;//Inverse: reverse traversal when going back.
-   bool y_inverse = false;
-   for( unsigned int i = 0; i < number_of_nodes_on_level_zero_[2]; ++i ) {
-      if( !y_inverse ) {
-         for( unsigned int j = 0; j < number_of_nodes_on_level_zero_[1]; ++j ) {
-            if( !x_inverse ) {
-               for( unsigned int k = 0; k < number_of_nodes_on_level_zero_[0]; ++k ) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * number_of_nodes_on_level_zero_[1] * number_of_nodes_on_level_zero_[0] + j * number_of_nodes_on_level_zero_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::z_x_y );
-               }
-            } else {
-               for( int k = number_of_nodes_on_level_zero_[0] - 1; k >= 0; --k ) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * number_of_nodes_on_level_zero_[1] * number_of_nodes_on_level_zero_[0] + j * number_of_nodes_on_level_zero_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::_z_xy );
-               }
-            }
-            x_inverse = !x_inverse;
-         }
-      } else {
-         for( int j = number_of_nodes_on_level_zero_[1] - 1; j >= 0; --j ) {
-            if( !x_inverse ) {
-               for( unsigned int k = 0; k < number_of_nodes_on_level_zero_[0]; ++k ) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * number_of_nodes_on_level_zero_[1] * number_of_nodes_on_level_zero_[0] + j * number_of_nodes_on_level_zero_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::z_x_y );
-               }
-            } else {
-               for( int k = number_of_nodes_on_level_zero_[0] - 1; k >= 0; --k ) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * number_of_nodes_on_level_zero_[1] * number_of_nodes_on_level_zero_[0] + j * number_of_nodes_on_level_zero_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::_z_xy );
-               }
-            }
-            x_inverse = !x_inverse;
-         }
-      }
-      y_inverse = !y_inverse;
-   }
-#endif
-
-#ifndef PERFORMANCE
-   // Sanity Check.
-   for( unsigned int i = 0; i <= maximum_level_; i++ ) {
-      if( std::get<0>( ids_current_future_rank_map[i].back() ) != 0 ) {
-         throw std::logic_error( "TopologyManager::AssignTargetRankToLeaves Some miscalculations in the distribution of leaves per rank" );
-      }
-   }
-#endif
 }
 
 /**
@@ -612,18 +568,6 @@ std::string TopologyManager::LeafRankDistribution( int const number_of_ranks ) {
    }
 
    return leaf_rank_distribution;
-}
-
-/**
- * @brief Gives a list with the combined computation load ( weight ) on all levels.
- * @return List of summed weights on each level.
- */
-std::vector<unsigned int> TopologyManager::WeightsOnLevels() const {
-   std::vector<unsigned int> weights_on_level( maximum_level_ + 1 );//If max level is = 2 we need 3 elements "0, 1, 2".
-   for( TopologyNode const& node : forest_ ) {
-      node.ChildWeight( weights_on_level );
-   }
-   return weights_on_level;
 }
 
 /**
