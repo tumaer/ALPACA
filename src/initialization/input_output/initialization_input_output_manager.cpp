@@ -268,7 +268,7 @@ namespace Initialization {
             logger.LogMessage( "Standard output time stamps :    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( standard_output_timestamps.front(), UnitType::Time ), 6 ) + "  " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( standard_output_timestamps.back(), UnitType::Time ), 6 ) + "    " + std::to_string( standard_output_timestamps.size() ) );
          }
          if( !interface_output_timestamps.empty() ) {
-            logger.LogMessage( "Interface output time stamps:    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "  " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "    " + std::to_string( interface_output_timestamps.size() ) );
+            logger.LogMessage( "Interface output time stamps:    " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.front(), UnitType::Time ), 6 ) + "  " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( interface_output_timestamps.back(), UnitType::Time ), 6 ) + "    " + std::to_string( interface_output_timestamps.size() ) );
          }
       }
       // restart time stamps
