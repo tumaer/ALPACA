@@ -255,7 +255,7 @@ namespace Initialization {
       logger.LogMessage( StringOperations::Indent( 2 ) + "Input type        : " + InputTypeToString( input_type ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Simulation Name   : " + FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Output Folder     : " + output_folder_name );
-      logger.LogMessage( StringOperations::Indent( 2 ) + "Time naming factor: " + std::to_string( time_naming_factor ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Time naming factor: " + StringOperations::ToScientificNotationString( time_naming_factor, 9 ) );
       logger.LogMessage( " " );
       // Output and restart
       // Header for time stamps

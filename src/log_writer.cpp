@@ -188,16 +188,16 @@ LogWriter::LogWriter( bool const save_all_ranks ) : logfile_name_( "Unnamed_Simu
    }
    AddBreakLine( true );
 
-   LogMessage( "Time integrator                          : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( TimeIntegratorSetup::Concretize<time_integrator>::type ).name() ) ) );
-   LogMessage( "Riemann solver                           : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( RiemannSolverSetup::Concretize<riemann_solver>::type ).name() ) ) );
+   LogMessage( "Time integrator                               : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( TimeIntegratorSetup::Concretize<time_integrator>::type ).name() ) ) );
+   LogMessage( "Riemann solver                                : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( RiemannSolverSetup::Concretize<riemann_solver>::type ).name() ) ) );
    if constexpr( riemann_solver == RiemannSolvers::Roe ) {
-      LogMessage( "Flux Splitting Scheme                    : " + FluxSplittingToString( RoeSolverSettings::flux_splitting_scheme ) );
+      LogMessage( "Flux Splitting Scheme                         : " + FluxSplittingToString( RoeSolverSettings::flux_splitting_scheme ) );
    }
    if constexpr( riemann_solver == RiemannSolvers::Hllc || riemann_solver == RiemannSolvers::Hll ) {
-      LogMessage( "Signal Speed Selection                   : " + SignalSpeedToString( HllSolverSettings::signal_speed_selection ) );
+      LogMessage( "Signal Speed Selection                        : " + SignalSpeedToString( HllSolverSettings::signal_speed_selection ) );
    }
    if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe_M || RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
-      LogMessage( "Low-Mach-number limit factor             : " + std::to_string( RoeSolverSettings::low_mach_number_limit_factor ) );
+      LogMessage( "Low-Mach-number limit factor                  : " + std::to_string( RoeSolverSettings::low_mach_number_limit_factor ) );
    }
    LogMessage( "Prime state handler                           : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( PrimeStateHandlerSetup::Concretize<prime_state_handler>::type ).name() ) ) );
    LogMessage( "Reconstruction stencil                        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type ).name() ) ) );

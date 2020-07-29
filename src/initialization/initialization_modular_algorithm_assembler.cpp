@@ -142,11 +142,10 @@ namespace Initialization {
       LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Time control data: " );
-      logger.LogMessage( StringOperations::Indent( 2 ) + "Start time: " + std::to_string( start_time ) );
-      logger.LogMessage( StringOperations::Indent( 2 ) + "End time  : " + std::to_string( end_time ) );
-      logger.LogMessage( StringOperations::Indent( 2 ) + "CFL number: " + std::to_string( cfl_number ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Start time: " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( start_time, UnitType::Time ), 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "End time  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( end_time, UnitType::Time ), 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "CFL number: " + StringOperations::ToScientificNotationString( cfl_number, 9 ) );
       logger.LogMessage( " " );
-
       // Compute the cell size on maximum level
       unsigned int const maximum_level = topology_manager.GetMaximumLevel();
       // The MAA required the dimensionless cell size -> No dimensionalization required
