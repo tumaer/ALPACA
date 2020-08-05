@@ -6,8 +6,7 @@ set( ALPACA_ENV "$ENV{ALPACA_ENVIRONMENT}" )
 INCLUDE("./cmake/compiler.cmake")
 
 PROJECT( ALPACA )
-# To compile ALPACA, the c++17 standard is required.
-set( CMAKE_CXX_STANDARD 17 )
+set( CMAKE_CXX_STANDARD 20 )
 
 INCLUDE( FindMPI REQUIRED )
 
