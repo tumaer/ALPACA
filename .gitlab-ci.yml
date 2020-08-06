@@ -1,7 +1,7 @@
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
-image: aeralpaca/alpaca_paco:latest
+image: aeralpaca/alpaca_paco:develop
 
 stages:
  - statictests
@@ -17,10 +17,11 @@ Unit tests:
   script:
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake -DCMAKE_CXX_OUTPUT_EXTENSION_REPLACE=On ..
     - make Paco -j 4
     - mpiexec -n 1 ./Paco [1rank]
     - mpiexec -n 2 ./Paco [2rank]
+    - gcovr -e ../3rdParty/ -r ..
 
 Standard 1D Alpaca:
   stage: alltests
