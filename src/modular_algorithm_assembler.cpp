@@ -156,15 +156,15 @@ void ModularAlgorithmAssembler::ComputeLoop() {
    double time_measurement_end;
    double current_simulation_time = time_integrator_.CurrentRunTime();
 
-   bool time_step_size_too_small = false;
+   bool timestep_size_is_healthy = true;
 
    /* fast forward if current time is already greater than start time ( i.e. simulation was restarted ).
-    * We have to catch divison by zero in case only the initalization should be performed, i. e. start and end time are set to zero
+    * We have to catch division by zero in case only the initialization should be performed, i. e. start and end time are set to zero
     */
    double const flush_percentage = end_time_ == start_time_ ? 0.0 : ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ );
    logger_.FlushAlpaca( flush_percentage, current_simulation_time > start_time_ );
 
-   while( current_simulation_time < end_time_ && ( !time_step_size_too_small ) ) {
+   while( current_simulation_time < end_time_ && ( timestep_size_is_healthy ) ) {
       MPI_Barrier( MPI_COMM_WORLD );//For Time measurement
       time_measurement_start = MPI_Wtime();
       Advance();// This is the heart of the Simulation, the advancement in Time over the different levels
@@ -179,16 +179,17 @@ void ModularAlgorithmAssembler::ComputeLoop() {
       if constexpr( CC::WTL() ) {
          input_output_.WriteTimestepFile( time_integrator_.MicroTimestepSizes() );
       }
-      if( time_integrator_.MicroTimestepSizes().back() < CC::MTS() ) {
-         time_step_size_too_small = true;
+      // In case the time step is limited the timestep size will be exactly zero.
+      if( time_integrator_.MicroTimestepSizes().back() < CC::MTS() && time_integrator_.MicroTimestepSizes().back() > 0.0 ) {
+         timestep_size_is_healthy = false;
       }
       time_integrator_.FinishMacroTimestep();
       current_simulation_time = time_integrator_.CurrentRunTime();
       logger_.LogMessage( "Macro timestep done t = " + StringOperations::ToScientificNotationString( unit_handler_.DimensionalizeValue( current_simulation_time, UnitType::Time ), 9 ) );
       logger_.FlushAlpaca( ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ ) );
       // writing a restart file has priority over normal output, so call it first
-      input_output_.WriteRestartFile( current_simulation_time, time_step_size_too_small );
-      if( input_output_.WriteFullOutput( current_simulation_time, time_step_size_too_small ) ) {
+      input_output_.WriteRestartFile( current_simulation_time, !timestep_size_is_healthy );
+      if( input_output_.WriteFullOutput( current_simulation_time, !timestep_size_is_healthy ) ) {
          // if output has been written this timestep, we also write profiling information
          if constexpr( DP::Profile() ) { logger_.LogMessage( topology_.LeafRankDistribution( MpiUtilities::NumberOfRanks() ) ); }
       }
@@ -1424,12 +1425,8 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
       double const current_run_time              = std::accumulate( micro_time_steps.cbegin(), micro_time_steps.cend(), time_integrator_.CurrentRunTime() );
 
       if( current_run_time + local_dt_on_finest_level > end_time_ ) {
-         local_dt_on_finest_level = end_time_ - current_run_time;
-
-         //just for safety - make sure that the limiter does not lead to negative time-step sizes for the last output
-         if( local_dt_on_finest_level < 0.0 ) {
-            throw std::logic_error( "Time-step limiter gives negative time-step size!" );
-         }
+         //Floating-point math might yield negative epsilon.
+         local_dt_on_finest_level = std::max( end_time_ - current_run_time, 0.0 );
       }
    }
 

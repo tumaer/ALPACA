@@ -154,7 +154,10 @@
     <output>
         <timeNamingFactor> 1.e1 </timeNamingFactor>
         <standardOutput> <!-- for general or debug output -->
-            <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+            <type> Stamps </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+            <stamps>
+                <ts1> 1.0 </ts1>
+            </stamps>
         </standardOutput>
         <interfaceOutput>
             <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
