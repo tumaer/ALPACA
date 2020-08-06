@@ -139,19 +139,8 @@ TopologyManager::TopologyManager( std::array<unsigned int, 3> const level_zero_b
    //Topology Tree Node creation
    forest_.shrink_to_fit();
 
-   int const number_of_ranks               = MpiUtilities::NumberOfRanks();
-   std::vector<std::size_t> const rank_map = ElementsPerRank( forest_.size(), number_of_ranks );
-
-   //Topology Tree Rank setup
-   int sum = 0;
-   for( int i = 0; i < number_of_ranks; i++ ) {
-      for( std::size_t j = 0; j < rank_map[i]; j++ ) {
-         forest_[sum].SetCurrentRankOfLeaf( forest_[sum].Id(), i );
-         sum++;
-      }
-   }
-
-   // TODO get rid of setCurrentRankFunctionalityt!
+   // Assign correct ranks to nodes
+   GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
 }
 
 /**

@@ -541,24 +541,6 @@ void TopologyNode::AssignTargetRankToLeaf( nid_t const id, int const rank ) {
 }
 
 /**
- * @brief Assigns the given rank to the node with the given id.
- * @param id The id of the node to be assigned to the given rank.
- * @param rank The rank the node is assigned to.
- */
-void TopologyNode::SetCurrentRankOfLeaf( nid_t const id, int const rank ) {
-   if( id == unique_id_ ) {
-#ifndef PERFORMANCE
-      if( !is_leaf_ ) {
-         throw std::logic_error( "Avoid calling SetRankOfLeaf for non leaves!" );
-      }
-#endif
-      current_rank_ = rank;
-   } else {
-      GetChildWithId( id ).SetCurrentRankOfLeaf( id, rank );
-   }
-}
-
-/**
  * @brief Gives a list of all nodes which are to be moved from one MPI rank to another in order to achieve a better load balance.
  * @param ids_current_future_rank_map Indirect return parameter, giving a list of all nodes that need to be shifted from one mpi rank to another.
  *        The entries are as the name suggest id - current rank - future rank.

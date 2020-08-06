@@ -133,7 +133,6 @@ public:
    int BalanceTargetRanks();
 
    void AssignTargetRankToLeaf( nid_t const id, int const rank );
-   void SetCurrentRankOfLeaf( nid_t const id, int const rank );
 
    bool NodeExists( nid_t const id ) const;
    bool NodeIsLeaf( nid_t const id ) const;
