@@ -92,7 +92,8 @@ namespace ContainerOperations {
     * @param amount_of_rotations The numer of left-rotations to perform.
     * @tparam RandomAccess Container type. Must provide random access iterators.
     * @return A copy of c with rotated elements.
-    * @note Undefined behavior if the number rotations is large the size of the container Copies the container argument, as it needs to create a copy of all elements at somepoint either way.
+    * @note Undefined behavior if the number of rotations is larger than the size of the container.
+    * Copies the container argument, as it needs to create a copy of all elements at some point either way.
     */
    template<typename RandomAccess>
    RandomAccess RotatedLeftCopy( RandomAccess c, std::size_t const amount_of_rotations ) {
@@ -102,7 +103,8 @@ namespace ContainerOperations {
 
    /**
     * @brief Gives the element that is present most often in the container.
-    * @param non_empty The original container holding the elements to be rotated and copied.
+    * @param non_empty The original container holding the elements.
+    * @tparam Container holding the elemnts must be iterable.
     * @return The element which occurs most frequent in the container. If multiple elements occur the most, the first one (container ordering) is returned.
     * @note Function is undefined if the container is empty.
     */

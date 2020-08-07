@@ -118,7 +118,7 @@ SCENARIO( "Hilbert index is correctly computed", "[1rank]" ) {
          std::vector<sfcidx_t> indices;
          indices.reserve( cube.size() );
          std::transform( std::cbegin( cube ), std::cend( cube ), std::back_inserter( indices ), []( auto const id ) { return HilbertIndex( id ); } );
-         THEN( "The indices match the expected hilbert traversal thorugh the cube" ) {
+         THEN( "The indices match the expected hilbert traversal through the cube" ) {
             std::vector<sfcidx_t> expected_hilbert_order = { 0, 3, 7, 4, 1, 2, 6, 5 };
             REQUIRE( indices == expected_hilbert_order );
          }
@@ -133,7 +133,7 @@ SCENARIO( "Hilbert index is correctly computed", "[1rank]" ) {
          std::vector<sfcidx_t> indices;
          indices.reserve( channel.size() );
          std::transform( std::cbegin( channel ), std::cend( channel ), std::back_inserter( indices ), []( auto const id ) { return HilbertIndex( id ); } );
-         THEN( "The indices match the expected hilbert traversal thorugh the cube" ) {
+         THEN( "The indices match the expected hilbert traversal through the cube" ) {
             std::vector<sfcidx_t> expected_hilbert_order = { 0, 3, 60, 63, 7, 4, 59, 56 };
             REQUIRE( indices == expected_hilbert_order );
          }
@@ -148,7 +148,7 @@ SCENARIO( "Hilbert index is correctly computed", "[1rank]" ) {
          std::vector<sfcidx_t> indices;
          indices.reserve( ltwo_channel_z.size() );
          std::transform( std::cbegin( ltwo_channel_z ), std::cend( ltwo_channel_z ), std::back_inserter( indices ), []( auto const id ) { return HilbertIndex( id ); } );
-         THEN( "The indices match the expected hilbert traversal thorugh the cube" ) {
+         THEN( "The indices match the expected hilbert traversal through the cube" ) {
             std::vector<sfcidx_t> expected_hilbert_order = { 0, 1, 26, 25, 486, 485, 510, 511, 512, 519,
                                                              520, 523, 724, 723, 716, 715, 13620, 13621, 13578, 13579,
                                                              13556, 13557, 13514, 13515, 13108, 13109, 13066, 13067, 13044, 13045,
@@ -218,7 +218,7 @@ SCENARIO( "Lebesgue index is correctly computed", "[1rank]" ) {
          std::vector<sfcidx_t> indices;
          indices.reserve( cube.size() );
          std::transform( std::cbegin( cube ), std::cend( cube ), std::back_inserter( indices ), []( auto const id ) { return LebesgueIndex( id ); } );
-         THEN( "The indices match the expected hilbert traversal thorugh the cube" ) {
+         THEN( "The indices match the expected hilbert traversal through the cube" ) {
             std::vector<sfcidx_t> expected_lebesgue_order = { 0, 1, 2, 3, 4, 5, 6, 7 };
             REQUIRE( indices == expected_lebesgue_order );
          }
@@ -233,7 +233,7 @@ SCENARIO( "Lebesgue index is correctly computed", "[1rank]" ) {
          std::vector<sfcidx_t> indices;
          indices.reserve( channel.size() );
          std::transform( std::cbegin( channel ), std::cend( channel ), std::back_inserter( indices ), []( auto const id ) { return LebesgueIndex( id ); } );
-         THEN( "The indices match the expected hilbert traversal thorugh the cube" ) {
+         THEN( "The indices match the expected hilbert traversal through the cube" ) {
             std::vector<sfcidx_t> expected_lebesgue_order = { 0, 1, 8, 9, 2, 3, 10, 11 };
             REQUIRE( indices == expected_lebesgue_order );
          }

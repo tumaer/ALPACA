@@ -84,6 +84,12 @@
 #include "utilities/string_operations.h"
 
 namespace {
+   /**
+    * @brief Gives a count of elements that should be on each respective rank to obtained a balanced load.
+    * @param number_of_elements The amount of elements to distribute accross the ranks.
+    * @param number_of_ranks The amount of ranks to distribute the elements onto.
+    * @return Vector of size number_of_ranks. Each entry gives the amount of elements the respective rank should hold in a well-balanced scenario.
+    */
    std::vector<std::size_t> ElementsPerRank( std::size_t const number_of_elements, int const number_of_ranks ) {
       // Cast is save. Negative ranks indicate something is broken already anyways.
       std::size_t rank_count = static_cast<std::size_t>( number_of_ranks );

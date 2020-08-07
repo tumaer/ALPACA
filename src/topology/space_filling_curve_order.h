@@ -78,12 +78,12 @@
 
 /**
  * @brief Sorts a list of node ids according the the provided space-filling curve .
- * @param unsorted_ids The ids to be sorted. Indirect return parameter.
+ * @param ids_to_sort The unsorted indices, which get sorted by this function. Indirect return parameter.
  * @param index The index function of the respective space-filling curve.
  */
 template<typename SpaceFillingCurveIndexFunction = decltype( SpaceFillingCurveSettings::SfcIndex )>
-void OrderNodeIdsBySpaceFillingCurve( std::vector<nid_t>& unsorted_ids, SpaceFillingCurveIndexFunction index = SpaceFillingCurveSettings::SfcIndex ) {
-   std::sort( std::begin( unsorted_ids ), std::end( unsorted_ids ), [&index]( nid_t const a, nid_t const b ) { return index( a ) < index( b ); } );
+void OrderNodeIdsBySpaceFillingCurve( std::vector<nid_t>& ids_to_sort, SpaceFillingCurveIndexFunction index = SpaceFillingCurveSettings::SfcIndex ) {
+   std::sort( std::begin( ids_to_sort ), std::end( ids_to_sort ), [&index]( nid_t const a, nid_t const b ) { return index( a ) < index( b ); } );
 }
 
 #endif//SPACE_FILLING_CURVE_ORDER_H

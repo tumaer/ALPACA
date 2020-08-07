@@ -76,7 +76,7 @@
 #include "topology/node_id_type.h"
 #include "utilities/bit_operations.h"
 
-constexpr std::size_t bisi = 64;//Bits in SFC index.
+constexpr std::size_t bisi = 64;//bisi = Bits In Sfc Index.
 static_assert( std::numeric_limits<sfcidx_t>::digits == bisi, "Space-filling curve idices type must hold 64 bits." );
 static_assert( std::numeric_limits<sfcidx_t>::digits >= std::numeric_limits<nid_t>::digits, "Space-filling curve indices must not be smaller in type than node ids." );
 
@@ -193,7 +193,7 @@ namespace BinaryHilbert {
 
    /**
     * @brief Give the flip bit needed for for the given rotation.
-    * @param rotation The rootation.
+    * @param rotation The rotation.
     * @return The corresponding flip_bit_group
     */
    std::bitset<group_size> FlipBitForRotation( std::size_t const rotation ) {
@@ -204,11 +204,12 @@ namespace BinaryHilbert {
 
    /**
     * @brief Gives the rotation that should follow from the current rotation on the current group.
-    * @param rotation The current rotation.
-    * @param group The current group.
+    * @param rotation The current rotation. Must be smaller eight.
+    * @param group The current group. Group's int value mus be smaller three.
     * @return The next rotation.
+    * @note Invalid inputs result in undefined behavior.
     */
-   std::size_t NextRootationLookup( std::size_t const rotation, std::bitset<group_size> const group ) {
+   std::size_t NextRotationLookup( std::size_t const rotation, std::bitset<group_size> const group ) {
       constexpr std::array<std::array<std::size_t, 3>, 8> lookup = { { { { 1, 2, 0 } }, { { 2, 0, 1 } }, { { 0, 1, 2 } }, { { 2, 0, 1 } }, { { 1, 2, 0 } }, { { 2, 0, 1 } }, { { 0, 1, 2 } }, { { 2, 0, 1 } } } };
       return lookup[group.to_ulong()][rotation];
    }
@@ -226,7 +227,7 @@ namespace BinaryHilbert {
          std::bitset<group_size> const group = BitOperations::RightCircularShift( NthFlippedGroup( flip_bit_group, group_stream, i ), rotation );
          index_groups[i]                     = group;
          flip_bit_group                      = FlipBitForRotation( rotation );
-         rotation                            = NextRootationLookup( rotation, group.to_ulong() );
+         rotation                            = NextRotationLookup( rotation, group.to_ulong() );
       }
       return index_groups;
    }

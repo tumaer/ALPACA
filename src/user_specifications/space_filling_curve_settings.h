@@ -78,14 +78,15 @@ namespace SpaceFillingCurveSettings {
    constexpr auto SfcIndex = HilbertIndex;
 #endif
 
+   /*
+    * @brief Gives a string representation of the active space-filling curve.
+    */
    inline std::string SpaceFillingCurveSelectionString() {
-      std::string res;
       if( SfcIndex == LebesgueIndex ) {
-         res += "Lebesgue-Curve";
+         return "Lebesgue-Curve";
       } else {
-         res += "Hilbert-Curve";
+         return "Hilbert-Curve";
       }
-      return res;
    }
 }// namespace SpaceFillingCurveSettings
 

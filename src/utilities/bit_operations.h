@@ -74,14 +74,29 @@
 
 namespace BitOperations {
 
+   /*
+    * @brief Performs a right circular shift on the given bitset.
+    * @param argument The bitset to rotate.
+    * @param rotations The amount of rotations to perfrom.
+    * @return Rotated bitset.
+    * @note If the number of rotations is larger than the twice arguments's size it return an bitset with all bits false.
+    * This is different to C++20 rotr. The difference is unintentional. Do not rely on it.
+    */
    template<std::size_t N>
    std::bitset<N> RightCircularShift( std::bitset<N> const argument, std::size_t const rotations ) {
-      // This function becomes obsolete with C++20 std::rotr.
       return std::bitset<N>( ( argument >> rotations ) | ( argument << ( N - rotations ) ) );
    }
 
+   /**
+    * @brief Extracts a subset of bits from a larger bitset. The sub-bitset holds entries from start until start + N of the input bitset.
+    * @param long_bitset The bitset from which a subset is to be extracted.
+    * @param start The postion in long_bitset from which the subset starts.
+    * @tparam N length of the subbitset.
+    * @tparam M length of the longer bitset.
+    */
    template<std::size_t N, std::size_t M>
    std::bitset<N> SubBitset( std::bitset<M> const long_bitset, std::size_t start ) {
+      static_assert( N <= M, "Sub-bitset may not be larger the original input bitset." );
       std::bitset<N> subbitset;
       for( std::size_t i = 0; i < N; ++i ) {
          subbitset[i] = long_bitset[start + i];

@@ -164,7 +164,7 @@ void ModularAlgorithmAssembler::ComputeLoop() {
    double const flush_percentage = end_time_ == start_time_ ? 0.0 : ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ );
    logger_.FlushAlpaca( flush_percentage, current_simulation_time > start_time_ );
 
-   while( current_simulation_time < end_time_ && ( timestep_size_is_healthy ) ) {
+   while( current_simulation_time < end_time_ && timestep_size_is_healthy ) {
       MPI_Barrier( MPI_COMM_WORLD );//For Time measurement
       time_measurement_start = MPI_Wtime();
       Advance();// This is the heart of the Simulation, the advancement in Time over the different levels

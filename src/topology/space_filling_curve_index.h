@@ -72,6 +72,7 @@
 #include <cstdint>
 #include "topology/node_id_type.h"
 
+// Space-filling curve index type
 using sfcidx_t = std::uint64_t;
 
 sfcidx_t HilbertIndex( nid_t const node_id );

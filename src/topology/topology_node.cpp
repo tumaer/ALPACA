@@ -527,11 +527,17 @@ int TopologyNode::BalanceTargetRanks() {
    return future_rank_;
 }
 
+/*
+ * @brief Assigns the target rank to the leaf with the given id.
+ * @param id The lead id to be assigned a new rank.
+ * @param rank The rank to hold the node in the future.
+ * @note Does not change the current rank of the leaf.
+ */
 void TopologyNode::AssignTargetRankToLeaf( nid_t const id, int const rank ) {
    if( id == unique_id_ ) {
 #ifndef PERFORMANCE
       if( !is_leaf_ ) {
-         throw std::logic_error( "Avoid calling assinging ranks to non-leaves!" );
+         throw std::logic_error( "Avoid calling assigning ranks to non-leaves!" );
       }
 #endif
       future_rank_ = rank;
