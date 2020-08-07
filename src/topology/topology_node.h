@@ -72,7 +72,6 @@
 #include <tuple>
 #include "topology/node_id_type.h"
 #include "materials/material_definitions.h"
-#include "utilities/space_filling_curves.h"
 
 /**
  * @brief The TopologyNode class organizes the light weight global ( over MPI ranks ) node information in a tree structure. Allowing the TopologyManager efficient searches.
@@ -95,8 +94,6 @@ class TopologyNode {
 
    TopologyNode& GetChildWithId( nid_t const id );
    TopologyNode const& GetChildWithId( nid_t const id ) const;
-
-   unsigned int Weight() const;
 
 public:
    TopologyNode() = delete;
@@ -131,18 +128,14 @@ public:
 
    void LocalNodes( std::vector<nid_t>& local_nodes, int const rank ) const;
 
-   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, unsigned int const level = 0 );
-   void SetTargetRankForLeaf( std::vector<std::vector<std::tuple<unsigned int, int>>>& count_rank_map, const HilbertPosition position, unsigned int const level = 0 );
-
    void ListUnbalancedNodes( std::vector<std::tuple<nid_t const, int const, int const>>& ids_current_future_rank_map );
 
    int BalanceTargetRanks();
-   void SetCurrentRankOfLeaf( nid_t const id, int const rank );
+
+   void AssignTargetRankToLeaf( nid_t const id, int const rank );
 
    bool NodeExists( nid_t const id ) const;
    bool NodeIsLeaf( nid_t const id ) const;
-
-   void ChildWeight( std::vector<unsigned int>& weights_on_level, unsigned int const current_level = 0 ) const;
 
    void AddMaterial( nid_t const id, MaterialName const material );
    void RemoveMaterial( nid_t const id, MaterialName const material );

@@ -98,6 +98,7 @@ class ModularAlgorithmAssembler {
    double const start_time_;
    double const end_time_;
    double const cfl_number_;
+
    double const cell_size_on_maximum_level_;
    // source term variables (time computation)
    std::array<double, 3> const gravity_;

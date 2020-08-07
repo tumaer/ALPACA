@@ -147,27 +147,20 @@
             <fileName> inputfile/restart/restart_***.h5 </fileName>
         </restore>
         <snapshots>
-            <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
-            <interval> 3600 </interval> <!-- in wall seconds -->
-            <intervalsToKeep> 2 </intervalsToKeep>
+            <type> Off </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
         </snapshots>
     </restart>
 
     <output>
         <timeNamingFactor> 1.e1 </timeNamingFactor>
         <standardOutput> <!-- for general or debug output -->
-            <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
-            <interval>  1.0 </interval>
+            <type> Stamps </type> <!--Off, Interval, Stamps OR IntervalStamps-->
             <stamps>
-                <ts1> 0.0004 </ts1>
+                <ts1> 1.0 </ts1>
             </stamps>
         </standardOutput>
         <interfaceOutput>
-            <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
-            <interval>  1.0 </interval>
-            <stamps>
-                <ts1>  0.0004 </ts1>
-            </stamps>
+            <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
         </interfaceOutput>
     </output>
 </configuration>

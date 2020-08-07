@@ -65,129 +65,55 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef SPACE_FILLING_CURVES_H
-#define SPACE_FILLING_CURVES_H
 
-#include <array>
+#include <catch.hpp>
+#include "topology/space_filling_curve_order.h"
+#include <vector>
+#include "topology/id_information.h"
+#include "topology/node_id_type.h"
+#include "utilities/container_operations.h"
+#include "topology/space_filling_curve_index.h"
 
-/* Nomenclature according to \cite Bader 2013
- * _x implies "x bar"
- */
-enum class HilbertPosition { xyz,
-                             x_y_z,
-                             yzx,
-                             y_z_x,
-                             zxy,
-                             z_x_y,
-                             _xy_z,
-                             _x_yz,
-                             _yz_x,
-                             _y_zx,
-                             _zx_y,
-                             _z_xy };
-
-/**
- * @brief The SpaceFillingCurves namespace provides space filling curve Information %Currently only for Hilbert Curve% for the Load Balancing.
- * $PLEASE NOTE: SPACEFILLING CURVE LOAD BALANCING IS ONLY USEFUL IN 3D SIMULATIONS. HENCE THIS CLASS ONLY PROVIDES 3D VARIANTS$
- */
-namespace SpaceFillingCurves {
-
+namespace {
    /**
- * @brief Gives the Hilbert Order for the given position.
- * @param position The current position of the cube in the Hilbert Curve.
- * @return The traversal order.
- */
-   constexpr std::array<unsigned short, 8> GetHilbertOrder( const HilbertPosition position ) {
-      switch( position ) {
-         case HilbertPosition::xyz:
-            return { 0, 2, 3, 1, 5, 7, 6, 4 };
-         case HilbertPosition::x_y_z:
-            return { 6, 4, 5, 7, 3, 1, 0, 2 };
-         case HilbertPosition::yzx:
-            return { 0, 1, 5, 4, 6, 7, 3, 2 };
-         case HilbertPosition::y_z_x:
-            return { 6, 7, 3, 2, 0, 1, 5, 4 };
-
-         case HilbertPosition::zxy:
-            return { 0, 4, 6, 2, 3, 7, 5, 1 };
-         case HilbertPosition::z_x_y:
-            return { 6, 2, 0, 4, 5, 1, 3, 7 };
-         case HilbertPosition::_xy_z:
-            return { 5, 7, 6, 4, 0, 2, 3, 1 };
-         case HilbertPosition::_x_yz:
-            return { 3, 1, 0, 2, 6, 4, 5, 7 };
-
-         case HilbertPosition::_yz_x:
-            return { 5, 4, 0, 1, 3, 2, 6, 7 };
-         case HilbertPosition::_y_zx:
-            return { 3, 2, 6, 7, 5, 4, 0, 1 };
-         case HilbertPosition::_zx_y:
-            return { 5, 1, 3, 7, 6, 2, 0, 4 };
-         case HilbertPosition::_z_xy:
-            return { 3, 7, 5, 1, 0, 4, 6, 2 };
-      }
-      return { 0, 1, 2, 3, 4, 5, 6, 7 };
+    * @brief Gives the ids of some arbitrary nodes which reside on the same level.
+    */
+   std::vector<nid_t> BunchOfNodesOnLevelThree() {
+      auto const level_three_start = IdsOfChildren( IdsOfChildren( IdsOfChildren( IdSeed() ).front() ).front() ).front();
+      return { level_three_start,
+               EastNeighborOfNodeWithId( level_three_start ),
+               NorthNeighborOfNodeWithId( EastNeighborOfNodeWithId( level_three_start ) ),
+               TopNeighborOfNodeWithId( NorthNeighborOfNodeWithId( EastNeighborOfNodeWithId( level_three_start ) ) ),
+               TopNeighborOfNodeWithId( NorthNeighborOfNodeWithId( TopNeighborOfNodeWithId( level_three_start ) ) ),
+               NorthNeighborOfNodeWithId( TopNeighborOfNodeWithId( level_three_start ) ),
+               TopNeighborOfNodeWithId( level_three_start ) };
    }
+}// namespace
 
-   /**
- * @brief Gives the Hilbert Replacement for the given Position.
- * @param position The current position of the cube in the Hilbert Curve.
- * @return The replacement order.
- */
-   constexpr std::array<HilbertPosition, 8> GetHilbertReplacement( const HilbertPosition position ) {
-      switch( position ) {
-         case HilbertPosition::xyz:
-            return { HilbertPosition::yzx, HilbertPosition::zxy, HilbertPosition::zxy, HilbertPosition::_x_yz,
-                     HilbertPosition::_x_yz, HilbertPosition::_zx_y, HilbertPosition::_zx_y, HilbertPosition::y_z_x };
-
-         case HilbertPosition::x_y_z:
-            return { HilbertPosition::y_z_x, HilbertPosition::z_x_y, HilbertPosition::z_x_y, HilbertPosition::_xy_z,
-                     HilbertPosition::_xy_z, HilbertPosition::_z_xy, HilbertPosition::_z_xy, HilbertPosition::yzx };
-
-         case HilbertPosition::yzx:
-            return { HilbertPosition::zxy, HilbertPosition::xyz, HilbertPosition::xyz, HilbertPosition::_yz_x,
-                     HilbertPosition::_yz_x, HilbertPosition::x_y_z, HilbertPosition::x_y_z, HilbertPosition::_z_xy };
-
-         case HilbertPosition::y_z_x:
-            return { HilbertPosition::z_x_y, HilbertPosition::x_y_z, HilbertPosition::x_y_z, HilbertPosition::_y_zx,
-                     HilbertPosition::_y_zx, HilbertPosition::xyz, HilbertPosition::xyz, HilbertPosition::_zx_y };
-
-         case HilbertPosition::zxy:
-            return { HilbertPosition::xyz, HilbertPosition::yzx, HilbertPosition::yzx, HilbertPosition::z_x_y,
-                     HilbertPosition::z_x_y, HilbertPosition::_y_zx, HilbertPosition::_y_zx, HilbertPosition::_xy_z };
-
-         case HilbertPosition::z_x_y:
-            return { HilbertPosition::x_y_z, HilbertPosition::y_z_x, HilbertPosition::y_z_x, HilbertPosition::zxy,
-                     HilbertPosition::zxy, HilbertPosition::_yz_x, HilbertPosition::_yz_x, HilbertPosition::_x_yz };
-
-         case HilbertPosition::_xy_z:
-            return { HilbertPosition::_yz_x, HilbertPosition::_zx_y, HilbertPosition::_zx_y, HilbertPosition::x_y_z,
-                     HilbertPosition::x_y_z, HilbertPosition::zxy, HilbertPosition::zxy, HilbertPosition::_y_zx };
-
-         case HilbertPosition::_x_yz:
-            return { HilbertPosition::_y_zx, HilbertPosition::_z_xy, HilbertPosition::_z_xy, HilbertPosition::xyz,
-                     HilbertPosition::xyz, HilbertPosition::z_x_y, HilbertPosition::z_x_y, HilbertPosition::_yz_x };
-
-         case HilbertPosition::_yz_x:
-            return { HilbertPosition::_zx_y, HilbertPosition::_xy_z, HilbertPosition::_xy_z, HilbertPosition::yzx,
-                     HilbertPosition::yzx, HilbertPosition::_x_yz, HilbertPosition::_x_yz, HilbertPosition::z_x_y };
-
-         case HilbertPosition::_y_zx:
-            return { HilbertPosition::_z_xy, HilbertPosition::_x_yz, HilbertPosition::_x_yz, HilbertPosition::y_z_x,
-                     HilbertPosition::y_z_x, HilbertPosition::_xy_z, HilbertPosition::_xy_z, HilbertPosition::zxy };
-
-         case HilbertPosition::_zx_y:
-            return { HilbertPosition::_xy_z, HilbertPosition::_yz_x, HilbertPosition::_yz_x, HilbertPosition::_z_xy,
-                     HilbertPosition::_z_xy, HilbertPosition::y_z_x, HilbertPosition::y_z_x, HilbertPosition::xyz };
-
-         case HilbertPosition::_z_xy:
-            return { HilbertPosition::_x_yz, HilbertPosition::_y_zx, HilbertPosition::_y_zx, HilbertPosition::_zx_y,
-                     HilbertPosition::_zx_y, HilbertPosition::yzx, HilbertPosition::yzx, HilbertPosition::x_y_z };
+SCENARIO( "Space-filling curves give the correct ordering of ids", "[1rank]" ) {
+   GIVEN( "A bunch of ids on the same level" ) {
+      auto nodes = BunchOfNodesOnLevelThree();
+      WHEN( "We ask for the Hilbert Curve order of these ids and on a rotated input" ) {
+         auto rotated_nodes = ContainerOperations::RotatedLeftCopy( nodes, 4 );
+         OrderNodeIdsBySpaceFillingCurve( nodes, HilbertIndex );
+         OrderNodeIdsBySpaceFillingCurve( rotated_nodes, HilbertIndex );
+         THEN( "The mappings are identical" ) {
+            REQUIRE( nodes == rotated_nodes );
+         }
+         THEN( "The mappings are unique" ) {
+            REQUIRE( ContainerOperations::HoldsUniqueElements( nodes ) );
+         }
       }
-
-      return { { HilbertPosition::yzx, HilbertPosition::zxy, HilbertPosition::zxy, HilbertPosition::_x_yz,
-                 HilbertPosition::_x_yz, HilbertPosition::_zx_y, HilbertPosition::_zx_y, HilbertPosition::y_z_x } };
+      WHEN( "We ask for the Z-Curve order these ids and on a rotated input" ) {
+         auto rotated_nodes = ContainerOperations::RotatedLeftCopy( nodes, 4 );
+         OrderNodeIdsBySpaceFillingCurve( nodes, LebesgueIndex );
+         OrderNodeIdsBySpaceFillingCurve( rotated_nodes, LebesgueIndex );
+         THEN( "The mappings are identical" ) {
+            REQUIRE( nodes == rotated_nodes );
+         }
+         THEN( "The mapping are unique" ) {
+            REQUIRE( ContainerOperations::HoldsUniqueElements( rotated_nodes ) );
+         }
+      }
    }
-}// namespace SpaceFillingCurves
-
-#endif// SPACE_FILLING_CURVES_H
+}
