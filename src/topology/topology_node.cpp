@@ -146,20 +146,21 @@ void TopologyNode::NodeLeafCount( std::pair<unsigned int, unsigned int>& nodes_a
 }
 
 /**
- * @brief Gives the interface node and leaf count, i.e. how many interface nodes and leaves are descending from this one.
- * @param nodes_and_leaves Indirect return parameter of the final result.
+ * @brief Gives the amount of interface leaves within the decendants (itself included) of this node.
+ * @brief retrun The interface node count.
  */
-void TopologyNode::NodeInterfaceLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const {
-   nodes_and_leaves.first += 1;
+unsigned int TopologyNode::InterfaceLeafCount() const {
+   unsigned int count = 0;
    if( is_leaf_ ) {
       if( materials_.size() != 1 ) {
-         nodes_and_leaves.second += 1;
+         count++;
       }
    } else {
       for( TopologyNode const& child : children_ ) {
-         child.NodeInterfaceLeafCount( nodes_and_leaves );
+         count += child.InterfaceLeafCount();
       }
    }
+   return count;
 }
 
 /**
@@ -183,23 +184,22 @@ void TopologyNode::RankWiseNodeLeafCount( std::vector<std::pair<unsigned int, un
 }
 
 /**
- * @brief Gives the count of interface nodes and leaves in a list where each element corresponds to one MPI rank
+ * @brief Gives the count of interface leaves in a list where each element corresponds to one MPI rank.
  * @param nodes_leaves_per_rank Indirect return parameter.
  */
-void TopologyNode::RankWiseNodeInterfaceLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const {
+void TopologyNode::RankWiseInterfaceLeafCount( std::vector<unsigned int>& nodes_leaves_per_rank ) const {
 
    if( static_cast<int>( nodes_leaves_per_rank.size() ) < current_rank_ + 1 ) {// length starts with 0, int due to MPI
-      nodes_leaves_per_rank.resize( current_rank_ + 1, std::make_pair( 0, 0 ) );
+      nodes_leaves_per_rank.resize( current_rank_ + 1, 0u );
    }
 
-   nodes_leaves_per_rank[current_rank_].first += 1;
    if( is_leaf_ ) {
       if( materials_.size() != 1 ) {
-         nodes_leaves_per_rank[current_rank_].second += 1;
+         nodes_leaves_per_rank[current_rank_] += 1;
       }
    } else {
       for( TopologyNode const& child : children_ ) {
-         child.RankWiseNodeInterfaceLeafCount( nodes_leaves_per_rank );
+         child.RankWiseInterfaceLeafCount( nodes_leaves_per_rank );
       }
    }
 }

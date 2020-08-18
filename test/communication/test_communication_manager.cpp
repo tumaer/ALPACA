@@ -336,7 +336,7 @@ SCENARIO( "The neighborhood relations are correct", "[1rank]" ) {
          }
       }
       WHEN( "We pretend to have a three-rank topology" ) {
-         simplest_jump_topo.GetLoadBalancedTopology( 3 );
+         simplest_jump_topo.PrepareLoadBalancedTopology( 3 );
          simplest_jump_topo.UpdateTopology();
          CommunicationManager communication = CommunicationManager( simplest_jump_topo, maximum_level );
          communication.GenerateNeighborRelationForHaloUpdate( level_zero );

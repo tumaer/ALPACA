@@ -109,9 +109,9 @@ public:
 
    int GetRank( nid_t const id ) const;
    void NodeLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
-   void NodeInterfaceLeafCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
+   unsigned int InterfaceLeafCount() const;
    void RankWiseNodeLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const;
-   void RankWiseNodeInterfaceLeafCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank ) const;
+   void RankWiseInterfaceLeafCount( std::vector<unsigned int>& nodes_leaves_per_rank ) const;
    void NodeBlockCount( std::pair<unsigned int, unsigned int>& nodes_and_leaves ) const;
    unsigned int MultiPhaseNodeCount() const;
    void RankWiseNodeBlockCount( std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank ) const;

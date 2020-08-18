@@ -21,7 +21,7 @@ Unit tests:
     - make Paco -j 4
     - mpiexec -n 1 ./Paco [1rank]
     - mpiexec -n 2 ./Paco [2rank]
-    - gcovr -e ../3rdParty/ -r ..
+    - gcovr -e ../3rdParty/ -e ../test/ -r ..
 
 Standard 1D Alpaca:
   stage: alltests

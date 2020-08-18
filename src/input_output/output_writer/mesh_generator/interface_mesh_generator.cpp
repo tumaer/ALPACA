@@ -94,7 +94,7 @@ std::vector<std::reference_wrapper<Node const>> InterfaceMeshGenerator::DoGetLoc
  * @brief See base class implementation.
  */
 hsize_t InterfaceMeshGenerator::DoGetGlobalNumberOfCells() const {
-   return hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
+   return hsize_t( topology_.InterfaceLeafCount() ) * MeshGeneratorUtilities::NumberOfInternalCellsPerBlock();
 }
 
 /**
@@ -115,7 +115,7 @@ hsize_t InterfaceMeshGenerator::DoGetLocalCellsStartIndex() const {
  * @brief See base class implementation.
  */
 std::vector<hsize_t> InterfaceMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinates() const {
-   return { hsize_t( std::get<1>( topology_.NodeAndInterfaceLeafCount() ) ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t( 3 ) };
+   return { hsize_t( topology_.InterfaceLeafCount() ) * MeshGeneratorUtilities::NumberOfInternalVerticesPerBlock(), hsize_t( 3 ) };
 }
 
 /**
