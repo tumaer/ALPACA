@@ -146,7 +146,7 @@ TopologyManager::TopologyManager( std::array<unsigned int, 3> const level_zero_b
    forest_.shrink_to_fit();
 
    // Assign correct ranks to nodes
-   GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
+   PrepareLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
 }
 
 /**
@@ -259,6 +259,7 @@ void TopologyManager::CoarseNodeWithId( nid_t const parent_id ) {
  * @brief Determines the rank which holds the node of given id.
  * @param id The unique id of the node.
  * @return Rank id for the requested node.
+ * @note This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
 int TopologyManager::GetRankOfNode( nid_t const id ) const {
    return forest_[PositionOfNodeInZeroTopology( id )].GetRank( id );
@@ -269,7 +270,7 @@ int TopologyManager::GetRankOfNode( nid_t const id ) const {
  * @param number_of_ranks The number of ranks available to distribute the load onto.
  * @return A vector of all nodes and their current as well as their future mpi rank.
  */
-std::vector<std::tuple<nid_t const, int const, int const>> TopologyManager::GetLoadBalancedTopology( int const number_of_ranks ) {
+std::vector<std::tuple<nid_t const, int const, int const>> TopologyManager::PrepareLoadBalancedTopology( int const number_of_ranks ) {
 
    AssignTargetRankToLeaves( number_of_ranks );
    AssignBalancedLoad();
@@ -284,6 +285,7 @@ std::vector<std::tuple<nid_t const, int const, int const>> TopologyManager::GetL
  * @brief Indicates whether a node exists in the global Tree, does not make implications about local tree
  * @param id id of the node one is looking for
  * @return true if node exists, false otherwise
+ * @note This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
 bool TopologyManager::NodeExists( nid_t const id ) const {
 
@@ -339,6 +341,7 @@ std::vector<nid_t> TopologyManager::DescendantIdsOfNode( nid_t const id ) const 
  * @param id Unique id of the node to be checked for self-ownership.
  * @param rank The rank on which existence is to be checked.
  * @return true if node is on the same rank as invoker, false otherwise.
+ * @note This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
 bool TopologyManager::NodeIsOnRank( nid_t const id, int const rank ) const {
 
@@ -543,6 +546,7 @@ void TopologyManager::ListNodeToBalance( std::vector<std::tuple<nid_t const, int
 std::string TopologyManager::LeafRankDistribution( int const number_of_ranks ) {
 
    std::string leaf_rank_distribution;
+   leaf_rank_distribution.reserve( 31 + maximum_level_ * ( 10 + number_of_ranks * 20 ) );
 
    std::vector<std::vector<int>> leaves_per_level_per_rank( maximum_level_ + 1, std::vector<int>( number_of_ranks, 0 ) );
    for( unsigned int level = 0; level < maximum_level_ + 1; level++ ) {
@@ -555,7 +559,7 @@ std::string TopologyManager::LeafRankDistribution( int const number_of_ranks ) {
 
    leaf_rank_distribution.append( "+++ leave rank distribution +++ " );
    for( unsigned int level = 0; level < maximum_level_ + 1; level++ ) {
-      leaf_rank_distribution.append( "Level: " + std::to_string( level ) );
+      leaf_rank_distribution.append( "Level: " + std::to_string( level ) + " " );
       for( int rank = 0; rank < number_of_ranks; rank++ ) {
          leaf_rank_distribution.append( "Rank: " + std::to_string( rank ) + " --> " + std::to_string( leaves_per_level_per_rank[level][rank] ) + " | " );
       }
@@ -596,9 +600,8 @@ std::vector<nid_t> TopologyManager::IdsOnLevelOfRank( unsigned int const level, 
  * @brief Gives whether the node with the given id is a multi-phase node, i.e. contains more than one material.
  * @param id Id of the node in question.
  * @return True if the node is multi-phase, false if it is single-phase.
- *
- * @note This is different to the call function node.HasLevelset(). Only on the finest level both are equivalent. Multiphase nodes can also exist on coarser
- *       levels, whereas levelset containing nodes cannot.
+ * @note This is function differs from querying presence of a levelset. Here also nodes on levels other than maximum may return true.
+ *       This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
 bool TopologyManager::IsNodeMultiPhase( nid_t const id ) const {
    return forest_[PositionOfNodeInZeroTopology( id )].GetMaterials( id ).size() > 1;
@@ -670,7 +673,7 @@ bool TopologyManager::IsLoadBalancingNecessary() {
 }
 
 /**
- * @brief returns the number of global nodes and leaves in a std::pair
+ * @brief Gives the number of global nodes and leaves in a std::pair
  * @return std::pair<#Nodes, #Leaves>
  */
 std::pair<unsigned int, unsigned int> TopologyManager::NodeAndLeafCount() const {
@@ -681,12 +684,15 @@ std::pair<unsigned int, unsigned int> TopologyManager::NodeAndLeafCount() const 
    return node_leaf_count;
 }
 
-std::pair<unsigned int, unsigned int> TopologyManager::NodeAndInterfaceLeafCount() const {
-   std::pair<unsigned int, unsigned int> node_leaf_count = std::make_pair<unsigned int, unsigned int>( 0, 0 );
-   for( TopologyNode const& node : forest_ ) {
-      node.NodeInterfaceLeafCount( node_leaf_count );
-   }
-   return node_leaf_count;
+/**
+ * @brief Gives the number of leaves which contain an interface.
+ * @return number of interface containing leaves.
+ */
+unsigned int TopologyManager::InterfaceLeafCount() const {
+   return std::accumulate( std::cbegin( forest_ ),
+                           std::cend( forest_ ),
+                           0u,
+                           []( auto const partial_sum, auto const& node ) { return partial_sum + node.InterfaceLeafCount(); } );
 }
 
 /**
@@ -701,12 +707,16 @@ std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndLeav
    return nodes_and_leaves_per_rank;
 }
 
-std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndInterfaceLeavesPerRank() const {
-   std::vector<std::pair<unsigned int, unsigned int>> nodes_and_leaves_per_rank;
+/**
+ * @brief Gives the number of leaves which contain an interface for each rank.
+ * @retrun Vector of interface leaf counts. Postion refelects rank id.
+ */
+std::vector<unsigned int> TopologyManager::InterfaceLeavesPerRank() const {
+   std::vector<unsigned int> interface_leaves_per_rank;
    for( TopologyNode const& node : forest_ ) {
-      node.RankWiseNodeInterfaceLeafCount( nodes_and_leaves_per_rank );
+      node.RankWiseInterfaceLeafCount( interface_leaves_per_rank );
    }
-   return nodes_and_leaves_per_rank;
+   return interface_leaves_per_rank;
 }
 
 /**
@@ -789,7 +799,7 @@ std::vector<unsigned int> TopologyManager::RestoreTopology( std::vector<nid_t> i
    }
 
    // load balance topology
-   GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
+   PrepareLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
 
    // return the indices in the input list of the nodes that ended up on this rank
    std::vector<unsigned int> local_indices;
@@ -894,10 +904,9 @@ unsigned long long int TopologyManager::LeafOffsetOfRank( int const rank ) const
  * @return The offset.
  */
 unsigned long long int TopologyManager::InterfaceLeafOffsetOfRank( int const rank ) const {
-   std::vector<std::pair<unsigned int, unsigned int>>&& rank_node_map = NodesAndInterfaceLeavesPerRank();
-   auto const cend                                                    = rank_node_map.size() > std::size_t( rank ) ? rank_node_map.cbegin() + rank : rank_node_map.cend();
-   return std::accumulate( rank_node_map.cbegin(), cend, 0ll,
-                           []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ) { return a + b.second; } );
+   std::vector<unsigned int> rank_node_map = InterfaceLeavesPerRank();
+   auto const cend                         = rank_node_map.size() > std::size_t( rank ) ? rank_node_map.cbegin() + rank : rank_node_map.cend();
+   return std::accumulate( rank_node_map.cbegin(), cend, 0ll );
 }
 
 /**
@@ -924,4 +933,40 @@ std::pair<unsigned long long int, unsigned long long int> TopologyManager::NodeA
                                            []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ) { return a + b.first; } ),
                           std::accumulate( rank_node_block_map.cbegin(), cend, 0u,
                                            []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ) { return a + b.second; } ) );
+}
+
+/**
+    * @brief Determines whether a location ( including edges and corners ) of a block is at the edge of the computational domain.
+    * @param location The  direction of the edge under consideration.
+    * @param id The id of the node under investigation.
+    * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
+    * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations ( e. g. NOT Top in 1D ).
+    */
+bool TopologyManager::IsExternalTopologyBoundary( BoundaryLocation const location, nid_t const id ) const {
+   return PeriodicIsExternalBoundary( location, id, number_of_nodes_on_level_zero_, active_periodic_locations_ );
+}
+
+/**
+    * @brief Gives the maximum level
+    * @return Maximum level
+    */
+unsigned int TopologyManager::GetMaximumLevel() const {
+   return maximum_level_;
+}
+/**
+    * @brief Gives the number of nodes on level zero
+    * @return Number of nodes
+    */
+std::array<unsigned int, 3> TopologyManager::GetNumberOfNodesOnLevelZero() const {
+   return number_of_nodes_on_level_zero_;
+}
+
+/**
+   * @brief Gives the id of a neighbor at the provided direction.
+   * @param id The id of the node whose neighbor is to be found.
+   * @param location Direction in which the neighbor is located.
+   * @return Id of the neighbor.
+   */
+nid_t TopologyManager::GetTopologyNeighborId( nid_t const id, BoundaryLocation const location ) const {
+   return GetPeriodicNeighborId( id, location, number_of_nodes_on_level_zero_, active_periodic_locations_ );
 }

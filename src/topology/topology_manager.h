@@ -112,102 +112,67 @@ public:
    TopologyManager( TopologyManager&& )                 = delete;
    TopologyManager& operator=( TopologyManager&& ) = delete;
 
-   /**
-    * @brief Gives the maximum level
-    * @return Maximum level
-    */
-   inline unsigned int GetMaximumLevel() const {
-      return maximum_level_;
-   }
+   // Counters:
+   unsigned int MultiPhaseNodeCount() const;
+   unsigned int InterfaceLeafCount() const;
+   std::pair<unsigned int, unsigned int> NodeAndLeafCount() const;
+   std::pair<unsigned int, unsigned int> NodeAndBlockCount() const;
+   // Rank-wise counters:
+   std::vector<std::pair<unsigned int, unsigned int>> NodesAndLeavesPerRank() const;
+   std::vector<std::pair<unsigned int, unsigned int>> NodesAndBlocksPerRank() const;
+   std::vector<unsigned int> InterfaceLeavesPerRank() const;
+   // Offset-counters:
+   unsigned long long int LeafOffsetOfRank( int const rank ) const;
+   unsigned long long int InterfaceLeafOffsetOfRank( int const rank ) const;
+   unsigned long long int NodeOffsetOfRank( int const rank ) const;
+   std::pair<unsigned long long int, unsigned long long int> NodeAndBlockOffsetOfRank( int const rank ) const;
 
-   /**
-    * @brief Gives the number of nodes on level zero
-    * @return Number of nodes
-    */
-   inline std::array<unsigned int, 3> GetNumberOfNodesOnLevelZero() const {
-      return number_of_nodes_on_level_zero_;
-   }
-
-   // Return functions for the nodes
-   int GetRankOfNode( nid_t const id ) const;
-
-   unsigned int GetCurrentMaximumLevel() const;
-
-   bool UpdateTopology();
-
+   //Single node testers:
    bool NodeExists( nid_t const id ) const;
-   bool FaceIsJump( nid_t const id, BoundaryLocation const location ) const;
    bool NodeIsOnRank( nid_t const id, int const rank ) const;
    bool NodeIsLeaf( nid_t const id ) const;
+   bool IsNodeMultiPhase( nid_t const id ) const;
+   int GetRankOfNode( nid_t const id ) const;
 
-   void RefineNodeWithId( nid_t const id );
-   void CoarseNodeWithId( nid_t const parent_id );
-   std::string LeafRankDistribution( int const number_of_ranks );
+   bool NodeContainsMaterial( nid_t const node_id, MaterialName const material ) const;
+   std::vector<MaterialName> GetMaterialsOfNode( nid_t const id ) const;
+   MaterialName SingleMaterialOfNode( nid_t const id ) const;
 
+   // Topological questions:
+   bool FaceIsJump( nid_t const id, BoundaryLocation const location ) const;
+   bool IsExternalTopologyBoundary( BoundaryLocation const location, nid_t const id ) const;
+   std::vector<nid_t> GetNeighboringLeaves( nid_t const id, BoundaryLocation const location ) const;
+   nid_t GetTopologyNeighborId( nid_t const id, BoundaryLocation const location ) const;
+
+   // Simple Getters:
+   unsigned int GetMaximumLevel() const;
+   std::array<unsigned int, 3> GetNumberOfNodesOnLevelZero() const;
+   unsigned int GetCurrentMaximumLevel() const;
+   bool IsLoadBalancingNecessary();
+
+   // Node listings:
    std::vector<nid_t> LocalLeafIds() const;
    std::vector<nid_t> LocalInterfaceLeafIds() const;
    std::vector<nid_t> LeafIds() const;
    std::vector<nid_t> LocalLeafIdsOnLevel( unsigned int const level ) const;
    std::vector<nid_t> LeafIdsOnLevel( unsigned int const level ) const;
    std::vector<nid_t> DescendantIdsOfNode( nid_t const id ) const;
-
    std::vector<nid_t> LocalNodeIds() const;
-
-   std::vector<std::tuple<nid_t const, int const, int const>> GetLoadBalancedTopology( int const number_of_ranks );
-
    std::vector<nid_t> GlobalIdsOnLevel( unsigned int const level ) const;
    std::vector<nid_t> IdsOnLevelOfRank( unsigned int const level, int const rank_id ) const;
 
-   bool IsLoadBalancingNecessary();
-   bool IsNodeMultiPhase( nid_t const id ) const;
-
+   // Node and/or topology altering:
+   void RefineNodeWithId( nid_t const id );
+   void CoarseNodeWithId( nid_t const parent_id );
    void AddMaterialToNode( nid_t const id, MaterialName const material );
    void RemoveMaterialFromNode( nid_t const id, MaterialName const material );
-   std::vector<MaterialName> GetMaterialsOfNode( nid_t const id ) const;
-   MaterialName SingleMaterialOfNode( nid_t const id ) const;
-   bool NodeContainsMaterial( nid_t const node_id, MaterialName const material ) const;
 
-   std::pair<unsigned int, unsigned int> NodeAndLeafCount() const;
-   std::pair<unsigned int, unsigned int> NodeAndInterfaceLeafCount() const;
-
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndLeavesPerRank() const;
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndInterfaceLeavesPerRank() const;
-
-   std::pair<unsigned int, unsigned int> NodeAndBlockCount() const;
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndBlocksPerRank() const;
-
-   unsigned int MultiPhaseNodeCount() const;
-
+   bool UpdateTopology();
+   std::vector<std::tuple<nid_t const, int const, int const>> PrepareLoadBalancedTopology( int const number_of_ranks );
    std::vector<unsigned int> RestoreTopology( std::vector<nid_t> ids, std::vector<unsigned short> number_of_phases, std::vector<unsigned short> materials );
 
-   std::vector<nid_t> GetNeighboringLeaves( nid_t const id, BoundaryLocation const location ) const;
-
-   unsigned long long int LeafOffsetOfRank( int const rank ) const;
-   unsigned long long int InterfaceLeafOffsetOfRank( int const rank ) const;
-   unsigned long long int NodeOffsetOfRank( int const rank ) const;
-   std::pair<unsigned long long int, unsigned long long int> NodeAndBlockOffsetOfRank( int const rank ) const;
-
-   /**
-   * @brief Gives the id of a neighbor at the provided direction.
-   * @param id The id of the node whose neighbor is to be found.
-   * @param location Direction in which the neighbor is located.
-   * @return Id of the neighbor.
-   */
-   inline nid_t GetTopologyNeighborId( nid_t const id, BoundaryLocation const location ) const {
-      return GetPeriodicNeighborId( id, location, number_of_nodes_on_level_zero_, active_periodic_locations_ );
-   }
-
-   /**
-    * @brief Determines whether a location ( including edges and corners ) of a block is at the edge of the computational domain.
-    * @param location The  direction of the edge under consideration.
-    * @param id The id of the node under investigation.
-    * @param setup The simulation settings as provided by the user.
-    * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
-    * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations ( e. g. NOT Top in 1D ).
-    */
-   inline bool IsExternalTopologyBoundary( BoundaryLocation const location, nid_t const id ) const {
-      return PeriodicIsExternalBoundary( location, id, number_of_nodes_on_level_zero_, active_periodic_locations_ );
-   }
+   // Formatted information
+   std::string LeafRankDistribution( int const number_of_ranks );
 };
 
 #endif// TOPOLOGY_MANAGER_H

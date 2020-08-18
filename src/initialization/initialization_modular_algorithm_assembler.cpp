@@ -104,7 +104,7 @@ namespace Initialization {
     * @return vector with all levels.
     */
    std::vector<unsigned int> GetAllLevels( unsigned int const maximum_level ) {
-      std::vector<unsigned int> all_levels( maximum_level + 1 );//Level zero need to be counted as well
+      std::vector<unsigned int> all_levels( maximum_level + 1 );//Level zero needs to be counted as well
       std::iota( all_levels.begin(), all_levels.end(), 0 );
       return all_levels;
    }

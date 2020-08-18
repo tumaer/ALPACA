@@ -1481,7 +1481,7 @@ void ModularAlgorithmAssembler::ResetJumpConservativeBuffers( std::vector<unsign
 void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const updated_levels_descending, bool const force ) {
    if( topology_.IsLoadBalancingNecessary() || force ) {
       //id - Current Rank - Future Rank
-      std::vector<std::tuple<nid_t const, int const, int const>> const ids_rank_map = topology_.GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
+      std::vector<std::tuple<nid_t const, int const, int const>> const ids_rank_map = topology_.PrepareLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
       // ^ Changes the rank assignment in the Topology.
       communicator_.InvalidateCache();
 

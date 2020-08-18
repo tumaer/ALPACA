@@ -87,6 +87,17 @@ class CommunicationManager : public CommunicationTypes {
    int const mpi_tag_ub_;
    std::vector<unsigned int> partner_tag_map_;
 
+   /**
+    * Schlachtplan:
+    * Make Topology -> unordered_map
+    * When remeshing -> go through topology and give two vectors of From-To node pairs and the ranks of each:
+    *    The first list (send_list) has the local node as from
+    *    The second list (receive_list) has the local node as to
+    * Sort lists first by sender than by receiver (or vice versa)
+    * Go through lists and start counting tags (as currently done) for each rank combination. Save the resulting To-From-Tag tuple.
+    * Look-up when needed.
+    */
+
    //Cache for Halo Update Pattern
    std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_;
    std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_mpi_;

@@ -98,8 +98,6 @@ SCENARIO( "Interface mesh generator: Dimension of global vertex coordinates vect
 
       WHEN( "The topology consists of one refined node with two multi-material nodes" ) {
          TestUtilities::RefineFirstNodeInTopologyAndAddTwoMultiLeaves( topology, tree );
-         REQUIRE( topology.NodeAndLeafCount() == std::pair<unsigned int, unsigned int>( 9, 8 ) );
-
          THEN( "The global vertex coordinates dimension vector has two entries with the first being equal the number of vertices time the number of leafs (8) and the second being three" ) {
             std::vector<hsize_t> const global_vertex_coordinates_dimensions = mesh_generator->GetGlobalDimensionsOfVertexCoordinates();
             REQUIRE( global_vertex_coordinates_dimensions.size() == 2 );
@@ -393,7 +391,7 @@ SCENARIO( "Interface mesh generator: Check that vertex IDs and coordinates are c
 
          THEN( "The coordinates of the IDs of each cell must be in an order where first x is increased, then y and last z" ) {
             // Loop through all cells and check the coordinates of all vertex ids.
-            /** 
+            /**
              * A cell must be build in the following order (numbers correspond to vertex ID increment)
              *
              *                 7-------6
