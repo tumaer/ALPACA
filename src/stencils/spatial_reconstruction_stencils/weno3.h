@@ -114,14 +114,17 @@ class WENO3 : public Stencil<WENO3> {
 
       // Compute smoothness indicators s_i
       double const s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2;
-      double const s1  = s11 * s11 + epsilon_;
+      double const s1  = s11 * s11;
 
       double const s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3;
-      double const s2  = s21 * s21 + epsilon_;
+      double const s2  = s21 * s21;
 
       // Compute weights
-      double const a1 = coef_weights_1_ / ( s1 * s1 );
-      double const a2 = coef_weights_2_ / ( s2 * s2 );
+      // NOTE: The epsilon value is used here explicitly to avoid compiler optimizations when the epsilon is added directly to s_i.
+      //       This could lead to undesired behavior in case the values s1 and s2 are of similar magnitude.
+      //       Then, it cannot guaranteed anymore that a division by zero is avoided.
+      double const a1 = coef_weights_1_ / ( ( s1 + epsilon_ ) * ( s1 + epsilon_ ) );
+      double const a2 = coef_weights_2_ / ( ( s2 + epsilon_ ) * ( s2 + epsilon_ ) );
 
       double const one_a_sum = 1.0 / ( a1 + a2 );
 

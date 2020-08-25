@@ -231,7 +231,7 @@ void Hdf5Manager::OpenDatasetForWriting( std::string const& dataset_name, std::v
    H5Pset_chunk( dataset.properties_create_, dataset.chunk_.size(), dataset.chunk_.data() );
 
    // Define the number of elements of the dataset that are written at once (per dimension). Always 1 per dimension.
-   dataset.count_ = std::vector( dataset.total_dimensions_.size(), 1ull );
+   dataset.count_ = std::vector<hsize_t>( dataset.total_dimensions_.size(), 1ull );
 
    /** Open the dataset for writing and select the entire appropriate hyperslab */
    // Create the dataspace for the full (global, all ranks) data (NULL marks that the dataspace is fixed to the given dimensions and cannot grow during writing)
@@ -285,7 +285,7 @@ void Hdf5Manager::OpenDatasetForReading( std::string const& dataset_name, std::v
 
    /** Create the properties that are used for the reading procedure */
    // Define the count for the dataset
-   dataset.count_ = std::vector( dataset.local_dimensions_.size(), 1ull );
+   dataset.count_ = std::vector<hsize_t>( dataset.local_dimensions_.size(), 1ull );
 
    /** Open the dataset for reading and select the entire local hyperslab */
    // Creates a new dataset and links it into the file/group

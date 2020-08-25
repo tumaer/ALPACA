@@ -226,7 +226,7 @@ class WENO9 : public Stencil<WENO9> {
       double const s14 = coef_smoothness_0_13_ * v4 + coef_smoothness_0_14_ * v5;
       double const s15 = coef_smoothness_0_15_ * v5;
 
-      double s1 = v1 * s11 + v2 * s12 + v3 * s13 + v4 * s14 + v5 * s15;
+      double const s1 = v1 * s11 + v2 * s12 + v3 * s13 + v4 * s14 + v5 * s15;
 
       double const s21 = coef_smoothness_1_01_ * v2 + coef_smoothness_1_02_ * v3 + coef_smoothness_1_03_ * v4 + coef_smoothness_1_04_ * v5 + coef_smoothness_1_05_ * v6;
       double const s22 = coef_smoothness_1_06_ * v3 + coef_smoothness_1_07_ * v4 + coef_smoothness_1_08_ * v5 + coef_smoothness_1_09_ * v6;
@@ -234,7 +234,7 @@ class WENO9 : public Stencil<WENO9> {
       double const s24 = coef_smoothness_1_13_ * v5 + coef_smoothness_1_14_ * v6;
       double const s25 = coef_smoothness_1_15_ * v6;
 
-      double s2 = v2 * s21 + v3 * s22 + v4 * s23 + v5 * s24 + v6 * s25;
+      double const s2 = v2 * s21 + v3 * s22 + v4 * s23 + v5 * s24 + v6 * s25;
 
       double const s31 = coef_smoothness_2_01_ * v3 + coef_smoothness_2_02_ * v4 + coef_smoothness_2_03_ * v5 + coef_smoothness_2_04_ * v6 + coef_smoothness_2_05_ * v7;
       double const s32 = coef_smoothness_2_06_ * v4 + coef_smoothness_2_07_ * v5 + coef_smoothness_2_08_ * v6 + coef_smoothness_2_09_ * v7;
@@ -242,7 +242,7 @@ class WENO9 : public Stencil<WENO9> {
       double const s34 = coef_smoothness_2_13_ * v6 + coef_smoothness_2_14_ * v7;
       double const s35 = coef_smoothness_2_15_ * v7;
 
-      double s3 = v3 * s31 + v4 * s32 + v5 * s33 + v6 * s34 + v7 * s35;
+      double const s3 = v3 * s31 + v4 * s32 + v5 * s33 + v6 * s34 + v7 * s35;
 
       double const s41 = coef_smoothness_3_01_ * v4 + coef_smoothness_3_02_ * v5 + coef_smoothness_3_03_ * v6 + coef_smoothness_3_04_ * v7 + coef_smoothness_3_05_ * v8;
       double const s42 = coef_smoothness_3_06_ * v5 + coef_smoothness_3_07_ * v6 + coef_smoothness_3_08_ * v7 + coef_smoothness_3_09_ * v8;
@@ -250,7 +250,7 @@ class WENO9 : public Stencil<WENO9> {
       double const s44 = coef_smoothness_3_13_ * v7 + coef_smoothness_3_14_ * v8;
       double const s45 = coef_smoothness_3_15_ * v8;
 
-      double s4 = v4 * s41 + v5 * s42 + v6 * s43 + v7 * s44 + v8 * s45;
+      double const s4 = v4 * s41 + v5 * s42 + v6 * s43 + v7 * s44 + v8 * s45;
 
       double const s51 = coef_smoothness_4_01_ * v5 + coef_smoothness_4_02_ * v6 + coef_smoothness_4_03_ * v7 + coef_smoothness_4_04_ * v8 + coef_smoothness_4_05_ * v9;
       double const s52 = coef_smoothness_4_06_ * v6 + coef_smoothness_4_07_ * v7 + coef_smoothness_4_08_ * v8 + coef_smoothness_4_09_ * v9;
@@ -258,21 +258,17 @@ class WENO9 : public Stencil<WENO9> {
       double const s54 = coef_smoothness_4_13_ * v8 + coef_smoothness_4_14_ * v9;
       double const s55 = coef_smoothness_4_15_ * v9;
 
-      double s5 = v5 * s51 + v6 * s52 + v7 * s53 + v8 * s54 + v9 * s55;
-
-      // Add epsilon to avoid division by 0
-      s1 += epsilon_weno9_;
-      s2 += epsilon_weno9_;
-      s3 += epsilon_weno9_;
-      s4 += epsilon_weno9_;
-      s5 += epsilon_weno9_;
+      double const s5 = v5 * s51 + v6 * s52 + v7 * s53 + v8 * s54 + v9 * s55;
 
       // Compute weights
-      double const a1 = coef_weights_1_ / ( s1 * s1 );
-      double const a2 = coef_weights_2_ / ( s2 * s2 );
-      double const a3 = coef_weights_3_ / ( s3 * s3 );
-      double const a4 = coef_weights_4_ / ( s4 * s4 );
-      double const a5 = coef_weights_5_ / ( s5 * s5 );
+      // NOTE: The epsilon value is used here explicitly to avoid compiler optimizations when the epsilon is added directly to s_i.
+      //       This could lead to undesired behavior in case the values s1, ..., s5 are of similar magnitude.
+      //       Then, it cannot guaranteed anymore that a division by zero is avoided.
+      double const a1 = coef_weights_1_ / ( ( s1 + epsilon_weno9_ ) * ( s1 + epsilon_weno9_ ) );
+      double const a2 = coef_weights_2_ / ( ( s2 + epsilon_weno9_ ) * ( s2 + epsilon_weno9_ ) );
+      double const a3 = coef_weights_3_ / ( ( s3 + epsilon_weno9_ ) * ( s3 + epsilon_weno9_ ) );
+      double const a4 = coef_weights_4_ / ( ( s4 + epsilon_weno9_ ) * ( s4 + epsilon_weno9_ ) );
+      double const a5 = coef_weights_5_ / ( ( s5 + epsilon_weno9_ ) * ( s5 + epsilon_weno9_ ) );
 
       double const one_a_sum = 1.0 / ( a1 + a2 + a3 + a4 + a5 );
 

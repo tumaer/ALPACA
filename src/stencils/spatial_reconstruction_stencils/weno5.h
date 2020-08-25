@@ -140,22 +140,25 @@ class WENO5 : public Stencil<WENO5> {
       double const s11 = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2 + coef_smoothness_13_ * v3;
       double const s12 = coef_smoothness_14_ * v1 + coef_smoothness_15_ * v2 + coef_smoothness_16_ * v3;
 
-      double const s1 = epsilon_weno5_ + coef_smoothness_1_ * s11 * s11 + coef_smoothness_2_ * s12 * s12;
+      double const s1 = coef_smoothness_1_ * s11 * s11 + coef_smoothness_2_ * s12 * s12;
 
       double const s21 = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3 + coef_smoothness_23_ * v4;
       double const s22 = coef_smoothness_24_ * v2 + coef_smoothness_25_ * v4;
 
-      double const s2 = epsilon_weno5_ + coef_smoothness_1_ * s21 * s21 + coef_smoothness_2_ * s22 * s22;
+      double const s2 = coef_smoothness_1_ * s21 * s21 + coef_smoothness_2_ * s22 * s22;
 
       double const s31 = coef_smoothness_31_ * v3 + coef_smoothness_32_ * v4 + coef_smoothness_33_ * v5;
       double const s32 = coef_smoothness_34_ * v3 + coef_smoothness_35_ * v4 + coef_smoothness_36_ * v5;
 
-      double const s3 = epsilon_weno5_ + coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
+      double const s3 = coef_smoothness_1_ * s31 * s31 + coef_smoothness_2_ * s32 * s32;
 
       // Compute weights
-      double const a1 = coef_weights_1_ / ( s1 * s1 );
-      double const a2 = coef_weights_2_ / ( s2 * s2 );
-      double const a3 = coef_weights_3_ / ( s3 * s3 );
+      // NOTE: The epsilon value is used here explicitly to avoid compiler optimizations when the epsilon is added directly to s_i.
+      //       This could lead to undesired behavior in case the values s1, ..., s3 are of similar magnitude.
+      //       Then, it cannot guaranteed anymore that a division by zero is avoided.
+      double const a1 = coef_weights_1_ / ( ( s1 + epsilon_weno5_ ) * ( s1 + epsilon_weno5_ ) );
+      double const a2 = coef_weights_2_ / ( ( s2 + epsilon_weno5_ ) * ( s2 + epsilon_weno5_ ) );
+      double const a3 = coef_weights_3_ / ( ( s3 + epsilon_weno5_ ) * ( s3 + epsilon_weno5_ ) );
 
       double const one_a_sum = 1.0 / ( a1 + a2 + a3 );
 
