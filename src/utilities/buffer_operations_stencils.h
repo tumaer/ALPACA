@@ -201,9 +201,9 @@ namespace BufferOperations {
          /**
           * @brief Offsets in order to also calculate first derivatives in halo cells. This is necessary for the  reconstruction to cell faces.
           */
-         constexpr unsigned int offset_x = DerivativeStencil::DownstreamStencilSize() + 1;
-         constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? DerivativeStencil::DownstreamStencilSize() + 1 : 0;
-         constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? DerivativeStencil::DownstreamStencilSize() + 1 : 0;
+         constexpr unsigned int offset_x = DerivativeStencil::DownstreamStencilSize();
+         constexpr unsigned int offset_y = CC::DIM() != Dimension::One ? DerivativeStencil::DownstreamStencilSize() : 0;
+         constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? DerivativeStencil::DownstreamStencilSize() : 0;
 
          for( unsigned int i = 0 + offset_x; i < CC::TCX() - offset_x; ++i ) {
             for( unsigned int j = 0 + offset_y; j < CC::TCY() - offset_y; ++j ) {
