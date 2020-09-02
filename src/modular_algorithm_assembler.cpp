@@ -655,7 +655,7 @@ void ModularAlgorithmAssembler::Advance() {
 
          // Calculate the prime states based on the integrated conservatives and save them in the prime state buffer.
          SetTimeInProfileRuns( function_timer );
-         ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( all_levels_ );//TODO-19 JW and NH: It would suffice to do it on updated_levels if we could track nodes that were load balanced but not integrated.
+         ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( levels_to_update_descending );
          LogElapsedTimeSinceInProfileRuns( function_timer, "ObtainPrimeStatesFromConservatives " );
          ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, print_this_step, debug_key );
 
@@ -1518,6 +1518,8 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
       // ^ Changes the rank assignment in the Topology.
       communicator_.InvalidateCache();
 
+      std::vector<std::uint64_t> received_nodes_not_updated;
+
       MPI_Datatype const conservatives_datatype = communicator_.ConservativesDatatype();
       MPI_Datatype const boundary_jump_datatype = communicator_.JumpSurfaceDatatype();
 
@@ -1527,7 +1529,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
 
       for( auto const& [id, current_rank, future_rank] : ids_rank_map ) {//We traverse current topology
          /*If the node has not been updated, i.e. integrated values in RHS buffer, we need to handle the AVG buffer as well*/
-         bool const send_averages = std::find( updated_levels_descending.begin(), updated_levels_descending.end(), LevelOfNode( id ) ) == updated_levels_descending.end();
+         bool const node_not_updated = std::find( updated_levels_descending.begin(), updated_levels_descending.end(), LevelOfNode( id ) ) == updated_levels_descending.end();
 
          if( current_rank == my_rank_id ) {
             Node const& node = tree_.GetNodeWithId( id );
@@ -1535,8 +1537,8 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                Block const& block = node.GetPhaseByMaterial( material );
 
                communicator_.Send( &block.GetRightHandSideBuffer(), MF::ANOE(), conservatives_datatype, future_rank, requests );
-               /*If the node has not been updated we need to send the AVG buffer as well*/
-               if( send_averages ) {
+               /*If the node has not been updated we need to send the AVG and initial buffer as well*/
+               if( node_not_updated ) {
                   communicator_.Send( &block.GetAverageBuffer(), MF::ANOE(), conservatives_datatype, future_rank, requests );
                   communicator_.Send( &block.GetInitialBuffer(), MF::ANOE(), conservatives_datatype, future_rank, requests );
                }
@@ -1562,6 +1564,9 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                CommunicationStatistics::balance_send_++;
             }
          } else if( future_rank == my_rank_id ) {// The node is currently NOT ours, but will be in the future
+            if( node_not_updated ) {
+               received_nodes_not_updated.push_back( id );
+            }
             // Create Node first, then post asynchronous Recv.
             Node& new_node = tree_.CreateNode( id, topology_.GetMaterialsOfNode( id ) );
 
@@ -1569,7 +1574,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                Block& block = new_node.GetPhaseByMaterial( material );
                communicator_.Recv( &block.GetRightHandSideBuffer(), MF::ANOE(), conservatives_datatype, current_rank, requests );
                /*If the node has not been updated, we need to receive ( and apply ) the AVG buffer as well*/
-               if( send_averages ) {
+               if( node_not_updated ) {
                   communicator_.Recv( &block.GetAverageBuffer(), MF::ANOE(), conservatives_datatype, current_rank, requests );
                   communicator_.Recv( &block.GetInitialBuffer(), MF::ANOE(), conservatives_datatype, current_rank, requests );
                }
@@ -1607,6 +1612,18 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
          int const current_rank = std::get<1>( ids_rank_map[i] );
          if( current_rank == my_rank_id ) {
             tree_.RemoveNodeWithId( id );
+         }
+      }
+
+      // calculate prime states for received nodes that were not updated this timestep
+      for( auto const& id : received_nodes_not_updated ) {
+         if( topology_.NodeIsLeaf( id ) ) {
+            Node& node = tree_.GetNodeWithId( id );
+            if( node.HasLevelset() ) {
+               DoObtainPrimeStatesFromConservativesForLevelsetNodes<ConservativeBufferType::Average>( node );
+            } else {
+               DoObtainPrimeStatesFromConservativesForNonLevelsetNodes<ConservativeBufferType::Average>( node );
+            }
          }
       }
 
