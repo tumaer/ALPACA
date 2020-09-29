@@ -104,7 +104,7 @@ namespace Initialization {
          // Read the desired interval of times (check on consistency done in reader)
          double const interval( unit_handler.NonDimensionalizeValue( output_reader.ReadOutputInterval( output_type ), UnitType::Time ) );
          // fill output_times with timestamps generated from given interval (ceil ensures that at least the number of time stamps is 1)
-         size_t number_of_timesteps = size_t( std::floor( std::nextafter( ( end_time - start_time ) / interval, 0 ) ) );
+         size_t number_of_timesteps = size_t( std::ceil( std::nextafter( ( end_time - start_time ) / interval, 0 ) ) );
 
          // Remove the virtually generated step for intervals larger than start_time - end_time to exclude end_time (will be added in the end exactly)
          if( number_of_timesteps != 0 ) {
