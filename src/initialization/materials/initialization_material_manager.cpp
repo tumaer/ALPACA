@@ -87,11 +87,6 @@ namespace Initialization {
          throw std::invalid_argument( "This number of materials is not currently not supported!" );
       }
 
-      // In case of capillary forces at least tow materials must be defined
-      if( CC::CapillaryForcesActive() && number_of_materials < 2 ) {
-         throw std::invalid_argument( "For the simulation with Capillary Forces at least two materials must be specified!" );
-      }
-
       // declare vector that is returned and reserve enough memory
       std::vector<Material> materials;
       materials.reserve( number_of_materials );

@@ -1,0 +1,13 @@
+        Runtime,  NumberOfRanks,                     Inputfile,                                                                                                                                        Executable
+   283.41466667,              1,     RayleighTaylorInstability,                         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+    45.72130000,              8,     RayleighTaylorInstability,                         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+    18.38383333,             28,     RayleighTaylorInstability,                         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+   415.23333333,              1,     RayleighTaylorInstability,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Min_TwoRarefaction_Fedkiw_Roe_GlobalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5
+    64.28530000,              8,     RayleighTaylorInstability,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Min_TwoRarefaction_Fedkiw_Roe_GlobalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5
+    25.63386667,             28,     RayleighTaylorInstability,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Min_TwoRarefaction_Fedkiw_Roe_GlobalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5
+   459.02200000,              1,     RayleighTaylorInstability,         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Weno_Linearized_Fedkiw_Roe_LocalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5
+    69.53960000,              8,     RayleighTaylorInstability,         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Weno_Linearized_Fedkiw_Roe_LocalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5
+    26.51816667,             28,     RayleighTaylorInstability,         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Weno_Linearized_Fedkiw_Roe_LocalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5
+   281.37166667,              1,     RayleighTaylorInstability,                               ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Min_Hllc_Fedkiw_Hllc_Roe_Einfeldt_WENO5_HOUC5
+    44.84490000,              8,     RayleighTaylorInstability,                               ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Min_Hllc_Fedkiw_Hllc_Roe_Einfeldt_WENO5_HOUC5
+    18.08176667,             28,     RayleighTaylorInstability,                               ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Min_Hllc_Fedkiw_Hllc_Roe_Einfeldt_WENO5_HOUC5

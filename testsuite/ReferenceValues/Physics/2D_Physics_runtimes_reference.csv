@@ -1,0 +1,5 @@
+        Runtime,                         Inputfile,                                                                                                                    Executable
+  2125.22500000,                   OscillatingDrop,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+  8239.14750000,      ShearDropDeformation_lambda1,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+  7659.72500000,     ShearDropDeformation_lambda01,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+  1478.08750000,          CouetteFlowTwoInterfaces,     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5

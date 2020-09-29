@@ -152,6 +152,7 @@ ModularAlgorithmAssembler::ModularAlgorithmAssembler( double const start_time,
 void ModularAlgorithmAssembler::ComputeLoop() {
 
    std::vector<double> loop_times;
+   std::vector<double> output_runtimes;
    double time_measurement_start;
    double time_measurement_end;
    double current_simulation_time = time_integrator_.CurrentRunTime();
@@ -187,11 +188,25 @@ void ModularAlgorithmAssembler::ComputeLoop() {
       current_simulation_time = time_integrator_.CurrentRunTime();
       logger_.LogMessage( "Macro timestep done t = " + StringOperations::ToScientificNotationString( unit_handler_.DimensionalizeValue( current_simulation_time, UnitType::Time ), 9 ) );
       logger_.FlushAlpaca( ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ ) );
+
+      // surround the output writing with time measurements to provide tunrim tracking if desired
+      if constexpr( CC::TR() ) {
+         MPI_Barrier( MPI_COMM_WORLD );
+         time_measurement_start = MPI_Wtime();
+      }
+
       // writing a restart file has priority over normal output, so call it first
       input_output_.WriteRestartFile( current_simulation_time, !timestep_size_is_healthy );
       if( input_output_.WriteFullOutput( current_simulation_time, !timestep_size_is_healthy ) ) {
          // if output has been written this timestep, we also write profiling information
          if constexpr( DP::Profile() ) { logger_.LogMessage( topology_.LeafRankDistribution( MpiUtilities::NumberOfRanks() ) ); }
+      }
+
+      // Finalize the output time measurement
+      if constexpr( CC::TR() ) {
+         MPI_Barrier( MPI_COMM_WORLD );
+         time_measurement_end = MPI_Wtime();
+         output_runtimes.push_back( time_measurement_end - time_measurement_start );
       }
    }
 
@@ -199,12 +214,24 @@ void ModularAlgorithmAssembler::ComputeLoop() {
       logger_.LogMessage( SummedCommunicationStatisticsString() );
    }
    logger_.LogMessage( " Total Time Spent in Compute Loop ( seconds ): " + StringOperations::ToScientificNotationString( std::accumulate( loop_times.begin(), loop_times.end(), 0.0 ), 5 ) );
+   if constexpr( CC::TR() ) {
+      logger_.LogMessage( " Total Time Spent for Output Writing ( seconds ): " + StringOperations::ToScientificNotationString( std::accumulate( output_runtimes.begin(), output_runtimes.end(), 0.0 ), 5 ) );
+   }
 }
 
 /**
  * @brief Sets-up the starting point of the simulation based on either a restart file or the initial conditions depending on the configuration.
  */
 void ModularAlgorithmAssembler::Initialization() {
+
+   double time_measurement_start;
+   double time_measurement_end;
+   // track the runtime for the initialization if desired
+   if constexpr( CC::TR() ) {
+      MPI_Barrier( MPI_COMM_WORLD );
+      time_measurement_start = MPI_Wtime();
+   }
+
    // Restart the simulation from snapshot
    double const restart_time = input_output_.RestoreSimulationFromSnapshot();
    // If no restart was carried out (negative restart time) create new simulation
@@ -223,6 +250,12 @@ void ModularAlgorithmAssembler::Initialization() {
    double const run_time = time_integrator_.CurrentRunTime();
    input_output_.WriteFullOutput( run_time, true );
    input_output_.WriteRestartFile( run_time );// Does only trigger writing of restart file if requested by user input ( =inputfile ).
+
+   if constexpr( CC::TR() ) {
+      MPI_Barrier( MPI_COMM_WORLD );
+      time_measurement_end = MPI_Wtime();
+      logger_.LogMessage( " Total Time Spent for Initialization ( seconds ): " + StringOperations::ToScientificNotationString( time_measurement_end - time_measurement_start, 5 ) );
+   }
 }
 
 /**

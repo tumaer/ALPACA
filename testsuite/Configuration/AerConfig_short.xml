@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+
+   <general>
+      <!--
+         Environment:  NumberOfRanks (1D/2D/3D)
+         Merge      :      5     13    28
+         Aer        :      4     7     12
+         Sumuc      :      17    35    48
+         Cluster    :      16    28    28
+      -->
+      <environment> Aer </environment>
+      <numberOfRanks> 7 10 11 </numberOfRanks> <!--- Add for each dimension if Custom Environment -->
+      <compile> 1 </compile>
+      <dimensions>
+         <one>   1 </one>
+         <two>   1 </two>
+         <three> 0 </three>
+      </dimensions>
+   </general>
+
+   <testCases>
+      <singlePhase>
+         <active> True </active>
+         <skipNoReferenceCases> True </skipNoReferenceCases>
+      </singlePhase>
+      <twoPhase>
+         <active> True </active>
+         <skipNoReferenceCases> True </skipNoReferenceCases>
+      </twoPhase>
+      <detailedSod>
+         <active> True </active>
+         <skipNoReferenceCases> True </skipNoReferenceCases>
+         <reducedSet> True </reducedSet>
+      </detailedSod>
+      <symmetry>
+         <active> False </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </symmetry>
+      <parallelization>
+         <active> True </active>
+         <skipNoReferenceCases> True </skipNoReferenceCases>
+         <reducedSet> True </reducedSet>
+      </parallelization>
+      <physics>
+         <active> False </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </physics>
+      <inputOutput>
+         <active> False </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </inputOutput>
+   </testCases>
+
+   <oneDimensionalSetup>
+      <indexBased> True </indexBased>
+      <enablePerformance> False </enablePerformance>
+      <internalCells>          8                 32                    </internalCells>
+      <haloSize>               6                 4                     </haloSize>
+      <timeIntegrator>         RK2               RK3                   </timeIntegrator>
+      <riemannSolver>          Roe               Hllc                  </riemannSolver>
+      <fluxSplitting>          Roe               Roe                   </fluxSplitting>
+      <signalSpeed>            Einfeldt          Einfeldt              </signalSpeed>
+      <reconstructionStencil>  WENO9             WENO5                 </reconstructionStencil>
+      <derivativeStencil>      HOUC5             HOUC5                 </derivativeStencil>
+      <levelsetAdvector>       DerivativeStencil ReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Min               Weno                  </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized        Hllc                  </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw            Upwind                </ghostFluidExtender>
+      <gravity>                True              True                  </gravity>
+      <viscosity>              True              True                  </viscosity>
+      <capillaryForces>        True              True                  </capillaryForces>
+      <trackRuntimes>          True              True                  </trackRuntimes>
+      <limitEndTime>           True              True                  </limitEndTime>
+   </oneDimensionalSetup>
+
+   <twoDimensionalSetup>
+      <indexBased> True </indexBased>
+      <enablePerformance> False </enablePerformance>
+      <internalCells>          16                      </internalCells>
+      <haloSize>               4                       </haloSize>
+      <timeIntegrator>         RK3                     </timeIntegrator>
+      <riemannSolver>          Roe                     </riemannSolver>
+      <fluxSplitting>          Roe                     </fluxSplitting>
+      <signalSpeed>            Einfeldt                </signalSpeed>
+      <reconstructionStencil>  WENO5                   </reconstructionStencil>
+      <derivativeStencil>      HOUC5                   </derivativeStencil>
+      <levelsetAdvector>       HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Weno                    </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized              </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw                  </ghostFluidExtender>
+      <gravity>                True                    </gravity>
+      <viscosity>              True                    </viscosity>
+      <capillaryForces>        True                    </capillaryForces>
+      <trackRuntimes>          True                    </trackRuntimes>
+      <limitEndTime>           True                    </limitEndTime>
+   </twoDimensionalSetup>
+
+   <threeDimensionalSetup>
+      <indexBased> False </indexBased>
+      <enablePerformance> True </enablePerformance>
+      <internalCells>          20                      </internalCells>
+      <haloSize>               4                       </haloSize>
+      <timeIntegrator>         RK3                     </timeIntegrator>
+      <riemannSolver>          Roe                     </riemannSolver>
+      <fluxSplitting>          Roe                     </fluxSplitting>
+      <signalSpeed>            Einfeldt                </signalSpeed>
+      <reconstructionStencil>  WENO5                   </reconstructionStencil>
+      <derivativeStencil>      HOUC5                   </derivativeStencil>
+      <levelsetAdvector>       HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Weno                    </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized              </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw                  </ghostFluidExtender>
+      <gravity>                True                    </gravity>
+      <viscosity>              True                    </viscosity>
+      <capillaryForces>        True                    </capillaryForces>
+      <trackRuntimes>          True                    </trackRuntimes>
+      <limitEndTime>           True                    </limitEndTime>
+   </threeDimensionalSetup>
+
+</configuration>

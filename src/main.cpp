@@ -87,13 +87,11 @@ int main( int argc, char* argv[] ) {
 
    MPI_Init( &argc, &argv );
    //Triggers signals on floating point errors, i.e. prohibits quiet NaNs and alike
-#ifndef PERFORMANCE
 #ifdef __linux__
    feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 #endif
 #ifdef __APPLE__
    _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
-#endif
 #endif
 
    //NH Seperate Scope for MPI.

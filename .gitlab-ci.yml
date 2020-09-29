@@ -4,13 +4,19 @@ variables:
 image: aeralpaca/alpaca_paco:develop
 
 stages:
- - statictests
- - alltests
+  - alltests
+  - statictests
 
 clang-format:
   stage: statictests
   script:
     - bash Utilities/BashScripts/clang_format_test.sh clang-format-10
+
+python-format:
+  stage: statictests
+  script:
+    - pip3 install autopep8
+    - bash Utilities/BashScripts/python_format_test.sh
 
 Unit tests:
   stage: alltests
@@ -26,65 +32,50 @@ Unit tests:
 Standard 1D Alpaca:
   stage: alltests
   script:
-    - python3 Utilities/PythonScripts/prepare_user_settings_for_build.py . --limit-end-time
-    - mkdir build
-    - cd build
-    - cmake -DDIM=1 ..
-    - make -j 2
-    - mv ALPACA ../A_1D_STD
-    - cd ..
+    - pip3 install ./python
+    - python3 ./python/scripts/create_executable.py ./ --dimension 1 --limit-end-time True --executable-name A_1D_STD --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_1D_STD Utilities/Inputfiles/CiCd/1D-LevelsetSodX.xml
     - mpiexec -n 2 ./A_1D_STD Utilities/Inputfiles/CiCd/1D-LevelsetSodX.xml
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 1D-LevelsetSodX/1D-LevelsetSodX.log
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 1D-LevelsetSodX-1/1D-LevelsetSodX.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 1D-LevelsetSodX/1D-LevelsetSodX.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 1D-LevelsetSodX-1/1D-LevelsetSodX.log
     - diff 1D-LevelsetSodX/1D-LevelsetSodX.log 1D-LevelsetSodX-1/1D-LevelsetSodX.log
-    - python3 Utilities/PythonScripts/sod_analysis.py 1D-LevelsetSodX/domain/data_2.000000.h5 0.20000000 --max-density-errors 5.0e-08 2.0e-5 3.0e-1 --max-velocity-errors 5.5e-08 2.5e-05 3.5e-01
+    - python3 ./python/scripts/sod_analysis.py 1D-LevelsetSodX/domain/data_2.000000.h5
+      --max-density-errors 5.0e-08 1.2e-8 5.8e-9 --max-pressure-errors 7e-08 1.6e-08 8.1e-09
 
 Varied 1D Alpaca :
   stage: alltests
   script:
-    - python3 Utilities/PythonScripts/prepare_user_settings_for_build.py . --ic 24 --riemann Hllc --reinit Min --limit-end-time
-    - mkdir build
-    - cd build
-    - cmake -DDIM=1 ..
-    - make -j 2
-    - mv ALPACA ../A_1D_VAR
-    - cd ..
+    - pip3 install ./python
+    - python3 ./python/scripts/create_executable.py ./ --dimension 1 --internal-cells 24 --riemann-solver Hllc --levelset-reinitializer Min
+      --limit-end-time True --executable-name A_1D_VAR --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_1D_VAR Utilities/Inputfiles/CiCd/1D-LevelsetSodX.xml
     - mpiexec -n 2 ./A_1D_VAR Utilities/Inputfiles/CiCd/1D-LevelsetSodX.xml
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 1D-LevelsetSodX/1D-LevelsetSodX.log
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 1D-LevelsetSodX-1/1D-LevelsetSodX.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 1D-LevelsetSodX/1D-LevelsetSodX.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 1D-LevelsetSodX-1/1D-LevelsetSodX.log
     - diff 1D-LevelsetSodX/1D-LevelsetSodX.log 1D-LevelsetSodX-1/1D-LevelsetSodX.log
-    - python3 Utilities/PythonScripts/sod_analysis.py 1D-LevelsetSodX-1/domain/data_2.000000.h5 0.20000000 --max-density-errors 2.0e-08 1.5e-05 5.5e-01 --max-velocity-errors 2.0e-08 1.5e-05 5.5e-1
+    - python3 ./python/scripts/sod_analysis.py 1D-LevelsetSodX-1/domain/data_2.000000.h5
+      --max-density-errors 1.5e-08 3e-08 1.75e-09 --max-pressure-errors 2.0e-08 4.1e-09 2.25e-09
 
 Two dimensional Alpaca:
   stage: alltests
   script:
-    - python3 Utilities/PythonScripts/prepare_user_settings_for_build.py . --axisymmetric --ic 20 --timeintegration RK2 --reconstructionstencil TENO5
-    - mkdir build
-    - cd build
-    - cmake -DDIM=2 ..
-    - make -j 2
-    - mv ALPACA ../A_2D
-    - cd ..
+    - pip3 install ./python
+    - python3 ./python/scripts/create_executable.py ./ --dimension 2 --axisymmetric True --internal-cells 20 --time-integrator RK2
+      --reconstruction-stencil TENO5 --executable-name A_2D --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_2D Utilities/Inputfiles/CiCd/2D-Dummy.xml
     - mpiexec -n 2 ./A_2D Utilities/Inputfiles/CiCd/2D-Dummy.xml
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 2D-Dummy/2D-Dummy.log
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 2D-Dummy-1/2D-Dummy.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 2D-Dummy/2D-Dummy.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 2D-Dummy-1/2D-Dummy.log
     - diff 2D-Dummy/2D-Dummy.log 2D-Dummy-1/2D-Dummy.log
 
 Three dimensional Alpaca:
   stage: alltests
   script:
-    - python3 Utilities/PythonScripts/prepare_user_settings_for_build.py . --gruneisen-density --lsadvect DerivativeStencil --interfaceriemann TwoRarefaction
-    - mkdir build
-    - cd build
-    - cmake ..
-    - make -j 2
-    - mv ALPACA ../A_3D
-    - cd ..
+    - pip3 install ./python
+    - python3 ./python/scripts/create_executable.py ./ --gruneisen-density-dependent True --levelset-advector DerivativeStencil
+      --interface-riemann-solver TwoRarefaction --executable-name A_3D --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_3D Utilities/Inputfiles/CiCd/3D-Dummy.xml
     - mpiexec -n 2 ./A_3D Utilities/Inputfiles/CiCd/3D-Dummy.xml
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 3D-Dummy/3D-Dummy.log
-    - python3 Utilities/PythonScripts/remove_volatile_strings_from_logfile.py 3D-Dummy-1/3D-Dummy.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 3D-Dummy/3D-Dummy.log
+    - python3 ./python/scripts/remove_volatile_log_information.py 3D-Dummy-1/3D-Dummy.log
     - diff 3D-Dummy/3D-Dummy.log 3D-Dummy-1/3D-Dummy.log

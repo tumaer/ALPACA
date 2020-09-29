@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <domain>
+        <!-- size of a single node on level 0 -->
+        <nodeSize> 0.25  </nodeSize>
+
+        <!-- number of nodes per dimension-->
+        <nodeRatio>
+            <x> 4 </x>
+            <y> 1 </y>
+            <z> 1 </z>
+        </nodeRatio>
+
+        <boundaryConditions>
+            <material>
+                <!--types of material boundary conditions:
+                zeroGradient,
+                symmetry,
+                wall
+                -->
+                <west>ZeroGradient</west>
+                <east>ZeroGradient</east>
+                <south>ZeroGradient</south>
+                <north>ZeroGradient</north>
+                <bottom>symmetry</bottom>
+                <top>symmetry</top>
+            </material>
+
+            <levelSet>
+                <!--types of level-set boundary conditions:
+                zeroGradient
+                symmetry
+                -->
+                <west>   symmetry </west>
+                <east>   symmetry </east>
+                <south>  symmetry </south>
+                <north>  symmetry </north>
+                <bottom> symmetry </bottom>
+                <top>    symmetry </top>
+            </levelSet>
+        </boundaryConditions>
+
+        <initialConditions>
+            <material1>
+            if (x &lt; 0.2)
+            {
+                density := 27.0 / 7.0 * 1.2;
+                velocityX := 10.0 * sqrt(42.0)/27.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 31.0/3.0 ;
+            }
+                else
+            {
+                density := 1.2;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
+            }
+            </material1>
+
+            <material2>
+                density := 1000.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
+            </material2>
+
+            <levelSet1>
+                phi := 0.3-x;
+            </levelSet1>
+        </initialConditions>
+    </domain>
+
+    <!-- Materials -->
+    <!--Material Types: StiffenedGas, Waterlike (Tait)-->
+    <materials>
+        <numberOfMaterials>              2   </numberOfMaterials>
+        <material1>
+            <equationOfState>
+                <type> StiffenedGas </type>
+                <gamma>               1.4   </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 0.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material1>
+
+        <material2>
+            <equationOfState>
+                <type> StiffenedGas </type>
+                <gamma>               5.5   </gamma>
+                <backgroundPressure>  4921.15   </backgroundPressure>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 0.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material2>
+    </materials>
+
+    <materialPairings>
+        <material1_2>
+           <surfaceTensionCoefficient> 0.0 </surfaceTensionCoefficient>
+	    </material1_2>
+	</materialPairings>
+
+    <sourceTerms>
+        <gravity>
+            <x> 0.0 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </gravity>
+    </sourceTerms>
+
+    <multiResolution>
+        <maximumLevel> 3 </maximumLevel>
+
+        <refinementCriterion>
+            <epsilonReference>    0.01 </epsilonReference>
+            <!-- user_level_of_epsilon_ref: allowed values [0-12] -->
+            <levelOfEpsilonReference> 2  </levelOfEpsilonReference>
+        </refinementCriterion>
+    </multiResolution>
+
+   <timeControl>
+       <startTime> 0.0 </startTime>
+       <endTime>   0.12 </endTime>
+       <CFLNumber> 0.4 </CFLNumber>
+   </timeControl>
+
+   <dimensionalization>
+       <lengthReference>         1  </lengthReference>
+       <velocityReference>       1  </velocityReference>
+       <densityReference>        1  </densityReference>
+       <temperatureReference>    1  </temperatureReference>
+   </dimensionalization>
+
+   <restart>
+      <restore>
+         <mode> Off </mode> <!-- Off, Soft OR Forced -->
+         <fileName> inputfile/restart/restart_***.h5 </fileName>
+      </restore>
+      <snapshots>
+         <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep>
+      </snapshots>
+   </restart>
+
+   <output>
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <standardOutput> <!-- for general or debug output -->
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  0.01 </interval>
+	      <stamps>
+            <ts1> 0.0004 </ts1>
+         </stamps>
+      </standardOutput>
+      <interfaceOutput>
+         <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e3 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+         </stamps>
+      </interfaceOutput>
+   </output>
+</configuration>

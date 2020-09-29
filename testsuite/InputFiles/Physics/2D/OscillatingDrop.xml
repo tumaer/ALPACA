@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <domain>
+        <nodeSize> 0.125  </nodeSize>
+
+        <nodeRatio>
+            <x> 8 </x>
+            <y> 8 </y>
+            <z> 8 </z>
+        </nodeRatio>
+
+        <boundaryConditions>
+            <material>
+                <west>   Symmetry </west>
+                <east>   zerogradient </east>
+                <south>  Symmetry </south>
+                <north>  zerogradient </north>
+                <bottom> Symmetry </bottom>
+                <top>    Symmetry </top>
+            </material>
+
+            <levelSet>
+                <west>   Symmetry </west>
+                <east>   zerogradient </east>
+                <south>  symmetry </south>
+                <north>  zerogradient </north>
+                <bottom> symmetry </bottom>
+                <top>    symmetry </top>
+            </levelSet>
+        </boundaryConditions>
+
+        <initialConditions>
+            <material1>
+                density := 100.0;
+                velocityX := - 1 * sqrt( pow(x,2) + pow(y,2) )/0.4 * cos( atan( y/x ) );
+                velocityY := 1 * sqrt( pow(x,2) + pow(y,2) )/0.4 * sin( atan( y/x ) );
+                velocityZ := 0.0;
+                pressure := 1.0e4;
+            </material1>
+            <material2>
+                density := 5.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0e4;
+            </material2>
+
+            <levelSet1>
+
+                phi := 0.4 - sqrt( pow(x,2) + pow(y,2) );
+
+            </levelSet1>
+        </initialConditions>
+    </domain>
+
+    <materials>
+        <numberOfMaterials> 2 </numberOfMaterials>
+        <material1>
+            <equationOfState>
+                <type>WaterlikeFluid</type>
+                <gamma> 7.15     </gamma>
+                <A>     10500      </A>
+                <B>     1e5      </B>
+                <rho0>  100.0   </rho0>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 0.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material1>
+        <material2>
+            <equationOfState>
+                <type> StiffenedGasSafe </type>
+                <gamma>               1.4   </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 0.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material2>
+    </materials>
+
+    <materialPairings>
+        <material1_2>
+            <surfaceTensionCoefficient> 200.0 </surfaceTensionCoefficient>
+        </material1_2>
+    </materialPairings>
+
+    <sourceTerms>
+        <gravity>
+            <x> 0.0 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </gravity>
+    </sourceTerms>
+
+    <freeSurface>
+        <pExternalReference>  1e4 </pExternalReference>
+    </freeSurface>
+
+    <multiResolution>
+        <maximumLevel> 0 </maximumLevel>
+
+        <refinementCriterion>
+            <epsilonReference> 0.01 </epsilonReference>
+            <levelOfEpsilonReference> 1 </levelOfEpsilonReference>
+        </refinementCriterion>
+    </multiResolution>
+    <timeControl>
+        <startTime> 0.0 </startTime>
+        <endTime>   1.0 </endTime>
+        <CFLNumber> 0.5 </CFLNumber>
+    </timeControl>
+
+    <dimensionalization>
+        <lengthReference>         1  </lengthReference>
+        <velocityReference>       1  </velocityReference>
+        <densityReference>        1  </densityReference>
+        <temperatureReference>    1  </temperatureReference>
+    </dimensionalization>
+
+    <restart>
+        <restore>
+            <mode> Off </mode> <!-- Off, Soft OR Forced -->
+            <fileName> OscillatingDrop/restart/restart_***.h5 </fileName>
+        </restore>
+        <snapshots>
+            <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+            <interval> 3600 </interval> <!-- in wall seconds -->
+            <intervalsToKeep> 2 </intervalsToKeep>
+        </snapshots>
+    </restart>
+
+    <output>
+        <timeNamingFactor> 1.e0 </timeNamingFactor>
+        <standardOutput> <!-- for general or debug output -->
+            <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+            <interval>  1e-2 </interval>
+            <stamps>
+                <ts1> 0.0004 </ts1>
+            </stamps>
+        </standardOutput>
+        <interfaceOutput>
+            <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+            <interval>  1e3 </interval>
+            <stamps>
+                <ts1>  0.0004 </ts1>
+            </stamps>
+        </interfaceOutput>
+    </output>
+</configuration>

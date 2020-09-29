@@ -394,6 +394,6 @@ std::string RestartManager::WriteRestartFile( double const timestep, std::string
    hdf5_manager_.CloseFile();
 
    /** Return the created filename and provide logging */
-   logger_.LogMessage( "Restart File " + filename + " written" );
+   logger_.LogMessage( "Restart file written at t = " + StringOperations::ToScientificNotationString( timestep, 9 ), true, true );
    return filename;
 }
