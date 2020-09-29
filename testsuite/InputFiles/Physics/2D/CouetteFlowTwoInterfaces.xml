@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modeling and Simulation of the Crown- and Rayleigh Jet Formation in the Drop Splash Problem using the Conservative
+Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
+<configuration>
+    <domain>
+        <nodeSize> 1  </nodeSize>
+
+        <nodeRatio>
+            <x> 1 </x>
+            <y> 1 </y>
+            <z> 1 </z>
+        </nodeRatio>
+
+        <boundaryConditions>
+            <material>
+                <west>   Periodic </west>
+                <valuesWest>
+                    <density>1.0</density>
+                    <velocityX>0.0</velocityX>
+                    <velocityY>0.0</velocityY>
+                    <velocityZ>0.0</velocityZ>
+                    <pressure>10</pressure>
+                </valuesWest>
+
+                <east>   Periodic </east>
+                <valuesEast>
+                    <density>1.0</density>
+                    <velocityX>0.0</velocityX>
+                    <velocityY>0.0</velocityY>
+                    <velocityZ>0.0</velocityZ>
+                    <pressure>10</pressure>
+                </valuesEast>
+
+                <south>  FixedValue </south>
+                <valuesSouth>
+                    <density>1.0</density>
+                    <velocityX>0.0</velocityX>
+                    <velocityY>0.0</velocityY>
+                    <velocityZ>0.0</velocityZ>
+                    <pressure>10</pressure>
+                </valuesSouth>
+
+                <north>  FixedValue </north>
+                <valuesNorth>
+                    <density>1.0</density>
+                    <velocityX>1.0</velocityX>
+                    <velocityY>0.0</velocityY>
+                    <velocityZ>0.0</velocityZ>
+                    <pressure>10</pressure>
+                </valuesNorth>
+                <bottom> Symmetry </bottom>
+                <top>    Symmetry </top>
+            </material>
+
+            <levelSet>
+                <west>   periodic </west>
+                <east>   periodic </east>
+                <south>  symmetry </south>
+                <north>  symmetry </north>
+                <bottom> symmetry </bottom>
+                <top>    symmetry </top>
+            </levelSet>
+        </boundaryConditions>
+
+        <initialConditions>
+            <material1>
+                density := 1.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 100.0;
+            </material1>
+            <material2>
+                density := 1.0;
+                velocityY := 0.0;
+                velocityX := 0.0;
+                velocityZ := 0.0;
+                pressure := 100.0;
+            </material2>
+
+            <levelSet1>
+            if (y &gt; 0.5)
+	       phi := y - 0.7;
+	    else
+	       phi := 0.3 - y;
+
+            </levelSet1>
+        </initialConditions>
+    </domain>
+
+    <materials>
+        <numberOfMaterials> 2 </numberOfMaterials>
+        <material1>
+            <equationOfState>
+                <type>WaterlikeFluid</type>
+                <gamma> 7.15     </gamma>
+                <A>     100      </A>
+                <B>     2000      </B>
+                <rho0>  1   </rho0>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 2.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material1>
+        <material2>
+            <equationOfState>
+                <type>WaterlikeFluid</type>
+                <gamma> 7.15     </gamma>
+                <A>     100      </A>
+                <B>     2000      </B>
+                <rho0>  1   </rho0>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 1.0 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material2>
+    </materials>
+
+    <materialPairings>
+        <material1_2>
+           <surfaceTensionCoefficient> 0.0 </surfaceTensionCoefficient>
+	    </material1_2>
+	</materialPairings>
+
+    <sourceTerms>
+        <gravity>
+            <x> 0.0 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </gravity>
+    </sourceTerms>
+
+    <freeSurface>
+        <pExternalReference>  1e4 </pExternalReference>
+    </freeSurface>
+
+    <multiResolution>
+        <maximumLevel> 2 </maximumLevel>
+
+        <refinementCriterion>
+            <epsilonReference> 0.01 </epsilonReference>
+            <levelOfEpsilonReference> 1  </levelOfEpsilonReference>
+        </refinementCriterion>
+    </multiResolution>
+
+   <timeControl>
+       <startTime> 0.0 </startTime>
+       <endTime>   0.5 </endTime>
+       <CFLNumber> 0.5 </CFLNumber>
+   </timeControl>
+
+   <dimensionalization>
+       <lengthReference>         1  </lengthReference>
+       <velocityReference>       1  </velocityReference>
+       <densityReference>        1  </densityReference>
+       <temperatureReference>    1  </temperatureReference>
+   </dimensionalization>
+
+   <restart>
+      <restore>
+         <mode> Off </mode> <!-- Off, Soft OR Forced -->
+         <fileName> CouetteFlow_two_interface/restart/restart_***.h5 </fileName>
+      </restore>
+      <snapshots>
+         <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep>
+      </snapshots>
+   </restart>
+
+   <output>
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <standardOutput> <!-- for general or debug output -->
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e-2 </interval>
+	      <stamps>
+            <ts1> 0.0004 </ts1>
+         </stamps>
+      </standardOutput>
+      <interfaceOutput>
+         <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e3 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+         </stamps>
+      </interfaceOutput>
+   </output>
+</configuration>

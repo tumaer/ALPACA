@@ -95,6 +95,11 @@ MaterialManager::MaterialManager( std::vector<Material> materials,
  */
 unsigned int MaterialManager::MapPairingToIndex( MaterialName const first_material, MaterialName const second_material ) const {
 
+   // NOTE: This part is required to have a fall back behavior in case capillary forces are activated and only one material is defined.
+   if( materials_.size() == 1 ) {
+      return 0;
+   }
+
 #ifndef PERFORMANCE
    if( first_material == second_material ) {
       throw std::runtime_error( "Error! Material pairing can only be obtained for two distinct materials!" );

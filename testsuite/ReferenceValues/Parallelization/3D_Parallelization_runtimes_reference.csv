@@ -1,0 +1,4 @@
+        Runtime,  NumberOfRanks,     Inputfile,                                                                                                                    Executable
+   247.41466667,              1,     GaussPuls,     ALPACA_3D_20_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+    26.88076667,             12,     GaussPuls,     ALPACA_3D_20_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+    16.01056667,             28,     GaussPuls,     ALPACA_3D_20_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5

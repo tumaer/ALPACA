@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+
+   <general>
+      <!--
+         Environment:  NumberOfRanks (1D/2D/3D)
+         Merge      :      5     13    28
+         Aer        :      15    15    15
+         Sumuc      :      17    35    48
+         Cluster    :      16    28    28
+         Custom     :      4     8     10
+      -->
+      <environment> CLUSTER </environment>
+      <compile> 1 </compile> <!-- Do NOT deactivate the compile option for merge run -->
+      <dimensions>
+         <one>   1 </one>
+         <two>   1 </two>
+         <three> 1 </three>
+      </dimensions>
+   </general>
+
+   <testCases>
+      <singlePhase>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </singlePhase>
+      <twoPhase>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </twoPhase>
+      <detailedSod>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+         <reducedSet> False </reducedSet>
+      </detailedSod>
+      <symmetry>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </symmetry>
+      <parallelization>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+         <reducedSet> False </reducedSet>
+      </parallelization>
+      <physics>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </physics>
+      <inputOutput>
+         <active> True </active>
+         <skipNoReferenceCases> False </skipNoReferenceCases>
+      </inputOutput>
+   </testCases>
+
+   <oneDimensionalSetup>
+      <indexBased> True </indexBased>
+      <enablePerformance> False </enablePerformance>
+      <internalCells>          8                     8                     8                     8                     8                     8                     8
+                               24                    24                    24                    24                    24                    24                    24
+                               32                    32                    32                    32                    32                    32                    32                    </internalCells>
+      <haloSize>               6                     6                     6                     6                     6                     6                     6
+                               6                     6                     6                     6                     6                     6                     6
+                               4                     4                     4                     4                     4                     4                     4                     </haloSize>
+      <timeIntegrator>         RK2                   RK2                   RK2                   RK2                   RK2                   RK2                   RK2
+                               RK2                   RK2                   RK2                   RK2                   RK2                   RK2                   RK2
+                               RK3                   RK3                   RK3                   RK3                   RK3                   RK3                   RK3                   </timeIntegrator>
+      <riemannSolver>          Roe                   Roe                   Roe                   Roe                   Roe                   Hllc                  Hll
+                               Roe                   Roe                   Roe                   Roe                   Roe                   Hllc                  Hll
+                               Roe                   Roe                   Roe                   Roe                   Roe                   Hllc                  Hll                   </riemannSolver>
+      <fluxSplitting>          Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe
+                               Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe
+                               Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe                   </fluxSplitting>
+      <signalSpeed>            Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt
+                               Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt
+                               Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              </signalSpeed>
+      <reconstructionStencil>  WENO9                 WENO5Z                WENO7                 WENO9                 WENO5                 WENO7                 WENO5Z
+                               WENO7                 WENO9                 WENO5                 WENO3                 WENO5Z                WENO3                 WENO9
+                               WENO3                 WENO3                 WENO5Z                WENO7                 WENO3                 WENO5                 WENO3                 </reconstructionStencil>
+      <derivativeStencil>      HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
+                               HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
+                               HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 </derivativeStencil>
+      <levelsetAdvector>       DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil
+                               HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil
+                               ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Min                   Min                   Min                   Min                   Min                   Min                   Min
+                               Min                   Min                   Min                   Min                   Min                   Min                   Min
+                               Weno                  Weno                  Weno                  Weno                  Weno                  Weno                  Weno                  </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized            Exact                 TwoRarefaction        Hllc                  Linearized            Exact                 Hllc
+                               Hllc                  Linearized            Exact                 TwoRarefaction        Hllc                  Linearized            Linearized
+                               TwoRarefaction        Hllc                  Linearized            Exact                 TwoRarefaction        Hllc                  TwoRarefaction        </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw
+                               Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw
+                               Upwind                Upwind                Upwind                Upwind                Upwind                Upwind                Upwind                </ghostFluidExtender>
+      <gravity>                True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True                  </gravity>
+      <viscosity>              True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True                  </viscosity>
+      <capillaryForces>        True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True                  </capillaryForces>
+      <trackRuntimes>          True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True                  </trackRuntimes>
+      <limitEndTime>           True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True
+                               True                  True                  True                  True                  True                  True                  True                  </limitEndTime>
+   </oneDimensionalSetup>
+
+   <twoDimensionalSetup>
+      <indexBased> True </indexBased>
+      <enablePerformance> False </enablePerformance>
+      <internalCells>          16                      16                    16                    16                      </internalCells>
+      <haloSize>               4                       4                     4                     4                       </haloSize>
+      <timeIntegrator>         RK3                     RK3                   RK3                   RK3                     </timeIntegrator>
+      <riemannSolver>          Roe                     Roe                   Roe                   Hllc                    </riemannSolver>
+      <fluxSplitting>          Roe                     LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe                     </fluxSplitting>
+      <signalSpeed>            Einfeldt                Einfeldt              Einfeldt              Einfeldt                </signalSpeed>
+      <reconstructionStencil>  WENO5                   WENOAO53              WENOAO53              WENO5                   </reconstructionStencil>
+      <derivativeStencil>      HOUC5                   HOUC5                 HOUC5                 HOUC5                   </derivativeStencil>
+      <levelsetAdvector>       HjReconstructionStencil ReconstructionStencil ReconstructionStencil HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Weno                    Weno                  Min                   Min                     </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized              Linearized            TwoRarefaction        Hllc                    </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw                  Fedkiw                Fedkiw                Fedkiw                  </ghostFluidExtender>
+      <gravity>                True                    True                  True                  True                    </gravity>
+      <viscosity>              True                    True                  True                  True                    </viscosity>
+      <capillaryForces>        True                    True                  True                  True                    </capillaryForces>
+      <trackRuntimes>          True                    True                  True                  True                    </trackRuntimes>
+      <limitEndTime>           True                    True                  True                  True                    </limitEndTime>
+   </twoDimensionalSetup>
+
+   <threeDimensionalSetup>
+      <indexBased> False </indexBased>
+      <enablePerformance> True </enablePerformance>
+      <internalCells>          20                      </internalCells>
+      <haloSize>               4                       </haloSize>
+      <timeIntegrator>         RK3                     </timeIntegrator>
+      <riemannSolver>          Roe                     </riemannSolver>
+      <fluxSplitting>          Roe                     </fluxSplitting>
+      <signalSpeed>            Einfeldt                </signalSpeed>
+      <reconstructionStencil>  WENO5                   </reconstructionStencil>
+      <derivativeStencil>      HOUC5                   </derivativeStencil>
+      <levelsetAdvector>       HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Weno                    </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized              </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw                  </ghostFluidExtender>
+      <gravity>                True                    </gravity>
+      <viscosity>              True                    </viscosity>
+      <capillaryForces>        True                    </capillaryForces>
+      <trackRuntimes>          True                    </trackRuntimes>
+      <limitEndTime>           True                    </limitEndTime>
+   </threeDimensionalSetup>
+
+</configuration>

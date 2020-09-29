@@ -90,7 +90,7 @@ MaterialPairing::MaterialPairing( double const dimensional_surface_tension_coeff
  * @brief Sets up a material pairing with no input data
  * @note Function can be removed when the surface tension coefficient hard coding is removed from the capillary pressure calculator.
  */
-MaterialPairing::MaterialPairing() : surface_tension_coefficient_( -1.0 ),
+MaterialPairing::MaterialPairing() : surface_tension_coefficient_( 0.0 ),
                                      surface_tension_coefficient_model_( nullptr ) {
    /** Empty besides initializer list */
 }

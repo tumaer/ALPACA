@@ -102,7 +102,7 @@ class CompileTimeConstants {
    static constexpr bool gravitation_active_       = true; // Enables gravitational term
    static constexpr bool viscosity_active_         = true; // Enables viscosity term
    static constexpr bool heat_conduction_active_   = false;// Enables heat conduction term
-   static constexpr bool capillary_forces_active_  = false;// Enables surface tension term
+   static constexpr bool capillary_forces_active_  = true; // Enables surface tension term
 
    // Flags to activate material property models
    static constexpr bool viscosity_model_active_                   = false;
@@ -124,6 +124,7 @@ class CompileTimeConstants {
    static constexpr bool write_timestep_list_      = false;                                 // All micro time steps are written into a .txt file
    static constexpr bool limit_end_time_           = true;                                  // Last macro time step is adapted to exactly match user end time
    static constexpr double minimum_time_step_size_ = std::numeric_limits<double>::epsilon();// Minimum micro time step size
+   static constexpr bool track_runtimes_           = false;
 
    /* This factor defines the width of the levelset narrow band in terms of cellsizes
     * Outside of this range the levelset is fixed to this distance (levelset_cutoff_factor_ * cellsize)
@@ -496,6 +497,12 @@ public:
     * @return Minimum time-step size.
     */
    static constexpr double MTS() { return minimum_time_step_size_; }
+
+   /**
+    * @brief Gives a bool to decide if runtime is tracked.
+    * @return Runtime tracking decision.
+    */
+   static constexpr bool TR() { return track_runtimes_; }
 
    /**
     * @brief Gives the number of children when the block is refined

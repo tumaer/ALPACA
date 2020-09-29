@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Initial working directory:
+## We submit the job from the current directory
+#SBATCH -D .
+
+# Job name
+#SBATCH -J Testsuite
+
+# Output and error files
+## Place them in root-directory
+#SBATCH -o ../../%j%-x-Testsuite.out
+#SBATCH -e ../../%j%-x-Testsuite.err
+
+# Notification
+#SBATCH --mail-type=end
+#SBATCH --mail-user=<your-email>@<your-host.domain>
+
+# Where to run the simulation
+#SBATCH --clusters=<cluster>
+#SBATCH --partition=<partition>
+#SBATCH --qos=<QOS>
+
+# Request ressources
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=<#>
+#SBATCH --time=<HH:MM:SS>
+
+# Setup execution environment
+#SBATCH --export=NONE
+#SBATCH --get-user-env
+module load slurm_setup
+
+python3.6 -m venv venv
+source venv/bin/activate
+pip3 install -r ../AlpacaPy/requirements.txt
+
+source ./initialize_cluster.sh
+python3 ../AlpacaPy/Testsuite/run_testsuite.py <config.xml> <alpaca-base-path>
+
+deactivate
+rm -rf venv

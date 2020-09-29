@@ -1,26 +1,33 @@
-MESSAGE( STATUS "Set performance flags" )
+message( STATUS "Set performance flags" )
 
 set(STANDARD_FLAGS "-m64 -g")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STANDARD_FLAGS}")
 
-set(COMPILER_ENV "$ENV{COMPILER}")
-if(ALPACA_ENV STREQUAL "LRZ")
-   set(MACHINE_FLAGS "${MACHINE_FLAGS} -D PERFORMANCE")
-   set(MACHINE_PERFORMANCE_FLAGS "${MACHINE_PERFORMANCE_FLAGS}")
-elseif(ALPACA_ENV STREQUAL "SNG")
+# Make the performance option avaible
+if(ALPACA_ENV STREQUAL "LRZ" OR ALPACA_ENV STREQUAL "SNG")
+    option(PERFORMANCE "Performance" ON)
+else(ALPACA_ENV STREQUAL "LRZ" OR ALPACA_ENV STREQUAL "SNG")
+    option(PERFORMANCE "Performance" OFF)
+endif(ALPACA_ENV STREQUAL "LRZ" OR ALPACA_ENV STREQUAL "SNG")
+
+# Idependently of environment set the performance flag and machine performance flags
+if(PERFORMANCE)
     set(MACHINE_FLAGS "${MACHINE_FLAGS} -D PERFORMANCE")
-    if(COMPILER_ENV STREQUAL "INTEL")
+endif(PERFORMANCE)
+
+# Set additional machine performance flags for the supermuc
+set(MACHINE_PERFORMANCE_FLAGS "")
+if(ALPACA_ENV STREQUAL "SNG")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
         set(MACHINE_PERFORMANCE_FLAGS "${MACHINE_PERFORMANCE_FLAGS} -vecabi=cmdtarget -xHost -qopt-zmm-usage=high -qopt-report=5")
-    else(COMPILER_ENV STREQUAL "INTEL")
+    else(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
         set(MACHINE_PERFORMANCE_FLAGS "${MACHINE_PERFORMANCE_FLAGS} -ftree-vectorize -mavx512f -mavx512cd -ffast-math -march=skylake-avx512 -fopt-info-vec ")
-    endif(COMPILER_ENV STREQUAL "INTEL")
-elseif(ALPACA_ENV STREQUAL "ALPACA_USER")
-else(ALPACA_ENV STREQUAL "LRZ")
-   set(MACHINE_PERFORMANCE_FLAGS "${MACHINE_PERFORMANCE_FLAGS}")
-endif(ALPACA_ENV STREQUAL "LRZ")
+    endif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+endif(ALPACA_ENV STREQUAL "SNG")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MACHINE_FLAGS}")
 
+# Handle deubg mode
 option(DBG "Debug" OFF)
 if(DBG)
    set(ALPACA_CXX_FLAGS "-O0")
@@ -31,15 +38,19 @@ else(DBG)
    set(PACO_CXX_FLAGS "")
 endif(DBG)
 
-option(SYMMETRY_FLAGS "Symmetry preserving flags" OFF)
+# Option to allow enabling full symmetry operations
+option(SYMMETRY "Symmetry preserving flags" ON)
 
-set(ALPACA_SYMMETRY_FLAGS "")
+# Set the floating point flags for intel compiler
+set(ALPACA_FLOATING_FLAGS "")
 if(ALPACA_ENV STREQUAL "LRZ" OR ALPACA_ENV STREQUAL "SNG")
-    if(COMPILER_ENV STREQUAL "INTEL")
-        if (SYMMETRY_FLAGS)
-            set(ALPACA_SYMMETRY_FLAGS "-fp-model precise")
-        else(SYMMETRY_FLAGS)
-            set(ALPACA_SYMMETRY_FLAGS "-fp-model fast=2")
-        endif (SYMMETRY_FLAGS)
-    endif(COMPILER_ENV STREQUAL "INTEL")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+        # If symmetry is set add precise model to keep floating point operation order (allows exception handling)
+        if(SYMMETRY)
+            set(ALPACA_FLOATING_FLAGS "-fp-model precise")
+        # Otherwise allow full compiler optimization
+        else(SYMMETRY)
+            set(ALPACA_FLOATING_FLAGS "-fp-model fast=2")
+        endif(SYMMETRY)
+    endif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 endif(ALPACA_ENV STREQUAL "LRZ" OR ALPACA_ENV STREQUAL "SNG")
