@@ -65,42 +65,34 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef HLL_RIEMANN_SOLVER_H
-#define HLL_RIEMANN_SOLVER_H
+#include <catch.hpp>
+
+#include <vector>
+#include <algorithm>
 
 #include "solvers/riemann_solvers/riemann_solver.h"
-#include "block_definitions/block.h"
-#include "enums/direction_definition.h"
-#include "materials/material.h"
-#include "materials/material_manager.h"
-#include "user_specifications/compile_time_constants.h"
 
-/**
- * @brief Discretization of the Riemann solver using the HLL procedure according to \cite Toro2009, chapter 10.3.
- */
-class HllRiemannSolver : public RiemannSolver<HllRiemannSolver> {
+SCENARIO( "Non-momentum equation indexing", "[1rank]" ) {
 
-   friend RiemannSolver;
+   GIVEN( "A list with all active non-momentum equations in their given order" ) {
 
-   template<Direction DIR>
-   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double const cell_size ) const;
+      constexpr unsigned int number_nonmomentum_equations = MF::ANOE() - MF::AME().size();
+      std::vector<Equation> nonmomentum_equations;
 
-   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
+      for( Equation const e : MF::ASOE() ) {
+         if( e == Equation::MomentumX || e == Equation::MomentumY || e == Equation::MomentumZ )
+            continue;
 
-public:
-   HllRiemannSolver() = delete;
-   explicit HllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
-   ~HllRiemannSolver()                         = default;
-   HllRiemannSolver( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver& operator=( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver( HllRiemannSolver&& )                 = delete;
-   HllRiemannSolver& operator=( HllRiemannSolver&& ) = delete;
-};
+         nonmomentum_equations.push_back( e );
+      }
 
-#endif// HLL_RIEMANN_SOLVER_H
+      WHEN( "Accessing an element of this list with its index" ) {
+         THEN( "The same equation is obtained as with the function NthNonMomentumEquation and the same index" ) {
+
+            for( unsigned int i = 0; i < number_nonmomentum_equations; ++i ) {
+               REQUIRE( MF::NthNonMomentumEquation( i ) == nonmomentum_equations[i] );
+            }
+         }
+      }
+   }
+}

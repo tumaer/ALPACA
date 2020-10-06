@@ -82,6 +82,30 @@ EigenDecomposition::EigenDecomposition( MaterialManager const& material_manager 
 }
 
 /**
+ * @brief Transforms the given values from characteristic space back into physical space via the given eigenvectors.
+ *        Underlying summations are done consistently in order to preserve symmetry.
+ * @param characteristic_values Values in characteristic space.
+ * @return Values in physical space.
+ */
+std::array<double, MF::ANOE()> const EigenDecomposition::TransformToPhysicalSpace( std::array<double, MF::ANOE()> const& characteristic_values,
+                                                                                   double const ( &roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()] ) const {
+   std::array<double, MF::ANOE()> physical_values;
+
+   for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
+      physical_values[l] = 0.0;
+      // sum up linear contributions
+      for( unsigned int n = 1; n < MF::ANOE() - 1; ++n ) {
+         physical_values[l] += characteristic_values[n] * roe_eigenvectors_right[l][n];
+      }// n: characteristic fields
+      // Non-linear contributions have to be added together to maintain full symmetry
+      physical_values[l] += ( characteristic_values[0] * roe_eigenvectors_right[l][0] +
+                              characteristic_values[MF::ANOE() - 1] * roe_eigenvectors_right[l][MF::ANOE() - 1] );
+   }// l: conservatives
+
+   return physical_values;
+}
+
+/**
  * @brief Computes the global Lax-Friedrichs eigenvalues (maxima) within the given block.
  * @param mat_block The block in which the eigenvalues are to be computed.
  * @param eigenvalues Indirect return parameter.

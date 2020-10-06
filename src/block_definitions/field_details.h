@@ -204,19 +204,22 @@ namespace FieldDetails {
    */
    struct ActiveEquations : public ActiveFieldsDefinition<ActiveEquations, EquationPool> {
       static constexpr auto Definition = MakeArray(
-            //           conservative                  unit                    input_name*
+            // clang-format off
+
+            //           conservative                 unit                    input_name*
             // mandatory equations (DO NOT CHANGE):
-            FieldInfo{ EquationPool::Mass, UnitType::Density, "" }, FieldInfo{ EquationPool::Energy, UnitType::Energy, "" }, FieldInfo { EquationPool::MomentumX, UnitType::Momentum, "" }
+              FieldInfo{ EquationPool::Mass,          UnitType::Density,      "" }
+            , FieldInfo{ EquationPool::Energy,        UnitType::Energy,       "" }
+            , FieldInfo{ EquationPool::MomentumX,     UnitType::Momentum,     "" }
 #if DIMENSION != 1
-            ,
-            FieldInfo { EquationPool::MomentumY, UnitType::Momentum, "" }
+            , FieldInfo{ EquationPool::MomentumY,     UnitType::Momentum,     "" }
 #endif
 #if DIMENSION == 3
-            ,
-            FieldInfo { EquationPool::MomentumZ, UnitType::Momentum, "" }
+            , FieldInfo{ EquationPool::MomentumZ,     UnitType::Momentum,     "" }
 #endif
             // optional equations:
-            // , FieldInfo{ EquationPool::Example,        UnitType::Example,      "example" }
+         // , FieldInfo{ EquationPool::Example,       UnitType::Example,      "example" }
+            // clang-format on
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active equations! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -227,21 +230,22 @@ namespace FieldDetails {
    */
    struct ActivePrimeStates : public ActiveFieldsDefinition<ActivePrimeStates, PrimeStatePool> {
       static constexpr auto Definition = MakeArray(
-            //           prime state                      unit                       input_name
+            // clang-format off
+            //           prime state                     unit                       input_name
             // mandatory prime states (DO NOT CHANGE):
-            FieldInfo{ PrimeStatePool::Density, UnitType::Density, "density" }, FieldInfo{ PrimeStatePool::Pressure, UnitType::Pressure, "pressure" }, FieldInfo { PrimeStatePool::VelocityX, UnitType::Velocity, "velocityX" }
+              FieldInfo{ PrimeStatePool::Density,        UnitType::Density,         "density" }
+            , FieldInfo{ PrimeStatePool::Pressure,       UnitType::Pressure,        "pressure" }
+            , FieldInfo{ PrimeStatePool::VelocityX,      UnitType::Velocity,        "velocityX" }
 #if DIMENSION != 1
-            ,
-            FieldInfo { PrimeStatePool::VelocityY, UnitType::Velocity, "velocityY" }
+            , FieldInfo{ PrimeStatePool::VelocityY,      UnitType::Velocity,        "velocityY" }
 #endif
 #if DIMENSION == 3
-            ,
-            FieldInfo { PrimeStatePool::VelocityZ, UnitType::Velocity, "velocityZ" }
+            , FieldInfo{ PrimeStatePool::VelocityZ,      UnitType::Velocity,        "velocityZ" }
 #endif
             // optional prime states:
-            ,
-            FieldInfo{ PrimeStatePool::Temperature, UnitType::Temperature, "" }
-            // , FieldInfo{ PrimeStatePool::Example,        UnitType::Example,      "example" }
+            , FieldInfo{ PrimeStatePool::Temperature,    UnitType::Temperature,     "" }
+         // , FieldInfo{ PrimeStatePool::Example,        UnitType::Example,         "example" }
+            // clang-format on
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active prime states! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -252,10 +256,12 @@ namespace FieldDetails {
    */
    struct ActiveParameters : public ActiveFieldsDefinition<ActiveParameters, ParameterPool> {
       static constexpr auto Definition = MakeArray(
-            //           parameter                                      unit                  input_name
-            FieldInfo{ ParameterPool::ShearViscosity, UnitType::Viscosity, "" }, FieldInfo{ ParameterPool::ThermalConductivity, UnitType::ThermalConductivity, "" }
-
-            // , FieldInfo{ ParameterPool::Example,                    UnitType::Example,      "example" }
+            // clang-format off
+            //           parameter                                   unit                             input_name
+              FieldInfo{ ParameterPool::ShearViscosity,              UnitType::Viscosity,             "" }
+            , FieldInfo{ ParameterPool::ThermalConductivity,         UnitType::ThermalConductivity,   "" }
+         // , FieldInfo{ ParameterPool::Example,                     UnitType::Example,               "example" }
+            // clang-format on
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active parameters! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -266,10 +272,14 @@ namespace FieldDetails {
    */
    struct ActiveInterfaceDescriptions : public ActiveFieldsDefinition<ActiveInterfaceDescriptions, InterfaceDescriptionPool> {
       static constexpr auto Definition = MakeArray(
-            //           interface description                               unit                  input_name
+            // clang-format off
+            //           interface description                          unit                    input_name
             // mandatory description (DO NOT CHANGE):
-            FieldInfo{ InterfaceDescriptionPool::Levelset, UnitType::Unitless, "phi" }, FieldInfo{ InterfaceDescriptionPool::VolumeFraction, UnitType::Unitless, "" }
-            // , FieldInfo{ InterfaceDescriptionPool::Example,             UnitType::Example,      "example" }
+              FieldInfo{ InterfaceDescriptionPool::Levelset,            UnitType::Unitless,     "phi" }
+            , FieldInfo{ InterfaceDescriptionPool::VolumeFraction,      UnitType::Unitless,     "" }
+            // optional description:
+         // , FieldInfo{ InterfaceDescriptionPool::Example,             UnitType::Example,      "example" }
+            // clang-format on
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active interface descriptions! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -280,13 +290,15 @@ namespace FieldDetails {
    */
    struct ActiveInterfaceStates : public ActiveFieldsDefinition<ActiveInterfaceStates, InterfaceStatePool> {
       static constexpr auto Definition = MakeArray(
+            // clang-format off
             //           interface state                             unit                  input_name
             // mandatory interface states (DO NOT CHANGE):
-            FieldInfo{ InterfaceStatePool::Velocity, UnitType::Velocity, "" }
+              FieldInfo{ InterfaceStatePool::Velocity,               UnitType::Velocity,     "" }
             // optional interface states:
-            ,
-            FieldInfo{ InterfaceStatePool::PressurePositive, UnitType::Pressure, "" }, FieldInfo{ InterfaceStatePool::PressureNegative, UnitType::Pressure, "" }
-            // , FieldInfo{ InterfaceStatePool::Example,             UnitType::Example,      "example" }
+            , FieldInfo{ InterfaceStatePool::PressurePositive,       UnitType::Pressure,     "" }
+            , FieldInfo{ InterfaceStatePool::PressureNegative,       UnitType::Pressure,     "" }
+         // , FieldInfo{ InterfaceStatePool::Example,                UnitType::Example,      "example" }
+            // clang-format on
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active interface states! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );
@@ -297,9 +309,11 @@ namespace FieldDetails {
    */
    struct ActiveInterfaceParameters : public ActiveFieldsDefinition<ActiveInterfaceParameters, InterfaceParameterPool> {
       static constexpr auto Definition = MakeArray(
-            //           interface parameter                                                     unit                              input_name              component_name*
-            FieldInfo{ InterfaceParameterPool::SurfaceTensionCoefficient, UnitType::SurfaceTensionCoefficient, "" }
-            // , FieldInfo{ InterfaceParameterPool::Example,                                  UnitType::Example,                       "example" }
+            // clang-format off
+            //           interface parameter                                        unit                                   input_name
+              FieldInfo{ InterfaceParameterPool::SurfaceTensionCoefficient,         UnitType::SurfaceTensionCoefficient,   "" }
+         // , FieldInfo{ InterfaceParameterPool::Example,                           UnitType::Example,                     "example" }
+            // clang-format on
       );
       // notes: *  if input name is empty the field will not be read from input files. Spaces are not allowed
       static_assert( Definition.size() < InactiveFieldOffset, "Too many active interface parameters! Please increase ActiveFieldsDefinition::InactiveFieldOffset." );

@@ -86,13 +86,6 @@ class EigenDecomposition {
 
    MaterialManager const& material_manager_;
 
-   static constexpr std::array<std::array<unsigned int, 3>, 3> direction_momentum_indices_    = { { { 0, 1, 2 },
-                                                                                                 { 1, 0, 2 },
-                                                                                                 { 2, 0, 1 } } };
-   static constexpr std::array<std::array<unsigned int, 3>, 3> direction_eigenvector_indices_ = { { { 1, 2, 3 },
-                                                                                                    { 2, 1, 3 },
-                                                                                                    { 3, 1, 2 } } };
-
    // Using static to cheat constness (for this global variable okay - don't do this at home (we are what you a call Experts) ;)
    static double global_eigenvalues_[DTI( CC::DIM() )][MF::ANOE()];
 
@@ -110,6 +103,7 @@ public:
                                       double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                                       double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                                       double ( &fluxfunction_eigenvalues )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const;
+   std::array<double, MF::ANOE()> const TransformToPhysicalSpace( std::array<double, MF::ANOE()> const& characteristic_values, double const ( &roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()] ) const;
 
    void ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
    void SetGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
@@ -131,6 +125,40 @@ namespace {
       for( unsigned int l = 1; l < MF::ANOE() - 1; ++l ) {
          eigenvalues[l] = u;
       }
+   }
+
+   /**
+    * @brief Get the minor direction identifier for the given (template parameter) principal direction.
+    * @param minor_index 0 or 1 for the first or second minor direction, respectively.
+    * @tparam The principal direction.
+    * @return Direction identifier.
+    */
+   template<Direction>
+   constexpr Direction GetMinorDirection( unsigned int const minor_index );
+
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   constexpr Direction GetMinorDirection<Direction::X>( unsigned int const minor_index ) {
+      constexpr std::array<Direction, 2> minor_directions = { Direction::Y, Direction::Z };
+      return minor_directions[minor_index];
+   }
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   constexpr Direction GetMinorDirection<Direction::Y>( unsigned int const minor_index ) {
+      constexpr std::array<Direction, 2> minor_directions = { Direction::X, Direction::Z };
+      return minor_directions[minor_index];
+   }
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   constexpr Direction GetMinorDirection<Direction::Z>( unsigned int const minor_index ) {
+      constexpr std::array<Direction, 2> minor_directions = { Direction::X, Direction::Y };
+      return minor_directions[minor_index];
    }
 }// namespace
 
@@ -161,14 +189,12 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
    constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
 
    // indices of principal and first/second minor momentum/velocity within the three-packs MF::AME and MF::AV
-   constexpr unsigned int principal = direction_momentum_indices_[DTI( DIR )][0];
-   constexpr unsigned int minor1    = direction_momentum_indices_[DTI( DIR )][1];
-   constexpr unsigned int minor2    = direction_momentum_indices_[DTI( DIR )][2];
+   constexpr unsigned int principal = DTI( DIR );
+   constexpr unsigned int minor1    = DTI( GetMinorDirection<DIR>( 0 ) );
+   constexpr unsigned int minor2    = DTI( GetMinorDirection<DIR>( 1 ) );
 
-   // Indices of eigenvectors for characteristic fields due to principal and first/second minor momentum
-   constexpr unsigned int ev_principal = direction_eigenvector_indices_[DTI( DIR )][0];
-   constexpr unsigned int ev_minor1    = direction_eigenvector_indices_[DTI( DIR )][1];
-   constexpr unsigned int ev_minor2    = direction_eigenvector_indices_[DTI( DIR )][2];
+   // Index of eigenvectors for characteristic fields due to principal momentum
+   constexpr unsigned int ev_principal = DTI( CC::DIM() );
 
    // Access the pair's elements directly.
    auto const& [material, block] = mat_block;
@@ -269,6 +295,25 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
                left_eigenvector[      0     ][ETI(MF::AME()[minor2])    ] = 0.5 * one_cc * (-minor2_velocity_roe_ave*gruneisen_roe_ave);
             left_eigenvector[         0     ][ETI(Equation::Energy)     ] = 0.5 * one_cc * gruneisen_roe_ave;
 
+            if constexpr( CC::DIM() != Dimension::One ) {
+               // Additional eigenvector for lambda = u related to second momentum equation (= first minor momentum)
+               left_eigenvector[      1     ][ETI(Equation::Mass)       ] = minor1_velocity_roe_ave * one_density_roe_ave;
+               left_eigenvector[      1     ][ETI(MF::AME()[principal]) ] = 0.0;
+               left_eigenvector[      1     ][ETI(MF::AME()[minor1])    ] = -one_density_roe_ave;
+               if constexpr( CC::DIM() == Dimension::Three )
+                  left_eigenvector[   1     ][ETI(MF::AME()[minor2])    ] = 0.0;
+               left_eigenvector[      1     ][ETI(Equation::Energy)     ] = 0.0;
+            }
+
+            if constexpr( CC::DIM() == Dimension::Three ) {
+               // Additional eigenvector for lambda = u related to third momentum equation (= second minor momentum)
+               left_eigenvector[      2     ][ETI(Equation::Mass)       ] = -minor2_velocity_roe_ave * one_density_roe_ave;
+               left_eigenvector[      2     ][ETI(MF::AME()[principal]) ] = 0.0;
+               left_eigenvector[      2     ][ETI(MF::AME()[minor1])    ] = 0.0;
+               left_eigenvector[      2     ][ETI(MF::AME()[minor2])    ] = one_density_roe_ave;
+               left_eigenvector[      2     ][ETI(Equation::Energy)     ] = 0.0;
+            }
+
             // Eigenvector for lambda = u related to principal momentum direction
             left_eigenvector[   ev_principal][ETI(Equation::Mass)       ] =  one_cc * (enthalpy_roe_ave - q_squared);
             left_eigenvector[   ev_principal][ETI(MF::AME()[principal]) ] =  one_cc * principal_velocity_roe_ave;
@@ -277,25 +322,6 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             if constexpr( CC::DIM() == Dimension::Three )
                left_eigenvector[ev_principal][ETI(MF::AME()[minor2])    ] =  one_cc * minor2_velocity_roe_ave;
             left_eigenvector[   ev_principal][ETI(Equation::Energy)     ] = -one_cc;
-
-            if constexpr( CC::DIM() != Dimension::One ) {
-               // Additional eigenvector for lambda = u related to second momentum equation (= first minor momentum)
-               left_eigenvector[   ev_minor1][ETI(Equation::Mass)       ] = minor1_velocity_roe_ave * one_density_roe_ave;
-               left_eigenvector[   ev_minor1][ETI(MF::AME()[principal]) ] = 0.0;
-               left_eigenvector[   ev_minor1][ETI(MF::AME()[minor1])    ] = -one_density_roe_ave;
-               if constexpr( CC::DIM() == Dimension::Three )
-                  left_eigenvector[ev_minor1][ETI(MF::AME()[minor2])    ] = 0.0;
-               left_eigenvector[   ev_minor1][ETI(Equation::Energy)     ] = 0.0;
-            }
-
-            if constexpr( CC::DIM() == Dimension::Three ) {
-               // Additional eigenvector for lambda = u related to third momentum equation (= second minor momentum)
-               left_eigenvector[   ev_minor2][ETI(Equation::Mass)       ] = -minor2_velocity_roe_ave * one_density_roe_ave;
-               left_eigenvector[   ev_minor2][ETI(MF::AME()[principal]) ] = 0.0;
-               left_eigenvector[   ev_minor2][ETI(MF::AME()[minor1])    ] = 0.0;
-               left_eigenvector[   ev_minor2][ETI(MF::AME()[minor2])    ] = one_density_roe_ave;
-               left_eigenvector[   ev_minor2][ETI(Equation::Energy)     ] = 0.0;
-            }
 
             // eigenvector for lambda = u+c
             left_eigenvector[   MF::ANOE()-1][ETI(Equation::Mass)       ] = 0.5 * one_cc * (gruneisen_roe_ave*q_squared - gruneisen_roe_ave*enthalpy_roe_ave - (principal_velocity_roe_ave-c) * c);
@@ -312,48 +338,48 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Mass equation entries of right eigenvectors
             right_eigenvector[   ETI(Equation::Mass)      ][      0     ] = 1.0;
-            right_eigenvector[   ETI(Equation::Mass)      ][ev_principal] = gruneisen_roe_ave;
             if constexpr( CC::DIM() != Dimension::One )
-               right_eigenvector[ETI(Equation::Mass)      ][ev_minor1   ] = 0.0;
+               right_eigenvector[ETI(Equation::Mass)      ][      1     ] = 0.0;
             if constexpr( CC::DIM() == Dimension::Three )
-               right_eigenvector[ETI(Equation::Mass)      ][ev_minor2   ] = 0.0;
+               right_eigenvector[ETI(Equation::Mass)      ][      2     ] = 0.0;
+            right_eigenvector[   ETI(Equation::Mass)      ][ev_principal] = gruneisen_roe_ave;
             right_eigenvector[   ETI(Equation::Mass)      ][MF::ANOE()-1] = 1.0;
 
             // principal momentum equation entries
             right_eigenvector[   ETI(MF::AME()[principal])][      0     ] = principal_velocity_roe_ave - c;
-            right_eigenvector[   ETI(MF::AME()[principal])][ev_principal] = gruneisen_roe_ave * principal_velocity_roe_ave;
             if constexpr( CC::DIM() != Dimension::One )
-               right_eigenvector[ETI(MF::AME()[principal])][ev_minor1   ] = 0.0;
+               right_eigenvector[ETI(MF::AME()[principal])][      1     ] = 0.0;
             if constexpr( CC::DIM() == Dimension::Three )
-               right_eigenvector[ETI(MF::AME()[principal])][ev_minor2   ] = 0.0;
+               right_eigenvector[ETI(MF::AME()[principal])][      2     ] = 0.0;
+            right_eigenvector[   ETI(MF::AME()[principal])][ev_principal] = gruneisen_roe_ave * principal_velocity_roe_ave;
             right_eigenvector[   ETI(MF::AME()[principal])][MF::ANOE()-1] = principal_velocity_roe_ave + c;
 
             if constexpr( CC::DIM() != Dimension::One ) {
                // first minor momentum equation entries
                right_eigenvector[   ETI(MF::AME()[minor1])][      0     ] = minor1_velocity_roe_ave;
-               right_eigenvector[   ETI(MF::AME()[minor1])][ev_principal] = gruneisen_roe_ave * minor1_velocity_roe_ave;
-               right_eigenvector[   ETI(MF::AME()[minor1])][ev_minor1   ] = -density_roe_ave;
+               right_eigenvector[   ETI(MF::AME()[minor1])][      1     ] = -density_roe_ave;
                if constexpr( CC::DIM() == Dimension::Three )
-                  right_eigenvector[ETI(MF::AME()[minor1])][ev_minor2   ] = 0.0;
+                  right_eigenvector[ETI(MF::AME()[minor1])][      2     ] = 0.0;
+               right_eigenvector[   ETI(MF::AME()[minor1])][ev_principal] = gruneisen_roe_ave * minor1_velocity_roe_ave;
                right_eigenvector[   ETI(MF::AME()[minor1])][MF::ANOE()-1] = minor1_velocity_roe_ave;
             }
 
             if constexpr( CC::DIM() == Dimension::Three ) {
                // second minor momentum equation entries
                right_eigenvector[ETI(MF::AME()[minor2])   ][      0     ] = minor2_velocity_roe_ave;
+               right_eigenvector[ETI(MF::AME()[minor2])   ][      1     ] = 0.0;
+               right_eigenvector[ETI(MF::AME()[minor2])   ][      2     ] = density_roe_ave;
                right_eigenvector[ETI(MF::AME()[minor2])   ][ev_principal] = gruneisen_roe_ave * minor2_velocity_roe_ave;
-               right_eigenvector[ETI(MF::AME()[minor2])   ][ev_minor1   ] = 0.0;
-               right_eigenvector[ETI(MF::AME()[minor2])   ][ev_minor2   ] = density_roe_ave;
                right_eigenvector[ETI(MF::AME()[minor2])   ][MF::ANOE()-1] = minor2_velocity_roe_ave;
             }
 
             // Energy equation entries
             right_eigenvector[   ETI(Equation::Energy)    ][      0     ] = enthalpy_roe_ave - principal_velocity_roe_ave * c;
-            right_eigenvector[   ETI(Equation::Energy)    ][ev_principal] = gruneisen_roe_ave * enthalpy_roe_ave - c*c;
             if constexpr( CC::DIM() != Dimension::One )
-               right_eigenvector[ETI(Equation::Energy)    ][ev_minor1   ] = -minor1_velocity_roe_ave * density_roe_ave;
+               right_eigenvector[ETI(Equation::Energy)    ][      1     ] = -minor1_velocity_roe_ave * density_roe_ave;
             if constexpr( CC::DIM() == Dimension::Three )
-               right_eigenvector[ETI(Equation::Energy)    ][ev_minor2   ] = density_roe_ave * minor2_velocity_roe_ave;
+               right_eigenvector[ETI(Equation::Energy)    ][      2     ] = density_roe_ave * minor2_velocity_roe_ave;
+            right_eigenvector[   ETI(Equation::Energy)    ][ev_principal] = gruneisen_roe_ave * enthalpy_roe_ave - c*c;
             right_eigenvector[   ETI(Equation::Energy)    ][MF::ANOE()-1] = enthalpy_roe_ave + principal_velocity_roe_ave * c;
 
 

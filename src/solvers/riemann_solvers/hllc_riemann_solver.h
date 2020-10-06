@@ -82,12 +82,6 @@ class HllcRiemannSolver : public RiemannSolver<HllcRiemannSolver> {
 
    friend RiemannSolver;
 
-   // is used to distinguish principal and secondary momenta such that one single Riemann solver
-   // routine can be used for all three spatial directions
-   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = { { { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ) },
-                                                                                     { ETI( Equation::MomentumY ), ETI( Equation::MomentumX ), ETI( Equation::MomentumZ ) },
-                                                                                     { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ) } } };
-
    template<Direction DIR>
    void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
                        double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
