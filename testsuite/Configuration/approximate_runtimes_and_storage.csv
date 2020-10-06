@@ -6,14 +6,14 @@ Runtime:
 Testcase            1D      2D      3D    Total
 ------------------------------------------------
 Compilation       1:10 h  0:16 h  0:06 h  1:32 h
-SinglePhase       0:32 h  0:03 h  1:15 h  1:50 h
+SinglePhase       0:32 h  0:03 h  0:25 h  1:00 h
 TwoPhase          0:23 h  0:03 h  1:04 h  1:30 h
 Parallelization   4:15 h  0:30 h  0:05 h  4:50 h
 DetailedSod       0:16 h  0:09 h  2:45 h  3:10 h
 Symmetry           ---     ---    1:05 h  1:05 h
 Physics            ---    5:40 h   ---    5:40 h
 ------------------------------------------------
-Total Testsuite   6:36 h  6:40 h  6:30 h 19:37 h
+Total Testsuite   6:36 h  6:40 h  5:20 h 18:20 h
 
 Storage:
 Note: The storage varies and can be larger or smaller depending on the block size of the file system
@@ -24,11 +24,11 @@ Note: The storage varies and can be larger or smaller depending on the block siz
 Testcase            1D      2D      3D    Total
 ------------------------------------------------
 Compilation       0.9 GB  0.3 GB   48 MB  1.2 GB
-SinglePhase       3.4 GB  1.0 GB  2.8 GB  7.2 GB
+SinglePhase       3.4 GB  1.0 GB  1.0 GB  5.4 GB
 TwoPhase          3.8 GB  0.2 GB  3.5 GB  7.5 GB
 Parallelization   2.6 GB  0.4 GB  0.7 GB  3.7 GB
 DetailedSod       0.7 GB  0.6 GB  7.5 GB  8.7 GB
 Symmetry           ---     ---    1.0 GB  1.0 GB
 Physics            ---    1.5 GB   ---    1.5 GB
 ------------------------------------------------
-Total Testsuite  11.4 GB  4.0 GB 15.5 GB 30.9 GB
+Total Testsuite  11.4 GB  4.0 GB 15.5 GB 29.1 GB

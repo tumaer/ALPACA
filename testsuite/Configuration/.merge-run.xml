@@ -29,7 +29,7 @@
          <skipNoReferenceCases> True </skipNoReferenceCases>
       </twoPhase>
       <detailedSod>
-         <active> Truie </active>
+         <active> True </active>
          <skipNoReferenceCases> True </skipNoReferenceCases>
          <reducedSet> False </reducedSet>
       </detailedSod>
