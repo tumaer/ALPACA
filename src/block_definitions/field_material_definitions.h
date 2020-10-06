@@ -352,6 +352,26 @@ public:
     * @return Set of parameters.
     */
    static constexpr auto ASOPA() { return active_parameters_; }
+
+   /**
+    * @brief Helper function to get the nth conservative equation that is NOT a momentum equation.
+    * @param n
+    * @return Identifier of the nth non-momentum equation.
+    */
+   static constexpr Equation NthNonMomentumEquation( unsigned int const n ) {
+      unsigned int skipped = 0;
+      for( unsigned int i = 0; i <= n; ) {
+         if( active_equations_[i + skipped] == Equation::MomentumX ||
+             active_equations_[i + skipped] == Equation::MomentumY ||
+             active_equations_[i + skipped] == Equation::MomentumZ ) {
+
+            ++skipped;
+         } else {
+            ++i;
+         }
+      }
+      return active_equations_[n + skipped];
+   }
 };
 
 using MF = MaterialFieldsDefinitions;

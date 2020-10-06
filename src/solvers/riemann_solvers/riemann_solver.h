@@ -74,40 +74,23 @@
 #include "materials/material_manager.h"
 
 namespace {
-   /**
-    * @brief Helper function to create the index sequence used to enforce symmetry while summing up conservative equation contributions in characteristic decomposition.
-    * @tparam RemainingIndices Zero-based index sequence representing the non-mandatory equations (i.e. non-standard Euler equations).
-    * @return The created index sequence.
-    */
-   template<std::size_t... RemainingIndices>
-   constexpr std::array<std::array<unsigned int, MF::ANOE()>, DTI( CC::DIM() )> MakeConservativeEquationSummationSequence( std::index_sequence<RemainingIndices...> const ) {
-#if DIMENSION == 1
-      return { { { ETI( Equation::Mass ), ETI( Equation::MomentumX ), ETI( Equation::Energy ), ( RemainingIndices + DTI( CC::DIM() ) + 2 )... } } };
-#elif DIMENSION == 2
-      return { { { ETI( Equation::Mass ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::Energy ), ( RemainingIndices + DTI( CC::DIM() ) + 2 )... },
-                 { ETI( Equation::Mass ), ETI( Equation::MomentumY ), ETI( Equation::MomentumX ), ETI( Equation::Energy ), ( RemainingIndices + DTI( CC::DIM() ) + 2 )... } } };
-#else
-      return { { { ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::Energy ), ETI( Equation::Mass ), ( RemainingIndices + DTI( CC::DIM() ) + 2 )... },
-                 { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::Energy ), ETI( Equation::Mass ), ( RemainingIndices + DTI( CC::DIM() ) + 2 )... },
-                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( Equation::Energy ), ETI( Equation::Mass ), ( RemainingIndices + DTI( CC::DIM() ) + 2 )... } } };
-#endif
-   }
 
    /**
-    * @brief Helper function to create the index sequence used to enforce symmetry while summing up contributions of the characteristic fields.
-    * @tparam RemainingIndices Zero-based index sequence representing the non-standard characteristic fields (i.e. characteristic fields not appearing in the standard Euler equations).
+    * @brief Helper function to create the index sequence used to enforce symmetry while summing up conservative equation contributions in characteristic decomposition.
+    * @tparam RemainingIndices Zero-based index sequence representing the non-momentum equations. Are transformed into real equation indices.
     * @return The created index sequence.
     */
-   template<std::size_t... RemainingIndices>
-   constexpr std::array<std::array<unsigned int, MF::ANOE() - 2>, DTI( CC::DIM() )> MakeCharacteristicFieldSummationSequence( std::index_sequence<RemainingIndices...> const ) {
+   template<std::size_t... NonMomentumIndices>
+   constexpr std::array<std::array<unsigned int, MF::ANOE()>, DTI( CC::DIM() )> MakeConservativeEquationSummationSequence( std::index_sequence<NonMomentumIndices...> const ) {
 #if DIMENSION == 1
-      return { { { 1, ( RemainingIndices + DTI( CC::DIM() ) + 1 )... } } };
+      return { { { ETI( Equation::MomentumX ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
 #elif DIMENSION == 2
-      return { { { 1, 2, ( RemainingIndices + DTI( CC::DIM() ) + 1 )... }, { 2, 1, ( RemainingIndices + DTI( CC::DIM() ) + 1 )... } } };
+      return { { { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
+                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
 #else
-      return { { { 2, 3, 1, ( RemainingIndices + DTI( CC::DIM() ) + 1 )... },
-                 { 3, 1, 2, ( RemainingIndices + DTI( CC::DIM() ) + 1 )... },
-                 { 1, 2, 3, ( RemainingIndices + DTI( CC::DIM() ) + 1 )... } } };
+      return { { { ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
+                 { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
+                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
 #endif
    }
 }// namespace
@@ -120,8 +103,7 @@ class RiemannSolver {
 
    friend DerivedRiemannSolver;
 
-   static constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence( std::make_index_sequence<MF::ANOE() - DTI( CC::DIM() ) - 2>{} );
-   static constexpr auto characteristic_field_summation_sequence_  = MakeCharacteristicFieldSummationSequence( std::make_index_sequence<MF::ANOE() - DTI( CC::DIM() ) - 2>{} );
+   static constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence( std::make_index_sequence<MF::ANOE() - DTI( CC::DIM() )>{} );
 
    EigenDecomposition const& eigendecomposition_calculator_;
    MaterialManager const& material_manager_;

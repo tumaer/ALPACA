@@ -142,16 +142,14 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
 
-   // declaration of applied vectors
-   std::vector<double> state_face_left( MF::ANOE() );                        //variable vector containing interpolated states of left patch of cell face i/j/k+1/2
-   std::vector<double> state_face_right( MF::ANOE() );                       //variable vector containing interpolated states of right patch of cell face i/j/k+1/2
+   // declaration of applied arrays
    std::array<double, ReconstructionStencil::StencilSize()> u_characteristic;//temp storage for characteristic decomposition
-   std::vector<double> characteristic_average_plus( MF::ANOE() );            // state_face_left  in characteristic space
-   std::vector<double> characteristic_average_minus( MF::ANOE() );           // state_face_right in characteristic space
-   std::vector<double> flux_left( MF::ANOE() );                              // F(state_face_left)
-   std::vector<double> flux_right( MF::ANOE() );                             // F(state_face_right)
+   std::array<double, MF::ANOE()> characteristic_average_plus;               // state_face_left  in characteristic space
+   std::array<double, MF::ANOE()> characteristic_average_minus;              // state_face_right in characteristic space
+   std::array<double, MF::ANOE()> flux_left;                                 // F(state_face_left)
+   std::array<double, MF::ANOE()> flux_right;                                // F(state_face_right)
 
-   constexpr unsigned int principal_momentum = momentum_order_[DTI( DIR )][0];
+   constexpr unsigned int principal_momentum_index = ETI( MF::AME()[DTI( DIR )] );
 
    constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
    constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
@@ -206,19 +204,8 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
             }// N-Loop
 
             // back-transformation into physical space
-            for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
-               state_face_left[l]  = 0.0;
-               state_face_right[l] = 0.0;
-               for( unsigned int const n : characteristic_field_summation_sequence_[DTI( DIR )] ) {
-                  state_face_left[l] += characteristic_average_minus[n] * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
-                  state_face_right[l] += characteristic_average_plus[n] * Roe_eigenvectors_right[i_index][j_index][k_index][l][n];
-               }// N-Loop
-               // Non-linear contributions have to be added together to maintain full symmetry
-               state_face_left[l] += ( characteristic_average_minus[0] * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
-                                       characteristic_average_minus[MF::ANOE() - 1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE() - 1] );
-               state_face_right[l] += ( characteristic_average_plus[0] * Roe_eigenvectors_right[i_index][j_index][k_index][l][0] +
-                                        characteristic_average_plus[MF::ANOE() - 1] * Roe_eigenvectors_right[i_index][j_index][k_index][l][MF::ANOE() - 1] );
-            }// L-Loop
+            auto const state_face_left  = eigendecomposition_calculator_.TransformToPhysicalSpace( characteristic_average_minus, Roe_eigenvectors_right[i_index][j_index][k_index] );
+            auto const state_face_right = eigendecomposition_calculator_.TransformToPhysicalSpace( characteristic_average_plus, Roe_eigenvectors_right[i_index][j_index][k_index] );
 
             // Check for invalid cells due to ghost fluid method
             if( state_face_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || state_face_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
@@ -230,8 +217,10 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
             // Check for invalid cells due to ghost fluid method
             if( pressure_left <= -B || pressure_right <= -B ) continue;
 
-            double const velocity_left        = state_face_left[principal_momentum] / state_face_left[ETI( Equation::Mass )];
-            double const velocity_right       = state_face_right[principal_momentum] / state_face_right[ETI( Equation::Mass )];
+            double const one_density_left     = 1.0 / state_face_left[ETI( Equation::Mass )];
+            double const one_density_right    = 1.0 / state_face_right[ETI( Equation::Mass )];
+            double const velocity_left        = state_face_left[principal_momentum_index] * one_density_left;
+            double const velocity_right       = state_face_right[principal_momentum_index] * one_density_right;
             double const speed_of_sound_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_left[ETI( Equation::Mass )], pressure_left );
             double const speed_of_sound_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_right[ETI( Equation::Mass )], pressure_right );
 
@@ -246,17 +235,20 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
             double const wave_speed_right = std::max( wave_speed_right_simple, 0.0 );
 
             // Calculation of left and right flux
-            flux_left[ETI( Equation::Mass )]    = state_face_left[principal_momentum];
-            flux_left[principal_momentum]       = ( ( state_face_left[principal_momentum] * state_face_left[principal_momentum] ) / state_face_left[ETI( Equation::Mass )] ) + pressure_left;
-            flux_left[ETI( Equation::Energy )]  = velocity_left * ( state_face_left[ETI( Equation::Energy )] + pressure_left );
-            flux_right[ETI( Equation::Mass )]   = state_face_right[principal_momentum];
-            flux_right[principal_momentum]      = ( ( state_face_right[principal_momentum] * state_face_right[principal_momentum] ) / state_face_right[ETI( Equation::Mass )] ) + pressure_right;
-            flux_right[ETI( Equation::Energy )] = velocity_right * ( state_face_right[ETI( Equation::Energy )] + pressure_right );
+            flux_left[ETI( Equation::Mass )]     = state_face_left[principal_momentum_index];
+            flux_left[principal_momentum_index]  = ( ( state_face_left[principal_momentum_index] * state_face_left[principal_momentum_index] ) * one_density_left ) + pressure_left;
+            flux_left[ETI( Equation::Energy )]   = velocity_left * ( state_face_left[ETI( Equation::Energy )] + pressure_left );
+            flux_right[ETI( Equation::Mass )]    = state_face_right[principal_momentum_index];
+            flux_right[principal_momentum_index] = ( ( state_face_right[principal_momentum_index] * state_face_right[principal_momentum_index] ) * one_density_right ) + pressure_right;
+            flux_right[ETI( Equation::Energy )]  = velocity_right * ( state_face_right[ETI( Equation::Energy )] + pressure_right );
 
-            // Momenta besides principal momentum (start iterating at 1)
-            for( unsigned int d = 1; d < DTI( CC::DIM() ); ++d ) {
-               flux_left[momentum_order_[DTI( DIR )][d]]  = velocity_left * state_face_left[momentum_order_[DTI( DIR )][d]];
-               flux_right[momentum_order_[DTI( DIR )][d]] = velocity_right * state_face_right[momentum_order_[DTI( DIR )][d]];
+            // minor momenta
+            for( unsigned int d = 0; d < DTI( CC::DIM() ) - 1; ++d ) {
+               // get the index of this minor momentum
+               unsigned int const minor_momentum_index = ETI( MF::AME()[DTI( GetMinorDirection<DIR>( d ) )] );
+
+               flux_left[minor_momentum_index]  = velocity_left * state_face_left[minor_momentum_index];
+               flux_right[minor_momentum_index] = velocity_right * state_face_right[minor_momentum_index];
             }
 
             for( unsigned int n = 0; n < MF::ANOE(); ++n ) {

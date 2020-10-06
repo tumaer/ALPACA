@@ -217,8 +217,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
    std::array<double, ReconstructionStencil::StencilSize()> positive_characteristic_flux;
    std::array<double, ReconstructionStencil::StencilSize()> negative_characteristic_flux;
 
-   double alpha_fluxvectorsplitting[MF::ANOE()];// artificial viscosity / alpha of flux-vector splitting f(u) +- alpha u
-   double physical_flux[MF::ANOE()][MF::ANOE()];
+   std::array<double, MF::ANOE()> characteristic_flux;
 
    auto const& conservatives = block.GetAverageBuffer();
 
@@ -230,20 +229,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
             int const j_index = j - offset_y;
             int const k_index = k - offset_z;
 
-#ifndef PERFORMANCE
-            //NH Restting pure precaution
-            for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
-               alpha_fluxvectorsplitting[e] = 0.0;
-               for( unsigned int ee = 0; ee < MF::ANOE(); ++ee ) {
-                  physical_flux[e][ee] = 0.0;
-               }
-            }
-#endif
-
-            // Flux-Vector splitting: flux function => f(u) +- alpha*u
-            for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
-               alpha_fluxvectorsplitting[l] = fluxfunction_wavespeed[i_index][j_index][k_index][l];
-            }
+            auto const& alpha_fluxvectorsplitting = fluxfunction_wavespeed[i_index][j_index][k_index];
 
             // reconstruct fluxes at face i+1/2 by characteristic decomposition and applying an WENO scheme to smoothen stencils
             for( unsigned int n = 0; n < MF::ANOE(); ++n ) {// n is index of characteristic field (eigenvalue, eigenvector)
@@ -265,26 +251,14 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
                }
 
                //apply WENO scheme to compute characteristic fluxes
-               double const characteristic_flux = 0.5 * ( SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( positive_characteristic_flux, cell_size ) + SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( negative_characteristic_flux, cell_size ) );
-
-               // back-transformation into physical space
-               for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
-                  physical_flux[l][n] = characteristic_flux * roe_eigenvectors_right[i_index][j_index][k_index][l][n];
-               }
+               characteristic_flux[n] = 0.5 * ( SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( positive_characteristic_flux, cell_size ) + SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( negative_characteristic_flux, cell_size ) );
             }
 
             // reconstruct the fluxes at face i+1/2
-            for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
-               double flux = 0.0;
-               // n is index of conservative equation, l is index of characteristic field
-               for( unsigned int const n : characteristic_field_summation_sequence_[DTI( DIR )] ) {
-                  // first sum contributions of eigenvalues u in prescribed order
-                  flux += physical_flux[l][n];
-               }
-               // Non-linear contributions (corresponding to eigenvalues u-c and u+c) have to be added separately to maintain full symmetry
-               flux += ( physical_flux[l][0] + physical_flux[l][MF::ANOE() - 1] );
+            auto const physical_flux = eigendecomposition_calculator_.TransformToPhysicalSpace( characteristic_flux, roe_eigenvectors_right[i_index][j_index][k_index] );
 
-               fluxes[l][i_index][j_index][k_index] += flux;
+            for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
+               fluxes[l][i_index][j_index][k_index] += physical_flux[l];
             }
          }
       }
