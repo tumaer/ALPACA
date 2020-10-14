@@ -87,15 +87,15 @@ class StiffenedGasCompleteSafe : public EquationOfState {
    double const specific_gas_constant_;
 
    // functions required from the bae class
-   double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
-   double DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetGruneisen() const override;
-   double DoGetPsi( double const pressure, double const one_density ) const override;
-   double DoGetGamma() const override;
-   double DoGetB() const override;
-   double DoGetSpeedOfSound( double const density, double const pressure ) const override;
+   double ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const override;
+   double ComputeTemperature( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double GetGruneisen() const override;
+   double ComputePsi( double const pressure, double const one_density ) const override;
+   double GetGamma() const override;
+   double GetB() const override;
+   double ComputeSpeedOfSound( double const density, double const pressure ) const override;
 
 public:
    StiffenedGasCompleteSafe() = delete;

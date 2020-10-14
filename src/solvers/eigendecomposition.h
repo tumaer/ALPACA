@@ -207,7 +207,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
    PrimeStates const& prime_states                            = block.GetPrimeStateBuffer();
    double const( &pressure )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Pressure );
 
-   double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().GetGruneisen();
+   double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().Gruneisen();
 
    for( unsigned int i = start_x; i <= CC::LICX(); ++i ) {
       for( unsigned int j = start_y; j <= CC::LICY(); ++j ) {
@@ -239,8 +239,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             double const minor1_velocity_target     = CC::DIM() != Dimension::One   ? prime_states[MF::AV()[minor1]][i][j][k] : 0.0;
             double const minor2_velocity_target     = CC::DIM() == Dimension::Three ? prime_states[MF::AV()[minor2]][i][j][k] : 0.0;
             double const pressure_target            = pressure[i][j][k];
-            double const generalized_psi_target     = material_manager_.GetMaterial(material).GetEquationOfState().GetPsi(pressure_target, one_rho_target);
-            double const gruneisen_target           = CC::GruneisenDensityDependent() ? material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen(rho_target) : 0.0;
+            double const generalized_psi_target     = material_manager_.GetMaterial(material).GetEquationOfState().Psi(pressure_target, one_rho_target);
+            double const gruneisen_target           = CC::GruneisenDensityDependent() ? material_manager_.GetMaterial(material).GetEquationOfState().Gruneisen(rho_target) : 0.0;
 
             double const rho_neighbor               =       density[in][jn][kn];
             double const one_rho_neighbor           = 1.0 / density[in][jn][kn];
@@ -252,8 +252,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             double const minor1_velocity_neighbor   = CC::DIM() != Dimension::One   ? prime_states[MF::AV()[minor1]][in][jn][kn] : 0.0;
             double const minor2_velocity_neighbor   = CC::DIM() == Dimension::Three ? prime_states[MF::AV()[minor2]][in][jn][kn] : 0.0;
             double const pressure_neighbor          =   pressure[in][jn][kn];
-            double const generalized_psi_neighbor   = material_manager_.GetMaterial(material).GetEquationOfState().GetPsi(pressure_neighbor, one_rho_neighbor);
-            double const gruneisen_neighbor         = CC::GruneisenDensityDependent() ? material_manager_.GetMaterial(material).GetEquationOfState().GetGruneisen(rho_neighbor) : 0.0;
+            double const generalized_psi_neighbor   = material_manager_.GetMaterial(material).GetEquationOfState().Psi(pressure_neighbor, one_rho_neighbor);
+            double const gruneisen_neighbor         = CC::GruneisenDensityDependent() ? material_manager_.GetMaterial(material).GetEquationOfState().Gruneisen(rho_neighbor) : 0.0;
 
             // compute expensive and frequently used temporaries
             double const sqrt_rho_target   = std::sqrt(rho_target);
@@ -268,8 +268,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             double const minor2_velocity_roe_ave = ((minor2_velocity_target * sqrt_rho_target) + (minor2_velocity_neighbor * sqrt_rho_neighbor)) * rho_div;
             double const generalized_psi_roe_ave = ((generalized_psi_target * sqrt_rho_target) + (generalized_psi_neighbor * sqrt_rho_neighbor)) * rho_div;
             double const gruneisen_roe_ave = CC::GruneisenDensityDependent() ? ((gruneisen_target * sqrt_rho_target) + (gruneisen_neighbor * sqrt_rho_neighbor)) * rho_div : gruneisen_coefficient_material;
-            double const enthalpy_roe_ave = ( material_manager_.GetMaterial(material).GetEquationOfState().GetEnthalpy(rho_target,   x_momentum_target,   y_momentum_target,   z_momentum_target,   energy_target )   * sqrt_rho_target
-                                            + material_manager_.GetMaterial(material).GetEquationOfState().GetEnthalpy(rho_neighbor, x_momentum_neighbor, y_momentum_neighbor, z_momentum_neighbor, energy_neighbor ) * sqrt_rho_neighbor)
+            double const enthalpy_roe_ave = ( material_manager_.GetMaterial(material).GetEquationOfState().Enthalpy(rho_target,   x_momentum_target,   y_momentum_target,   z_momentum_target,   energy_target )   * sqrt_rho_target
+                                            + material_manager_.GetMaterial(material).GetEquationOfState().Enthalpy(rho_neighbor, x_momentum_neighbor, y_momentum_neighbor, z_momentum_neighbor, energy_neighbor ) * sqrt_rho_neighbor)
                                             * rho_div;
 
             // Absolute roe averaged velocity, speed of sound
@@ -404,8 +404,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Flux-function artificial viscosity -> Local-Lax-Friedrichs eigenvalues
             if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs ) {
-               double const c_target   = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_target,   pressure_target);
-               double const c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_neighbor, pressure_neighbor);
+               double const c_target   = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_target,   pressure_target);
+               double const c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_neighbor, pressure_neighbor);
 
                SaveForAllFields( eigenvalues,
                   std::max(std::abs(principal_velocity_target - c_target),std::abs(principal_velocity_neighbor - c_neighbor)),
@@ -415,8 +415,8 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
 
             // Flux-function artificial viscosity -> LLF-M eigenvalues
             if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
-               double const c_target   = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_target,   pressure_target);
-               double const c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().GetSpeedOfSound(rho_neighbor, pressure_neighbor);
+               double const c_target   = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_target,   pressure_target);
+               double const c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_neighbor, pressure_neighbor);
 
                double const c_target_m   = std::min( RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_target )  , c_target );
                double const c_neighbor_m = std::min( RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_neighbor ), c_neighbor );

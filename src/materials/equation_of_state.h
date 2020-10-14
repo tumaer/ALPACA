@@ -77,28 +77,28 @@
 class EquationOfState {
 
    // functions required to be implented from the derivwed class
-   virtual double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
-   virtual double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const = 0;
-   virtual double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const = 0;
+   virtual double ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const    = 0;
+   virtual double ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const    = 0;
+   virtual double ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const = 0;
    // Here we use the [[maybe_unused]] syntax to explicitly name the variables that should be used for derived classes.
-   virtual double DoGetTemperature( [[maybe_unused]] double const density,
-                                    [[maybe_unused]] double const momentum_x, [[maybe_unused]] double const momentum_y, [[maybe_unused]] double const momentum_z,
-                                    [[maybe_unused]] double const energy ) const {
+   virtual double ComputeTemperature( [[maybe_unused]] double const mass,
+                                      [[maybe_unused]] double const momentum_x, [[maybe_unused]] double const momentum_y, [[maybe_unused]] double const momentum_z,
+                                      [[maybe_unused]] double const energy ) const {
       return -1.0;
    }
 
-   virtual double DoGetGruneisen() const = 0;
-   virtual double DoGetGruneisen( [[maybe_unused]] double const density ) const {
-      return DoGetGruneisen();
+   virtual double GetGruneisen() const = 0;
+   virtual double GetGruneisen( [[maybe_unused]] double const density ) const {
+      return GetGruneisen();
    }
-   virtual double DoGetPsi( double const pressure, double const one_density ) const = 0;
-   virtual double DoGetGamma() const {
+   virtual double ComputePsi( double const pressure, double const one_density ) const = 0;
+   virtual double GetGamma() const {
       return -1.0;
    }
-   virtual double DoGetB() const {
+   virtual double GetB() const {
       return -1.0;
    }
-   virtual double DoGetSpeedOfSound( double const density, double const pressure ) const = 0;
+   virtual double ComputeSpeedOfSound( double const density, double const pressure ) const = 0;
 
 protected:
    // protected default constructor (can only be called from derived classes)
@@ -112,34 +112,34 @@ public:
    EquationOfState& operator=( EquationOfState&& ) = delete;
 
    /**
-    * @brief Computes the pressure for given input of a arbitrary density, momentum and energy according to the material equation of state.
-    * @param density The density used for the computation.
+    * @brief Computes the pressure for given input of a arbitrary mass, momentum and energy according to the material equation of state.
+    * @param mass The mass used for the computation.
     * @param momentum_x The momentum in x-direction used for the computation.
     * @param momentum_y The momentum in y-direction used for the computation.
     * @param momentum_z The momentum in z-direction used for the computation.
     * @param energy The energy used for the computation.
     * @return Pressure for the state imposed by the inputs of the implemented material.
     */
-   double GetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-      return DoGetPressure( density, momentum_x, momentum_y, momentum_z, energy );
+   double Pressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+      return ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy );
    }
 
    /**
     * @brief GetEnthalpy Computes the Enthalpy based on the given inputs according to the implemented equation of state and the material parameters.
-    * @param density The density used for the computation.
+    * @param mass The mass used for the computation.
     * @param momentum_x The momentum in x-direction used for the computation.
     * @param momentum_y The momentum in y-direction used for the computation.
     * @param momentum_z The momentum in z-direction used for the computation.
     * @param energy The energy used for the computation.
     * @return enthalpy for the state imposed by the inputs of the implemented material.
     */
-   double GetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-      return DoGetEnthalpy( density, momentum_x, momentum_y, momentum_z, energy );
+   double Enthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+      return ComputeEnthalpy( mass, momentum_x, momentum_y, momentum_z, energy );
    }
 
    /**
-    * @brief Computes the temperature for given input of a arbitrary density, momentum and energy according to the material equation of state.
-    * @param density The density used for the computation.
+    * @brief Computes the temperature for given input of a arbitrary mass, momentum and energy according to the material equation of state.
+    * @param mass The mass used for the computation.
     * @param momentum_x The momentum in x-direction used for the computation.
     * @param momentum_y The momentum in y-direction used for the computation.
     * @param momentum_z The momentum in z-direction used for the computation.
@@ -147,21 +147,21 @@ public:
     * @return Temperature for the state imposed by the inputs of the implemented material.
     * @note Returns -1.0 if the equation of state cannot supply a temperature calculation.
     */
-   double GetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-      return DoGetTemperature( density, momentum_x, momentum_y, momentum_z, energy );
+   double Temperature( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+      return ComputeTemperature( mass, momentum_x, momentum_y, momentum_z, energy );
    }
 
    /**
-    * @brief Computes the energy in the material for given input of density, momentum and pressure.
+    * @brief Computes the energy in the material for given input of density, velocity and pressure.
     * @param density The density used for the computation.
-    * @param momentum_x The momentum in x-direction used for the computation.
-    * @param momentum_y The momentum in y-direction used for the computation.
-    * @param momentum_z The momentum in z-direction used for the computation.
+    * @param velocity_x The velocity in x-direction used for the computation.
+    * @param velocity_y The velocity in y-direction used for the computation.
+    * @param velocity_z The velocity in z-direction used for the computation.
     * @param pressure The pressure used for the computation.
     * @return Energy for the state imposed by the inputs of the implemented material.
     */
-   double GetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-      return DoGetEnergy( density, momentum_x, momentum_y, momentum_z, pressure );
+   double Energy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
+      return ComputeEnergy( density, velocity_x, velocity_y, velocity_z, pressure );
    }
 
    /**
@@ -170,24 +170,24 @@ public:
     * @param pressure The pressure used for the computation.
     * @return Speed of sound for the state imposed by the inputs of the implemented material.
     */
-   double GetSpeedOfSound( double const density, double const pressure ) const {
-      return DoGetSpeedOfSound( density, pressure );
+   double SpeedOfSound( double const density, double const pressure ) const {
+      return ComputeSpeedOfSound( density, pressure );
    }
 
    /**
     * @brief Computes the Grueneisen coefficient according to the material equation of state. Dependent on material constants only so far.
     * @return Grueneisen coefficient for the implemented material.
     */
-   double GetGruneisen() const {
-      return DoGetGruneisen();
+   double Gruneisen() const {
+      return GetGruneisen();
    }
 
    /**
     * @brief Computes the Grueneisen coefficient according to the material equation of state. Dependent on material constants only so far.
     * @return Grueneisen coefficient for the implemented material.
     */
-   double GetGruneisen( double const density ) const {
-      return DoGetGruneisen( density );
+   double Gruneisen( double const density ) const {
+      return GetGruneisen( density );
    }
 
    /**
@@ -196,24 +196,24 @@ public:
     * @param one over density ( saves costs ) .
     * @return Psi for the state imposed by the inputs of the implemented material.
     */
-   double GetPsi( double const pressure, double const one_density ) const {
-      return DoGetPsi( pressure, one_density );
+   double Psi( double const pressure, double const one_density ) const {
+      return ComputePsi( pressure, one_density );
    }
 
    /**
     * @brief Returns the Gamma of the material.
     * @return Gamma value of the implemented material.
     */
-   double GetGamma() const {
-      return DoGetGamma();
+   double Gamma() const {
+      return GetGamma();
    }
 
    /**
     * @brief Returns the B of the material.
     * @return B value of the implemented material.
     */
-   double GetB() const {
-      return DoGetB();
+   double B() const {
+      return GetB();
    }
 };
 

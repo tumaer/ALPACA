@@ -85,12 +85,12 @@ class WaterlikeFluid : public EquationOfState {
    double const rho0_;
 
    // functions required from base class
-   double DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
-   double DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const override;
-   double DoGetGruneisen() const override;
-   double DoGetPsi( double const pressure, double const one_density ) const override;
-   double DoGetSpeedOfSound( double const density, double const pressure ) const override;
+   double ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const override;
+   double GetGruneisen() const override;
+   double ComputePsi( double const pressure, double const one_density ) const override;
+   double ComputeSpeedOfSound( double const density, double const pressure ) const override;
 
 public:
    WaterlikeFluid() = delete;

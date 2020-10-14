@@ -88,39 +88,39 @@ WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& d
 
 /**
  * @brief Computes pressure from inputs as A - B + B * ( rho / rho0 )^gamma.
- * @param density The density used for the computation.
+ * @param mass The mass used for the computation.
  * @return Pressure according to Tait's equation of state.
  */
-double WaterlikeFluid::DoGetPressure( double const density, double const, double const, double const, double const ) const {
-   return A_ - B_ + B_ * std::pow( density / rho0_, gamma_ );
+double WaterlikeFluid::ComputePressure( double const mass, double const, double const, double const, double const ) const {
+   return A_ - B_ + B_ * std::pow( mass / rho0_, gamma_ );
 }
 
 /**
  * @brief Gives the enthalpy for the given inputs. ( Not available for classic Tait ).
  * @return Zero. This is according to Tait's equation of state correct.
  */
-double WaterlikeFluid::DoGetEnthalpy( double const, double const, double const, double const, double const ) const {
+double WaterlikeFluid::ComputeEnthalpy( double const, double const, double const, double const, double const ) const {
    return 0.0;
 }
 
 /**
  * @brief Computes energy according to 1/( gamma-1 ) * ( p + B - A ) + B - A + 1/2 * rho *|v|^2.
  * @param density The density used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
+ * @param velocity_x The velocity in x-direction used for the computation.
+ * @param velocity_y The velocity in y-direction used for the computation.
+ * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
  * @return Energy according to Tait's equation of state.
  */
-double WaterlikeFluid::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-   return 1.0 / ( 1.0 - gamma_ ) * ( pressure + B_ - A_ ) + B_ - A_ + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / density );
+double WaterlikeFluid::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
+   return 1.0 / ( 1.0 - gamma_ ) * ( pressure + B_ - A_ ) + B_ - A_ + ( 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) * density );
 }
 
 /**
  * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
  * @return Gruneisen coefficient according to Tait's equation of state.
  */
-double WaterlikeFluid::DoGetGruneisen() const {
+double WaterlikeFluid::GetGruneisen() const {
    return 0.0;
 }
 
@@ -130,7 +130,7 @@ double WaterlikeFluid::DoGetGruneisen() const {
  * @param one_density The density used for the computation.
  * @return Psi according to Tait's equation of state.
  */
-double WaterlikeFluid::DoGetPsi( double const pressure, double const one_density ) const {
+double WaterlikeFluid::ComputePsi( double const pressure, double const one_density ) const {
    return gamma_ * ( pressure + B_ - A_ ) * one_density;
 }
 
@@ -140,7 +140,7 @@ double WaterlikeFluid::DoGetPsi( double const pressure, double const one_density
  * @param pressure The pressure used for the computation.
  * @return Speed of sound according to Tait's equation of state.
  */
-double WaterlikeFluid::DoGetSpeedOfSound( double const density, double const pressure ) const {
+double WaterlikeFluid::ComputeSpeedOfSound( double const density, double const pressure ) const {
    return std::sqrt( gamma_ * ( pressure + B_ - A_ ) / density );
 }
 
@@ -156,7 +156,7 @@ std::string WaterlikeFluid::GetLogData( unsigned int const indent, UnitHandler c
    // Name of the equation of state
    log_string += StringOperations::Indent( indent ) + "Type                 : Water-like fluid\n";
    // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( DoGetGruneisen(), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( GetGruneisen(), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "A                    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( A_, UnitType::Pressure ), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "B                    : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( B_, UnitType::Pressure ), 9 ) + "\n";

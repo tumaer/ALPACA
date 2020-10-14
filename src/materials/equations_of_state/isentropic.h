@@ -65,125 +65,40 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "eigendecomposition.h"
-#include "utilities/mathematical_functions.h"
-#include "user_specifications/numerical_setup.h"
 
-#include <cmath>
+#ifndef ISENTROPIC_H
+#define ISENTROPIC_H
 
-double EigenDecomposition::global_eigenvalues_[DTI( CC::DIM() )][MF::ANOE()];
-
-/**
- * @brief Standard constructor using an already existing MaterialManager.
- * @param material_manager The MaterialManager provides the correct equation of state for a given Material.
- */
-EigenDecomposition::EigenDecomposition( MaterialManager const& material_manager ) : material_manager_( material_manager ) {
-   /*Empty besides initializer list*/
-}
+#include "materials/equation_of_state.h"
+#include "materials/material.h"
 
 /**
- * @brief Transforms the given values from characteristic space back into physical space via the given eigenvectors.
- *        Underlying summations are done consistently in order to preserve symmetry.
- * @param characteristic_values Values in characteristic space.
- * @return Values in physical space.
+ * @brief The Isentropic class implements a generic isentropic material, i.e. material parameters must be set via caller input.
  */
-std::array<double, MF::ANOE()> const EigenDecomposition::TransformToPhysicalSpace( std::array<double, MF::ANOE()> const& characteristic_values,
-                                                                                   double const ( &roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()] ) const {
-   std::array<double, MF::ANOE()> physical_values;
+class Isentropic : public EquationOfState {
 
-   for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
-      physical_values[l] = 0.0;
-      // sum up linear contributions
-      for( unsigned int n = 1; n < MF::ANOE() - 1; ++n ) {
-         physical_values[l] += characteristic_values[n] * roe_eigenvectors_right[l][n];
-      }// n: characteristic fields
-      // Non-linear contributions have to be added together to maintain full symmetry
-      physical_values[l] += ( characteristic_values[0] * roe_eigenvectors_right[l][0] +
-                              characteristic_values[MF::ANOE() - 1] * roe_eigenvectors_right[l][MF::ANOE() - 1] );
-   }// l: conservatives
+   double const gamma_;
+   double const A_;
 
-   return physical_values;
-}
+   double ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const override;
+   double ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const override;
+   double GetGruneisen() const override;
+   double ComputePsi( double const pressure, double const one_density ) const override;
+   double GetGamma() const override;
+   double GetB() const override;
+   double ComputeSpeedOfSound( double const density, double const pressure ) const override;
 
-/**
- * @brief Computes the global Lax-Friedrichs eigenvalues (maxima) within the given block.
- * @param mat_block The block in which the eigenvalues are to be computed.
- * @param eigenvalues Indirect return parameter.
- */
-void EigenDecomposition::ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const {
+public:
+   Isentropic() = delete;
+   explicit Isentropic( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler );
+   virtual ~Isentropic()           = default;
+   Isentropic( const Isentropic& ) = delete;
+   Isentropic& operator=( const Isentropic& ) = delete;
+   Isentropic( Isentropic&& )                 = delete;
+   Isentropic& operator=( Isentropic&& ) = delete;
 
-   // We save u-c,u,u+c, i.e. three values, for the eigenvalues per direction
-   std::array<double, 3> max_eigenvalue_x = { 0.0 };
-   std::array<double, 3> max_eigenvalue_y = { 0.0 };
-   std::array<double, 3> max_eigenvalue_z = { 0.0 };
+   std::string GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const;
+};
 
-   // Access the pair's elements directly.
-   auto const& [material, block] = mat_block;
-
-   double const( &density )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Density );
-
-   for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-      for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
-         for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
-            /**
-              * This if statement is necessary due to the ghost-fluid method. In ghost-material cells which do not lie on the extension band, i.e. therein
-              * we do not have extended or integrated values, the density is zero. Therefore, we cannot compute Lax-Friedrichs eigenvalues in those cells.
-              */
-            if( density[i][j][k] <= 0.0 ) continue;
-
-            double const c = material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( density[i][j][k], block.GetPrimeStateBuffer( PrimeState::Pressure )[i][j][k] );
-            double const u = block.GetPrimeStateBuffer( PrimeState::VelocityX )[i][j][k];
-
-            max_eigenvalue_x[0] = std::max( max_eigenvalue_x[0], std::abs( u - c ) );
-            max_eigenvalue_x[1] = std::max( max_eigenvalue_x[1], std::abs( u ) );
-            max_eigenvalue_x[2] = std::max( max_eigenvalue_x[2], std::abs( u + c ) );
-
-            if constexpr( CC::DIM() != Dimension::One ) {
-               double const v = block.GetPrimeStateBuffer( PrimeState::VelocityY )[i][j][k];
-
-               max_eigenvalue_y[0] = std::max( max_eigenvalue_y[0], std::abs( v - c ) );
-               max_eigenvalue_y[1] = std::max( max_eigenvalue_y[1], std::abs( v ) );
-               max_eigenvalue_y[2] = std::max( max_eigenvalue_y[2], std::abs( v + c ) );
-            }
-
-            if constexpr( CC::DIM() == Dimension::Three ) {
-               double const w = block.GetPrimeStateBuffer( PrimeState::VelocityZ )[i][j][k];
-
-               max_eigenvalue_z[0] = std::max( max_eigenvalue_z[0], std::abs( w - c ) );
-               max_eigenvalue_z[1] = std::max( max_eigenvalue_z[1], std::abs( w ) );
-               max_eigenvalue_z[2] = std::max( max_eigenvalue_z[2], std::abs( w + c ) );
-            }
-         }
-      }
-   }
-
-   SaveForAllFields( eigenvalues[0], max_eigenvalue_x[0], max_eigenvalue_x[1], max_eigenvalue_x[2] );
-
-   if constexpr( CC::DIM() != Dimension::One ) {
-      SaveForAllFields( eigenvalues[1], max_eigenvalue_y[0], max_eigenvalue_y[1], max_eigenvalue_y[2] );
-   }
-
-   if constexpr( CC::DIM() == Dimension::Three ) {
-      SaveForAllFields( eigenvalues[2], max_eigenvalue_z[0], max_eigenvalue_z[1], max_eigenvalue_z[2] );
-   }
-}
-
-/**
- * @brief Stores the global Lax-Friedrichs eigenvalues for later usage.
- * @param eigenvalues The eigenvalues to be set.
- */
-void EigenDecomposition::SetGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const {
-   for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
-      for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
-         global_eigenvalues_[d][e] = eigenvalues[d][e];
-      }
-   }
-}
-
-/**
- * @brief Gives the stored global Lax-Friedrichs eigenvalues.
- * @return The buffer holding the global eigenvalues.
- */
-auto EigenDecomposition::GetGlobalEigenvalues() const -> double const ( & )[DTI( CC::DIM() )][MF::ANOE()] {
-   return global_eigenvalues_;
-}
+#endif// ISENTROPIC_H

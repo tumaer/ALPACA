@@ -86,50 +86,50 @@ StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> cons
 
 /**
  * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| ).
- * @param density The density used for the computation.
+ * @param mass The mass used for the computation.
  * @param momentum_x The momentum in x-direction used for the computation.
  * @param momentum_y The momentum in y-direction used for the computation.
  * @param momentum_z The momentum in z-direction used for the computation.
  * @param energy The energy used for the computation.
  * @return Pressure according to stiffened-gas equation of state.
  */
-double StiffenedGasSafe::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   double pressure = -gamma_ * background_pressure_ + ( gamma_ - 1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
+double StiffenedGasSafe::ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+   double pressure = -gamma_ * background_pressure_ + ( gamma_ - 1.0 ) * ( energy - 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( mass, epsilon_ ) );
    return std::max( pressure, -background_pressure_ + epsilon_ );
 }
 
 /**
 
  * @brief Computes enthalpy as ( E + p ) / rho.
- * @param density The density used for the computation.
+ * @param mass The mass used for the computation.
  * @param momentum_x The momentum in x-direction used for the computation.
  * @param momentum_y The momentum in y-direction used for the computation.
  * @param momentum_z The momentum in z-direction used for the computation.
  * @param energy The energy used for the computation.
  * @return Enthalpy value.
  */
-double StiffenedGasSafe::DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return ( energy + DoGetPressure( density, momentum_x, momentum_y, momentum_z, energy ) ) / std::max( density, epsilon_ );
+double StiffenedGasSafe::ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+   return ( energy + ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy ) ) / std::max( mass, epsilon_ );
 }
 
 /**
  * @brief Computes Energy from inputs as ( p + gamma * B ) / ( gamma - 1 ) + 0.5 * rho * ||v^2||.
  * @param density The density used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
+ * @param velocity_x The velocity in x-direction used for the computation.
+ * @param velocity_y The velocity in y-direction used for the computation.
+ * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
  * @return Energy according to stiffened-gas equation of state.
  */
-double StiffenedGasSafe::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
-   return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ - 1.0 ) + ( 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / std::max( density, epsilon_ ) );
+double StiffenedGasSafe::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
+   return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ - 1.0 ) + ( 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) * density );
 }
 
 /**
  * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
  * @return Gruneisen coefficient according to stiffened-gas equation of state.
  */
-double StiffenedGasSafe::DoGetGruneisen() const {
+double StiffenedGasSafe::GetGruneisen() const {
    return ( gamma_ - 1.0 );
 }
 
@@ -139,7 +139,7 @@ double StiffenedGasSafe::DoGetGruneisen() const {
  * @param one_density ( devision by zero is already avoided before ) .
  * @return Psi according to stiffened-gas equation of state.
  */
-double StiffenedGasSafe::DoGetPsi( double const pressure, double const one_density ) const {
+double StiffenedGasSafe::ComputePsi( double const pressure, double const one_density ) const {
    return ( pressure + gamma_ * background_pressure_ ) * one_density;
 }
 
@@ -149,7 +149,7 @@ double StiffenedGasSafe::DoGetPsi( double const pressure, double const one_densi
  * @param pressure The pressure used for the computation.
  * @return Speed of sound according to stiffened-gas equation of state.
  */
-double StiffenedGasSafe::DoGetSpeedOfSound( double const density, double const pressure ) const {
+double StiffenedGasSafe::ComputeSpeedOfSound( double const density, double const pressure ) const {
    double speed_of_sound_squared = gamma_ * ( pressure + background_pressure_ ) / std::max( density, epsilon_ );
    return std::sqrt( std::max( speed_of_sound_squared, epsilon_ ) );
 }
@@ -158,7 +158,7 @@ double StiffenedGasSafe::DoGetSpeedOfSound( double const density, double const p
  * @brief Returns Gamma.
  * @return Gamma.
  */
-double StiffenedGasSafe::DoGetGamma() const {
+double StiffenedGasSafe::GetGamma() const {
    return gamma_;
 }
 
@@ -166,7 +166,7 @@ double StiffenedGasSafe::DoGetGamma() const {
  * @brief Returns B.
  * @return B.
  */
-double StiffenedGasSafe::DoGetB() const {
+double StiffenedGasSafe::GetB() const {
    return background_pressure_;
 }
 
@@ -182,7 +182,7 @@ std::string StiffenedGasSafe::GetLogData( unsigned int const indent, UnitHandler
    // Name of the equation of state
    log_string += StringOperations::Indent( indent ) + "Type                 : Stiffened gas safe\n";
    // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( DoGetGruneisen(), 9 ) + "\n";
+   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( GetGruneisen(), 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
    log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
 

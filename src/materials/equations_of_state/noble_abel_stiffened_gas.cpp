@@ -95,73 +95,73 @@ NobleAbelStiffenedGas::NobleAbelStiffenedGas( std::unordered_map<std::string, do
 
 /**
  * @brief Computes the pressure from inputs as ( gamma - 1 ) * ( ( E  - 0.5 * rho * ||v^2|| ) / rho - e_const ) / ( 1 / rho - covolume ) - gamma * p_const.
- * @param density The density used for the computation.
+ * @param mass The mass used for the computation.
  * @param momentum_x The momentum in x-direction used for the computation.
  * @param momentum_y The momentum in y-direction used for the computation.
  * @param momentum_z The momentum in z-direction used for the computation.
  * @param energy The energy used for the computation.
  * @return Pressure according to NASG equation of state.
  */
-double NobleAbelStiffenedGas::DoGetPressure( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   double const one_density     = 1.0 / density;
-   double const internal_energy = one_density * ( energy - one_density * 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) );
+double NobleAbelStiffenedGas::ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+   double const one_mass        = 1.0 / mass;
+   double const internal_energy = one_mass * ( energy - one_mass * 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) );
 
-   return ( gamma_ - 1.0 ) * ( internal_energy - energy_constant_ ) / ( one_density - covolume_ ) - gamma_ * pressure_constant_;
+   return ( gamma_ - 1.0 ) * ( internal_energy - energy_constant_ ) / ( one_mass - covolume_ ) - gamma_ * pressure_constant_;
 }
 
 /**
  * @brief Computes enthalpy as ( E + p ) / rho.
- * @param density The density used for the computation.
+ * @param mass The mass used for the computation.
  * @param momentum_x The momentum in x-direction used for the computation.
  * @param momentum_y The momentum in y-direction used for the computation.
  * @param momentum_z The momentum in z-direction used for the computation.
  * @param energy The energy used for the computation.
  * @return Enthalpy value.
  */
-double NobleAbelStiffenedGas::DoGetEnthalpy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return ( energy + DoGetPressure( density, momentum_x, momentum_y, momentum_z, energy ) ) / density;
+double NobleAbelStiffenedGas::ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+   return ( energy + ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy ) ) / mass;
 }
 
 /**
  * @brief Computes Energy from inputs as rho * ( ( p + gamma * p_const ) / ( gamma - 1 ) * ( 1 / rho - covolume ) + e_const ) + 0.5 * rho * ||v^2||
  * @param density The density used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
+ * @param velocity_x The velocity in x-direction used for the computation.
+ * @param velocity_y The velocity in y-direction used for the computation.
+ * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
  * @return Energy according to NASG equation of state.
  */
-double NobleAbelStiffenedGas::DoGetEnergy( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const {
+double NobleAbelStiffenedGas::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
    double const internal_energy = ( pressure + gamma_ * pressure_constant_ ) / ( density * ( gamma_ - 1.0 ) ) * ( 1.0 - covolume_ * density ) + energy_constant_;
-   return density * internal_energy + 0.5 * DimensionAwareConsistencyManagedSum( momentum_x * momentum_x, momentum_y * momentum_y, momentum_z * momentum_z ) / density;
+   return density * ( internal_energy + 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) );
 }
 
 /**
  * @brief Computes temperature for Noble-Abel stiffened-gas EOS.
- * @param density The density used for the computation.
+ * @param mass The mass used for the computation.
  * @param momentum_x The momentum in x-direction used for the computation.
  * @param momentum_y The momentum in y-direction used for the computation.
  * @param momentum_z The momentum in z-direction used for the computation.
  * @param energy The energy used for the computation.
  * @return Temperature according to NASG EOS.
  */
-double NobleAbelStiffenedGas::DoGetTemperature( double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   double const pressure = DoGetPressure( density, momentum_x, momentum_y, momentum_z, energy );
-   return ( pressure + pressure_constant_ ) / ( density * ( gamma_ - 1.0 ) * specific_heat_capacity_ ) * ( 1.0 - covolume_ * density );
+double NobleAbelStiffenedGas::ComputeTemperature( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
+   double const pressure = ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy );
+   return ( pressure + pressure_constant_ ) / ( mass * ( gamma_ - 1.0 ) * specific_heat_capacity_ ) * ( 1.0 - covolume_ * mass );
 }
 
 /**
  * @brief Computes Gruneisen coefficient as ( gamma - 1 ) / ( 1 - covolume * rho )
  * @return Gruneisen coefficient according to NASG equation of state.
  */
-double NobleAbelStiffenedGas::DoGetGruneisen( double const density ) const {
+double NobleAbelStiffenedGas::GetGruneisen( double const density ) const {
    return ( gamma_ - 1.0 ) / ( 1.0 - covolume_ * density );
 }
 
 /**
- * @brief DO NOT CALL. Throws an error since Gruneisen coefficient for NASG is density dependent. Call NobleAbelStiffenedGas::DoGetGruneisen( double const density ) instead.
+ * @brief DO NOT CALL. Throws an error since Gruneisen coefficient for NASG is density dependent. Call NobleAbelStiffenedGas::GetGruneisen( double const density ) instead.
  */
-double NobleAbelStiffenedGas::DoGetGruneisen() const {
+double NobleAbelStiffenedGas::GetGruneisen() const {
    throw std::runtime_error( "NobleAbelStiffenedGas: Gruneisen parameter depends on density!" );
 }
 
@@ -171,7 +171,7 @@ double NobleAbelStiffenedGas::DoGetGruneisen() const {
  * @param one_density ( devision by zero is already avoided before ) .
  * @return Psi according to NASG equation of state.
  */
-double NobleAbelStiffenedGas::DoGetPsi( double const pressure, double const one_density ) const {
+double NobleAbelStiffenedGas::ComputePsi( double const pressure, double const one_density ) const {
    return ( pressure + gamma_ * pressure_constant_ ) * one_density * one_density / ( one_density - covolume_ );
 }
 
@@ -179,7 +179,7 @@ double NobleAbelStiffenedGas::DoGetPsi( double const pressure, double const one_
  * @brief Returns Gamma.
  * @return Gamma.
  */
-double NobleAbelStiffenedGas::DoGetGamma() const {
+double NobleAbelStiffenedGas::GetGamma() const {
    return gamma_;
 }
 
@@ -187,7 +187,7 @@ double NobleAbelStiffenedGas::DoGetGamma() const {
  * @brief Returns the pressure constant.
  * @return B.
  */
-double NobleAbelStiffenedGas::DoGetB() const {
+double NobleAbelStiffenedGas::GetB() const {
    return pressure_constant_;
 }
 
@@ -197,7 +197,7 @@ double NobleAbelStiffenedGas::DoGetB() const {
  * @param pressure The pressure used for the computation.
  * @return Speed of sound according to NASG equation of state.
  */
-double NobleAbelStiffenedGas::DoGetSpeedOfSound( double const density, double const pressure ) const {
+double NobleAbelStiffenedGas::ComputeSpeedOfSound( double const density, double const pressure ) const {
    double const speed_of_sound_squared = gamma_ * ( pressure + pressure_constant_ ) / ( density * ( 1.0 - covolume_ * density ) );
    return std::sqrt( speed_of_sound_squared );
 }
