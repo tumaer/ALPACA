@@ -104,16 +104,16 @@ double WaterlikeFluid::ComputeEnthalpy( double const, double const, double const
 }
 
 /**
- * @brief Computes energy according to 1/( gamma-1 ) * ( p + B - A ) + B - A + 1/2 * rho *|v|^2.
+ * @brief Computes energy according to Taits equation.
  * @param density The density used for the computation.
  * @param velocity_x The velocity in x-direction used for the computation.
  * @param velocity_y The velocity in y-direction used for the computation.
  * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
- * @return Energy according to Tait's equation of state.
+ * @return Energy according to given inputs.
  */
 double WaterlikeFluid::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
-   return 1.0 / ( 1.0 - gamma_ ) * ( pressure + B_ - A_ ) + B_ - A_ + ( 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) * density );
+   return ( 1.0 / ( 1.0 - gamma_ ) ) * ( pressure + B_ - A_ ) + B_ - A_ + ( 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) * density );
 }
 
 /**

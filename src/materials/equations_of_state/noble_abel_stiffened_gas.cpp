@@ -123,13 +123,13 @@ double NobleAbelStiffenedGas::ComputeEnthalpy( double const mass, double const m
 }
 
 /**
- * @brief Computes Energy from inputs as rho * ( ( p + gamma * p_const ) / ( gamma - 1 ) * ( 1 / rho - covolume ) + e_const ) + 0.5 * rho * ||v^2||
+ * @brief Computes Energy according to Nobel-Abel stiffend gas equation.
  * @param density The density used for the computation.
  * @param velocity_x The velocity in x-direction used for the computation.
  * @param velocity_y The velocity in y-direction used for the computation.
  * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
- * @return Energy according to NASG equation of state.
+ * @return Energy according to given inputs.
  */
 double NobleAbelStiffenedGas::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
    double const internal_energy = ( pressure + gamma_ * pressure_constant_ ) / ( density * ( gamma_ - 1.0 ) ) * ( 1.0 - covolume_ * density ) + energy_constant_;

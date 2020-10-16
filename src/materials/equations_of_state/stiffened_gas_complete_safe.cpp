@@ -118,13 +118,13 @@ double StiffenedGasCompleteSafe::ComputeEnthalpy( double const mass, double cons
 }
 
 /**
- * @brief Computes Energy from inputs as ( p + gamma * B ) / ( gamma - 1 ) + 0.5 * ||v^2||.
+ * @brief Computes Energy according to stiffened gas complete equation, but secured against division by zero.
  * @param density The density used for the computation.
  * @param velocity_x The velocity in x-direction used for the computation.
  * @param velocity_y The velocity in y-direction used for the computation.
  * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
- * @return Energy according to complete stiffened-gas equation of state.
+ * @return Energy according to given inputs.
  */
 double StiffenedGasCompleteSafe::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
    return density * energy_translation_factor_ + ( pressure + gamma_ * background_pressure_ ) / ( gamma_ - 1.0 ) + ( 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) * density );

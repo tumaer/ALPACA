@@ -113,13 +113,13 @@ double StiffenedGas::ComputeEnthalpy( double const mass, double const momentum_x
 }
 
 /**
- * @brief Computes Energy from inputs as ( p + gamma * B ) / ( gamma - 1 ) + 0.5 * rho * ||v^2||.
+ * @brief Computes energy according to stiffened gas equation.
  * @param density The density used for the computation.
  * @param velocity_x The velocity in x-direction used for the computation.
  * @param velocity_y The velocity in y-direction used for the computation.
  * @param velocity_z The velocity in z-direction used for the computation.
  * @param pressure The pressure used for the computation.
- * @return Energy according to stiffened-gas equation of state.
+ * @return Energy according to given inputs.
  */
 double StiffenedGas::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
    return ( pressure + gamma_ * background_pressure_ ) / ( gamma_ - 1.0 ) + ( 0.5 * DimensionAwareConsistencyManagedSum( velocity_x * velocity_x, velocity_y * velocity_y, velocity_z * velocity_z ) * density );
