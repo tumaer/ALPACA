@@ -171,10 +171,10 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
    auto const& [material, block] = mat_block;
 
    // To check for invalid cells due to ghost fluid method
-   double const B = material_manager_.GetMaterial( material ).GetEquationOfState().GetB();
+   double const B = material_manager_.GetMaterial( material ).GetEquationOfState().B();
 
    // For Toro signal speeds
-   double const gamma = material_manager_.GetMaterial( material ).GetEquationOfState().GetGamma();
+   double const gamma = material_manager_.GetMaterial( material ).GetEquationOfState().Gamma();
 
    for( unsigned int i = x_start; i <= x_end; ++i ) {
       for( unsigned int j = y_start; j <= y_end; ++j ) {
@@ -211,8 +211,8 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
             if( state_face_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || state_face_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
 
             // Compute pressure, velocity and speed of sound for both cells for reconstructed values
-            double const pressure_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetPressure( state_face_left[ETI( Equation::Mass )], state_face_left[ETI( Equation::MomentumX )], CC::DIM() > Dimension::One ? state_face_left[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? state_face_left[ETI( Equation::MomentumZ )] : 0.0, state_face_left[ETI( Equation::Energy )] );
-            double const pressure_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetPressure( state_face_right[ETI( Equation::Mass )], state_face_right[ETI( Equation::MomentumX )], CC::DIM() > Dimension::One ? state_face_right[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? state_face_right[ETI( Equation::MomentumZ )] : 0.0, state_face_right[ETI( Equation::Energy )] );
+            double const pressure_left  = material_manager_.GetMaterial( material ).GetEquationOfState().Pressure( state_face_left[ETI( Equation::Mass )], state_face_left[ETI( Equation::MomentumX )], CC::DIM() > Dimension::One ? state_face_left[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? state_face_left[ETI( Equation::MomentumZ )] : 0.0, state_face_left[ETI( Equation::Energy )] );
+            double const pressure_right = material_manager_.GetMaterial( material ).GetEquationOfState().Pressure( state_face_right[ETI( Equation::Mass )], state_face_right[ETI( Equation::MomentumX )], CC::DIM() > Dimension::One ? state_face_right[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? state_face_right[ETI( Equation::MomentumZ )] : 0.0, state_face_right[ETI( Equation::Energy )] );
 
             // Check for invalid cells due to ghost fluid method
             if( pressure_left <= -B || pressure_right <= -B ) continue;
@@ -221,8 +221,8 @@ void HllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const
             double const one_density_right    = 1.0 / state_face_right[ETI( Equation::Mass )];
             double const velocity_left        = state_face_left[principal_momentum_index] * one_density_left;
             double const velocity_right       = state_face_right[principal_momentum_index] * one_density_right;
-            double const speed_of_sound_left  = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_left[ETI( Equation::Mass )], pressure_left );
-            double const speed_of_sound_right = material_manager_.GetMaterial( material ).GetEquationOfState().GetSpeedOfSound( state_face_right[ETI( Equation::Mass )], pressure_right );
+            double const speed_of_sound_left  = material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( state_face_left[ETI( Equation::Mass )], pressure_left );
+            double const speed_of_sound_right = material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( state_face_right[ETI( Equation::Mass )], pressure_right );
 
             // Calculation of signal speeds
             auto const [wave_speed_left_simple, wave_speed_right_simple] = CalculateSignalSpeed( state_face_left[ETI( Equation::Mass )], state_face_right[ETI( Equation::Mass )],

@@ -237,19 +237,19 @@ class IterativeInterfaceRiemannSolver : public InterfaceRiemannSolver<DerivedIte
       /**
        * For the iteration procedure several constants can be computed in advance. Those constants can be found in \cite Toro2009 chapter 4.3.
        */
-      double const speed_of_sound_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().GetSpeedOfSound( rho_left, p_left );
-      double const speed_of_sound_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().GetSpeedOfSound( rho_right, p_right );
+      double const speed_of_sound_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().SpeedOfSound( rho_left, p_left );
+      double const speed_of_sound_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().SpeedOfSound( rho_right, p_right );
 
       double const impedance_left  = rho_left * speed_of_sound_left;
       double const impedance_right = rho_right * speed_of_sound_right;
 
       double const inverse_impedance_sum = 1.0 / std::max( ( impedance_left + impedance_right ), std::numeric_limits<double>::epsilon() );
 
-      double const gamma_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().GetGamma();
-      double const gamma_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().GetGamma();
+      double const gamma_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().Gamma();
+      double const gamma_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().Gamma();
 
-      double const pressure_constant_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().GetB();
-      double const pressure_constant_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().GetB();
+      double const pressure_constant_left  = material_manager_.GetMaterial( material_left ).GetEquationOfState().B();
+      double const pressure_constant_right = material_manager_.GetMaterial( material_right ).GetEquationOfState().B();
 
       double const pressure_function_left      = IterationUtilities::MaterialPressureFunction( p_left, pressure_constant_left );
       double const one_pressure_function_left  = 1.0 / std::max( pressure_function_left, std::numeric_limits<double>::epsilon() );
