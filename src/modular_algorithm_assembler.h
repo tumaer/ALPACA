@@ -72,7 +72,7 @@
 #include "initial_condition.h"
 #include "integrator/time_integrator_setup.h"
 #include "levelset/multi_phase_manager/multi_phase_manager_setup.h"
-#include "prime_states/prime_state_handler_setup.h"
+#include "prime_states/prime_state_handler.h"
 #include "parameter/parameter_manager.h"
 #include "solvers/space_solver.h"
 #include "input_output/input_output_manager.h"
@@ -82,7 +82,6 @@
 
 using TimeIntegratorConcretization    = TimeIntegratorSetup::Concretize<time_integrator>::type;
 using MultiPhaseManagerConcretization = MultiPhaseManagerSetup::Concretize<phase_manager>::type;
-using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
 
 /**
  *  @brief Executes the multiresolution Algorithm according to Kaiser et al. ( to appear ).
@@ -124,7 +123,7 @@ class ModularAlgorithmAssembler {
 
    MultiPhaseManagerConcretization const multi_phase_manager_;//TODO-19 NH make const
 
-   PrimeStateHandlerConcretization const prime_state_handler_;
+   PrimeStateHandler const prime_state_handler_;
 
    ParameterManager const parameter_manager_;
 

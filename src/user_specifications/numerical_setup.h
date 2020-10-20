@@ -73,10 +73,6 @@ enum class TimeIntegrators { RK2,
                              RK3 };
 constexpr TimeIntegrators time_integrator = TimeIntegrators::RK3;
 
-// PRIME_STATE_HANDLER
-enum class PrimeStateHandlers { Euler };
-constexpr PrimeStateHandlers prime_state_handler = PrimeStateHandlers::Euler;
-
 // MULTI_PHASE_MANAGER
 enum class PhaseManagers { TwoPhase,
                            NumerousPhase };
