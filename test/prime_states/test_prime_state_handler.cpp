@@ -65,66 +65,78 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef EULER_PRIME_STATE_HANDLER_H
-#define EULER_PRIME_STATE_HANDLER_H
+#include <catch.hpp>
 
-#include "prime_state_handler.h"
+#include "prime_states/prime_state_handler.h"
 
-/**
- * @brief This class handles the conversion between conservative and prime state values for the standard Euler equations.
- * @note Also calculates temperature if PrimeState::Temperature is active.
- */
-class EulerPrimeStateHandler : public PrimeStateHandler<EulerPrimeStateHandler> {
-   friend PrimeStateHandler;
+#include "materials/equations_of_state/stiffened_gas.h"
 
-   template<typename PrimeStatesContainerType, typename ConservativesContainerType>
-   inline void ConvertPrimeStatesToConservativesImplementation( MaterialName const& material, PrimeStatesContainerType const& prime_states_container, ConservativesContainerType& conservatives_container ) const {
-      double const density                                = prime_states_container[PTI( PrimeState::Density )];
-      conservatives_container[ETI( Equation::Mass )]      = density;
-      double const velocity_x                             = prime_states_container[PTI( PrimeState::VelocityX )];
-      conservatives_container[ETI( Equation::MomentumX )] = velocity_x * density;
+SCENARIO( "Conservative quantities and prime state values can be converted into each other", "[1rank]" ) {
 
-      double const velocity_y = CC::DIM() != Dimension::One ? prime_states_container[PTI( PrimeState::VelocityY )] : 0.0;
-      if constexpr( CC::DIM() != Dimension::One ) {
-         conservatives_container[ETI( Equation::MomentumY )] = velocity_y * density;
+   // Initialize the unit handler class
+   UnitHandler const unit_handler( 1.0, 1.0, 1.0, 1.0 );
+
+   // Here the stiffened gas complete safe equation of state is used since it provides a temperature computatation and the unit test does not depend on the
+   // activation of the temperature in the primestate struct
+   std::unordered_map<std::string, double> const eos_data = { { "gamma", 1.4 }, { "backgroundPressure", 1.0 } };
+   std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
+
+   // Define material properties and initialize material
+   double const shear_viscosity           = 1.0;
+   double const bulk_viscosity            = 2.0;
+   double const specific_heat_capacity    = 3.0;
+   double const thermal_heat_conductivity = 4.0;
+
+   // Instantiate material
+   std::vector<Material> materials;
+   materials.emplace_back( Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
+                                     nullptr, nullptr, unit_handler ) );
+
+   // Instantiate material pairing
+   std::vector<MaterialPairing> material_pairings;
+
+   auto const material_manager    = MaterialManager( std::move( materials ), std::move( material_pairings ) );
+   auto const prime_state_handler = PrimeStateHandler( material_manager );
+
+   GIVEN( "A set of prime states" ) {
+      std::array<double, MF::ANOP()> prime_states;
+      for( unsigned int p = 0; p < MF::ANOP(); ++p ) {
+         prime_states[p] = double( p + 1 );
       }
 
-      double const velocity_z = CC::DIM() == Dimension::Three ? prime_states_container[PTI( PrimeState::VelocityZ )] : 0.0;
-      if constexpr( CC::DIM() == Dimension::Three ) {
-         conservatives_container[ETI( Equation::MomentumZ )] = velocity_z * density;
+      // Obtain the material name of the single initialized material
+      MaterialName const material_name = material_manager.GetMaterialNames().front();
+
+      WHEN( "Prime states are converted to conservatives" ) {
+         std::array<double, MF::ANOE()> conservatives;
+         prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
+         THEN( "Momenta equal the product of density and velocity" ) {
+            for( unsigned int m = 0; m < DTI( CC::DIM() ); ++m ) {
+               REQUIRE( conservatives[ETI( MF::AME()[m] )] == Approx( prime_states[PTI( PrimeState::Density )] * prime_states[PTI( MF::AV()[m] )] ) );
+            }
+         }
+
+         THEN( "Density equals mass" ) {
+            REQUIRE( conservatives[ETI( Equation::Mass )] == Approx( prime_states[PTI( PrimeState::Density )] ) );
+         }
+
+         // Energy is not suitable to be checked since it depends on the used equation of state
       }
-      conservatives_container[ETI( Equation::Energy )] = material_manager_.GetMaterial( material ).GetEquationOfState().Energy( density, velocity_x, velocity_y, velocity_z, prime_states_container[PTI( PrimeState::Pressure )] );
+
+      WHEN( "Prime states are converted to conservatives and converted back to prime states" ) {
+         std::array<double, MF::ANOE()> conservatives;
+         std::array<double, MF::ANOP()> prime_states_new;
+         prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
+         prime_state_handler.ConvertConservativesToPrimeStates( material_name, conservatives, prime_states_new );
+
+         THEN( "The resulting prime states equal the original prime states" ) {
+            for( auto const& prime : MF::ASOP() ) {
+               // Do not take the temperature, since it depends on the equation of state.
+               if( prime != PrimeState::Temperature ) {
+                  REQUIRE( prime_states_new[PTI( prime )] == Approx( prime_states[PTI( prime )] ) );
+               }
+            }
+         }
+      }
    }
-
-   template<typename ConservativesContainerType, typename PrimeStatesContainerType>
-   inline void ConvertConservativesToPrimeStatesImplementation( MaterialName const& material, ConservativesContainerType const& conservatives_container, PrimeStatesContainerType& prime_states_container ) const {
-      double const one_density                             = 1.0 / conservatives_container[ETI( Equation::Mass )];
-      prime_states_container[PTI( PrimeState::Density )]   = conservatives_container[ETI( Equation::Mass )];
-      prime_states_container[PTI( PrimeState::VelocityX )] = conservatives_container[ETI( Equation::MomentumX )] * one_density;
-      if constexpr( CC::DIM() != Dimension::One ) {
-         prime_states_container[PTI( PrimeState::VelocityY )] = conservatives_container[ETI( Equation::MomentumY )] * one_density;
-      }
-      if constexpr( CC::DIM() == Dimension::Three ) {
-         prime_states_container[PTI( PrimeState::VelocityZ )] = conservatives_container[ETI( Equation::MomentumZ )] * one_density;
-      }
-      prime_states_container[PTI( PrimeState::Pressure )] = material_manager_.GetMaterial( material ).GetEquationOfState().Pressure( conservatives_container[ETI( Equation::Mass )], conservatives_container[ETI( Equation::MomentumX )], CC::DIM() != Dimension::One ? conservatives_container[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0, conservatives_container[ETI( Equation::Energy )] );
-      if constexpr( MF::IsPrimeStateActive( PrimeState::Temperature ) ) {
-         // only calculate temperature if the prime state is activated
-         prime_states_container[PTI( PrimeState::Temperature )] = material_manager_.GetMaterial( material ).GetEquationOfState().Temperature( conservatives_container[ETI( Equation::Mass )], conservatives_container[ETI( Equation::MomentumX )], CC::DIM() != Dimension::One ? conservatives_container[ETI( Equation::MomentumY )] : 0.0, CC::DIM() == Dimension::Three ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0, conservatives_container[ETI( Equation::Energy )] );
-      }
-   }
-
-public:
-   ~EulerPrimeStateHandler() = default;
-   /**
-    * @brief Construct a new EulerPrimeStateHandler using an existing MaterialManager instance.
-    * @param material_manager The MaterialManager object to be used for conversion.
-    */
-   explicit EulerPrimeStateHandler( MaterialManager const& material_manager ) : PrimeStateHandler( material_manager ) {}
-   EulerPrimeStateHandler( EulerPrimeStateHandler const& ) = delete;
-   EulerPrimeStateHandler& operator=( EulerPrimeStateHandler const& ) = delete;
-   EulerPrimeStateHandler( EulerPrimeStateHandler&& )                 = delete;
-   EulerPrimeStateHandler& operator=( EulerPrimeStateHandler&& ) = delete;
-};
-
-#endif// EULER_PRIME_STATE_HANDLER_H
+}

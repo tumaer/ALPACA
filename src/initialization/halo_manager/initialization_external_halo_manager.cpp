@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "initialization/halo_manager/initialization_external_halo_manager.h"
 
-#include "prime_states/prime_state_handler_setup.h"
+#include "prime_states/prime_state_handler.h"
 
 namespace Initialization {
 
@@ -82,9 +82,7 @@ namespace Initialization {
                                                                             UnitHandler const& unit_handler,
                                                                             MaterialManager const& material_manager ) {
 
-      // Declare the prime state handler that is used in the simulation and initialize it
-      using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
-      PrimeStateHandlerConcretization const prime_state_handler( material_manager );
+      PrimeStateHandler const prime_state_handler( material_manager );
       // Get all materials contained in the simulation
       std::vector<MaterialName> const material_names( material_manager.GetMaterialNames() );
 
@@ -118,9 +116,7 @@ namespace Initialization {
    std::vector<std::array<double, MF::ANOP()>> ConvertConservativesToPrimeStates( std::vector<std::array<double, MF::ANOE()>> const& fixed_conservatives,
                                                                                   MaterialManager const& material_manager ) {
 
-      // Declare the prime state handler that is used in the simulation and initialize it
-      using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
-      PrimeStateHandlerConcretization const prime_state_handler( material_manager );
+      PrimeStateHandler const prime_state_handler( material_manager );
 
       // Get all materials contained in the simulation
       std::vector<MaterialName> const material_names( material_manager.GetMaterialNames() );

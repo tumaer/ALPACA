@@ -85,7 +85,7 @@
 #include "enums/flux_splitting.h"
 
 #include "solvers/riemann_solvers/riemann_solver_setup.h"
-#include "prime_states/prime_state_handler_setup.h"
+#include "prime_states/prime_state_handler.h"
 #include "integrator/time_integrator_setup.h"
 #include "levelset/multi_phase_manager/multi_phase_manager_setup.h"
 #include "levelset/levelset_advector/levelset_advector_setup.h"
@@ -199,7 +199,6 @@ LogWriter::LogWriter( bool const save_all_ranks ) : logfile_name_( "Unnamed_Simu
    if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe_M || RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
       LogMessage( "Low-Mach-number limit factor                  : " + std::to_string( RoeSolverSettings::low_mach_number_limit_factor ) );
    }
-   LogMessage( "Prime state handler                           : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( PrimeStateHandlerSetup::Concretize<prime_state_handler>::type ).name() ) ) );
    LogMessage( "Reconstruction stencil                        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type ).name() ) ) );
    LogMessage( "Viscous fluxes reconstruction stencil         : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<viscous_fluxes_reconstruction_stencil>::type ).name() ) ) );
    LogMessage( "Heat fluxes reconstruction stencil            : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<heat_fluxes_reconstruction_stencil>::type ).name() ) ) );

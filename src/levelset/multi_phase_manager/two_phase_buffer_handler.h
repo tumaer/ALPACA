@@ -69,9 +69,7 @@
 #define TWO_PHASE_BUFFER_HANDLER_H
 
 #include "buffer_handler.h"
-#include "prime_states/prime_state_handler_setup.h"
-
-using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
+#include "prime_states/prime_state_handler.h"
 
 /**
  * @brief The TwoPhaseBufferHandler class is a specification of the BufferHandler for two phase simulations.
@@ -80,7 +78,7 @@ class TwoPhaseBufferHandler : public BufferHandler<TwoPhaseBufferHandler> {
 
    friend BufferHandler;
 
-   PrimeStateHandlerConcretization const prime_state_handler_;
+   PrimeStateHandler const prime_state_handler_;
 
 private:
    void TransformToConservativesImplementation( Node& node ) const;
