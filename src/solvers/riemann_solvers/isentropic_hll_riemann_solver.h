@@ -65,105 +65,44 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_SETUP_H
-#define RIEMANN_SOLVER_SETUP_H
 
-#include "user_specifications/numerical_setup.h"
-#include "user_specifications/equation_settings.h"
-#include "solvers/riemann_solvers/roe_riemann_solver.h"
-#include "solvers/riemann_solvers/hllc_riemann_solver.h"
-#include "solvers/riemann_solvers/isentropic_hllc_riemann_solver.h"
-#include "solvers/riemann_solvers/hll_riemann_solver.h"
-#include "solvers/riemann_solvers/isentropic_hll_riemann_solver.h"
-#include "user_specifications/riemann_solver_settings.h"
+#ifndef ISENTROPIC_HLL_RIEMANN_SOLVER_H
+#define ISENTROPIC_HLL_RIEMANN_SOLVER_H
+
+#include "solvers/riemann_solvers/riemann_solver.h"
+#include "block_definitions/block.h"
+#include "user_specifications/compile_time_constants.h"
 
 /**
- * @brief A namespace to get a RiemannSolver type based on a specified constexpr.
+ * @brief Discretization of the Riemann solver using the HLL procedure derived from \cite Toro2009, chapter 10.3 for isentropic cases.
  */
-namespace RiemannSolverSetup {
+class IsentropicHllRiemannSolver : public RiemannSolver<IsentropicHllRiemannSolver> {
 
-   namespace Isentropic {
-      /**
-       * @brief Function returning the Isentropic Riemann solver matching the type in the template argument.
-       * @tparam RiemannSolvers Specification of the RiemannSolver type.
-       */
-      template<RiemannSolvers>
-      struct Concretize;
+   friend RiemannSolver;
 
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hllc> {
-         using type = IsentropicHllcRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hll> {
-         using type = IsentropicHllRiemannSolver;
-      };
-   }// namespace Isentropic
+   // is used to distinguish principal and secondary momenta such that one single Riemann solver
+   // routine can be used for all three spatial directions
+   static constexpr std::array<std::array<unsigned int, 3>, 3> momentum_order_ = { { { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ) },
+                                                                                     { ETI( Equation::MomentumY ), ETI( Equation::MomentumX ), ETI( Equation::MomentumZ ) },
+                                                                                     { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ) } } };
 
-   namespace EulerNavierStokes {
-      /**
-       * @brief Function returning the Euler or Navier-Stokes equations Riemann solver matching the type in the template argument.
-       * @tparam RiemannSolvers Specification of the RiemannSolver type.
-       */
-      template<RiemannSolvers>
-      struct Concretize;
+   template<Direction DIR>
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double const cell_size ) const;
 
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Roe> {
-         using type = RoeRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hllc> {
-         using type = HllcRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hll> {
-         using type = HllRiemannSolver;
-      };
-   }// namespace EulerNavierStokes
+   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
 
-   /**
-   * @brief Function returning the Riemann solver matching the type in the template argument accroding to the equation set in the second template parameter.
-   * @tparam RiemannSolvers Specification of the RiemannSolver type.
-   * @tparam EquationSet Specification of the Equation(s) beeing solved.
-   */
-   template<RiemannSolvers R, EquationSet>
-   struct Dispatch {
-      using type = typename EulerNavierStokes::Concretize<R>::type;
-   };
+public:
+   IsentropicHllRiemannSolver() = delete;
+   explicit IsentropicHllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
+   ~IsentropicHllRiemannSolver()                                   = default;
+   IsentropicHllRiemannSolver( IsentropicHllRiemannSolver const& ) = delete;
+   IsentropicHllRiemannSolver& operator=( IsentropicHllRiemannSolver const& ) = delete;
+   IsentropicHllRiemannSolver( IsentropicHllRiemannSolver&& )                 = delete;
+   IsentropicHllRiemannSolver& operator=( IsentropicHllRiemannSolver&& ) = delete;
+};
 
-   /**
-    * @brief See generic implementation.
-    */
-   template<RiemannSolvers R>
-   struct Dispatch<R, EquationSet::Isentropic> {
-      using type = typename Isentropic::Concretize<R>::type;
-   };
-
-   /**
-    * @brief Function returning the Riemann solver for the (globally) selected Equation and the given Solver template argument.
-    * @tparam RiemannSolvers Specification of the RiemannSolver type.
-    */
-   template<RiemannSolvers R>
-   struct Concretize {
-      using type = typename Dispatch<R, active_equations>::type;
-   };
-
-}// namespace RiemannSolverSetup
-
-#endif// RIEMANN_SOLVER_SETUP_H
+#endif// HLL_RIEMANN_SOLVER_H

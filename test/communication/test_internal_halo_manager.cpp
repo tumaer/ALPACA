@@ -90,7 +90,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
       WHEN( "Material, interface tag and levelset values are set and halo-updated" ) {
          for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
             node.SetInterfaceBlock( std::make_unique<InterfaceBlock>( static_cast<double>( id ) ) );
-            auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+            auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
             auto& interface_tags = node.GetInterfaceTags();
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -118,7 +118,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
                                                                                             { 6, { BoundaryLocation::East, BoundaryLocation::SouthEast, BoundaryLocation::EastSouthBottom } },
                                                                                             { 7, { BoundaryLocation::West, BoundaryLocation::SouthWest, BoundaryLocation::WestSouthBottom } } } );
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
-               auto const& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+               auto const& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
                auto const& interface_tags = node.GetInterfaceTags();
                auto const& levelset       = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
                for( auto const& side : sides_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) ) ) {
@@ -164,7 +164,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          }
          for( auto& level : tree.FullNodeList() ) {
             for( auto& [id, node] : level ) {
-               auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+               auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
                auto& interface_tags = node.GetInterfaceTags();
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   for( unsigned int j = 0; j < CC::TCY(); ++j ) {
@@ -196,7 +196,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
                   { 7, BoundaryLocation::West }// On level 1 (standard),
             } );
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
-               auto const& cells                   = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Energy );
+               auto const& cells                   = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
                auto const& interface_tags          = node.GetInterfaceTags();
                auto const& levelset                = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
                auto const& side                    = side_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) );

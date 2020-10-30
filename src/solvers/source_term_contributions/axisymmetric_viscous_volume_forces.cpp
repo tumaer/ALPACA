@@ -136,14 +136,11 @@ void AxisymmetricViscousVolumeForces::ComputeForces( std::pair<MaterialName cons
 
          // Plus as it is just one term of many to add to volume forces.
          axisymmetric_viscous_volume_forces[ETI( Equation::Mass )][i][j][0] += 0.0;
-         axisymmetric_viscous_volume_forces[ETI( Equation::Energy )][i][j][0] +=
-               ( 2.0 * mu_1 + mu_2 ) * u[indices[0]][indices[1]][indices[2]] * u[indices[0]][indices[1]][indices[2]] * one_radius * one_radius +
-               2.0 * mu_2 * u[indices[0]][indices[1]][indices[2]] * one_radius * ( velocity_gradient[indices[0]][indices[1]][0][0] + velocity_gradient[indices[0]][indices[1]][1][1] );
-
-         axisymmetric_viscous_volume_forces[ETI( Equation::MomentumX )][i][j][0] +=
-               ( 2.0 * mu_1 + mu_2 ) * ( velocity_gradient[indices[0]][indices[1]][0][0] - u[indices[0]][indices[1]][indices[2]] * one_radius ) * one_radius;
-         axisymmetric_viscous_volume_forces[ETI( Equation::MomentumY )][i][j][0] +=
-               ( mu_1 * velocity_gradient[indices[0]][indices[1]][1][0] + ( mu_1 + mu_2 ) * velocity_gradient[indices[0]][indices[1]][0][1] ) * one_radius;
+         if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
+            axisymmetric_viscous_volume_forces[ETI( Equation::Energy )][i][j][0] += ( 2.0 * mu_1 + mu_2 ) * u[indices[0]][indices[1]][indices[2]] * u[indices[0]][indices[1]][indices[2]] * one_radius * one_radius + 2.0 * mu_2 * u[indices[0]][indices[1]][indices[2]] * one_radius * ( velocity_gradient[indices[0]][indices[1]][0][0] + velocity_gradient[indices[0]][indices[1]][1][1] );
+         }
+         axisymmetric_viscous_volume_forces[ETI( Equation::MomentumX )][i][j][0] += ( 2.0 * mu_1 + mu_2 ) * ( velocity_gradient[indices[0]][indices[1]][0][0] - u[indices[0]][indices[1]][indices[2]] * one_radius ) * one_radius;
+         axisymmetric_viscous_volume_forces[ETI( Equation::MomentumY )][i][j][0] += ( mu_1 * velocity_gradient[indices[0]][indices[1]][1][0] + ( mu_1 + mu_2 ) * velocity_gradient[indices[0]][indices[1]][0][1] ) * one_radius;
       }
    }
 }

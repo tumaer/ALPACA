@@ -282,13 +282,13 @@ namespace Initialization {
       }
 
       if( snapshot_interval == 0 && snapshot_timestamps.empty() ) {
-         logger.LogMessage( "Restart snapshots         : Disabled" );
+         logger.LogMessage( "Restart snapshots           : Disabled" );
       }
 
       if( standard_output_timestamps.empty() ) {
-         logger.LogMessage( "Standard output files     : Disabled" );
+         logger.LogMessage( "Standard output files       : Disabled" );
       } else if( interface_output_timestamps.empty() ) {
-         logger.LogMessage( "Interface output files    : Disabled" );
+         logger.LogMessage( "Interface output files      : Disabled" );
       }
 
       logger.LogMessage( " " );

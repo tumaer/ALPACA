@@ -35,8 +35,7 @@ def setup_argument_parser() -> ArgumentParser:
     parser.add_argument("--disable-symmetry", action="store_false", dest="enable_symmetry",
                         help="If set, the symmetry macro is disabled for compilation")
     # NOTE: For the performance flag default=None is chosen and two options are given to actively set or unset the flag.
-    #       This is required, since the performance flag
-    #       changes its default value depending on the Alpaca environment.
+    #       This is required, since the performance flag changes its default value depending on the Alpaca environment.
     parser.add_argument("--enable-performance", action="store_true", dest="enable_performance",
                         help="If set, the performance macro is enabled for compilation")
     parser.add_argument("--disable-performance", action="store_false", dest="enable_performance",

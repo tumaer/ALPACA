@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
 *                                                                                        *
 * This file is part of ALPACA                                                            *
@@ -65,105 +66,66 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_SETUP_H
-#define RIEMANN_SOLVER_SETUP_H
-
-#include "user_specifications/numerical_setup.h"
-#include "user_specifications/equation_settings.h"
-#include "solvers/riemann_solvers/roe_riemann_solver.h"
-#include "solvers/riemann_solvers/hllc_riemann_solver.h"
-#include "solvers/riemann_solvers/isentropic_hllc_riemann_solver.h"
-#include "solvers/riemann_solvers/hll_riemann_solver.h"
-#include "solvers/riemann_solvers/isentropic_hll_riemann_solver.h"
-#include "user_specifications/riemann_solver_settings.h"
+#ifndef FIELD_ENUMS_H
+#define FIELD_ENUMS_H
 
 /**
- * @brief A namespace to get a RiemannSolver type based on a specified constexpr.
- */
-namespace RiemannSolverSetup {
+* @brief Unique identifier for all possible conservative equations in arbitrary order.
+*/
+enum class EquationPool {
+   Mass,
+   MomentumX,
+   MomentumY,
+   MomentumZ,
+   Energy,// Example
+};
 
-   namespace Isentropic {
-      /**
-       * @brief Function returning the Isentropic Riemann solver matching the type in the template argument.
-       * @tparam RiemannSolvers Specification of the RiemannSolver type.
-       */
-      template<RiemannSolvers>
-      struct Concretize;
+/**
+* @brief Unique Identifier for all possible prime states in arbitrary order.
+*/
+enum class PrimeStatePool {
+   Density,
+   Pressure,
+   VelocityX,
+   VelocityY,
+   VelocityZ,
+   Temperature,// Example
+};
+/**
+* @brief Unique Identifier for all possible interface quantities in arbitrary order.
+*/
+enum class InterfaceStatePool {
+   Velocity,
+   PressurePositive,
+   PressureNegative
+};
 
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hllc> {
-         using type = IsentropicHllcRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hll> {
-         using type = IsentropicHllRiemannSolver;
-      };
-   }// namespace Isentropic
-
-   namespace EulerNavierStokes {
-      /**
-       * @brief Function returning the Euler or Navier-Stokes equations Riemann solver matching the type in the template argument.
-       * @tparam RiemannSolvers Specification of the RiemannSolver type.
-       */
-      template<RiemannSolvers>
-      struct Concretize;
-
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Roe> {
-         using type = RoeRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hllc> {
-         using type = HllcRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hll> {
-         using type = HllRiemannSolver;
-      };
-   }// namespace EulerNavierStokes
-
-   /**
-   * @brief Function returning the Riemann solver matching the type in the template argument accroding to the equation set in the second template parameter.
-   * @tparam RiemannSolvers Specification of the RiemannSolver type.
-   * @tparam EquationSet Specification of the Equation(s) beeing solved.
+/**
+   * @brief Unique Identifier for all possible interface descriptions variables in arbitrary order.
+   * @note  Every member has to be added to the InterfaceDescription enumeration as well.
    */
-   template<RiemannSolvers R, EquationSet>
-   struct Dispatch {
-      using type = typename EulerNavierStokes::Concretize<R>::type;
-   };
+enum class InterfaceDescriptionPool {
+   Levelset,
+   VolumeFraction
+};
 
-   /**
-    * @brief See generic implementation.
-    */
-   template<RiemannSolvers R>
-   struct Dispatch<R, EquationSet::Isentropic> {
-      using type = typename Isentropic::Concretize<R>::type;
-   };
+/**
+   * @brief Unique Identifier for all possible interface parameters in arbitrary order.
+   * @note  Every member has to be added to the InterfaceParameter enumeration as well.
+   */
+enum class InterfaceParameterPool {
+   SurfaceTensionCoefficient
+};
 
-   /**
-    * @brief Function returning the Riemann solver for the (globally) selected Equation and the given Solver template argument.
-    * @tparam RiemannSolvers Specification of the RiemannSolver type.
-    */
-   template<RiemannSolvers R>
-   struct Concretize {
-      using type = typename Dispatch<R, active_equations>::type;
-   };
+/**
+   * @brief Unique Identifier for all possible parameters in arbitrary order.
+   * @note  Every member has to be added to the Parameters enumeration as well.
+   */
+enum class ParameterPool {
+   // viscosity parameters
+   ShearViscosity,
+   // conductivity parameters
+   ThermalConductivity
+};
 
-}// namespace RiemannSolverSetup
-
-#endif// RIEMANN_SOLVER_SETUP_H
+#endif// FIELD_ENUMS_H

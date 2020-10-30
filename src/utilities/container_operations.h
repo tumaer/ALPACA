@@ -71,6 +71,7 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <utility>
 
 namespace ContainerOperations {
    /*
@@ -117,6 +118,23 @@ namespace ContainerOperations {
       }
       return std::get<0>( *std::max_element( std::cbegin( count ), std::cend( count ), []( auto const& a, auto const& b ) { return std::get<1>( a ) < std::get<1>( b ); } ) );
    }
+
+   /**
+ * @brief Applies the given function element-wise to all elements in the container and returns an array of the results.
+ * @tparam Container A container holding elements providing at least a constexpr size and at function.
+ * @tparam Function The function to be applied to all elements
+ * @note Does not work with empty containers.
+ */
+   template<typename Container, typename Function>
+   constexpr auto ArrayOfElementWiseFunctionApplication( Container const c, Function const f ) {
+      using value_type                        = decltype( f( std::declval<typename Container::value_type>() ) );
+      std::array<value_type, c.size()> result = {};
+      for( std::size_t i = 0; i < c.size(); ++i ) {
+         result[i] = f( c.at( i ) );
+      }
+      return result;
+   }
+
 }// namespace ContainerOperations
 
 #endif//CONTAINER_OPERATIONS_H

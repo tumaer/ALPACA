@@ -1,8 +1,5 @@
-     RelativeError,                     Inputfile,                                                                                                                Executable
-    2.08487882e-02,               OscillatingDrop, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
-
-    2.72767575e-02,  ShearDropDeformation_lambda1, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
-
-    9.54961412e-02, ShearDropDeformation_lambda01, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
-
-    4.51742028e-03,      CouetteFlowTwoInterfaces, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5
+     RelativeError,                     Inputfile,                                                                                                                             Executable
+    2.08487882e-02,               OscillatingDrop, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5_NavierStokes
+    2.72767575e-02,  ShearDropDeformation_lambda1, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5_NavierStokes
+    9.54961412e-02, ShearDropDeformation_lambda01, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5_NavierStokes
+    4.51742028e-03,      CouetteFlowTwoInterfaces, ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5_NavierStokes

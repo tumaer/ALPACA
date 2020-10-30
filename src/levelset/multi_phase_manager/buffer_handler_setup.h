@@ -78,7 +78,7 @@ namespace BufferHandlerSetup {
 
    /**
     * @brief Function returning the typedef of a BufferHandler based on a constexpr template.
-    * 
+    *
     * @tparam BufferHandlers The constexpr template parameter to specify the exact BufferHandler type.
     */
    template<BufferHandlers>

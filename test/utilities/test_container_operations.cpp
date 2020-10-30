@@ -66,9 +66,12 @@
 *                                                                                        *
 *****************************************************************************************/
 
+#include <algorithm>
 #include <catch.hpp>
 #include <deque>
+#include <iterator>
 #include <list>
+#include <math.h>
 #include <unordered_map>
 #include <vector>
 #include "utilities/container_operations.h"
@@ -150,6 +153,25 @@ SCENARIO( "Most frequent elements can be found", "[1rank]" ) {
          THEN( "The result is the one of the most occuring elements and the found one is opposite in the two containers" ) {
             REQUIRE( most_frequent_in_v == other_most_occuring_element );
             REQUIRE( most_frequent_in_w == most_occuring_element );
+         }
+      }
+   }
+}
+
+SCENARIO( "Array of elementwise application is produced properly", "[1rank]" ) {
+   GIVEN( "A container providing the necessary consexpr size and at functions" ) {
+      constexpr std::array<double, 4> a = { 1, -2, 3, -4 };
+      WHEN( "We apply two different elementwise functions" ) {
+         constexpr auto square = []( auto const in ) { return in * in; };
+         constexpr auto negate = []( auto const in ) { return -in; };
+         //constinit would be preferred here, but lacking compiler support.
+         constexpr auto array_of_a_squared = ContainerOperations::ArrayOfElementWiseFunctionApplication( a, square );
+         constexpr auto array_of_a_negated = ContainerOperations::ArrayOfElementWiseFunctionApplication( a, negate );
+         THEN( "The resutls match the expectation" ) {
+            constexpr std::array<double, a.size()> a_squared_expected = { 1, 4, 9, 16 };
+            constexpr std::array<double, a.size()> a_negated_expected = { -1, 2, -3, 4 };
+            REQUIRE( array_of_a_squared == a_squared_expected );
+            REQUIRE( array_of_a_negated == a_negated_expected );
          }
       }
    }

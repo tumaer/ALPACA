@@ -90,6 +90,8 @@
                                True                  True                  True                  True                  </trackRuntimes>
       <limitEndTime>           True                  True                  True                  True
                                True                  True                  True                  True                  </limitEndTime>
+      <equationSet>            NavierStokes          NavierStokes          NavierStokes          NavierStokes
+                               NavierStokes          NavierStokes          NavierStokes          NavierStokes          </equationSet>
    </oneDimensionalSetup>
 
    <twoDimensionalSetup>
@@ -112,6 +114,7 @@
       <capillaryForces>        True                    True                    </capillaryForces>
       <trackRuntimes>          True                    True                    </trackRuntimes>
       <limitEndTime>           True                    True                    </limitEndTime>
+      <equationSet>            NavierStokes            NavierStokes            </equationSet>
    </twoDimensionalSetup>
 
    <threeDimensionalSetup>
@@ -134,6 +137,7 @@
       <capillaryForces>        True                    </capillaryForces>
       <trackRuntimes>          True                    </trackRuntimes>
       <limitEndTime>           True                    </limitEndTime>
+      <equationSet>            NavierStokes            </equationSet>
    </threeDimensionalSetup>
 
 </configuration>
