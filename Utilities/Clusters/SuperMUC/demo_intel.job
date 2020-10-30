@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Initial working directory:
+# Initial working directory
 #SBATCH -D <InitialDir>
 
 # Job name
@@ -15,29 +15,24 @@
 #SBATCH --mail-user=<your-email>@<your-host.domain>
 
 # Where to run the simulation
-#SBATCH --clusters=<cluster>
 #SBATCH --partition=<partition>
-#SBATCH --qos=<QOS>
 
 # Request ressources
 #SBATCH --nodes=<#Nodes>
-#SBATCH --tasks-per-node=28
+#SBATCH --tasks-per-node=48
 #SBATCH --time=<HH:MM:SS>
+
+# Billing information
+#SBATCH --account=<account>
 
 # Setup execution environment
 #SBATCH --export=NONE
 #SBATCH --get-user-env
+
 module load slurm_setup
+module load hdf5/1.8.20-intel-impi-frt-threadsafe
 
-module unload intel-mpi
-module unload intel-mkl
-module unload intel
+ulimit -s unlimited
+export I_MPI_EXTRA_FILESYSTEM=on
 
-module load intel-mpi/2019-gcc
-module load hdf5/1.10.5-gcc8-impi
-
-## Commenting in the following line may help with stalling I/O
-## export I_MPI_EXTRA_FILESYSTEM=on
-
-## In case of RAM shortage try using mpiexec's -rr option (not supported by all MPI Libraries)
 mpiexec ./ALPACA ./<your-inputfile>.xml
