@@ -230,7 +230,19 @@ class UserSpecifications(SpecificationsBase):
                                                                     UserSpecificationFile.stencil_setup,
                                                                     "heat_fluxes_derivative_stencil_cell_face",
                                                                     "DerivativeStencils::",
-                                                                    DerivativeStencil.values)
+                                                                    DerivativeStencil.values),
+            # -----------------------
+            # Equation setttings
+            # -----------------------
+            "EquationSet": UserSpecificationTag(str, "NavierStokes",
+                                                UserSpecificationFile.equation_settings,
+                                                "active_equations",
+                                                "EquationSet::",
+                                                ["Isentropic",
+                                                 "Euler",
+                                                 "NavierStokes",
+                                                 "Custom"])
+
         }
         # ------------------------------------------------------------------------------------------------------------------------------------------------------
         # ONLY CHANGE THE IMPLEMENTATIONS BELOW CAREFULLY.

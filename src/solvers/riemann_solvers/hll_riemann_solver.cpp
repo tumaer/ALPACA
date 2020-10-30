@@ -65,6 +65,7 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
+
 #include "solvers/riemann_solvers/hll_riemann_solver.h"
 
 #include "utilities/mathematical_functions.h"

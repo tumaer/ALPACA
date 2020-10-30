@@ -81,7 +81,7 @@
 class CompileTimeConstants {
 
    /*** TO BE SET BY EXPERIENCED USERS ***/
-   static constexpr unsigned int internal_cells_per_block_and_dimension_ = 16;                                                       //Referred to as "IC"
+   static constexpr unsigned int internal_cells_per_block_and_dimension_ = 16;                                                       // Referred to as "IC"
    static constexpr unsigned int halo_width_                             = 4;                                                        // Referred to as "HS"
    static constexpr unsigned int cells_per_dimension_with_halo_          = 2 * halo_width_ + internal_cells_per_block_and_dimension_;// Referred to as "TC"
 
@@ -98,11 +98,11 @@ class CompileTimeConstants {
    static constexpr unsigned int space_time_discretization_order_ = 3;
 
    //Flags to enable/disable contributions for the right-hand side/advection terms of the Navier-Stokes equations
-   static constexpr bool inviscid_exchange_active_ = true; // Enables advection term
-   static constexpr bool gravitation_active_       = true; // Enables gravitational term
-   static constexpr bool viscosity_active_         = true; // Enables viscosity term
-   static constexpr bool heat_conduction_active_   = false;// Enables heat conduction term
-   static constexpr bool capillary_forces_active_  = true; // Enables surface tension term
+   static constexpr bool inviscid_exchange_active_ = true;// Enables advection term
+   static constexpr bool gravitation_active_       = true;// Enables gravitational term
+   static constexpr bool viscosity_active_         = true;// Enables viscosity term
+   static constexpr bool heat_conduction_active_   = true;// Enables heat conduction term
+   static constexpr bool capillary_forces_active_  = true;// Enables surface tension term
 
    // Flags to activate material property models
    static constexpr bool viscosity_model_active_                   = false;

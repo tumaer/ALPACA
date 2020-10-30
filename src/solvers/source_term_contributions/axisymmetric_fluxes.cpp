@@ -89,9 +89,11 @@ void AxisymmetricFluxes::ComputeAxisymmetricContributions( Block const& block, d
          unsigned int const index_j = j + CC::FICY();
 
          volume_forces[ETI( Equation::Mass )][i][j][0] -= momentum_x[index_i][index_j][0] * one_radius;
+         if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
+            volume_forces[ETI( Equation::Energy )][i][j][0] -= velocity_x[index_i][index_j][0] * ( energy[index_i][index_j][0] + pressure[index_i][index_j][0] ) * one_radius;
+         }
          volume_forces[ETI( Equation::MomentumX )][i][j][0] -= velocity_x[index_i][index_j][0] * momentum_x[index_i][index_j][0] * one_radius;
          volume_forces[ETI( Equation::MomentumY )][i][j][0] -= velocity_x[index_i][index_j][0] * momentum_y[index_i][index_j][0] * one_radius;
-         volume_forces[ETI( Equation::Energy )][i][j][0] -= velocity_x[index_i][index_j][0] * ( energy[index_i][index_j][0] + pressure[index_i][index_j][0] ) * one_radius;
       }
    }
 }

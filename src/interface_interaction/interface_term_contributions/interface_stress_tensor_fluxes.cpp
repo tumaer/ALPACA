@@ -181,15 +181,17 @@ void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node, double c
                   enery_flux_negative_material += momentum_fluxes_negative_material[r] * u_interface_normal_field[i][j][k][r];
                }
 
-               right_hand_side_positive_material[Equation::Energy][indices[0]][indices[1]][indices[2]] -= enery_flux_positive_material * one_cell_size;
-               right_hand_side_negative_material[Equation::Energy][indices[0]][indices[1]][indices[2]] += enery_flux_negative_material * one_cell_size;
+               if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
+                  right_hand_side_positive_material[Equation::Energy][indices[0]][indices[1]][indices[2]] -= enery_flux_positive_material * one_cell_size;
+                  right_hand_side_negative_material[Equation::Energy][indices[0]][indices[1]][indices[2]] += enery_flux_negative_material * one_cell_size;
+               }
                right_hand_side_positive_material[Equation::MomentumX][indices[0]][indices[1]][indices[2]] -= momentum_fluxes_positive_material[0] * one_cell_size;
                right_hand_side_negative_material[Equation::MomentumX][indices[0]][indices[1]][indices[2]] += momentum_fluxes_negative_material[0] * one_cell_size;
-               if( CC::DIM() != Dimension::One ) {
+               if constexpr( MF::IsEquationActive( Equation::MomentumY ) ) {
                   right_hand_side_positive_material[Equation::MomentumY][indices[0]][indices[1]][indices[2]] -= momentum_fluxes_positive_material[1] * one_cell_size;
                   right_hand_side_negative_material[Equation::MomentumY][indices[0]][indices[1]][indices[2]] += momentum_fluxes_negative_material[1] * one_cell_size;
                }
-               if( CC::DIM() == Dimension::Three ) {
+               if constexpr( MF::IsEquationActive( Equation::MomentumZ ) ) {
                   right_hand_side_positive_material[Equation::MomentumZ][indices[0]][indices[1]][indices[2]] -= momentum_fluxes_positive_material[2] * one_cell_size;
                   right_hand_side_negative_material[Equation::MomentumZ][indices[0]][indices[1]][indices[2]] += momentum_fluxes_negative_material[2] * one_cell_size;
                }

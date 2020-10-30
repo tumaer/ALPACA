@@ -78,6 +78,7 @@
 #include <typeinfo>
 #include <functional>
 
+#include "user_specifications/equation_settings.h"
 #include "user_specifications/compile_time_constants.h"
 #include "user_specifications/riemann_solver_settings.h"
 #include "utilities/helper_functions.h"
@@ -188,6 +189,9 @@ LogWriter::LogWriter( bool const save_all_ranks ) : logfile_name_( "Unnamed_Simu
    }
    AddBreakLine( true );
 
+   LogMessage( "Equation set                                  : " + SetToString( active_equations ) );
+   LogMessage( "Interface set                                 : " + SetToString( active_interface_quantities ) );
+   LogMessage( "Parameter set                                 : " + SetToString( active_parameters ) );
    LogMessage( "Time integrator                               : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( TimeIntegratorSetup::Concretize<time_integrator>::type ).name() ) ) );
    LogMessage( "Riemann solver                                : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( RiemannSolverSetup::Concretize<riemann_solver>::type ).name() ) ) );
    if constexpr( riemann_solver == RiemannSolvers::Roe ) {

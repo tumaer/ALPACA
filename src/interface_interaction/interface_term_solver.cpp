@@ -109,7 +109,7 @@ void InterfaceTermSolver::SolveInterfaceInteraction( Node& node ) const {
       interface_stress_tensor_fluxes_.ComputeInterfaceFluxes( node, delta_aperture_field, u_interface_normal_field );
    }
 
-   if( CC::HeatConductionActive() ) {
+   if( CC::HeatConductionActive() && MF::IsEquationActive( Equation::Energy ) && MF::IsPrimeStateActive( PrimeState::Temperature ) ) {
       heat_exchange_fluxes_.ComputeInterfaceFluxes( node, delta_aperture_field );
    }
 }

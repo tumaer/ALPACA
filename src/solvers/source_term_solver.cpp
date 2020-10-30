@@ -114,7 +114,7 @@ void SourceTermSolver::Sources( std::pair<MaterialName const, Block> const& mat_
    }
 
    // Compute terms for heat exchange
-   if constexpr( CC::HeatConductionActive() ) {
+   if constexpr( CC::HeatConductionActive() && MF::IsEquationActive( Equation::Energy ) && MF::IsPrimeStateActive( PrimeState::Temperature ) ) {
       heat_fluxes_.ComputeFluxes( mat_block, face_fluxes_x, face_fluxes_y, face_fluxes_z, cell_size );
    }
 }

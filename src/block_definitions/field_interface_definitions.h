@@ -93,9 +93,9 @@ enum class InterfaceFieldType { Description,
 class InterfaceFieldsDefinitions {
 
    // get arrays of the consecutively ordered active fields
-   static constexpr auto active_description_ = IndexSequenceToEnumArray<InterfaceDescription>( std::make_index_sequence<FieldDetails::ActiveInterfaceDescriptions::Count>{} );
-   static constexpr auto active_states_      = IndexSequenceToEnumArray<InterfaceState>( std::make_index_sequence<FieldDetails::ActiveInterfaceStates::Count>{} );
-   static constexpr auto active_parameters_  = IndexSequenceToEnumArray<InterfaceParameter>( std::make_index_sequence<FieldDetails::ActiveInterfaceParameters::Count>{} );
+   static constexpr auto active_description_ = IndexSequenceToEnumArray<InterfaceDescription>( std::make_index_sequence<FieldDetails::ActiveInterfaceDescriptions::count>{} );
+   static constexpr auto active_states_      = IndexSequenceToEnumArray<InterfaceState>( std::make_index_sequence<FieldDetails::ActiveInterfaceStates::count>{} );
+   static constexpr auto active_parameters_  = IndexSequenceToEnumArray<InterfaceParameter>( std::make_index_sequence<FieldDetails::ActiveInterfaceParameters::count>{} );
    // definition of interface states and parameters (the indices) which should be extended
    static constexpr std::array<InterfaceState, 1> states_to_extend_         = { InterfaceState::Velocity };
    static constexpr std::array<InterfaceParameter, 1> parameters_to_extend_ = { InterfaceParameter::SurfaceTensionCoefficient };
@@ -117,13 +117,13 @@ public:
    static constexpr bool IsFieldActive( InterfaceFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
          case InterfaceFieldType::Description: {
-            return field_index < FieldDetails::ActiveInterfaceDescriptions::InactiveFieldOffset;
+            return field_index < FieldDetails::ActiveInterfaceDescriptions::inactive_field_offset;
          }
          case InterfaceFieldType::Parameters: {
-            return field_index < FieldDetails::ActiveInterfaceParameters::InactiveFieldOffset;
+            return field_index < FieldDetails::ActiveInterfaceParameters::inactive_field_offset;
          }
          default: {// InterfaceFieldType::States
-            return field_index < FieldDetails::ActiveInterfaceStates::InactiveFieldOffset;
+            return field_index < FieldDetails::ActiveInterfaceStates::inactive_field_offset;
          }
       }
    }
@@ -134,7 +134,7 @@ public:
     * @return True if active, false otherwise.
     */
    static constexpr bool IsDescriptionActive( InterfaceDescription const id ) {
-      return static_cast<unsigned int>( id ) < FieldDetails::ActiveInterfaceDescriptions::InactiveFieldOffset;
+      return static_cast<unsigned int>( id ) < FieldDetails::ActiveInterfaceDescriptions::inactive_field_offset;
    }
 
    /**
@@ -143,7 +143,7 @@ public:
     * @return True if active, false otherwise.
     */
    static constexpr bool IsStateActive( InterfaceState const is ) {
-      return static_cast<unsigned int>( is ) < FieldDetails::ActiveInterfaceStates::InactiveFieldOffset;
+      return static_cast<unsigned int>( is ) < FieldDetails::ActiveInterfaceStates::inactive_field_offset;
    }
 
    /**
@@ -152,7 +152,7 @@ public:
     * @return True if active, false otherwise.
     */
    static constexpr bool IsParameterActive( InterfaceParameter const pa ) {
-      return static_cast<unsigned int>( pa ) < FieldDetails::ActiveInterfaceParameters::InactiveFieldOffset;
+      return static_cast<unsigned int>( pa ) < FieldDetails::ActiveInterfaceParameters::inactive_field_offset;
    }
 
    /**
@@ -255,7 +255,7 @@ public:
     *
     * @note Depending on the configuration of active inteface description, the number can change.
     */
-   static constexpr unsigned int ANOD() { return FieldDetails::ActiveInterfaceDescriptions::Count; }
+   static constexpr unsigned int ANOD() { return FieldDetails::ActiveInterfaceDescriptions::count; }
 
    /**
     * @brief Gives the number of interface states considered in the simulation.
@@ -263,7 +263,7 @@ public:
     *
     * @note Depending on the configuration of active prime states, the number can change (e.g., pressure activated).
     */
-   static constexpr unsigned int ANOS() { return FieldDetails::ActiveInterfaceStates::Count; }
+   static constexpr unsigned int ANOS() { return FieldDetails::ActiveInterfaceStates::count; }
 
    /**
     * @brief Gives the number of interface parameters considered in the simulation.
@@ -271,7 +271,7 @@ public:
     *
     * @note Depending on the configuration of active prime states, the number can change.
     */
-   static constexpr unsigned int ANOPA() { return FieldDetails::ActiveInterfaceParameters::Count; }
+   static constexpr unsigned int ANOPA() { return FieldDetails::ActiveInterfaceParameters::count; }
 
    /**
     * @brief Gives the number of active fields for the given field type, i.e. description, states or parameters.

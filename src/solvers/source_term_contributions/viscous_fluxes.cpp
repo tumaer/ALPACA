@@ -66,6 +66,9 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "viscous_fluxes.h"
+
+#include <numeric>
+
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "utilities/index_transformations.h"
 #include "stencils/stencil_utilities.h"
@@ -164,23 +167,26 @@ void ViscousFluxes::ComputeFluxes( std::pair<MaterialName const, Block> const& m
    for( unsigned int i = 0; i < CC::ICX() + 1; ++i ) {
       for( unsigned int j = 0; j < CC::ICY() + 1; ++j ) {
          for( unsigned int k = 0; k < CC::ICZ() + 1; ++k ) {
-            double energy_flux_x = 0.0;
-            double energy_flux_y = 0.0;
-            double energy_flux_z = 0.0;
 
             for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
                dissipative_flux_x[ETI( MF::AME()[r] )][i][j][k] -= tau_flux[i][j][k][0][r];
                if constexpr( CC::DIM() != Dimension::One ) dissipative_flux_y[ETI( MF::AME()[r] )][i][j][k] -= tau_flux[i][j][k][1][r];
                if constexpr( CC::DIM() == Dimension::Three ) dissipative_flux_z[ETI( MF::AME()[r] )][i][j][k] -= tau_flux[i][j][k][2][r];
-
-               energy_flux_x += tau_flux[i][j][k][0][r] * velocity_at_cell_faces[i][j][k][0][r];
-               if constexpr( CC::DIM() != Dimension::One ) energy_flux_y += tau_flux[i][j][k][1][r] * velocity_at_cell_faces[i][j][k][1][r];
-               if constexpr( CC::DIM() == Dimension::Three ) energy_flux_z += tau_flux[i][j][k][2][r] * velocity_at_cell_faces[i][j][k][2][r];
             }
 
-            dissipative_flux_x[ETI( Equation::Energy )][i][j][k] -= energy_flux_x;
-            if constexpr( CC::DIM() != Dimension::One ) dissipative_flux_y[ETI( Equation::Energy )][i][j][k] -= energy_flux_y;
-            if constexpr( CC::DIM() == Dimension::Three ) dissipative_flux_z[ETI( Equation::Energy )][i][j][k] -= energy_flux_z;
+            if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
+               double const energy_flux_x = std::inner_product( std::cbegin( tau_flux[i][j][k][0] ), std::cend( tau_flux[i][j][k][0] ), std::cbegin( velocity_at_cell_faces[i][j][k][0] ), 0.0 );
+               dissipative_flux_x[ETI( Equation::Energy )][i][j][k] -= energy_flux_x;
+
+               if constexpr( CC::DIM() != Dimension::One ) {
+                  double const energy_flux_y = std::inner_product( std::cbegin( tau_flux[i][j][k][1] ), std::cend( tau_flux[i][j][k][1] ), std::cbegin( velocity_at_cell_faces[i][j][k][1] ), 0.0 );
+                  dissipative_flux_y[ETI( Equation::Energy )][i][j][k] -= energy_flux_y;
+               }
+               if constexpr( CC::DIM() == Dimension::Three ) {
+                  double const energy_flux_z = std::inner_product( std::cbegin( tau_flux[i][j][k][2] ), std::cend( tau_flux[i][j][k][2] ), std::cbegin( velocity_at_cell_faces[i][j][k][2] ), 0.0 );
+                  dissipative_flux_z[ETI( Equation::Energy )][i][j][k] -= energy_flux_z;
+               }
+            }
          }
       }
    }

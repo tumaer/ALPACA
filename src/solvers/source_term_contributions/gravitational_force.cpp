@@ -96,13 +96,14 @@ void GravitationalForce::ComputeForces( Block const& block, double ( &gravity_fo
 
             // Add up to volume forces
             gravity_forces[ETI( Equation::Mass )][i][j][k] += 0.0;
-            gravity_forces[ETI( Equation::Energy )][i][j][k] += DimensionAwareConsistencyManagedSum( gravity_[0] * conservatives[Equation::MomentumX][indices[0]][indices[1]][indices[2]], CC::DIM() != Dimension::One ? gravity_[1] * conservatives[Equation::MomentumY][indices[0]][indices[1]][indices[2]] : 0.0, CC::DIM() == Dimension::Three ? gravity_[2] * conservatives[Equation::MomentumZ][indices[0]][indices[1]][indices[2]] : 0.0 );
-
+            if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
+               gravity_forces[ETI( Equation::Energy )][i][j][k] += DimensionAwareConsistencyManagedSum( gravity_[0] * conservatives[Equation::MomentumX][indices[0]][indices[1]][indices[2]], CC::DIM() != Dimension::One ? gravity_[1] * conservatives[Equation::MomentumY][indices[0]][indices[1]][indices[2]] : 0.0, CC::DIM() == Dimension::Three ? gravity_[2] * conservatives[Equation::MomentumZ][indices[0]][indices[1]][indices[2]] : 0.0 );
+            }
             gravity_forces[ETI( Equation::MomentumX )][i][j][k] += gravity_[0] * density[indices[0]][indices[1]][indices[2]];
-            if( CC::DIM() != Dimension::One ) {
+            if constexpr( MF::IsEquationActive( Equation::MomentumY ) ) {
                gravity_forces[ETI( Equation::MomentumY )][i][j][k] += gravity_[1] * density[indices[0]][indices[1]][indices[2]];
             }
-            if( CC::DIM() == Dimension::Three ) {
+            if constexpr( MF::IsEquationActive( Equation::MomentumZ ) ) {
                gravity_forces[ETI( Equation::MomentumZ )][i][j][k] += gravity_[2] * density[indices[0]][indices[1]][indices[2]];
             }
          }

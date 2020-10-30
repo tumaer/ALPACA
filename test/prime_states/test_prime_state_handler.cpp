@@ -76,7 +76,7 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
    // Initialize the unit handler class
    UnitHandler const unit_handler( 1.0, 1.0, 1.0, 1.0 );
 
-   // Here the stiffened gas complete safe equation of state is used since it provides a temperature computatation and the unit test does not depend on the
+   // Here the stiffened gas complete safe equation of state is used since it provides a temperature computation and the unit test does not depend on the
    // activation of the temperature in the primestate struct
    std::unordered_map<std::string, double> const eos_data = { { "gamma", 1.4 }, { "backgroundPressure", 1.0 } };
    std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
@@ -101,7 +101,7 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
    GIVEN( "A set of prime states" ) {
       std::array<double, MF::ANOP()> prime_states;
       for( unsigned int p = 0; p < MF::ANOP(); ++p ) {
-         prime_states[p] = double( p + 1 );
+         prime_states[p] = double( p + 2 );
       }
 
       // Obtain the material name of the single initialized material
@@ -119,7 +119,6 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
          THEN( "Density equals mass" ) {
             REQUIRE( conservatives[ETI( Equation::Mass )] == Approx( prime_states[PTI( PrimeState::Density )] ) );
          }
-
          // Energy is not suitable to be checked since it depends on the used equation of state
       }
 
@@ -130,11 +129,10 @@ SCENARIO( "Conservative quantities and prime state values can be converted into 
          prime_state_handler.ConvertConservativesToPrimeStates( material_name, conservatives, prime_states_new );
 
          THEN( "The resulting prime states equal the original prime states" ) {
-            for( auto const& prime : MF::ASOP() ) {
-               // Do not take the temperature, since it depends on the equation of state.
-               if( prime != PrimeState::Temperature ) {
-                  REQUIRE( prime_states_new[PTI( prime )] == Approx( prime_states[PTI( prime )] ) );
-               }
+            // Do not take the temperature or pressure, since they depends on the equation of state.
+            REQUIRE( prime_states_new[PTI( PrimeState::Density )] == Approx( prime_states[PTI( PrimeState::Density )] ) );
+            for( auto const& prime : MF::AV() ) {
+               REQUIRE( prime_states_new[PTI( prime )] == Approx( prime_states[PTI( prime )] ) );
             }
          }
       }

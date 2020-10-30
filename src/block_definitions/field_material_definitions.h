@@ -72,6 +72,8 @@
 #include <array>
 #include <tuple>
 #include <type_traits>
+#include "utilities/helper_functions.h"
+#include "utilities/container_operations.h"
 #include "user_specifications/compile_time_constants.h"
 #include "block_definitions/field_details.h"
 
@@ -92,9 +94,9 @@ enum class MaterialFieldType { Conservatives,
 class MaterialFieldsDefinitions {
 
    // get arrays of the consecutively ordered active fields
-   static constexpr auto active_equations_    = IndexSequenceToEnumArray<Equation>( std::make_index_sequence<FieldDetails::ActiveEquations::Count>{} );
-   static constexpr auto active_prime_states_ = IndexSequenceToEnumArray<PrimeState>( std::make_index_sequence<FieldDetails::ActivePrimeStates::Count>{} );
-   static constexpr auto active_parameters_   = IndexSequenceToEnumArray<Parameter>( std::make_index_sequence<FieldDetails::ActiveParameters::Count>{} );
+   static constexpr auto active_equations_    = IndexSequenceToEnumArray<Equation>( std::make_index_sequence<FieldDetails::ActiveEquations::count>{} );
+   static constexpr auto active_prime_states_ = IndexSequenceToEnumArray<PrimeState>( std::make_index_sequence<FieldDetails::ActivePrimeStates::count>{} );
+   static constexpr auto active_parameters_   = IndexSequenceToEnumArray<Parameter>( std::make_index_sequence<FieldDetails::ActiveParameters::count>{} );
 
    static constexpr std::array<Equation, DTI( CC::DIM() )> const active_momenta_ = { Equation::MomentumX
 #if DIMENSION != 1
@@ -117,7 +119,8 @@ class MaterialFieldsDefinitions {
                                                                                           PrimeState::VelocityZ
 #endif
    };
-   static constexpr std::array<Equation, 2> wavelet_analysis_equations_{ Equation::Mass, Equation::Energy };
+
+   static constexpr auto wavelet_analysis_equations_ = ContainerOperations::ArrayOfElementWiseFunctionApplication( FieldSetup::WaveletEquations<active_equations>(), FieldDetails::ActiveEquations::FieldIndex<Equation> );
 
 public:
    MaterialFieldsDefinitions()                                   = delete;
@@ -136,13 +139,13 @@ public:
    static constexpr bool IsFieldActive( MaterialFieldType const field_type, unsigned int const field_index ) {
       switch( field_type ) {
          case MaterialFieldType::Conservatives: {
-            return field_index < FieldDetails::ActiveEquations::InactiveFieldOffset;
+            return field_index < FieldDetails::ActiveEquations::inactive_field_offset;
          }
          case MaterialFieldType::Parameters: {
-            return field_index < FieldDetails::ActiveParameters::InactiveFieldOffset;
+            return field_index < FieldDetails::ActiveParameters::inactive_field_offset;
          }
          default: {// MaterialFieldType::PrimeStates
-            return field_index < FieldDetails::ActivePrimeStates::InactiveFieldOffset;
+            return field_index < FieldDetails::ActivePrimeStates::inactive_field_offset;
          }
       }
    }
@@ -153,7 +156,7 @@ public:
     * @return True if active, false otherwise.
     */
    static constexpr bool IsEquationActive( Equation const eq ) {
-      return static_cast<unsigned int>( eq ) < FieldDetails::ActiveEquations::InactiveFieldOffset;
+      return static_cast<unsigned int>( eq ) < FieldDetails::ActiveEquations::inactive_field_offset;
    }
 
    /**
@@ -162,7 +165,7 @@ public:
     * @return True if active, false otherwise.
     */
    static constexpr bool IsPrimeStateActive( PrimeState const ps ) {
-      return static_cast<unsigned int>( ps ) < FieldDetails::ActivePrimeStates::InactiveFieldOffset;
+      return static_cast<unsigned int>( ps ) < FieldDetails::ActivePrimeStates::inactive_field_offset;
    }
 
    /**
@@ -171,7 +174,7 @@ public:
     * @return True if active, false otherwise.
     */
    static constexpr bool IsParameterActive( Parameter const pa ) {
-      return static_cast<unsigned int>( pa ) < FieldDetails::ActiveParameters::InactiveFieldOffset;
+      return static_cast<unsigned int>( pa ) < FieldDetails::ActiveParameters::inactive_field_offset;
    }
 
    /**
@@ -276,7 +279,7 @@ public:
     *
     * @note Depending on the configuration of active conservatives, the number can change.
     */
-   static constexpr unsigned int ANOE() { return FieldDetails::ActiveEquations::Count; }
+   static constexpr unsigned int ANOE() { return FieldDetails::ActiveEquations::count; }
 
    /**
     * @brief Gives the number of prime states considered in the simulation.
@@ -286,7 +289,7 @@ public:
     *
     * @note Depending on the configuration of active prime states, the number can change (e.g., temperature activated).
     */
-   static constexpr unsigned int ANOP() { return FieldDetails::ActivePrimeStates::Count; }
+   static constexpr unsigned int ANOP() { return FieldDetails::ActivePrimeStates::count; }
 
    /**
     * @brief Gives the number of parameters considered in the simulation.
@@ -294,7 +297,7 @@ public:
     *
     * @note Depending on the configuration of active parameters, the number can change.
     */
-   static constexpr unsigned int ANOPA() { return FieldDetails::ActiveParameters::Count; }
+   static constexpr unsigned int ANOPA() { return FieldDetails::ActiveParameters::count; }
 
    /**
     * @brief Gives the number of active fields for the given field type, i.e. conservatives, prime states or parameters.

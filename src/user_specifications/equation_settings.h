@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
 *                                                                                        *
 * This file is part of ALPACA                                                            *
@@ -65,105 +66,75 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_SETUP_H
-#define RIEMANN_SOLVER_SETUP_H
+#ifndef EQUATION_SETTINGS_H
+#define EQUATION_SETTINGS_H
 
-#include "user_specifications/numerical_setup.h"
-#include "user_specifications/equation_settings.h"
-#include "solvers/riemann_solvers/roe_riemann_solver.h"
-#include "solvers/riemann_solvers/hllc_riemann_solver.h"
-#include "solvers/riemann_solvers/isentropic_hllc_riemann_solver.h"
-#include "solvers/riemann_solvers/hll_riemann_solver.h"
-#include "solvers/riemann_solvers/isentropic_hll_riemann_solver.h"
-#include "user_specifications/riemann_solver_settings.h"
+#include <string>
+
+enum class EquationSet { Isentropic,
+                         Euler,
+                         NavierStokes,
+                         Custom };
+constexpr EquationSet active_equations = EquationSet::NavierStokes;
+
+enum class InterfaceSet { Default,
+                          Custom };
+constexpr InterfaceSet active_interface_quantities = InterfaceSet::Default;
+
+enum class ParameterSet { Default,
+                          Custom };
+constexpr ParameterSet active_parameters = ParameterSet::Default;
 
 /**
- * @brief A namespace to get a RiemannSolver type based on a specified constexpr.
+ * @brief provides a string representation of an equation set.
+ * @param eq Equation set to be stringified.
+ * @return String of the given equation set.
  */
-namespace RiemannSolverSetup {
+inline std::string SetToString( EquationSet const eq ) {
+   switch( eq ) {
+      case EquationSet::Isentropic:
+         return "Isentropic";
+      case EquationSet::Euler:
+         return "Euler";
+      case EquationSet::NavierStokes:
+         return "Navier-Stokes";
+      case EquationSet::Custom:
+         return "Custom";
+      default:
+         return "ERROR: This set is not (yet) defined!";
+   }
+}
 
-   namespace Isentropic {
-      /**
-       * @brief Function returning the Isentropic Riemann solver matching the type in the template argument.
-       * @tparam RiemannSolvers Specification of the RiemannSolver type.
-       */
-      template<RiemannSolvers>
-      struct Concretize;
+/**
+ * @brief provides a string representation of an interface set.
+ * @param eq Interface set to be stringified.
+ * @return String of the given interface set.
+ */
+inline std::string SetToString( InterfaceSet const is ) {
+   switch( is ) {
+      case InterfaceSet::Default:
+         return "Default";
+      case InterfaceSet::Custom:
+         return "Custom";
+      default:
+         return "ERROR: This set is not (yet) defined!";
+   }
+}
 
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hllc> {
-         using type = IsentropicHllcRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hll> {
-         using type = IsentropicHllRiemannSolver;
-      };
-   }// namespace Isentropic
+/**
+ * @brief provides a string representation of a parameter set.
+ * @param ps Parameter set to be stringified.
+ * @return String of the given parameter set.
+ */
+inline std::string SetToString( ParameterSet const ps ) {
+   switch( ps ) {
+      case ParameterSet::Default:
+         return "Default";
+      case ParameterSet::Custom:
+         return "Custom";
+      default:
+         return "ERROR: This set is not (yet) defined!";
+   }
+}
 
-   namespace EulerNavierStokes {
-      /**
-       * @brief Function returning the Euler or Navier-Stokes equations Riemann solver matching the type in the template argument.
-       * @tparam RiemannSolvers Specification of the RiemannSolver type.
-       */
-      template<RiemannSolvers>
-      struct Concretize;
-
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Roe> {
-         using type = RoeRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hllc> {
-         using type = HllcRiemannSolver;
-      };
-      /**
-       * @brief See generic implementation.
-       */
-      template<>
-      struct Concretize<RiemannSolvers::Hll> {
-         using type = HllRiemannSolver;
-      };
-   }// namespace EulerNavierStokes
-
-   /**
-   * @brief Function returning the Riemann solver matching the type in the template argument accroding to the equation set in the second template parameter.
-   * @tparam RiemannSolvers Specification of the RiemannSolver type.
-   * @tparam EquationSet Specification of the Equation(s) beeing solved.
-   */
-   template<RiemannSolvers R, EquationSet>
-   struct Dispatch {
-      using type = typename EulerNavierStokes::Concretize<R>::type;
-   };
-
-   /**
-    * @brief See generic implementation.
-    */
-   template<RiemannSolvers R>
-   struct Dispatch<R, EquationSet::Isentropic> {
-      using type = typename Isentropic::Concretize<R>::type;
-   };
-
-   /**
-    * @brief Function returning the Riemann solver for the (globally) selected Equation and the given Solver template argument.
-    * @tparam RiemannSolvers Specification of the RiemannSolver type.
-    */
-   template<RiemannSolvers R>
-   struct Concretize {
-      using type = typename Dispatch<R, active_equations>::type;
-   };
-
-}// namespace RiemannSolverSetup
-
-#endif// RIEMANN_SOLVER_SETUP_H
+#endif//EQUATION_SETTINGS_H

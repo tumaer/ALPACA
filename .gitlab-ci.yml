@@ -60,13 +60,23 @@ Two dimensional Alpaca:
   stage: alltests
   script:
     - pip3 install ./python
-    - python3 ./python/scripts/create_executable.py ./ --dimension 2 --axisymmetric True --internal-cells 20 --time-integrator RK2
-      --reconstruction-stencil TENO5 --executable-name A_2D --executable-path ./ --disable-progress
+    - python3 ./python/scripts/create_executable.py ./ --dimension 2 --axisymmetric True --internal-cells 20 --time-integrator RK2 --reconstruction-stencil TENO5 --executable-name A_2D --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_2D Utilities/Inputfiles/CiCd/2D-Dummy.xml
     - mpiexec -n 2 ./A_2D Utilities/Inputfiles/CiCd/2D-Dummy.xml
     - python3 ./python/scripts/remove_volatile_log_information.py 2D-Dummy/2D-Dummy.log
     - python3 ./python/scripts/remove_volatile_log_information.py 2D-Dummy-1/2D-Dummy.log
     - diff 2D-Dummy/2D-Dummy.log 2D-Dummy-1/2D-Dummy.log
+
+Two dimensional isentropic:
+   stage: alltests
+   script:
+    - pip3 install ./python
+    - python3 ./python/scripts/create_executable.py ./ --dimension 2 --equation-set Isentropic --riemann-solver Hll --signal-speed Arithmetic --executable-name A_ISN --executable-path ./ --disable-progress
+    - mpiexec -n 1 ./A_ISN Utilities/Inputfiles/CiCd/Isentropic.xml
+    - mpiexec -n 2 ./A_ISN Utilities/Inputfiles/CiCd/Isentropic.xml
+    - python3 ./python/scripts/remove_volatile_log_information.py Isentropic/Isentropic.log
+    - python3 ./python/scripts/remove_volatile_log_information.py Isentropic-1/Isentropic.log
+    - diff Isentropic/Isentropic.log Isentropic-1/Isentropic.log
 
 Three dimensional Alpaca:
   stage: alltests

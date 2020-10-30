@@ -67,6 +67,7 @@
 *****************************************************************************************/
 #include "initialization/materials/initialization_material.h"
 
+#include "materials/equation_of_state.h"
 #include "user_specifications/compile_time_constants.h"
 
 #include "materials/equations_of_state/stiffened_gas.h"
@@ -74,6 +75,7 @@
 #include "materials/equations_of_state/stiffened_gas_complete_safe.h"
 #include "materials/equations_of_state/waterlike_fluid.h"
 #include "materials/equations_of_state/noble_abel_stiffened_gas.h"
+#include "materials/equations_of_state/isentropic.h"
 
 #include "materials/material_property_models/shear_viscosity_models/constant_shear_viscosity_model.h"
 #include "materials/material_property_models/shear_viscosity_models/shear_rate_models/power_law_shear_viscosity_model.h"
@@ -124,13 +126,18 @@ namespace Initialization {
             return eos;
          }
          case EquationOfStateName::NobleAbelStiffenedGas: {
-            // sanity check if gruneise nflag ist
+            // sanity check if Gruneisen flag ist
             if constexpr( !CC::GruneisenDensityDependent() ) {
                throw std::runtime_error( "To use NobleAbelStiffenedGas you need to activate CC::GruneisenDensityDependent" );
             }
-
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<NobleAbelStiffenedGas const> eos( std::make_unique<NobleAbelStiffenedGas const>( eos_data, unit_handler ) );
+            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            return eos;
+         }
+         case EquationOfStateName::Isentropic: {
+            // 1. Create, 2. Log, 3. Return eos
+            std::unique_ptr<Isentropic const> eos( std::make_unique<Isentropic const>( eos_data, unit_handler ) );
             logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }

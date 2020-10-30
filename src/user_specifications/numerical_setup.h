@@ -83,7 +83,7 @@ enum class LevelsetAdvectors { DerivativeStencil,
                                ReconstructionStencil,
                                HjReconstructionStencil,
                                HjDerivativeStencil };
-constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::ReconstructionStencil;
+constexpr LevelsetAdvectors levelset_advector = LevelsetAdvectors::HjReconstructionStencil;
 
 // LEVELSET_REINITIALIZER
 enum class LevelsetReinitializers { Min,
