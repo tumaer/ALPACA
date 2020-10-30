@@ -9,8 +9,9 @@ PROJECT( ALPACA )
 set( CMAKE_CXX_STANDARD 20 )
 
 INCLUDE( FindMPI REQUIRED )
+include_directories( ${MPI_CXX_INCLUDE_DIRS} )
 
-FIND_PACKAGE( HDF5 REQUIRED )
+INCLUDE( FindHDF5 REQUIRED )
 include_directories( ${HDF5_INCLUDE_DIRS} )
 
 # Define the present git hash as compiler macro.
@@ -88,11 +89,20 @@ if( PYMODULE )
    target_compile_definitions(alpacapy PRIVATE TEST_VIRTUAL=)
 endif( PYMODULE )
 
+target_link_libraries( ALPACA ${MPI_CXX_LIBRARIES} )
 target_link_libraries( ALPACA ${HDF5_LIBRARIES} )
 target_link_libraries( ALPACAlib ${HDF5_LIBRARIES} )
 if( PYMODULE )
    target_link_libraries( alpacapy PRIVATE ${HDF5_LIBRARIES} )
 endif( PYMODULE )
+
+if( MPI_CXX_COMPILE_FLAGS )
+  set_target_properties( ALPACA PROPERTIES COMPILE_FLAGS "${MPI_CXX_COMPILE_FLAGS}")
+endif( MPI_CXX_COMPILE_FLAGS )
+if( MPI_CXX_LINK_FLAGS )
+  set_target_properties( ALPACA PROPERTIES LINK_FLAGS "${MPI_CXX_LINK_FLAGS}")
+endif( MPI_CXX_LINK_FLAGS )
+
 
 # Define the UserExpressions executable, encapsulating the expression toolkit from the rest of the program
 find_library(UserExpr NAMES UserExpressions PATHS ${CMAKE_CURRENT_BINARY_DIR})
@@ -137,8 +147,16 @@ set_target_properties(Paco PROPERTIES EXCLUDE_FROM_ALL TRUE)
 set_target_properties(Paco PROPERTIES COMPILE_FLAGS "${PACO_CXX_FLAGS}")
 target_compile_definitions(Paco PUBLIC TEST_VIRTUAL=virtual)
 
+target_link_libraries( Paco ${MPI_CXX_LIBRARIES} )
 target_link_libraries( Paco ${HDF5_LIBRARIES} )
-target_link_libraries(Paco ${GCOV_LIBRARY})
+target_link_libraries( Paco ${GCOV_LIBRARY} )
+
+if( MPI_CXX_COMPILE_FLAGS )
+  set_target_properties( Paco PROPERTIES COMPILE_FLAGS "${MPI_CXX_COMPILE_FLAGS}")
+endif( MPI_CXX_COMPILE_FLAGS )
+if( MPI_CXX_LINK_FLAGS )
+  set_target_properties( Paco PROPERTIES LINK_FLAGS "${MPI_CXX_LINK_FLAGS}")
+endif( MPI_CXX_LINK_FLAGS )
 
 install(TARGETS ALPACAlib DESTINATION lib)
 install(FILES library/alpaca_runner.h DESTINATION include)

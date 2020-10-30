@@ -28,13 +28,7 @@
 #SBATCH --export=NONE
 #SBATCH --get-user-env
 module load slurm_setup
-
-module unload intel-mpi
-module unload intel-mkl
-module unload intel
-
-module load intel-mpi/2019-gcc
-module load hdf5/1.10.5-gcc8-impi
+module load hdf5/1.8.21-intel19-impi
 
 ## Commenting in the following line may help with stalling I/O
 ## export I_MPI_EXTRA_FILESYSTEM=on
