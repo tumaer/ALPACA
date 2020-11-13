@@ -65,37 +65,44 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_SETTINGS_H
-#define RIEMANN_SOLVER_SETTINGS_H
+#ifndef HLLC_LM_RIEMANN_SOLVER_H
+#define HLLC_LM_RIEMANN_SOLVER_H
 
-#include "enums/flux_splitting.h"
-#include "enums/signal_speed.h"
+#include "solvers/riemann_solvers/riemann_solver.h"
+#include "block_definitions/block.h"
+#include "enums/direction_definition.h"
+#include "materials/equation_of_state.h"
+#include "materials/material_manager.h"
+#include "user_specifications/compile_time_constants.h"
 
-// RIEMANN_SOLVER
-enum class RiemannSolvers { Roe,
-                            Hllc,
-                            Hllc_LM,
-                            Hll };
-constexpr RiemannSolvers riemann_solver = RiemannSolvers::Roe;
+/**
+ * @brief Discretization of the Riemann solver using the HLLC-LM procedure according to \cite Fleischmann2020b.
+ */
+class HllcLMRiemannSolver : public RiemannSolver<HllcLMRiemannSolver> {
 
-namespace RoeSolverSettings {
-   /* FluxSplitting options are:
-    * Roe | LocalLaxFriedrichs | GlobalLaxFriedrichs | Roe_M | LocalLaxFriedrichs_M
-    * Roe_M and LocalLaxFriedrichs_M according to \cite Fleischmann20
-    */
-   constexpr FluxSplitting flux_splitting_scheme = FluxSplitting::Roe;
+   friend RiemannSolver;
 
-   /* Phi in \cite Fleischmann20.
-    * Limits the speed of sound in the eigenvalue calculation of Roe-M and LLF-M
-    */
-   constexpr double low_mach_number_limit_factor = 5.0;
-}// namespace RoeSolverSettings
+   static constexpr double Ma_limit = 0.1;
 
-namespace HllSolverSettings {
-   /* Signal Speed choices for HLL-type solvers are:
-    * Einfeldt \cite Einfeldt88 | Davis \cite Davis88 | Toro \cite Toro94 | Arithmetic \cite Coralic14
-    */
-   constexpr SignalSpeed signal_speed_selection = SignalSpeed::Einfeldt;
-}// namespace HllSolverSettings
+   template<Direction DIR>
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double const cell_size ) const;
 
-#endif// RIEMANN_SOLVER_SETTINGS_H
+   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
+
+public:
+   HllcLMRiemannSolver() = delete;
+   explicit HllcLMRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
+   ~HllcLMRiemannSolver()                            = default;
+   HllcLMRiemannSolver( HllcLMRiemannSolver const& ) = delete;
+   HllcLMRiemannSolver& operator=( HllcLMRiemannSolver const& ) = delete;
+   HllcLMRiemannSolver( HllcLMRiemannSolver&& )                 = delete;
+   HllcLMRiemannSolver& operator=( HllcLMRiemannSolver&& ) = delete;
+};
+
+#endif// HLLC_LM_RIEMANN_SOLVER_H

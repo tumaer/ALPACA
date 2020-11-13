@@ -166,7 +166,7 @@ class UserSpecifications(SpecificationsBase):
             # Riemann setting
             # -----------------------
             "RiemannSolver": UserSpecificationTag(str, "Roe", UserSpecificationFile.riemann_solver_settings, "riemann_solver", "RiemannSolvers::",
-                                                  ["Roe", "Hllc", "Hll"]),
+                                                  ["Roe", "Hllc", "Hll", "Hllc_LM"]),
             "FluxSplitting": UserSpecificationTag(str, "Roe", UserSpecificationFile.riemann_solver_settings, "flux_splitting_scheme", "FluxSplitting::",
                                                   ["Roe", "LocalLaxFriedrichs", "GlobalLaxFriedrichs", "Roe_M", "LocalLaxFriedrichs_M"]),
             "SignalSpeed": UserSpecificationTag(str, "Einfeldt", UserSpecificationFile.riemann_solver_settings, "signal_speed_selection", "SignalSpeed::",
