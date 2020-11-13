@@ -114,24 +114,24 @@
    <twoDimensionalSetup>
       <indexBased> True </indexBased>
       <enablePerformance> False </enablePerformance>
-      <internalCells>          16                      16                    16                    16                      </internalCells>
-      <haloSize>               4                       4                     4                     4                       </haloSize>
-      <timeIntegrator>         RK3                     RK3                   RK3                   RK3                     </timeIntegrator>
-      <riemannSolver>          Roe                     Roe                   Roe                   Hllc                    </riemannSolver>
-      <fluxSplitting>          Roe                     LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe                     </fluxSplitting>
-      <signalSpeed>            Einfeldt                Einfeldt              Einfeldt              Einfeldt                </signalSpeed>
-      <reconstructionStencil>  WENO5                   WENOAO53              WENOAO53              WENO5                   </reconstructionStencil>
-      <derivativeStencil>      HOUC5                   HOUC5                 HOUC5                 HOUC5                   </derivativeStencil>
-      <levelsetAdvector>       HjReconstructionStencil ReconstructionStencil ReconstructionStencil HjReconstructionStencil </levelsetAdvector>
-      <levelsetReinitializer>  Weno                    Weno                  Min                   Min                     </levelsetReinitializer>
-      <interfaceRiemannSolver> Linearized              Linearized            TwoRarefaction        Hllc                    </interfaceRiemannSolver>
-      <ghostFluidExtender>     Fedkiw                  Fedkiw                Fedkiw                Fedkiw                  </ghostFluidExtender>
-      <gravity>                True                    True                  True                  True                    </gravity>
-      <viscosity>              True                    True                  True                  True                    </viscosity>
-      <capillaryForces>        True                    True                  True                  True                    </capillaryForces>
-      <trackRuntimes>          True                    True                  True                  True                    </trackRuntimes>
-      <limitEndTime>           True                    True                  True                  True                    </limitEndTime>
-      <equationSet>            NavierStokes            NavierStokes          NavierStokes          NavierStokes            </equationSet>
+      <internalCells>          16                      16                    16                    16                      16                      </internalCells>
+      <haloSize>               4                       4                     4                     4                       4                       </haloSize>
+      <timeIntegrator>         RK3                     RK3                   RK3                   RK3                     RK3                     </timeIntegrator>
+      <riemannSolver>          Roe                     Roe                   Roe                   Hllc                    Hllc_LM                 </riemannSolver>
+      <fluxSplitting>          Roe                     LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe                     Roe                     </fluxSplitting>
+      <signalSpeed>            Einfeldt                Einfeldt              Einfeldt              Einfeldt                Einfeldt                </signalSpeed>
+      <reconstructionStencil>  WENO5                   WENOAO53              WENOAO53              WENO5                   WENO5                   </reconstructionStencil>
+      <derivativeStencil>      HOUC5                   HOUC5                 HOUC5                 HOUC5                   HOUC5                   </derivativeStencil>
+      <levelsetAdvector>       HjReconstructionStencil ReconstructionStencil ReconstructionStencil HjReconstructionStencil HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>  Weno                    Weno                  Min                   Min                     Weno                    </levelsetReinitializer>
+      <interfaceRiemannSolver> Linearized              Linearized            TwoRarefaction        Hllc                    Linearized              </interfaceRiemannSolver>
+      <ghostFluidExtender>     Fedkiw                  Fedkiw                Fedkiw                Fedkiw                  Fedkiw                  </ghostFluidExtender>
+      <gravity>                True                    True                  True                  True                    True                    </gravity>
+      <viscosity>              True                    True                  True                  True                    True                    </viscosity>
+      <capillaryForces>        True                    True                  True                  True                    True                    </capillaryForces>
+      <trackRuntimes>          True                    True                  True                  True                    True                    </trackRuntimes>
+      <limitEndTime>           True                    True                  True                  True                    True                    </limitEndTime>
+      <equationSet>            NavierStokes            NavierStokes          NavierStokes          NavierStokes            NavierStokes            </equationSet>
    </twoDimensionalSetup>
 
    <threeDimensionalSetup>

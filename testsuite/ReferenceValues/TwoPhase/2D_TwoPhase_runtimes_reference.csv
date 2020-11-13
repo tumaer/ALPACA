@@ -7,3 +7,4 @@
      8.92303500,     ToroImplosionLevelset,         ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_ReconstructionStencil_Weno_Linearized_Fedkiw_Roe_LocalLaxFriedrichs_Einfeldt_WENOAO53_HOUC5_NavierStokes
      8.00341000,     ToroExplosionLevelset,                               ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Min_Hllc_Fedkiw_Hllc_Roe_Einfeldt_WENO5_HOUC5_NavierStokes
      7.31226750,     ToroImplosionLevelset,                               ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Min_Hllc_Fedkiw_Hllc_Roe_Einfeldt_WENO5_HOUC5_NavierStokes
+   274.53800000,                 Carbuncle,                     ALPACA_2D_16_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Hllc_LM_Roe_Einfeldt_WENO5_HOUC5_NavierStokes

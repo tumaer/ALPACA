@@ -72,6 +72,7 @@
 #include "user_specifications/equation_settings.h"
 #include "solvers/riemann_solvers/roe_riemann_solver.h"
 #include "solvers/riemann_solvers/hllc_riemann_solver.h"
+#include "solvers/riemann_solvers/hllc_lm_riemann_solver.h"
 #include "solvers/riemann_solvers/isentropic_hllc_riemann_solver.h"
 #include "solvers/riemann_solvers/hll_riemann_solver.h"
 #include "solvers/riemann_solvers/isentropic_hll_riemann_solver.h"
@@ -127,6 +128,13 @@ namespace RiemannSolverSetup {
       template<>
       struct Concretize<RiemannSolvers::Hllc> {
          using type = HllcRiemannSolver;
+      };
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<RiemannSolvers::Hllc_LM> {
+         using type = HllcLMRiemannSolver;
       };
       /**
        * @brief See generic implementation.
