@@ -86,7 +86,7 @@ TwoPhaseBufferHandler::TwoPhaseBufferHandler( MaterialManager const& material_ma
 void TwoPhaseBufferHandler::TransformToConservativesImplementation( Node& node ) const {
 
    if( node.HasLevelset() ) {
-      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
       for( auto& phase : node.GetPhases() ) {
          // for cut cells factorize volume fractions into conservatives -> volume averaged to real conservatives
          auto const material_sign               = MaterialSignCapsule::SignOfMaterial( phase.first );
@@ -112,8 +112,8 @@ void TwoPhaseBufferHandler::TransformToConservativesImplementation( Node& node )
  */
 void TwoPhaseBufferHandler::TransformToVolumeAveragedConservativesImplementation( Node& node ) const {
    InterfaceBlock const& interface_block                                 = node.GetInterfaceBlock();
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = interface_block.GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = interface_block.GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
    for( auto& phase : node.GetPhases() ) {
       std::int8_t const material_sign        = MaterialSignCapsule::SignOfMaterial( phase.first );
@@ -145,8 +145,8 @@ void TwoPhaseBufferHandler::TransformToVolumeAveragedConservativesImplementation
  */
 void TwoPhaseBufferHandler::AdaptConservativesToWellResolvedDistanceFunctionImplementation( Node& node ) const {
    for( auto& phase : node.GetPhases() ) {
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]      = node.GetInterfaceTags();
-      double const( &volume_fraction_no_scale )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]      = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+      double const( &volume_fraction_no_scale )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
       double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()]   = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
       MaterialName const material     = phase.first;
@@ -179,7 +179,7 @@ void TwoPhaseBufferHandler::AdaptConservativesToWellResolvedDistanceFunctionImpl
  */
 void TwoPhaseBufferHandler::CalculatePrimesFromIntegratedConservativesImplementation( Node& node ) const {
    InterfaceBlock const& interface_block                             = node.GetInterfaceBlock();
-   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
    for( auto& phase : node.GetPhases() ) {
       PrimeStates& prime_states              = phase.second.GetPrimeStateBuffer();
       MaterialName const material            = phase.first;
@@ -206,7 +206,7 @@ void TwoPhaseBufferHandler::CalculatePrimesFromIntegratedConservativesImplementa
  */
 void TwoPhaseBufferHandler::CalculateConservativesFromExtendedPrimesImplementation( Node& node ) const {
    InterfaceBlock const& interface_block                                 = node.GetInterfaceBlock();
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
    for( auto& phase : node.GetPhases() ) {
       MaterialName const material      = phase.first;

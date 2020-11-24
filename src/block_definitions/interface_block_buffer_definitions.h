@@ -78,9 +78,11 @@ enum class InterfaceBlockBufferType {
    LevelsetBase,
    LevelsetRightHandSide,
    LevelsetReinitialized,
+   LevelsetIntegrated,
    VolumeFractionBase,
    VolumeFractionRightHandSide,
    VolumeFractionReinitialized,
+   VolumeFractionIntegrated,
    // interface state buffers
    InterfaceStateVelocity,
    InterfaceStatePressurePositive,
@@ -114,6 +116,16 @@ static constexpr InterfaceBlockBufferType MapInterfaceDescritpionToInterfaceBloc
             }
             default: {
                return InterfaceBlockBufferType::VolumeFractionRightHandSide;
+            }
+         }
+      } break;
+      case InterfaceDescriptionBufferType::Integrated: {
+         switch( description_field ) {
+            case InterfaceDescription::Levelset: {
+               return InterfaceBlockBufferType::LevelsetIntegrated;
+            }
+            default: {
+               return InterfaceBlockBufferType::VolumeFractionIntegrated;
             }
          }
       } break;

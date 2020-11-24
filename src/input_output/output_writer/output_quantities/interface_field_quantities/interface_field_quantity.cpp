@@ -128,7 +128,7 @@ void InterfaceFieldQuantity::DoComputeCellData( Node const& node, std::vector<do
       }
    } else {
       // If interface tags are included the signum is taken from the corner interface tag
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       double const pre_factor                                               = quantity_data_.use_interface_tags_for_default_ ? Signum( interface_tags[0][0][0] ) : 1.0;
       double const default_value                                            = pre_factor * quantity_data_.default_value_;
 
@@ -184,7 +184,7 @@ void InterfaceFieldQuantity::DoComputeDebugCellData( Node const& node, std::vect
       }
    } else {
       // If interface tags are included the signum is taken from the corner interface tag
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       // Add default value for non-interface blocks
       //Loop through all components

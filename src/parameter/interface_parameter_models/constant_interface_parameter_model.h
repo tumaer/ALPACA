@@ -94,7 +94,7 @@ class ConstantInterfaceParameterModel : public InterfaceParameterModel {
    void DoUpdateParameter( Node& node ) const override {
 
       // Obtain the interface tags and volume fraction
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       // extract the parameter from the block, which should be computed
       double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedConstantInterfaceParameterModel::parameter_buffer_type_ );

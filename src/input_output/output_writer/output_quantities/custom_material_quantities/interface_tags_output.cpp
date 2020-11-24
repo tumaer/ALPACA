@@ -89,7 +89,7 @@ InterfaceTagsOutput::InterfaceTagsOutput( UnitHandler const& unit_handler,
  */
 void InterfaceTagsOutput::DoComputeCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
    // Loop through number of internal cells
    for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
@@ -106,7 +106,7 @@ void InterfaceTagsOutput::DoComputeCellData( Node const& node, std::vector<doubl
  */
 void InterfaceTagsOutput::DoComputeDebugCellData( Node const& node, std::vector<double>& cell_data, unsigned long long int& cell_data_counter, MaterialName const ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
    /** Assign the correct rank to the data vector */
    for( unsigned int k = 0; k < CC::TCZ(); ++k ) {

@@ -161,7 +161,7 @@ namespace {
     * @param The interface tag value to put into every cell of the interface tag buffer.
     */
    void SetNodesInterfaceTags( Node& node, InterfaceTag const value ) {
-      FillThreeDimensionalBufferWithValue( node.GetInterfaceTags(), ITTI( value ) );
+      FillThreeDimensionalBufferWithValue( node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), ITTI( value ) );
    }
 
    /*
@@ -170,7 +170,7 @@ namespace {
     * @param The interface tag value to put into the corner cells.
     */
    void SetCornerTagsToValue( Node& node, InterfaceTag const value ) {
-      auto& interface_tags                               = node.GetInterfaceTags();
+      auto& interface_tags                               = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       interface_tags[CC::FICX()][CC::FICY()][CC::FICZ()] = ITTI( value );
       interface_tags[CC::LICX()][CC::FICY()][CC::FICZ()] = ITTI( value );
       interface_tags[CC::FICX()][CC::LICY()][CC::FICZ()] = ITTI( value );
@@ -186,7 +186,7 @@ namespace {
     * @param parent The node which has received the averaged tags.
     */
    void VerifyCornerTagsAveragedIntoParent( Node const& parent ) {
-      auto parent_tags = parent.GetInterfaceTags();
+      auto parent_tags = parent.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       REQUIRE( parent_tags[CC::FICX()][CC::FICY()][CC::FICZ()] == ITTI( IT::OldCutCell ) );
       REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY()][CC::FICZ()] == ITTI( IT::OldCutCell ) );
       REQUIRE( parent_tags[CC::FICX()][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ()] == ITTI( IT::OldCutCell ) );
@@ -215,7 +215,7 @@ namespace {
     * @param node The node whose interface tag buffer is to be examined.
     */
    void VerifyHomogenousBulkTags( Node const& node ) {
-      auto const& tags = node.GetInterfaceTags();
+      auto const& tags = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       for( unsigned int i = CC::LICX(); i < CC::FICX(); ++i ) {
          for( unsigned int j = CC::LICY(); j < CC::FICY(); ++j ) {
             for( unsigned int k = CC::LICZ(); k < CC::FICZ(); ++k ) {

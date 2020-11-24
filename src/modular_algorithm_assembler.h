@@ -139,8 +139,10 @@ class ModularAlgorithmAssembler {
    void LogElapsedTimeSinceInProfileRuns( double const start_time, std::string const message );
 
    void ComputeRightHandSide( std::vector<unsigned int> const levels, unsigned int const stage );
+   void ComputeLevelsetRightHandSide( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage );
    void SwapBuffers( std::vector<unsigned int> const updated_levels, unsigned int const stage ) const;
    void Integrate( std::vector<unsigned int> const updated_levels, unsigned int const stage );
+   void IntegrateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage );
    void JumpFluxAdjustment( std::vector<unsigned int> const finished_levels_descending ) const;
 
    double ComputeTimestepSize() const;

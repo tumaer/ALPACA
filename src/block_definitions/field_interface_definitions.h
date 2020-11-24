@@ -81,7 +81,8 @@
 enum class InterfaceDescriptionBufferType { Base,
                                             RightHandSide,
                                             Reinitialized,
-                                            Initial };
+                                            Initial,
+                                            Integrated };
 
 /**
  * @brief Unique Identifier for the interface field type, i.e. a interface description, a interface state or a interface parameter field.

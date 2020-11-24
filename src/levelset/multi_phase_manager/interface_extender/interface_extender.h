@@ -103,7 +103,7 @@ class InterfaceExtender {
     */
    void DetermineMaximumValueOfQuantitiesToExtend( Node const& node, std::vector<double>& convergence_tracking_quantities ) const {
 
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       for( unsigned int field_index = 0; field_index < IF::NOFTE( field_type_ ); ++field_index ) {
          double const( &interface_field )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetFieldBuffer( field_type_, IF::FITE( field_type_, field_index ) );

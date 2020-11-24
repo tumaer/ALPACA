@@ -157,7 +157,7 @@ private:
    void AddMixingFluxesToConservatives( Node& node, MaterialName const material, double const ( &mixing_fluxes )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
 
       Block& phase                                                          = node.GetPhaseByMaterial( material );
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       for( Equation const eq : MF::ASOE() ) {
          double( &conservatives )[CC::TCX()][CC::TCY()][CC::TCZ()] = phase.GetRightHandSideBuffer( eq );
@@ -190,7 +190,7 @@ private:
 
       Block const& phase                                                = node.GetPhaseByMaterial( material );
       std::int8_t const material_sign                                   = MaterialSignCapsule::SignOfMaterial( material );
-      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
       double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
       double const material_sign_double      = double( material_sign );

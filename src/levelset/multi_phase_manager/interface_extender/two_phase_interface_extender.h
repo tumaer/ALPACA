@@ -96,7 +96,7 @@ private:
    void IterativeExtension( Node& node, std::vector<double>& convergence_tracking_quantities ) const {
 
       double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       std::array<double, DTI( CC::DIM() )> rhs_contributions;
 

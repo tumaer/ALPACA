@@ -97,7 +97,7 @@ public:
    ExternalHaloManager& operator=( ExternalHaloManager&& ) = delete;
 
    void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) const;
-   void UpdateInterfaceTagExternal( Node& node, BoundaryLocation const loc ) const;
+   void UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const;
    void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type, BoundaryLocation const loc ) const;
 };
 

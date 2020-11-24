@@ -93,11 +93,11 @@ void ExternalHaloManager::UpdateLevelsetExternal( Node& node, InterfaceBlockBuff
 
 /**
  * @brief Performs all interface tag halo updates in external boundaries.
- * @param Node for which the halo update is done (indirect return).
+ * @param interface_tags buffer for which the halo update is done (indirect return).
  * @param loc Location of the boundary to update.
  */
-void ExternalHaloManager::UpdateInterfaceTagExternal( Node& node, BoundaryLocation const loc ) const {
-   levelset_boundary_conditions_[LTI( loc )]->UpdateInterfaceTagExternal( node );
+void ExternalHaloManager::UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const {
+   levelset_boundary_conditions_[LTI( loc )]->UpdateInterfaceTagExternal( interface_tags );
 }
 
 /**

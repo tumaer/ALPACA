@@ -99,7 +99,7 @@ void VectorialMaterialOutput::DoComputeCellData( Node const& node, std::vector<d
    // Different behavior dependent on interface presence or not
    if( node.HasLevelset() ) {
       // Use the interface tags and levelset to differ between different states
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
 
       /**

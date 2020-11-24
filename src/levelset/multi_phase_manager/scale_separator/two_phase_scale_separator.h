@@ -78,7 +78,7 @@ class TwoPhaseScaleSeparator : public ScaleSeparator<TwoPhaseScaleSeparator> {
    friend ScaleSeparator;
 
 private:
-   void SeparateScalesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void SeparateScalesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceBlockBufferType const buffer_type ) const;
 
 public:
    TwoPhaseScaleSeparator() = delete;

@@ -337,7 +337,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          } else {// parent is single material
             initial_materials = topology_.GetMaterialsOfNode( parent_id );
             // copying tags of parent is sufficient as they are the same ( single material )
-            tree_.CreateNode( node_id, initial_materials, tree_.GetNodeWithId( parent_id ).GetInterfaceTags() );
+            tree_.CreateNode( node_id, initial_materials, tree_.GetNodeWithId( parent_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
          }
          for( MaterialName const& material : initial_materials ) {
             topology_.AddMaterialToNode( node_id, material );
@@ -351,15 +351,15 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
             Node& node = tree_.GetNodeWithId( node_id );
             if( node.HasLevelset() ) {
-               InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), node.GetInterfaceTags() );
+               InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
             }
          }
       }
-      halo_manager_.InterfaceTagHaloUpdateOnLevelList( { level } );
+      halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( { level } );
       for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
-         InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags() );
+         InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
       }
-      halo_manager_.InterfaceTagHaloUpdateOnLevelList( { level } );
+      halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( { level } );
       SenseApproachingInterface( { level }, false );// setting refine=false might cause an ill-defined tree afterwards which is corrected in next loop ( ++level )
       ImposeInitialCondition( level );
       halo_manager_.MaterialHaloUpdateOnLevel( level, MaterialFieldType::Conservatives );
@@ -520,6 +520,32 @@ void ModularAlgorithmAssembler::Advance() {
          }
          ProvideDebugInformation( "Start of Loop ", false, print_this_step, debug_key );
 
+         //Level set evolution: in this block, the level set field is evolved to the next stage. Reinitialized parameters are
+         //stored in integrated buffers.
+         if( exist_multi_nodes_global ) {
+            SetTimeInProfileRuns( function_timer );
+            ComputeLevelsetRightHandSide( nodes_needing_multiphase_treatment, stage );
+            LogElapsedTimeSinceInProfileRuns( function_timer, "ComputeLevelsetRightHandSide       " );
+            ProvideDebugInformation( "ComputeLevelsetRightHandSide - Done ", plot_this_step, print_this_step, debug_key );
+
+            SetTimeInProfileRuns( function_timer );
+            halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
+            LogElapsedTimeSinceInProfileRuns( function_timer, "LevelsetHaloUpdate                 " );
+            ProvideDebugInformation( "LevelsetHaloUpdate ( maximum level ) - Done ", plot_this_step, print_this_step, debug_key );
+
+            SetTimeInProfileRuns( function_timer );
+            IntegrateLevelset( nodes_needing_multiphase_treatment, stage );
+            LogElapsedTimeSinceInProfileRuns( function_timer, "IntegrateLevelset                  " );
+            ProvideDebugInformation( "IntegrateLevelset - Done ", plot_this_step, print_this_step, debug_key );
+
+            bool const is_last_stage = time_integrator_.IsLastStage( stage );
+            SetTimeInProfileRuns( function_timer );
+            multi_phase_manager_.UpdateIntegratedBuffer( nodes_needing_multiphase_treatment, is_last_stage );
+            LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateIntegratedBuffer                  " );
+            std::string&& message = is_last_stage ? "UpdateIntegratedBuffer in MultiphaseManager ( possibly with scale separation ) - Done " : "UpdateIntegratedBuffer in MultiphaseManager - Done ";
+            ProvideDebugInformation( message, plot_this_step, print_this_step, debug_key );
+         }
+
          // compute rhs on all levels which need to be updated this integer timestep
          SetTimeInProfileRuns( function_timer );
          ComputeRightHandSide( levels_to_update_descending, stage );
@@ -537,13 +563,6 @@ void ModularAlgorithmAssembler::Advance() {
          LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateHalos ( all )                  " );
          ProvideDebugInformation( "UpdateHalos( AllLevels ) - Done ", plot_this_step, print_this_step, debug_key );
 
-         if( exist_multi_nodes_global ) {
-            SetTimeInProfileRuns( function_timer );
-            halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
-            LogElapsedTimeSinceInProfileRuns( function_timer, "LevelsetHaloUpdate                 " );
-            ProvideDebugInformation( "LevelsetHaloUpdate ( maximum level ) - Done ", plot_this_step, print_this_step, debug_key );
-         }
-
          //Get which levels need to be advanced from here on in this timestep and stage
          levels_to_update_descending = GetLevels( timestep );
          levels_to_update_ascending.clear();
@@ -556,6 +575,7 @@ void ModularAlgorithmAssembler::Advance() {
          LogElapsedTimeSinceInProfileRuns( function_timer, "Integrate                          " );
          ProvideDebugInformation( "Integration - Done ", plot_this_step, print_this_step, debug_key );
 
+         //After fluid evolution is done, integrated values are copied into reinitialized values for the next iteration.
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.PropagateLevelset( nodes_needing_multiphase_treatment );
@@ -623,13 +643,6 @@ void ModularAlgorithmAssembler::Advance() {
             multi_phase_manager_.Mix( nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "Mixing                             " );
             ProvideDebugInformation( "Mixing - Done ", plot_this_step, print_this_step, debug_key );
-
-            bool const is_last_stage = time_integrator_.IsLastStage( stage );
-            SetTimeInProfileRuns( function_timer );
-            multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, is_last_stage );
-            LogElapsedTimeSinceInProfileRuns( function_timer, "EnforceWellResolvedDistanceFunction" );
-            std::string&& message = is_last_stage ? "EnforceWellResolvedDistanceFunction ( possibly with scale separation ) - Done " : "EnforceWellResolvedDistanceFunction - Done ";
-            ProvideDebugInformation( message, plot_this_step, print_this_step, debug_key );
 
             SetTimeInProfileRuns( function_timer );
             UpdateInterfaceTags( levels_with_updated_parents_descending );
@@ -775,6 +788,23 @@ void ModularAlgorithmAssembler::ComputeRightHandSide( std::vector<unsigned int> 
 }
 
 /**
+ * @brief Computes the f(u) term of the level-set equation in the Runge-Kutta function u^i = u^(i-1) + c_i * dt * f(u).
+ *        Stores the result in the right hand side buffers. Computations only done in leaves.
+ * @param nodes The nodes for which the right hand side will be computed.
+ * @param stage The current Runge-Kutta stage.
+ */
+void ModularAlgorithmAssembler::ComputeLevelsetRightHandSide( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) {
+
+   for( Node& node : nodes ) {
+      time_integrator_.FillInitialLevelsetBuffer( node, stage );
+      // compute fluxes for levelset
+      space_solver_.UpdateLevelsetFluxes( node );
+      // Levelset buffers are prepared for integration
+      time_integrator_.PrepareLevelsetBufferForIntegration( node, stage );
+   }// node
+}
+
+/**
  * @brief Swaps the content of the average and right hand side buffers of all nodes on the specified level. Thereby, it is ensured that
  * the average buffer of the conservatives and the base buffer of the level set contain values based on which the right-hand side values
  * for the next RK-( sub )step can be calculated. In the last RK-stage it is also necessary to copy the values of the reinitialized level-set buffer
@@ -830,6 +860,19 @@ void ModularAlgorithmAssembler::Integrate( std::vector<unsigned int> const updat
 }
 
 /**
+ * @brief Performs one integration stage of the level-set field with the selected time integrator for all nodes on the specified level.
+ * @param nodes The nodes which should be integrated in time.
+ * @param stage The current integrator stage (before the integration is executed).
+ */
+void ModularAlgorithmAssembler::IntegrateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) {
+
+   // We integrate all leaves
+   for( Node& node : nodes ) {
+      time_integrator_.IntegrateLevelsetNode( node, stage );
+   }
+}
+
+/**
  * @brief Updates the interface tags on all levels based on the cut cells on the finest level.
  * @param nodes The nodes on the finest level, for which the level-set field has to be updated.
  * @param levels_with_updated_parents_descending The child levels whose parents were updated in descending order.
@@ -854,21 +897,31 @@ void ModularAlgorithmAssembler::UpdateInterfaceTags( std::vector<unsigned int> c
     */
    averager_.AverageInterfaceTags( levels_with_updated_parents_descending );
    //Halo Update does not hurt, and we need not only parents but also the child levels
-   halo_manager_.InterfaceTagHaloUpdateOnLevelList( all_levels_ );
+   halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( all_levels_ );
 
    /**
     * Step 2: For all levels where cut cells were newly set, the narrow-band tags are set based on the cut-cell tags.
     */
    for( unsigned int const level : parent_levels_with_projected_cut_cell_tags ) {
       for( auto const node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
-         InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags() );
+         InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
       }
    }
 
    /**
     * Step 3: A halo update on all levels where narrow-band tags were newly set is necessary in the end.
     */
-   halo_manager_.InterfaceTagHaloUpdateOnLevelList( parent_levels_with_projected_cut_cell_tags );
+   halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( parent_levels_with_projected_cut_cell_tags );
+
+   /**
+    * Step 4: Update also integrated interface tags on all levels.
+    */
+   for( unsigned int const level : all_levels_ ) {
+      //std::cout << level << std::endl;
+      for( auto const node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
+         BO::CopySingleBuffer( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() );
+      }
+   }
 }
 
 /**
@@ -891,7 +944,7 @@ void ModularAlgorithmAssembler::SenseApproachingInterface( std::vector<unsigned 
          if( !topology_.IsNodeMultiPhase( node_id ) ) {
             Node& node = tree_.GetNodeWithId( node_id );
             // TODO-19 TP test total cells, but probably halo is enough for standard case ( no phase change in bulk ) --> OPTIMIZE?
-            if( !InterfaceTagFunctions::TotalInterfaceTagsAreUniform( node.GetInterfaceTags() ) ) {
+            if( !InterfaceTagFunctions::TotalInterfaceTagsAreUniform( node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() ) ) {
                // not uniform anymore, thus change to multi
 
                // get additional material
@@ -956,11 +1009,11 @@ void ModularAlgorithmAssembler::SenseVanishedInterface( std::vector<unsigned int
             if( all_children_single ) {
                // if all children are single, this node might become single as well
                Node& node = tree_.GetNodeWithId( node_id );
-               if( InterfaceTagFunctions::TotalInterfaceTagsAreUniform( node.GetInterfaceTags() ) ) {
+               if( InterfaceTagFunctions::TotalInterfaceTagsAreUniform( node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() ) ) {
                   // make single again
 
                   // get the vanished material ( can use an arbitrary interface tag since it's already clear that they are uniform )
-                  MaterialName const material_old = ( node.GetInterfaceTags()[CC::FICX()][CC::FICY()][CC::FICZ()] < 0 ) ? MaterialSignCapsule::PositiveMaterial() : MaterialSignCapsule::NegativeMaterial();
+                  MaterialName const material_old = ( node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>()[CC::FICX()][CC::FICY()][CC::FICZ()] < 0 ) ? MaterialSignCapsule::PositiveMaterial() : MaterialSignCapsule::NegativeMaterial();
                   topology_.RemoveMaterialFromNode( node_id, material_old );
 
                   // remove old material and interface block ( by setting it to nullptr )
@@ -1301,7 +1354,7 @@ void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForNonLevels
  */
 template<ConservativeBufferType C>
 void ModularAlgorithmAssembler::DoObtainPrimeStatesFromConservativesForLevelsetNodes( Node& node ) const {
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    for( auto& phase : node.GetPhases() ) {
       PrimeStates& prime_states          = phase.second.GetPrimeStateBuffer();
       Conservatives const& conservatives = phase.second.GetConservativeBuffer<C>();
@@ -1350,7 +1403,7 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
       for( auto const& [material, block] : node.GetPhases() ) {
          // Compute the material sign
          auto const material_sign                                              = MaterialSignCapsule::SignOfMaterial( material );
-         std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+         std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
          // Get all buffers needed
          PrimeStates const& prime_states = block.GetPrimeStateBuffer();
@@ -1546,7 +1599,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                communicator_.Send( &block.GetBoundaryJumpConservatives(), CC::SIDES(), boundary_jump_datatype, future_rank, requests );
             }
             if( topology_.IsNodeMultiPhase( id ) ) {
-               communicator_.Send( node.GetInterfaceTags(), FullBlockSendingSize(), MPI_INT8_T, future_rank, requests );
+               communicator_.Send( node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), FullBlockSendingSize(), MPI_INT8_T, future_rank, requests );
                if( node.HasLevelset() ) {// Lmax node
 
                   for( MaterialName const material : topology_.GetMaterialsOfNode( id ) ) {
@@ -1556,7 +1609,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                   /**
                    * It is not necessary to send the levelset_initial buffer, since the levelset is integrated each micro timestep.
                    */
-                  communicator_.Send( node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction ), FullBlockSendingSize(), MPI_DOUBLE, future_rank, requests );
+                  communicator_.Send( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), FullBlockSendingSize(), MPI_DOUBLE, future_rank, requests );
                   communicator_.Send( node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::Velocity ), FullBlockSendingSize(), MPI_DOUBLE, future_rank, requests );
                }
             }
@@ -1582,7 +1635,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                communicator_.Recv( &block.GetBoundaryJumpConservatives(), CC::SIDES(), boundary_jump_datatype, current_rank, requests );
             }
             if( topology_.IsNodeMultiPhase( id ) ) {
-               communicator_.Recv( &new_node.GetInterfaceTags(), FullBlockSendingSize(), MPI_INT8_T, current_rank, requests );
+               communicator_.Recv( &new_node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), FullBlockSendingSize(), MPI_INT8_T, current_rank, requests );
                if( LevelOfNode( id ) == all_levels_.back() ) {
                   for( MaterialName const material : topology_.GetMaterialsOfNode( id ) ) {
                      communicator_.Recv( &new_node.GetPhaseByMaterial( material ).GetPrimeStateBuffer(), MF::ANOP(), conservatives_datatype, current_rank, requests );
@@ -1590,12 +1643,12 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
                   // We have not yet created a LS field in our recieving Node. At this point it is clear it need one, so we create it with dummys and receive the correct values.
                   new_node.SetInterfaceBlock( std::make_unique<InterfaceBlock>( 0.0 ) );
                   communicator_.Recv( new_node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), FullBlockSendingSize(), MPI_DOUBLE, current_rank, requests );
-                  communicator_.Recv( new_node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction ), FullBlockSendingSize(), MPI_DOUBLE, current_rank, requests );
+                  communicator_.Recv( new_node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), FullBlockSendingSize(), MPI_DOUBLE, current_rank, requests );
                   communicator_.Recv( new_node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::Velocity ), FullBlockSendingSize(), MPI_DOUBLE, current_rank, requests );
                }
             } else {
                std::int8_t uniform_tag                                   = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( id ).back() ) * ITTI( IT::BulkPhase );
-               std::int8_t( &new_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = new_node.GetInterfaceTags();
+               std::int8_t( &new_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = new_node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
                BO::SetSingleBuffer( new_tags, uniform_tag );
             }
             if constexpr( DP::Profile() ) {
@@ -1642,7 +1695,7 @@ void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level
    for( auto& [id, node] : tree_.GetLevelContent( level ) ) {
       for( MaterialName const material : topology_.GetMaterialsOfNode( id ) ) {
 
-         std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+         std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
          Block& block = node.GetPhaseByMaterial( material );
 

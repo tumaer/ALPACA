@@ -94,9 +94,9 @@ ApertureCutCellMixer::ApertureCutCellMixer( HaloManager& halo_manager ) : TwoPha
  */
 void ApertureCutCellMixer::CalculateMixingContributionsImplementation( Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int, 6>>, std::vector<std::array<double, 2>>>>& mixing_contributions ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
    std::int8_t const material_sign                                       = MaterialSignCapsule::SignOfMaterial( material );
 
    double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;

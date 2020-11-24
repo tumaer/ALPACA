@@ -108,8 +108,8 @@ private:
     */
    void DetermineMaximumValueOfQuantitiesToExtend( Node const& node, double ( &convergence_tracking_quantities )[2][number_of_convergence_tracking_quantities_] ) const {
 
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+      double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
       // Loop through all materials on the node
       for( auto const& phase : node.GetPhases() ) {

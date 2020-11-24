@@ -84,6 +84,7 @@ class InterfaceBlock {
    InterfaceDescriptions right_hand_side_;
    InterfaceDescriptions reinitialized_;
    InterfaceDescriptions initial_;
+   InterfaceDescriptions integrated_;
 
    // buffers for the interface states (e.g. interface velocity, negative/positive pressure)
    InterfaceStates states_;
@@ -118,6 +119,9 @@ public:
    auto GetInitialBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
    auto GetInitialBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 
+   auto GetIntegratedBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetIntegratedBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+
    template<InterfaceDescriptionBufferType C>
    InterfaceDescriptions& GetInterfaceDescriptionBuffer();
 
@@ -132,6 +136,8 @@ public:
    InterfaceDescriptions const& GetReinitializedBuffer() const;
    InterfaceDescriptions& GetInitialBuffer();
    InterfaceDescriptions const& GetInitialBuffer() const;
+   InterfaceDescriptions& GetIntegratedBuffer();
+   InterfaceDescriptions const& GetIntegratedBuffer() const;
    InterfaceDescriptions& GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type );
    InterfaceDescriptions const& GetInterfaceDescriptionBuffer( InterfaceDescriptionBufferType const buffer_type ) const;
 

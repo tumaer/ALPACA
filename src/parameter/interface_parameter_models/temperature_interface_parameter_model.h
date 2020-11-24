@@ -98,7 +98,7 @@ class TemperatureInterfaceParameterModel : public InterfaceParameterModel {
       double( &parameter_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceParameterBuffer( DerivedTemperatureInterfaceParameterModel::parameter_buffer_type_ );
 
       // Obtain the interface tags and volume fraction
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( Levelset::VolumeFraction );
 
       // Compute the parameter based on constan values

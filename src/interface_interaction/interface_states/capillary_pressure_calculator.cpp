@@ -94,7 +94,7 @@ CapillaryPressureCalculator::CapillaryPressureCalculator( MaterialManager const&
  */
 void CapillaryPressureCalculator::ComputePressureDifference( Node const& node, double ( &pressure_difference )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    /**
     * Use the pressure_difference buffer in the next function call to store the curvature. Then, in the following step
     * multiplication with the surface_tension_coefficient_ gives the pressure difference due to capillary forces.

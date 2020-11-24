@@ -130,19 +130,20 @@ void InternalHaloManager::MaterialHaloUpdateOnMultis( MaterialFieldType const fi
 /**
  * @brief Updates the interface tags in internal halo cells on the given level.
  * @param level Level on which the update is done.
+ * @param type Level-set buffer type on which the update is done.
  */
-void InternalHaloManager::InterfaceTagHaloUpdateOnLevel( unsigned int const level ) {
+void InternalHaloManager::InterfaceTagHaloUpdateOnLevel( unsigned int const level, InterfaceDescriptionBufferType const type ) {
    std::vector<MPI_Request> requests;
    communication_manager_.GenerateNeighborRelationForHaloUpdate( level );
    // Non-Jump halo update
    // it is necessary that first the non-jump boundaries are carried out to ensure that all parent nodes contain the correct information in their halo cells
-   MpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesMpi( level ), requests );
-   NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundaries( level ) );
+   MpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesMpi( level ), type, requests );
+   NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundaries( level ), type );
    // Jump halo update
    // (Inteface tag jumps are always handled locally, but might be in the mpi buffer for MaterialHaloUpdates.)
-   NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesJump( level ) );
+   NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesJump( level ), type );
    // Inteface tag jumps are always handled locally, but might be in the mpi buffer for MaterialHaloUpdates.
-   NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesJumpMpi( level ) );
+   NoMpiInterfaceTagHaloUpdate( communication_manager_.InternalBoundariesJumpMpi( level ), type );
    MPI_Waitall( requests.size(), requests.data(), MPI_STATUSES_IGNORE );
    requests.clear();
 }
@@ -486,18 +487,20 @@ void InternalHaloManager::UpdateInterfaceHaloCellsNoMpi( nid_t const id, Interfa
    }
 }
 
-/* @brief Sends the state of the interface tags according to the Boundary Type.
+/** 
+ * @brief Sends the state of the interface tags according to the Boundary Type.
  * @param id_node The node and its id to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
+ * @param type Level-set buffer type on which the update is done.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
+void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( nid_t const id, std::vector<MPI_Request>& requests, InterfaceDescriptionBufferType const type, BoundaryLocation const loc ) {
    Node& node              = tree_.GetNodeWithId( id );
    nid_t const host_id     = id;
    nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    int const rank_of_neighbor                                         = topology_.GetRankOfNode( neighbor_id );
-   std::int8_t const( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags( type );
    MPI_Datatype send_type                                             = communication_manager_.SendDatatype( loc, DatatypeForMpi::Byte );
    communication_manager_.Send( host_buffer, 1, send_type, rank_of_neighbor, requests );
 }
@@ -506,16 +509,17 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiSend( nid_t const id, st
  * @brief Receives the state of the interface halo cells according to the Boundary Type.
  * @param id The id of the node to be updated.
  * @param requests Asynchronous communication is supported via a reference to a MPI_Request vector.
+ * @param type Level-set buffer type on which the update is done.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( nid_t const id, std::vector<MPI_Request>& requests, BoundaryLocation const loc ) {
+void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( nid_t const id, std::vector<MPI_Request>& requests, InterfaceDescriptionBufferType const type, BoundaryLocation const loc ) {
    Node& node              = tree_.GetNodeWithId( id );
    nid_t const host_id     = id;
    nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    int const rank_of_neighbor = topology_.GetRankOfNode( neighbor_id );
 
-   std::int8_t( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags( type );
    MPI_Datatype recv_type                                       = communication_manager_.RecvDatatype( loc, DatatypeForMpi::Byte );
    communication_manager_.Recv( host_buffer, 1, recv_type, rank_of_neighbor, requests );
 }
@@ -523,19 +527,20 @@ void InternalHaloManager::UpdateInterfaceTagHaloCellsMpiRecv( nid_t const id, st
 /**
  * @brief Performs all interface halo updates that can be done without communication.
  * @param id The id of the node to be updated.
+ * @param type Level-set buffer type on which the update is done.
  * @param loc BoundaryLocation to be updated.
  */
-void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( nid_t const id, BoundaryLocation const loc ) {
+void InternalHaloManager::UpdateInterfaceTagHaloCellsNoMpi( nid_t const id, InterfaceDescriptionBufferType const type, BoundaryLocation const loc ) {
    Node& node              = tree_.GetNodeWithId( id );
    nid_t const host_id     = id;
    nid_t const neighbor_id = topology_.GetTopologyNeighborId( host_id, loc );
 
    if( topology_.NodeExists( neighbor_id ) ) {
-      std::int8_t( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()]          = node.GetInterfaceTags();
-      std::int8_t const( &partner_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = tree_.GetNodeWithId( neighbor_id ).GetInterfaceTags();
+      std::int8_t( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()]          = node.GetInterfaceTags( type );
+      std::int8_t const( &partner_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = tree_.GetNodeWithId( neighbor_id ).GetInterfaceTags( type );
       UpdateNoJumpLocal( host_buffer, partner_buffer, loc );
    } else {// In case the neighbour does not exist, e.g. at jumps, the closest internal value (bulk phase) has to be extended.
-      ExtendClosestInternalValue( node.GetInterfaceTags(), loc );
+      ExtendClosestInternalValue( node.GetInterfaceTags( type ), loc );
    }
 }
 
@@ -741,8 +746,9 @@ void InternalHaloManager::NoMpiMaterialHaloUpdate( std::vector<std::tuple<nid_t,
 /**
  * @brief Executes the Interface tag halo update for all boundaries that do not need communication.
  * @param boundaries Boundaries to be updated.
+ * @param buffer_type Level-set buffer type on which the update is done.
  */
-void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries ) {
+void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries, InterfaceDescriptionBufferType const buffer_type ) {
    for( auto const& boundary : boundaries ) {
       nid_t const id                  = std::get<0>( boundary );
       BoundaryLocation const location = std::get<1>( boundary );
@@ -750,7 +756,7 @@ void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<ni
 
       if( type != InternalBoundaryType::JumpBoundaryMpiSend ) {
          // jump/no_jump is dealt within the boundary condition, but there is no need to project jumps from the parent, therefore it is ignored here.
-         UpdateInterfaceTagHaloCellsNoMpi( id, location );
+         UpdateInterfaceTagHaloCellsNoMpi( id, buffer_type, location );
       }
    }
 }
@@ -758,8 +764,9 @@ void InternalHaloManager::NoMpiInterfaceTagHaloUpdate( std::vector<std::tuple<ni
 /**
  * @brief Executes the interface tag halo update for all boundaries that do need communication.
  * @param boundaries Boundaries to be updated.
+ * @param type Level-set buffer type on which the update is done.
  */
-void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries,
+void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& boundaries, InterfaceDescriptionBufferType const type,
                                                      std::vector<MPI_Request>& requests ) {
    for( auto const& boundary : boundaries ) {
       BoundaryLocation const location = std::get<1>( boundary );
@@ -767,17 +774,17 @@ void InternalHaloManager::MpiInterfaceTagHaloUpdate( std::vector<std::tuple<nid_
 
       switch( std::get<2>( boundary ) ) {
          case InternalBoundaryType::NoJumpBoundaryMpiSend:
-            UpdateInterfaceTagHaloCellsMpiSend( id, requests, location );
+            UpdateInterfaceTagHaloCellsMpiSend( id, requests, type, location );
             break;
 #ifndef PERFORMANCE
          case InternalBoundaryType::NoJumpBoundaryMpiRecv:
-            UpdateInterfaceTagHaloCellsMpiRecv( id, requests, location );
+            UpdateInterfaceTagHaloCellsMpiRecv( id, requests, type, location );
             break;
          default:
             throw std::logic_error( "BoundaryManager::MpiInterfaceTagHaloUpdate: BoundaryType not supported" );
 #else
          default: /* InternalBoundaryType::NoJumpBoundaryMpiRecv */ {
-            UpdateInterfaceTagHaloCellsMpiRecv( id, requests, location );
+            UpdateInterfaceTagHaloCellsMpiRecv( id, requests, type, location );
          }
 #endif
       }

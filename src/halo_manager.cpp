@@ -161,29 +161,6 @@ void HaloManager::MaterialHaloUpdateOnLmaxMultis( MaterialFieldType const field_
 }
 
 /**
- * @brief Calls an interface tag halo update on Lmax only.
- */
-void HaloManager::InterfaceTagHaloUpdateOnLmax() const {
-   InterfaceTagHaloUpdateOnLevelList( { maximum_level_ } );
-}
-
-/**
- * @brief Adjusts the values in the interface tag buffer according to their type. (symmetry, internal ...).
- * @param updated_levels The levels on which halos of nodes will be modified.
- */
-void HaloManager::InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> const& updated_levels ) const {
-   for( unsigned int const& level : updated_levels ) {
-      internal_halo_manager_.InterfaceTagHaloUpdateOnLevel( level );
-      // Update of domain boundaries
-      for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
-         nid_t const id                  = std::get<0>( domain_boundary );
-         BoundaryLocation const location = std::get<1>( domain_boundary );
-         external_halo_manager_.UpdateInterfaceTagExternal( tree_.GetNodeWithId( id ), location );
-      }
-   }//levels
-}
-
-/**
  * @brief Calls a interface halo update of the specified interface buffer on Lmax (only!).
  * @param type The identifier of the buffer that is to be updated.
  */

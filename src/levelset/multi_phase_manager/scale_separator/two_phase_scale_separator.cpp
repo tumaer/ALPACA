@@ -173,12 +173,13 @@ namespace {
    /**
  * @brief Performs a scale separation procedure according to \cite Luo2016.
  * @param node The node for which scale separation is done.
+ * @param buffer_type The level-set buffer type for which scale separation is done.
  */
-   void ScaleSeparationProcedure( Node& node ) {
+   void ScaleSeparationProcedure( Node& node, InterfaceBlockBufferType const buffer_type ) {
 
-      double( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
+      double( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
 
-      std::int8_t( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = buffer_type == InterfaceBlockBufferType::LevelsetReinitialized ? node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() : node.GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>();
 
       std::int8_t interface_tags_positive_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
       std::int8_t interface_tags_negative_shift[CC::TCX()][CC::TCY()][CC::TCZ()];
@@ -309,10 +310,11 @@ namespace {
 /**
  * @brief Performs a scale separation procedure for a given vector of nodes.
  * @param nodes The nodes for which scale separation is done.
+ * @param buffer_type The level-set buffer type for which scale separation is done.
  */
-void TwoPhaseScaleSeparator::SeparateScalesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+void TwoPhaseScaleSeparator::SeparateScalesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceBlockBufferType const buffer_type ) const {
    for( Node& node : nodes ) {
-      ScaleSeparationProcedure( node );
+      ScaleSeparationProcedure( node, buffer_type );
    }
-   halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetReinitialized );
+   halo_manager_.InterfaceHaloUpdateOnLmax( buffer_type );
 }
