@@ -174,6 +174,16 @@ public:
     * @brief After integration of the level-set field related quantities have to be adjusted to the propagated level-set field.
     *        Quantities which are adjusted are the interface tags and the volume fraction.
     * @param nodes The nodes on the finest level for which interface-tags and volume fractions have to be adjusted.
+    * @param is_last_stage  Bool indicating whether this is the last stage of the RK cycle.
+    */
+   void UpdateIntegratedBuffer( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
+      static_cast<DerivedMultiPhaseManager const&>( *this ).UpdateIntegratedBufferImplementation( nodes, is_last_stage );
+   }
+
+   /**
+    * @brief After integration of the level-set field related quantities have to be adjusted to the propagated level-set field.
+    *        Quantities which are adjusted are the interface tags and the volume fraction.
+    * @param nodes The nodes on the finest level for which interface-tags and volume fractions have to be adjusted.
     */
    void PropagateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
       static_cast<DerivedMultiPhaseManager const&>( *this ).PropagateLevelsetImplementation( nodes );

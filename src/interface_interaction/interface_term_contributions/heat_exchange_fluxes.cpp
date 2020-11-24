@@ -93,8 +93,8 @@ void HeatExchangeFluxes::ComputeInterfaceFluxes( Node& node, double const ( &del
    double const cell_size     = node.GetCellSize();
    double const one_cell_size = 1.0 / cell_size;
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
    double real_material_temperature[CC::TCX()][CC::TCY()][CC::TCZ()];
    ComputeRealMaterialTemperature( node, real_material_temperature );

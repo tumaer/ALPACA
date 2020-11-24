@@ -391,7 +391,7 @@ void ComputeInterfaceCurvature( Node const& node, double ( &curvature )[CC::TCX(
    constexpr unsigned int offset_z = CC::DIM() == Dimension::Three ? ReconstructionStencil::DownstreamStencilSize() + 1 : 0;
 
    double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const cell_size                                                   = node.GetCellSize();
    double const one_cell_size                                               = 1.0 / cell_size;
 

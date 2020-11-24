@@ -78,7 +78,7 @@ class WenoIterativeLevelsetReinitializer : public IterativeLevelsetReinitializer
    friend IterativeLevelsetReinitializerBase;
 
 protected:
-   double ReinitializeSingleNodeImplementation( Node& node, bool const is_last_stage ) const;
+   double ReinitializeSingleNodeImplementation( Node& node, InterfaceDescriptionBufferType const levelset_type, bool const is_last_stage ) const;
 
 public:
    WenoIterativeLevelsetReinitializer() = delete;

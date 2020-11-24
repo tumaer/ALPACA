@@ -159,8 +159,7 @@ public:
    /**
     * @brief See base class. Adjusted to symmetry condition.
     */
-   void UpdateInterfaceTagExternal( Node& node ) const override {
-      std::int8_t( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   void UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const override {
       UpdateSimpleSymmetry( interface_tags );
    }
 

@@ -121,7 +121,7 @@ void InterfaceTermSolver::SolveInterfaceInteraction( Node& node ) const {
  *                                  The hardcoded three refers to the maximum number of spatial dimensions.
  */
 void InterfaceTermSolver::FillInterfaceNormalVelocityBuffer( Node const& node, double ( &u_interface_normal_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const {
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
    double const( &interface_velocity )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::Velocity );
 
@@ -160,7 +160,7 @@ void InterfaceTermSolver::FillInterfaceNormalVelocityBuffer( Node const& node, d
  */
 void InterfaceTermSolver::FillDeltaApertureBuffer( Node const& node, double ( &delta_aperture_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
@@ -205,7 +205,7 @@ void InterfaceTermSolver::WeightFaceFluxes( Node const& node, MaterialName const
                                             double ( &face_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
 
    std::int8_t const material_sign                                          = MaterialSignCapsule::SignOfMaterial( material );
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
    unsigned int const i_start = 0;
@@ -250,7 +250,7 @@ void InterfaceTermSolver::WeightVolumeForces( Node const& node, MaterialName con
                                               double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    std::int8_t const material_sign                                   = MaterialSignCapsule::SignOfMaterial( material );
-   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
    double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
    double const material_sign_double      = double( material_sign );

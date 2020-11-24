@@ -103,7 +103,7 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>& c
    double const cell_size = node.GetCellSize();
 
    if( node.HasLevelset() ) {
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       PrimeStates const& positive_prime_states = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer();
       PrimeStates const& negative_prime_states = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer();

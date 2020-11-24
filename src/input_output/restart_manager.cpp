@@ -361,7 +361,7 @@ std::string RestartManager::WriteRestartFile( double const timestep, std::string
          // write interface data (levelset and interface tags)
          if( node.HasLevelset() ) {
             hdf5_manager_.WriteDataset( "Levelset", node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset ) );
-            hdf5_manager_.WriteDataset( "InterfaceTags", node.GetInterfaceTags() );
+            hdf5_manager_.WriteDataset( "InterfaceTags", node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
          }
       }
    }

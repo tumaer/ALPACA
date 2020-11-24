@@ -84,7 +84,8 @@ Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<Ma
    for( unsigned int i = 0; i < CC::TCX(); ++i ) {
       for( unsigned int j = 0; j < CC::TCY(); ++j ) {
          for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-            interface_tags_[i][j][k] = initial_interface_tag;
+            interface_tags_[i][j][k]            = initial_interface_tag;
+            integrated_interface_tags_[i][j][k] = initial_interface_tag;
          }
       }
    }
@@ -108,7 +109,8 @@ Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<Ma
    for( unsigned int i = 0; i < CC::TCX(); ++i ) {
       for( unsigned int j = 0; j < CC::TCY(); ++j ) {
          for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-            interface_tags_[i][j][k] = initial_interface_tags[i][j][k];
+            interface_tags_[i][j][k]            = initial_interface_tags[i][j][k];
+            integrated_interface_tags_[i][j][k] = initial_interface_tags[i][j][k];
          }
       }
    }
@@ -302,18 +304,73 @@ std::int8_t Node::GetUniformInterfaceTag() const {
 }
 
 /**
- * @brief Gives the Interface Tag Buffer.
+ * @brief Gives the Interface Tag Buffer. Implementation for the reinitialized buffer.
  * @return Interface tag buffer.
  */
-auto Node::GetInterfaceTags() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return interface_tags_;
 }
 
 /**
  * @brief Const overlaod. See in non-const for details.
  */
-auto Node::GetInterfaceTags() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return interface_tags_;
+}
+
+/**
+ * @brief Gives the Interface Tag Buffer. Implementation for the integrated buffer.
+ * @return Interface tag buffer.
+ */
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return integrated_interface_tags_;
+}
+
+/**
+ * @brief Const overlaod. See in non-const for details.
+ */
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return integrated_interface_tags_;
+}
+
+/**
+ * @brief Gives the Interface Tag Buffer.
+ * @param type Level set field buffer type.
+ * @return Interface tag buffer.
+ */
+auto Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   switch( type ) {
+      case InterfaceDescriptionBufferType::Reinitialized: {
+         return interface_tags_;
+      }
+      case InterfaceDescriptionBufferType::Integrated: {
+         return integrated_interface_tags_;
+      }
+      default: {
+         throw std::logic_error( "Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) : type not defined" );
+      }
+   }
+}
+
+/**
+ * @brief Const overlaod. See in non-const for details.
+ */
+auto Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   switch( type ) {
+      case InterfaceDescriptionBufferType::Reinitialized: {
+         return interface_tags_;
+      }
+      case InterfaceDescriptionBufferType::Integrated: {
+         return integrated_interface_tags_;
+      }
+      default: {
+         throw std::logic_error( "Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) : type not defined" );
+      }
+   }
 }
 
 /**

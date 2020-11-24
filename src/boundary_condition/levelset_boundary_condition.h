@@ -95,9 +95,9 @@ public:
 
    /**
     * @brief Performs all interface tag halo updates in external boundaries.
-    * @param node Node on which the halo update is done.
+    * @param interface_tags buffer for which the halo update is done (indirect return).
     */
-   virtual void UpdateInterfaceTagExternal( Node& node ) const = 0;
+   virtual void UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const = 0;
 };
 
 #endif// LEVELSET_BOUNDARY_CONDITION_H

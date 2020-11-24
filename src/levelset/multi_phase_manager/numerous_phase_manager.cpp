@@ -92,7 +92,7 @@ void NumerousPhaseManager::MixImplementation( std::vector<std::reference_wrapper
  * @param is_last_stage See base class.
  */
 void NumerousPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
-   levelset_reinitializer_.Reinitialize( nodes, is_last_stage );
+   levelset_reinitializer_.Reinitialize( nodes, InterfaceDescriptionBufferType::Reinitialized, is_last_stage );
 }
 
 /**
@@ -109,6 +109,16 @@ void NumerousPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::ref
  */
 void NumerousPhaseManager::ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
    interface_extender_.Extend( nodes );
+}
+
+/**
+ * @brief See base class.
+ * @param nodes See base class.
+ * @param stage See base class.
+ */
+void NumerousPhaseManager::UpdateIntegratedBufferImplementation( std::vector<std::reference_wrapper<Node>> const&, bool const is_last_stage ) const {
+   (void)is_last_stage;
+   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::UpdateIntegratedBufferImplementation" );
 }
 
 /**

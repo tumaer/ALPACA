@@ -89,7 +89,7 @@ InterfaceVelocityPressureCalculator::InterfaceVelocityPressureCalculator( Materi
 void InterfaceVelocityPressureCalculator::FillInterfaceVelocityAndPressureBuffer( Node& node, double ( &pressure_difference )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
 
    double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
    double( &interface_velocity )[CC::TCX()][CC::TCY()][CC::TCZ()]          = node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::Velocity );
    double( &interface_pressure_positive )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::PressurePositive );

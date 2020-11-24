@@ -67,13 +67,11 @@
 *****************************************************************************************/
 #include "two_phase_manager.h"
 
-#include "interface_tags/interface_tag_functions.h"
 #include "material_sign_capsule.h"
 #include "utilities/buffer_operations_interface.h"
 
 /**
  * @brief Default constructor for the TwoPhaseManager. Calls the default constructor of the base class.
- * @param setup Instance to get access to user defined properties, relevant for the simulation.
  * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
  * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
  */
@@ -117,20 +115,17 @@ void TwoPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node
  */
 void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
    if( CC::ScaleSeparationActive() && is_last_stage ) {
-      scale_separator_.SeparateScales( nodes );
+      scale_separator_.SeparateScales( nodes, InterfaceBlockBufferType::LevelsetReinitialized );
       /**
        * Since we also want to reinitialize scale-separated cells we cannot update the interface tags at this place.
        * We have to do it after the reinitialization.
        */
    }
 
-   bool reinitialize = true;
-   if( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) {
-      reinitialize = false;
-   }
+   bool const reinitialize = ( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) ? false : true;
 
    if( reinitialize ) {
-      levelset_reinitializer_.Reinitialize( nodes, is_last_stage );
+      levelset_reinitializer_.Reinitialize( nodes, InterfaceDescriptionBufferType::Reinitialized, is_last_stage );
    }
 
    if( is_last_stage ) {
@@ -138,18 +133,18 @@ void TwoPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::ve
          buffer_handler_.AdaptConservativesToWellResolvedDistanceFunction( node );
       }
       halo_manager_.MaterialHaloUpdateOnLmax( MaterialFieldType::Conservatives );
-      UpdateInterfaceTagsOnFinestLevel( nodes );
+      UpdateInterfaceTagsOnFinestLevel<InterfaceDescriptionBufferType::Reinitialized>( nodes );
 
       for( Node& node : nodes ) {
-         SetVolumeFractionBuffer( node );
+         SetVolumeFractionBuffer<InterfaceDescriptionBufferType::Reinitialized>( node );
       }
-      halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::VolumeFractionBase );
+      halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::VolumeFractionReinitialized );
    }
 }
 
 /**
  * @brief Allows to extend material states to ghost cells.
- * @param node See base class.
+ * @param nodes See base class.
  */
 void TwoPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
 
@@ -191,14 +186,15 @@ void TwoPhaseManager::ExtendInterfaceStatesImplementation( std::vector<std::refe
  * @brief Calculates the volume fractions for the positive material on the inner cells of a given node and saves them in the volume-fraction buffer.
  *        The volume fractions are calculated using the reinitialized levelset buffer.
  * @param node The node for which the volume fraction buffer is set.
+ * @tparam T The level set description for which the volume fraction buffer is set.
  */
+template<InterfaceDescriptionBufferType T>
 void TwoPhaseManager::SetVolumeFractionBuffer( Node& node ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<T>();
 
-   InterfaceBlock& interface_block                             = node.GetInterfaceBlock();
-   double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]  = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
-   double( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]  = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<T>()[InterfaceDescription::Levelset];
+   double( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<T>()[InterfaceDescription::VolumeFraction];
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
       for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
@@ -218,24 +214,55 @@ void TwoPhaseManager::SetVolumeFractionBuffer( Node& node ) const {
 /**
  * See base class.
  * @param nodes See base class.
+ * @param is_last_stage See base class.
  */
-void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+void TwoPhaseManager::UpdateIntegratedBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
 
    /***
     * At this point in the algorithm time integration of the level-set field is already done. To fully propagate the level-set field,
     * interface tags and volume fractions have to be updated.
-    * The interface tag update and the calculation of volume fractions are based on the level-set values in the reinitialized level-set buffer. Thus, after the advection of the level-set field,
-    * the advected level-set values, which are currently in the right-hand side level-set buffer, have to be copied to the reinitialized level-set buffer.
+    * The interface tag update and the calculation of volume fractions are based on the level-set values in the integrated level-set buffer. Thus, after the advection of the level-set field,
+    * the advected level-set values, which are currently in the right-hand side level-set buffer, have to be copied to the integrated level-set buffer.
     */
-   BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Reinitialized>( nodes );
-   UpdateInterfaceTagsOnFinestLevel( nodes );
+   BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Integrated>( nodes );
+   UpdateInterfaceTagsOnFinestLevel<InterfaceDescriptionBufferType::Integrated>( nodes );
+
+   if( CC::ScaleSeparationActive() && is_last_stage ) {
+      scale_separator_.SeparateScales( nodes, InterfaceBlockBufferType::LevelsetIntegrated );
+      /**
+       * Since we also want to reinitialize scale-separated cells we cannot update the interface tags at this place.
+       * We have to do it after the reinitialization.
+       */
+   }
+
+   bool const reinitialize = ( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) ? false : true;
+
+   if( reinitialize ) {
+      levelset_reinitializer_.Reinitialize( nodes, InterfaceDescriptionBufferType::Integrated, is_last_stage );
+   }
+
+   UpdateInterfaceTagsOnFinestLevel<InterfaceDescriptionBufferType::Integrated>( nodes );
 
    // Set the volume fraction buffer according to the propagated level-set field.
    for( Node& node : nodes ) {
-      SetVolumeFractionBuffer( node );
+      SetVolumeFractionBuffer<InterfaceDescriptionBufferType::Integrated>( node );
    }
    // A halo update for the volume fractions is necessary to have also correct volume fractions in the halo cells.
-   halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::VolumeFractionBase );
+   halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::VolumeFractionIntegrated );
+}
+
+/**
+ * See base class.
+ * @param nodes See base class.
+ */
+void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+
+   BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Integrated, InterfaceDescriptionBufferType::Reinitialized, InterfaceDescription::Levelset>( nodes );
+   BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Integrated, InterfaceDescriptionBufferType::Reinitialized, InterfaceDescription::VolumeFraction>( nodes );
+
+   for( Node& node : nodes ) {
+      BO::CopySingleBuffer( node.GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>(), node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
+   }
 }
 
 /**
@@ -244,26 +271,9 @@ void TwoPhaseManager::PropagateLevelsetImplementation( std::vector<std::referenc
  */
 void TwoPhaseManager::InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
    for( Node& node : nodes ) {
-      SetVolumeFractionBuffer( node );
+      SetVolumeFractionBuffer<InterfaceDescriptionBufferType::Reinitialized>( node );
    }
-   halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::VolumeFractionBase );
-}
-
-/**
- * @brief Sets the interface tags on the finest level.
- * @param nodes The nodes on the finest level, which have a level-set block.
- */
-void TwoPhaseManager::UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
-
-   for( Node& node : nodes ) {
-      InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), node.GetInterfaceTags() );
-   }
-   halo_manager_.InterfaceTagHaloUpdateOnLmax();
-
-   for( Node& node : nodes ) {
-      InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( node.GetInterfaceTags() );
-   }
-   halo_manager_.InterfaceTagHaloUpdateOnLmax();
+   halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::VolumeFractionReinitialized );
 }
 
 /**

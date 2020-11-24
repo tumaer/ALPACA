@@ -91,7 +91,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
             node.SetInterfaceBlock( std::make_unique<InterfaceBlock>( static_cast<double>( id ) ) );
             auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
-            auto& interface_tags = node.GetInterfaceTags();
+            auto& interface_tags = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                   for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
@@ -105,7 +105,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          CommunicationManager communication = CommunicationManager( two_nodes_level_zero_topo, maximum_level );
          InternalHaloManager internal_halos = InternalHaloManager( tree, two_nodes_level_zero_topo, communication, 1 );
          internal_halos.MaterialHaloUpdateOnLevel( maximum_level, MaterialFieldType::Conservatives, false );
-         internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level );
+         internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level, InterfaceDescriptionBufferType::Reinitialized );
          internal_halos.InterfaceHaloUpdateOnLevel( maximum_level, InterfaceBlockBufferType::LevelsetRightHandSide );
 
          THEN( "The halo values contain the proper values from the neighbor node" ) {
@@ -119,7 +119,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
                                                                                             { 7, { BoundaryLocation::West, BoundaryLocation::SouthWest, BoundaryLocation::WestSouthBottom } } } );
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
                auto const& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
-               auto const& interface_tags = node.GetInterfaceTags();
+               auto const& interface_tags = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
                auto const& levelset       = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
                for( auto const& side : sides_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) ) ) {
                   auto const recv_indices = communication.GetStartIndicesHaloRecv( side );
@@ -165,7 +165,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          for( auto& level : tree.FullNodeList() ) {
             for( auto& [id, node] : level ) {
                auto& cells          = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
-               auto& interface_tags = node.GetInterfaceTags();
+               auto& interface_tags = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
                for( unsigned int i = 0; i < CC::TCX(); ++i ) {
                   for( unsigned int j = 0; j < CC::TCY(); ++j ) {
                      for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
@@ -180,8 +180,8 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
          InternalHaloManager internal_halos = InternalHaloManager( tree, simple_jump_topo, communication, 1 );
          internal_halos.MaterialHaloUpdateOnLevel( 0, MaterialFieldType::Conservatives, false );
          internal_halos.MaterialHaloUpdateOnLevel( maximum_level, MaterialFieldType::Conservatives, false );
-         internal_halos.InterfaceTagHaloUpdateOnLevel( 0 );
-         internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level );
+         internal_halos.InterfaceTagHaloUpdateOnLevel( 0, InterfaceDescriptionBufferType::Reinitialized );
+         internal_halos.InterfaceTagHaloUpdateOnLevel( maximum_level, InterfaceDescriptionBufferType::Reinitialized );
          internal_halos.InterfaceHaloUpdateOnLevel( maximum_level, InterfaceBlockBufferType::LevelsetRightHandSide );
 
          THEN( "The values in the jump halos are correct" ) {
@@ -197,7 +197,7 @@ SCENARIO( "Internal Halos can be updated correctly", "[1rank],[2rank]" ) {
             } );
             for( auto& [id, node] : tree.FullNodeList().at( maximum_level ) ) {
                auto const& cells                   = node.GetPhaseByMaterial( material_one ).GetRightHandSideBuffer( Equation::Mass );
-               auto const& interface_tags          = node.GetInterfaceTags();
+               auto const& interface_tags          = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
                auto const& levelset                = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
                auto const& side                    = side_to_check_for_id.at( PositionOfNodeAmongSiblings( id ) );
                auto const recv_indices             = communication.GetStartIndicesHaloRecv( side );

@@ -70,6 +70,7 @@
 
 #include "multi_phase_manager.h"
 #include "buffer_handler.h"
+#include "interface_tags/interface_tag_functions.h"
 
 /**
  * @brief The TwoPhaseManager provides functionality to perform two-phase flow simulation by a single-level set method.
@@ -79,16 +80,37 @@ class TwoPhaseManager : public MultiPhaseManager<TwoPhaseManager> {
    friend MultiPhaseManager;
 
 private:
+   template<InterfaceDescriptionBufferType T>
    void SetVolumeFractionBuffer( Node& node ) const;
-   void UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
 
    void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
    void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void UpdateIntegratedBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const;
    void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
    void ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const;
+
+   /**
+    * @brief Sets the interface tags on the finest level. Implementation for the reinitialized buffer.
+    * @param nodes_containing_level_set The nodes on the finest level, which have a level-set block.
+    * @tparam IDB The interface buffer type for the interface tag update.
+    */
+   template<InterfaceDescriptionBufferType IDB>
+   void UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes_containing_level_set ) const {
+
+      for( Node& node : nodes_containing_level_set ) {
+         InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<IDB>()[InterfaceDescription::Levelset], node.GetInterfaceTags<IDB>() );
+      }
+
+      halo_manager_.InterfaceTagHaloUpdateOnLmax<IDB>();
+
+      for( Node& node : nodes_containing_level_set ) {
+         InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( node.GetInterfaceTags<IDB>() );
+      }
+      halo_manager_.InterfaceTagHaloUpdateOnLmax<IDB>();
+   }
 
 public:
    TwoPhaseManager() = delete;

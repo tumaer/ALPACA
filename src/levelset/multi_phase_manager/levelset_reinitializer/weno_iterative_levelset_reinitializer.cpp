@@ -91,16 +91,17 @@ WenoIterativeLevelsetReinitializer::WenoIterativeLevelsetReinitializer( HaloMana
 /**
  * @brief Reinitializes the levelset field of a node using a HJ WENO scheme.
  * @param node The node with levelset block which has to be reinitialized.
+ * @param levelset_type  Level-set field type that is reinitialized.
  * @param is_last_stage Return whether it's the last RK stage or not.
  * @return The residuum for the current node.
  */
-double WenoIterativeLevelsetReinitializer::ReinitializeSingleNodeImplementation( Node& node, bool const is_last_stage ) const {
+double WenoIterativeLevelsetReinitializer::ReinitializeSingleNodeImplementation( Node& node, InterfaceDescriptionBufferType const levelset_type, bool const is_last_stage ) const {
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<levelset_reconstruction_stencil>::type;
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags( levelset_type );
    InterfaceBlock& interface_block                                       = node.GetInterfaceBlock();
-   double( &levelset_orig )[CC::TCX()][CC::TCY()][CC::TCZ()]             = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
+   double( &levelset_orig )[CC::TCX()][CC::TCY()][CC::TCZ()]             = interface_block.GetInterfaceDescriptionBuffer( levelset_type )[InterfaceDescription::Levelset];
    double const( &levelset_0_orig )[CC::TCX()][CC::TCY()][CC::TCZ()]     = interface_block.GetRightHandSideBuffer( InterfaceDescription::Levelset );
 
    double reinitialization_rhs[CC::TCX()][CC::TCY()][CC::TCZ()];

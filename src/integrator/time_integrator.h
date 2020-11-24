@@ -178,7 +178,7 @@ class TimeIntegrator {
    void IntegrateLevelset( Node& node, double const timestep ) const {
       double( &levelset_new )[CC::TCX()][CC::TCY()][CC::TCZ()]                 = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
       double const( &levelset_old )[CC::TCX()][CC::TCY()][CC::TCZ()]           = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
@@ -290,7 +290,7 @@ public:
    }
 
    /**
-     * @brief Integrates one node by one stage. Integration is done for the conservatives and the level-set field.
+     * @brief Integrates one node by one stage. Integration is done for the conservatives.
      * @param node The node to be integrated.
      * @param stage The integration stage.
      * @param number_of_timesteps The number of time steps relevant for this integration, i.e. on coarser levels the timestep sizes of the finer levels need to be summed.
@@ -312,13 +312,26 @@ public:
          IntegrateJumpConservatives( phase.second, multiplier_jump_conservatives * timestep );
       }
 
-      if( node.HasLevelset() ) {
-         IntegrateLevelset( node, multiplier_conservatives * timestep );
-      }
-
       for( auto& phase : node.GetPhases() ) {
          IntegrateConservatives( phase.second, multiplier_conservatives * timestep );
       }
+   }
+
+   /**
+    * @brief Integrates one node by one stage. Integration is done for the level-set field.
+    * @param node The node to be integrated.
+    * @param stage The integration stage.
+    */
+   void IntegrateLevelsetNode( Node& node, unsigned int const stage ) const {
+#ifndef PERFORMANCE
+      if( stage >= NumberOfStages() ) {
+         throw std::invalid_argument( "Stage is too large for Runge-Kutta-3 integration" );
+      }
+#endif
+      double const timestep                 = micro_timestep_sizes_.back();
+      double const multiplier_conservatives = GetTimestepMultiplierConservatives( stage );
+
+      IntegrateLevelset( node, multiplier_conservatives * timestep );
    }
 
    /**
@@ -331,7 +344,7 @@ public:
          if( node.HasLevelset() ) {
             for( auto& mat_block : node.GetPhases() ) {
                std::int8_t const material_sign                                   = MaterialSignCapsule::SignOfMaterial( mat_block.first );
-               double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+               double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
                double const reference_volume_fraction = ( material_sign > 0 ) ? 0.0 : 1.0;
                double const material_sign_double      = double( material_sign );
@@ -348,18 +361,27 @@ public:
                   }      //i
                }         //equations
             }            //phases
-
-            BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Base, InterfaceDescriptionBufferType::Initial>( node );
-
-         } else {//nodes without levelset
+         } else {        //nodes without levelset
             BO::Material::CopyConservativeBuffersForNode<ConservativeBufferType::Average, ConservativeBufferType::Initial>( node );
          }
       }//if initial stage
    }
 
    /**
-     * @brief Prepares the average buffer for the next Runge-Kutta sub-timestep.
-     * @param node The node for which the average buffer is prepared for the next sub-timestep.
+     * @brief Fills the initial level-set buffer with the initial values of the RK-stage. This is only done for the first Runge-Kutta step.
+     * @param node The node for which the level set of the last RK stage are written to the temporary buffer.
+     * @param stage The stage of the time stepping scheme.
+     */
+   void FillInitialLevelsetBuffer( Node& node, unsigned int const stage ) const {
+      if( stage == 0 ) {
+         BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Base, InterfaceDescriptionBufferType::Initial, InterfaceDescription::Levelset>( node );
+         BO::Interface::CopyInterfaceDescriptionBufferForNode<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::Initial, InterfaceDescription::VolumeFraction>( node );
+      }//stage
+   }
+
+   /**
+     * @brief Prepares the average buffer for the next Runge-Kutta stage.
+     * @param node The node for which the average buffer is prepared for the next stage.
      * @param stage The stage of the time-stepping scheme.
      */
    void PrepareBufferForIntegration( Node& node, unsigned int const stage ) const {
@@ -381,19 +403,30 @@ public:
                }      //i
             }         //equations
          }            //phases
+      }
+   }
 
-         if( node.HasLevelset() ) {
-            double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]               = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
-            double const( &levelset_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
+   /**
+    * @brief Prepares the level-set buffer for the next Runge-Kutta stage.
+    * @param node The node for which the average buffer is prepared for the next stage.
+    * @param stage The stage of the time-stepping scheme.
+    */
+   void PrepareLevelsetBufferForIntegration( Node& node, unsigned int const stage ) const {
+      //buffer preparation is only necessary for intermediate and last stage
+      if( stage != 0 ) {
 
-            for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-               for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-                  for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-                     levelset[i][j][k] = multipliers[0] * levelset[i][j][k] + multipliers[1] * levelset_initial[i][j][k];
-                  }//k
-               }   //j
-            }      //i
-         }         //nodes with levelset
+         auto const multipliers = GetBufferMultiplier( stage );
+
+         double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]               = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
+         double const( &levelset_initial )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInitialBuffer( InterfaceDescription::Levelset );
+
+         for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+            for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+               for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+                  levelset[i][j][k] = multipliers[0] * levelset[i][j][k] + multipliers[1] * levelset_initial[i][j][k];
+               }//k
+            }   //j
+         }      //i
       }
    }
 

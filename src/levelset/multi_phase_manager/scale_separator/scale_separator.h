@@ -100,9 +100,10 @@ public:
    /**
     * @brief Performs a scale separation procedure.
     * @param nodes The nodes for which scale separation should be done.
+    * @param buffer_type The level-set buffer type for which scale separation is done.
     */
-   void SeparateScales( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
-      static_cast<DerivedScaleSeparator const&>( *this ).SeparateScalesImplementation( nodes );
+   void SeparateScales( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceBlockBufferType const buffer_type ) const {
+      static_cast<DerivedScaleSeparator const&>( *this ).SeparateScalesImplementation( nodes, buffer_type );
    }
 };
 

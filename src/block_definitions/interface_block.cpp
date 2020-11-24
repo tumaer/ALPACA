@@ -80,8 +80,10 @@ InterfaceBlock::InterfaceBlock( double const ( &levelset_initial )[CC::TCX()][CC
    // In the right-hand and reinitialized buffer the levelset is copied and volume fraction is set to zero
    BO::CopySingleBuffer( levelset_initial, GetRightHandSideBuffer( InterfaceDescription::Levelset ) );
    BO::CopySingleBuffer( levelset_initial, GetReinitializedBuffer( InterfaceDescription::Levelset ) );
+   BO::CopySingleBuffer( levelset_initial, GetIntegratedBuffer( InterfaceDescription::Levelset ) );
    BO::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
    BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
+   BO::SetSingleBuffer( GetIntegratedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
    // In the initial buffer all values are set to zero
    BO::SetFieldBuffer( GetInitialBuffer(), 0.0 );
    // In the interface state buffer all values are set to zero
@@ -105,8 +107,10 @@ InterfaceBlock::InterfaceBlock( double const levelset_initial ) {
    // In the right-hand and reinitialized buffer the levelset is set to uniform given value and volume fraction is set to zero
    BO::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::Levelset ), levelset_initial );
    BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::Levelset ), levelset_initial );
+   BO::SetSingleBuffer( GetIntegratedBuffer( InterfaceDescription::Levelset ), levelset_initial );
    BO::SetSingleBuffer( GetRightHandSideBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
-   BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
+   BO::SetSingleBuffer( GetReinitializedBuffer( InterfaceDescription::VolumeFraction ), levelset_initial > 0 ? 1.0 : 0.0 );
+   BO::SetSingleBuffer( GetIntegratedBuffer( InterfaceDescription::VolumeFraction ), 0.0 );
    // In the initial buffer all values are set to zero
    BO::SetFieldBuffer( GetInitialBuffer(), 0.0 );
    // In the interface state buffer all values are set to zero
@@ -221,7 +225,23 @@ auto InterfaceBlock::GetInitialBuffer( InterfaceDescription const interface_desc
 }
 
 /**
- * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ * @brief Gives a Reference to the corresponding integrated buffer.
+ * @param interface_description Decider which buffer is to be returned.
+ * @return Reference to Array that is the requested buffer.
+ */
+auto InterfaceBlock::GetIntegratedBuffer( InterfaceDescription const interface_description ) -> double ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return integrated_[interface_description];
+}
+
+/**
+ * @brief Const overload.
+ */
+auto InterfaceBlock::GetIntegratedBuffer( InterfaceDescription const interface_description ) const -> double const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return integrated_[interface_description];
+}
+
+/**
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized, initial, or integrated). The decision is
  *                made based on the template parameter. Implementation for the base buffer.
  * @return Base interface description struct.
  */
@@ -239,7 +259,7 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<Inter
 }
 
 /**
- * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized, initial, or integrated). The decision is
  *                made based on the template parameter. Implementation for the right-hand side buffer.
  * @return Right-hand side interface description struct.
  */
@@ -257,7 +277,7 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<Inter
 }
 
 /**
- * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized, initial, or integrated). The decision is
  *                made based on the template parameter. Implementation for the reinitialized buffer.
  * @return Reinitialized interface description struct.
  */
@@ -275,7 +295,7 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<Inter
 }
 
 /**
- * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized or initial). The decision is
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized, initial, or integrated). The decision is
  *                made based on the template parameter. Implementation for the initial buffer.
  * @return Initial interface description struct.
  */
@@ -290,6 +310,24 @@ InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDe
 template<>
 InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::Initial>() const {
    return GetInitialBuffer();
+}
+
+/**
+ * @brief Wrapper function that returns an interface description buffer (base, right-hand side, reinitialized, initial, or integrated). The decision is
+ *                made based on the template parameter. Implementation for the integrated buffer.
+ * @return Integrated interface description struct.
+ */
+template<>
+InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::Integrated>() {
+   return GetIntegratedBuffer();
+}
+
+/**
+ * @brief Const overload.
+ */
+template<>
+InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer<InterfaceDescriptionBufferType::Integrated>() const {
+   return GetIntegratedBuffer();
 }
 
 /**
@@ -353,6 +391,21 @@ InterfaceDescriptions const& InterfaceBlock::GetInitialBuffer() const {
 }
 
 /**
+ * @brief Gives access to the integrated buffer.
+ * @return integrated buffer struct.
+ */
+InterfaceDescriptions& InterfaceBlock::GetIntegratedBuffer() {
+   return integrated_;
+}
+
+/**
+ * @brief Const overload.
+ */
+InterfaceDescriptions const& InterfaceBlock::GetIntegratedBuffer() const {
+   return integrated_;
+}
+
+/**
  * @brief Gives access to the interface descritpion buffer of given type.
  * @param buffer_type InterfaceDescription type of the buffer asked for.
  * @return buffer struct of given type.
@@ -367,6 +420,9 @@ InterfaceDescriptions& InterfaceBlock::GetInterfaceDescriptionBuffer( InterfaceD
       }
       case InterfaceDescriptionBufferType::Base: {
          return base_;
+      }
+      case InterfaceDescriptionBufferType::Integrated: {
+         return integrated_;
       }
       default: {// case InterfaceDescriptionBufferType::Initial:
          return initial_;
@@ -387,6 +443,9 @@ InterfaceDescriptions const& InterfaceBlock::GetInterfaceDescriptionBuffer( Inte
       }
       case InterfaceDescriptionBufferType::Base: {
          return base_;
+      }
+      case InterfaceDescriptionBufferType::Integrated: {
+         return integrated_;
       }
       default: {// case InterfaceDescriptionBufferType::Initial:
          return initial_;
@@ -481,6 +540,12 @@ auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type ) -> 
       case InterfaceBlockBufferType::VolumeFractionReinitialized: {
          return reinitialized_[InterfaceDescription::VolumeFraction];
       }
+      case InterfaceBlockBufferType::LevelsetIntegrated: {
+         return integrated_[InterfaceDescription::Levelset];
+      }
+      case InterfaceBlockBufferType::VolumeFractionIntegrated: {
+         return integrated_[InterfaceDescription::VolumeFraction];
+      }
       // interface states
       case InterfaceBlockBufferType::InterfaceStateVelocity: {
          return states_[InterfaceState::Velocity];
@@ -530,6 +595,12 @@ auto InterfaceBlock::GetBuffer( InterfaceBlockBufferType const buffer_type ) con
       }
       case InterfaceBlockBufferType::VolumeFractionReinitialized: {
          return reinitialized_[InterfaceDescription::VolumeFraction];
+      }
+      case InterfaceBlockBufferType::LevelsetIntegrated: {
+         return integrated_[InterfaceDescription::Levelset];
+      }
+      case InterfaceBlockBufferType::VolumeFractionIntegrated: {
+         return integrated_[InterfaceDescription::VolumeFraction];
       }
       // interface states
       case InterfaceBlockBufferType::InterfaceStateVelocity: {

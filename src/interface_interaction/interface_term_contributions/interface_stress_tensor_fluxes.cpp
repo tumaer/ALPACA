@@ -147,7 +147,7 @@ void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node, double c
 
    double const one_cell_size = 1.0 / node.GetCellSize();
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
    Conservatives& right_hand_side_positive_material = node.GetPhaseByMaterial( positive_material_properties_.material_ ).GetRightHandSideBuffer();
@@ -210,7 +210,7 @@ void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node, double c
  */
 void InterfaceStressTensorFluxes::AddInviscidPartToInterfaceStressTensor( Node const& node, double ( &interface_stress_tensor_positive_material )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )], double ( &interface_stress_tensor_negative_material )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]         = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]         = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
    double const( &interface_pressure_positive )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::PressurePositive );
    double const( &interface_pressure_negative )[CC::TCX()][CC::TCY()][CC::TCZ()] = CC::CapillaryForcesActive() ?
                                                                                          node.GetInterfaceBlock().GetInterfaceStateBuffer( InterfaceState::PressureNegative ) :
@@ -263,7 +263,7 @@ void InterfaceStressTensorFluxes::AddViscousPartToInterfaceStressTensor( Node co
       AddAxisymmetricPartToViscousStressTensor( node, tau );
    }
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {
@@ -290,7 +290,7 @@ void InterfaceStressTensorFluxes::AddViscousPartToInterfaceStressTensor( Node co
 void InterfaceStressTensorFluxes::CalculateVelocityGradientAtInterface( Node const& node, double ( &velocity_gradient_at_interface )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const {
 
    double const cell_size                                                = node.GetCellSize();
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
    double real_material_velocity_x[CC::TCX()][CC::TCY()][CC::TCZ()];
    double real_material_velocity_y[CC::TCX()][CC::TCY()][CC::TCZ()];
@@ -324,8 +324,8 @@ void InterfaceStressTensorFluxes::CalculateVelocityGradientAtInterface( Node con
  */
 void InterfaceStressTensorFluxes::CalculateViscousStressTensor( Node const& node, double const ( &velocity_gradient )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )], double ( &tau )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const( &volume_fractions )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+   double const( &volume_fractions )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {
@@ -359,8 +359,8 @@ void InterfaceStressTensorFluxes::CalculateViscousStressTensor( Node const& node
  */
 void InterfaceStressTensorFluxes::AddAxisymmetricPartToViscousStressTensor( Node const& node, double ( &tau )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const {
 
-   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const( &volume_fractions )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+   double const( &volume_fractions )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
    double const cell_size = node.GetCellSize();
 
@@ -398,7 +398,7 @@ void InterfaceStressTensorFluxes::AddAxisymmetricPartToViscousStressTensor( Node
  */
 void InterfaceStressTensorFluxes::ComputeRealMaterialVelocity( Node const& node, double ( &real_material_velocity_x )[CC::TCX()][CC::TCY()][CC::TCZ()], double ( &real_material_velocity_y )[CC::TCX()][CC::TCY()][CC::TCZ()], double ( &real_material_velocity_z )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
 
-   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::VolumeFraction );
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
    Block const& positive_material = node.GetPhaseByMaterial( positive_material_properties_.material_ );
    Block const& negative_material = node.GetPhaseByMaterial( negative_material_properties_.material_ );

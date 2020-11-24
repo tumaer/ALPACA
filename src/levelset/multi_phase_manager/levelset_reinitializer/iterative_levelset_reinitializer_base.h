@@ -98,11 +98,12 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
    /**
     * @brief Sets the cut-off in the levelset field of a node.
     * @param node The node with levelset block which has to be reinitialized.
+    * @param levelset_type Level set buffer type which is reinitialized.
     */
-   void CutOffSingleNode( Node& node ) const {
+   void CutOffSingleNode( Node& node, InterfaceDescriptionBufferType const levelset_type ) const {
 
       InterfaceBlock& interface_block                      = node.GetInterfaceBlock();
-      double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
+      double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer( levelset_type )[InterfaceDescription::Levelset];
 
       // Cells which have a levelset value greater than the cutoff value are set to cutoff.
       double const cutoff = CC::LSCOF();
@@ -120,12 +121,18 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
    /**
     * @brief Reinitializes a single-level set field as described in \cite Sussman1994.
     * @param nodes Vector holding all nodes that have to be updated.
-    * @param Return whether it's the last RK stage or not.
+    * @param levelset_type Level set buffer type which is reinitialized.
+    * @param is_last_stage whether it's the last RK stage or not.
     */
-   void ReinitializeImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
+   void ReinitializeImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceDescriptionBufferType const levelset_type, bool const is_last_stage ) const {
 
+      InterfaceBlockBufferType const levelset_buffer_type = levelset_type == InterfaceDescriptionBufferType::Reinitialized ? InterfaceBlockBufferType::LevelsetReinitialized : InterfaceBlockBufferType::LevelsetIntegrated;
       // Store the original levelset field in the right-hand side buffer to have a reference during reinitialization
-      BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
+      if( levelset_type == InterfaceDescriptionBufferType::Reinitialized ) {
+         BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
+      } else {
+         BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Integrated, InterfaceDescriptionBufferType::RightHandSide>( nodes );
+      }
 
       // Carry out the actual reinitialization procedure
       double residuum = 0.0;
@@ -135,11 +142,11 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
             residuum = 0.0;
          }
          for( auto& node : nodes ) {
-            residuum = std::max( residuum, static_cast<DerivedIterativeLevelsetReinitializer const&>( *this ).ReinitializeSingleNodeImplementation( node, is_last_stage ) );
+            residuum = std::max( residuum, static_cast<DerivedIterativeLevelsetReinitializer const&>( *this ).ReinitializeSingleNodeImplementation( node, levelset_type, is_last_stage ) );
          }
 
          //halo update
-         halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetReinitialized );
+         halo_manager_.InterfaceHaloUpdateOnLmax( levelset_buffer_type );
          if constexpr( ReinitializationConstants::TrackConvergence ) {
             MPI_Allreduce( MPI_IN_PLACE, &residuum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
 
@@ -157,9 +164,9 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
       }
 
       for( auto& node : nodes ) {
-         CutOffSingleNode( node );
+         CutOffSingleNode( node, levelset_type );
       }
-      halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetReinitialized );
+      halo_manager_.InterfaceHaloUpdateOnLmax( levelset_buffer_type );
    }
 
 public:

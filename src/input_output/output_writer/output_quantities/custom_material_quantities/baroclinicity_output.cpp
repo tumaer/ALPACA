@@ -102,7 +102,7 @@ void BaroclinicityOutput::DoComputeCellData( Node const& node, std::vector<doubl
    double const cell_size = node.GetCellSize();
 
    if( node.HasLevelset() ) {
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
       double const( &positive_pressure )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer( PrimeState::Pressure );
       double const( &positive_density )[CC::TCX()][CC::TCY()][CC::TCZ()]  = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer( PrimeState::Density );

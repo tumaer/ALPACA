@@ -215,7 +215,7 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
       for( auto const& [child_id, rank_of_child, rank_of_parent] : child_parent_rank_relations ) {
          if( rank_of_child == communicator_.MyRankId() && rank_of_parent != communicator_.MyRankId() ) {
             Node const& child = tree_.GetNodeWithId( child_id );
-            Multiresolution::PropagateCutCellTagsFromChildIntoParent( child.GetInterfaceTags(), send_buffer_parent.at( send_counter ).interface_tags_, child_id );
+            Multiresolution::PropagateCutCellTagsFromChildIntoParent( child.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), send_buffer_parent.at( send_counter ).interface_tags_, child_id );
             int const pos = PositionOfNodeAmongSiblings( child_id );
             communicator_.Send( &send_buffer_parent.at( send_counter ), 1, communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Byte ), rank_of_parent, requests );
             send_counter++;
@@ -224,7 +224,7 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
             nid_t const parent_id = ParentIdOfNode( child_id );
             Node& parent          = tree_.GetNodeWithId( parent_id );
             int const pos         = PositionOfNodeAmongSiblings( child_id );
-            communicator_.Recv( &parent.GetInterfaceTags(), 1, communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Byte ), rank_of_child, requests );
+            communicator_.Recv( &parent.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), 1, communicator_.AveragingSendDatatype( pos, DatatypeForMpi::Byte ), rank_of_child, requests );
          }
       }
 
@@ -233,7 +233,7 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
          nid_t const parent_id         = ParentIdOfNode( child_id );
          Node& parent                  = tree_.GetNodeWithId( parent_id );
          std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( child_id ).back() ) * ITTI( IT::BulkPhase );
-         Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags(), child_id );
+         Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), child_id );
       }
 
       // Non MPI Averaging
@@ -242,10 +242,10 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
          Node& parent          = tree_.GetNodeWithId( parent_id );
          if( topology_.IsNodeMultiPhase( child_id ) ) {
             Node const& child = tree_.GetNodeWithId( child_id );
-            Multiresolution::PropagateCutCellTagsFromChildIntoParent( child.GetInterfaceTags(), parent.GetInterfaceTags(), child_id );
+            Multiresolution::PropagateCutCellTagsFromChildIntoParent( child.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), parent.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), child_id );
          } else {
             std::int8_t const uniform_tag = MaterialSignCapsule::SignOfMaterial( topology_.GetMaterialsOfNode( child_id ).back() ) * ITTI( IT::BulkPhase );
-            Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags(), child_id );
+            Multiresolution::PropagateUniformTagsFromChildIntoParent( uniform_tag, parent.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), child_id );
          }
       }
 

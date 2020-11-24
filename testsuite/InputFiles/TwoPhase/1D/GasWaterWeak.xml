@@ -123,7 +123,7 @@
    <timeControl>
        <startTime> 0.0 </startTime>
        <endTime>   0.005 </endTime>
-       <CFLNumber> 0.5 </CFLNumber>
+       <CFLNumber> 0.48 </CFLNumber>
    </timeControl>
 
    <dimensionalization>

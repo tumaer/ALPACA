@@ -92,6 +92,7 @@ class Node {
 
    //type std::int8_t due to definition of enum InterfaceTag. Needs to be changed in case the enum type changes.
    std::int8_t interface_tags_[CC::TCX()][CC::TCY()][CC::TCZ()];
+   std::int8_t integrated_interface_tags_[CC::TCX()][CC::TCY()][CC::TCZ()];
 
    std::unique_ptr<InterfaceBlock> interface_block_;
 
@@ -132,8 +133,13 @@ public:
    bool HasLevelset() const;
 
    std::int8_t GetUniformInterfaceTag() const;
+   template<InterfaceDescriptionBufferType C>
    auto GetInterfaceTags() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   template<InterfaceDescriptionBufferType C>
    auto GetInterfaceTags() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+
+   auto GetInterfaceTags( InterfaceDescriptionBufferType const type ) -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
+   auto GetInterfaceTags( InterfaceDescriptionBufferType const type ) const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()];
 };
 
 #endif// NODE_H

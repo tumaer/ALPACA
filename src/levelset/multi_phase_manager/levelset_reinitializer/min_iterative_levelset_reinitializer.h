@@ -83,7 +83,7 @@ class MinIterativeLevelsetReinitializer : public IterativeLevelsetReinitializerB
    static constexpr bool subcell_fix_active_ = false;
 
 protected:
-   double ReinitializeSingleNodeImplementation( Node& node, bool const ) const;
+   double ReinitializeSingleNodeImplementation( Node& node, InterfaceDescriptionBufferType const levelset_type, bool const ) const;
 
 public:
    MinIterativeLevelsetReinitializer() = delete;

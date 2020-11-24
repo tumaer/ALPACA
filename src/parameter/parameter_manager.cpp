@@ -100,7 +100,7 @@ void ParameterManager::UpdateParameters( Node& node ) const {
       if constexpr( CC::ViscosityIsActive() && CC::ShearViscosityModelActive() ) {
          // Call appropriate function depending on presence of an interface of this node
          if( node.HasLevelset() ) {
-            material.GetShearViscosityModel().UpdateParameter( phase.second, cell_size, node.GetInterfaceTags(), material_sign );
+            material.GetShearViscosityModel().UpdateParameter( phase.second, cell_size, node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), material_sign );
          } else {
             material.GetShearViscosityModel().UpdateParameter( phase.second, cell_size );
          }
@@ -110,7 +110,7 @@ void ParameterManager::UpdateParameters( Node& node ) const {
       if constexpr( CC::HeatConductionActive() && CC::ThermalConductivityModelActive() ) {
          // Call appropriate function depending on presence of an interface of this node
          if( node.HasLevelset() ) {
-            material.GetThermalConductivityModel().UpdateParameter( phase.second, cell_size, node.GetInterfaceTags(), material_sign );
+            material.GetThermalConductivityModel().UpdateParameter( phase.second, cell_size, node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), material_sign );
          } else {
             material.GetThermalConductivityModel().UpdateParameter( phase.second, cell_size );
          }

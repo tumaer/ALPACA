@@ -110,20 +110,8 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
 
    // For multi-phase + Lmax nodes (which have a levelset)
    if( node.HasLevelset() ) {
-
-      double( &levelset_rhs )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
-      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
-         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
-            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-               levelset_rhs[i][j][k] = 0.0;
-            }//k
-         }   //j
-      }      //i
-
       // Solve interface Riemann problem to obtain interface velocity and interface exchange terms
       interface_term_solver_.SolveInterfaceInteraction( node );
-      // compute levelset rhs (from levelset and interface velocity)
-      levelset_advector_.Advect( node );
    }
 
    double const cell_size     = node.GetCellSize();
@@ -203,6 +191,25 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
          }
       }
    }//phases
+}
+
+/**
+ * @brief Computes right hand side of the level set advection equation.
+ * @param node The node under consideration.
+ */
+void SpaceSolver::UpdateLevelsetFluxes( Node& node ) const {
+
+   double( &levelset_rhs )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetRightHandSideBuffer( InterfaceDescription::Levelset );
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+            levelset_rhs[i][j][k] = 0.0;
+         }//k
+      }   //j
+   }      //i
+
+   // compute levelset rhs (from levelset and interface velocity)
+   levelset_advector_.Advect( node );
 }
 
 /**

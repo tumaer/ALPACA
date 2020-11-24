@@ -103,7 +103,7 @@ void MaterialFieldQuantity::DoComputeCellData( Node const& node, std::vector<dou
    // Change calls for levelset and non-levelset nodes
    if( node.HasLevelset() ) {
 
-      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+      std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetBaseBuffer( InterfaceDescription::Levelset );
 
       // local counter
