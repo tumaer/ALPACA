@@ -65,129 +65,86 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RECONSTRUCTION_STENCIL_SETUP_H
-#define RECONSTRUCTION_STENCIL_SETUP_H
+#ifndef WENOF3P_H
+#define WENOF3P_H
 
-#include "user_specifications/stencil_setup.h"
-#include "first_order.h"
-#include "weno3.h"
-#include "weno_f3p.h"
-#include "weno5.h"
-#include "weno-cu6.h"
-#include "weno5_z.h"
-#include "weno5_nu6p.h"
-#include "teno5.h"
-#include "weno7.h"
-#include "weno9.h"
-#include "weno-ao53.h"
-#include "weno5_hm.h"
-#include "fourth_order_central.h"
+#include <cmath>
+#include "stencils/stencil.h"
 
 /**
- * @brief A namespace to get a ReconstructionStencil type based on a specified constexpr.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to WENOF3+ \cite Gande2020.
  */
-namespace ReconstructionStencilSetup {
+class WENOF3P : public Stencil<WENOF3P> {
+
+   friend Stencil;
+
+   static constexpr StencilType stencil_type_ = StencilType::Reconstruction;
+
+   // Coefficients for WENO3 scheme
+   static constexpr double coef_smoothness_11_ = -1.0;
+   static constexpr double coef_smoothness_12_ = 1.0;
+   static constexpr double coef_smoothness_21_ = -1.0;
+   static constexpr double coef_smoothness_22_ = 1.0;
+
+   static constexpr double coef_weights_1_ = 1.0 / 3.0;
+   static constexpr double coef_weights_2_ = 2.0 / 3.0;
+
+   static constexpr double coef_stencils_1_ = -1.0 / 2.0;
+   static constexpr double coef_stencils_2_ = 3.0 / 2.0;
+   static constexpr double coef_stencils_3_ = 1.0 / 2.0;
+   static constexpr double coef_stencils_4_ = 1.0 / 2.0;
+
+   static constexpr double coef_beta3_dot_ = 1.0 / 12.0;
+
+   static constexpr double lambda_constant = 1.0 / 3.0;
+
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
+   static constexpr unsigned int stencil_size_            = 4;
+   static constexpr unsigned int downstream_stencil_size_ = 1;
 
    /**
-    * @brief Function returning the typedef of a ReconstructionStencil based on a constexpr template.
-    * 
-    * @tparam ReconstructionStencils The constexpr template parameter to specify the exact ReconstructionStencil type.
+    * @brief Evaluates the stencil according to a WENO-3 scheme. Also See base class.
+    * @note Hotpath function.
     */
-   template<ReconstructionStencils>
-   struct Concretize;
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const cell_size ) const {
+      // Assign values to v_i to make it easier to read
+      double const v1 = array[downstream_stencil_size_ + evaluation_properties[0] - evaluation_properties[1]];
+      double const v2 = array[downstream_stencil_size_ + evaluation_properties[0]];
+      double const v3 = array[downstream_stencil_size_ + evaluation_properties[0] + evaluation_properties[1]];
 
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::FirstOrder> {
-      typedef FirstOrder type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO3> {
-      typedef WENO3 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENOF3P> {
-      typedef WENOF3P type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::FourthOrderCentral> {
-      typedef FourthOrderCentral type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO5> {
-      typedef WENO5 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO5Z> {
-      typedef WENO5Z type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENOAO53> {
-      typedef WENOAO53 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO5NU6P> {
-      typedef WENO5NU6P type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::TENO5> {
-      typedef TENO5 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENOCU6> {
-      typedef WENOCU6 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO7> {
-      typedef WENO7 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO9> {
-      typedef WENO9 type;
-   };
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   struct Concretize<ReconstructionStencils::WENO5HM> {
-      typedef WENO5HM type;
-   };
+      // Compute smoothness indicators s_i
+      double const s11   = coef_smoothness_11_ * v1 + coef_smoothness_12_ * v2;
+      double const beta0 = s11 * s11;
 
-}// namespace ReconstructionStencilSetup
+      double const s21   = coef_smoothness_21_ * v2 + coef_smoothness_22_ * v3;
+      double const beta1 = s21 * s21;
 
-#endif// RECONSTRUCTION_STENCIL_SETUP_H
+      double const beta3_dot = coef_beta3_dot_ * ( ( ( v1 + v3 ) - 2.0 * v2 ) * ( ( v1 + v3 ) - 2.0 * v2 ) ) + 0.25 * ( ( v1 - v3 ) * ( v1 - v3 ) );
+
+      // Compute weights
+      double const tau    = std::abs( 0.5 * ( beta0 + beta1 ) - beta3_dot );
+      double const lambda = std::pow( cell_size, lambda_constant );
+
+      double const tmp = lambda / ( tau + epsilon_ );
+      double const a0  = coef_weights_1_ * ( 1.0 + ( tau + epsilon_ ) / ( beta0 + epsilon_ ) + tmp * ( beta0 + epsilon_ ) );
+      double const a1  = coef_weights_2_ * ( 1.0 + ( tau + epsilon_ ) / ( beta1 + epsilon_ ) + tmp * ( beta1 + epsilon_ ) );
+
+      double const one_a_sum = 1.0 / ( a0 + a1 );
+
+      double const w1 = a0 * one_a_sum;
+      double const w2 = a1 * one_a_sum;
+
+      // Return weighted average
+      return w1 * ( coef_stencils_1_ * v1 + coef_stencils_2_ * v2 ) + w2 * ( coef_stencils_3_ * v2 + coef_stencils_4_ * v3 );
+   }
+
+public:
+   explicit constexpr WENOF3P() = default;
+   ~WENOF3P()                   = default;
+   WENOF3P( WENOF3P const& )    = delete;
+   WENOF3P& operator=( WENOF3P const& ) = delete;
+   WENOF3P( WENOF3P&& )                 = delete;
+   WENOF3P& operator=( WENOF3P&& ) = delete;
+};
+
+#endif// STENCIL_WENOF3P_H

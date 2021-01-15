@@ -193,6 +193,20 @@ SCENARIO( "Reconstruction stencil correctness", "[1rank]" ) {
       TestWenoValuesLeftAndRightOfStepWithMargin<TENO5>( 1e-16 );
    }
 
+   GIVEN( "A WENO3P+ reconstruction stencil" ) {
+      constexpr auto wenof3p = WENOF3P();
+      TestStencilParameters( wenof3p, StencilType::Reconstruction, 4, 1 );
+      TestUnityOnUnitArrayWithMargin<WENOF3P>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENOF3P>( 1e-14 );
+   }
+
+   GIVEN( "A WENO5NU6+ reconstruction stencil" ) {
+      constexpr auto weno5nu6p = WENO5NU6P();
+      TestStencilParameters( weno5nu6p, StencilType::Reconstruction, 6, 2 );
+      TestUnityOnUnitArrayWithMargin<WENO5NU6P>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO5NU6P>( 1e-15 );
+   }
+
    GIVEN( "A first order reconstruction stencil" ) {
       constexpr auto first_order = FirstOrder();
       TestStencilParameters( first_order, StencilType::Reconstruction, 2, 0 );
