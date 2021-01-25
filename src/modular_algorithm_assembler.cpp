@@ -644,6 +644,15 @@ void ModularAlgorithmAssembler::Advance() {
             LogElapsedTimeSinceInProfileRuns( function_timer, "Mixing                             " );
             ProvideDebugInformation( "Mixing - Done ", plot_this_step, print_this_step, debug_key );
 
+            if constexpr( ReinitializationConstants::ReinitializeAfterMixing ) {
+               bool const is_last_stage = time_integrator_.IsLastStage( stage );
+               SetTimeInProfileRuns( function_timer );
+               multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, is_last_stage );
+               LogElapsedTimeSinceInProfileRuns( function_timer, "EnforceWellResolvedDistanceFunction                  " );
+               std::string&& message = is_last_stage ? "EnforceWellResolvedDistanceFunction in MultiphaseManager ( possibly with scale separation ) - Done " : "EnforceWellResolvedDistanceFunction in MultiphaseManager - Done ";
+               ProvideDebugInformation( message, plot_this_step, print_this_step, debug_key );
+            }
+
             SetTimeInProfileRuns( function_timer );
             UpdateInterfaceTags( levels_with_updated_parents_descending );
             LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateInterfaceTags                " );

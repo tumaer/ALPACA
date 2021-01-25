@@ -227,7 +227,7 @@ void TwoPhaseManager::UpdateIntegratedBufferImplementation( std::vector<std::ref
    BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::RightHandSide, InterfaceDescriptionBufferType::Integrated>( nodes );
    UpdateInterfaceTagsOnFinestLevel<InterfaceDescriptionBufferType::Integrated>( nodes );
 
-   if( CC::ScaleSeparationActive() && is_last_stage ) {
+   if( CC::ScaleSeparationActive() && is_last_stage && !ReinitializationConstants::ReinitializeAfterMixing ) {
       scale_separator_.SeparateScales( nodes, InterfaceBlockBufferType::LevelsetIntegrated );
       /**
        * Since we also want to reinitialize scale-separated cells we cannot update the interface tags at this place.
@@ -235,7 +235,7 @@ void TwoPhaseManager::UpdateIntegratedBufferImplementation( std::vector<std::ref
        */
    }
 
-   bool const reinitialize = ( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) ? false : true;
+   bool const reinitialize = ( ( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) || ReinitializationConstants::ReinitializeAfterMixing ) ? false : true;
 
    if( reinitialize ) {
       levelset_reinitializer_.Reinitialize( nodes, InterfaceDescriptionBufferType::Integrated, is_last_stage );

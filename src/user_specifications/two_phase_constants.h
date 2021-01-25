@@ -129,6 +129,11 @@ namespace ReinitializationConstants {
  * Decision whether only in last RK stage is reinitialized.
  */
    static constexpr bool ReinitializeOnlyInLastRkStage = true;
+
+   /**
+ * Decision whether reinitialization is performed before or after mixing.
+ */
+   static constexpr bool ReinitializeAfterMixing = true;
 }// namespace ReinitializationConstants
 
 namespace ExtensionConstants {
