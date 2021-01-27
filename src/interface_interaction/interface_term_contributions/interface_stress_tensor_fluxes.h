@@ -69,6 +69,7 @@
 #define INTERFACE_STRESS_TENSOR_FLUXES_H
 
 #include "materials/equation_of_state_definitions.h"
+#include "materials/material_manager.h"
 #include "topology/node.h"
 #include <vector>
 
@@ -97,6 +98,7 @@ class InterfaceStressTensorFluxes {
       }
    };
 
+   MaterialManager const& material_manager_;
    ViscousMaterialProperties const positive_material_properties_;
    ViscousMaterialProperties const negative_material_properties_;
 
@@ -119,7 +121,8 @@ class InterfaceStressTensorFluxes {
 
 public:
    InterfaceStressTensorFluxes() = delete;
-   explicit InterfaceStressTensorFluxes( MaterialName const material_positive, std::vector<double> const mu_positive,
+   explicit InterfaceStressTensorFluxes( MaterialManager const& material_manager,
+                                         MaterialName const material_positive, std::vector<double> const mu_positive,
                                          MaterialName const material_negative, std::vector<double> const mu_negative );
    ~InterfaceStressTensorFluxes()                                    = default;
    InterfaceStressTensorFluxes( InterfaceStressTensorFluxes const& ) = delete;

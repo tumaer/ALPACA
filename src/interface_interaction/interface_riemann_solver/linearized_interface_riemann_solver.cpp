@@ -92,7 +92,6 @@ LinearizedInterfaceRiemannSolver::LinearizedInterfaceRiemannSolver( MaterialMana
 std::array<double, 3> LinearizedInterfaceRiemannSolver::SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
                                                                                                     double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
                                                                                                     double const delta_p ) const {
-
    double const c_left         = material_manager_.GetMaterial( material_left ).GetEquationOfState().SpeedOfSound( rho_left, p_left );
    double const impedance_left = rho_left * c_left;
 

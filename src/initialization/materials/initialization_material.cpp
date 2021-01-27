@@ -232,6 +232,26 @@ namespace Initialization {
    }
 
    /**
+    * @brief Initializes the material type and makes consistency checks.
+    * @param material_index Index of the material to be read from the input file.
+    * @param material_reader Reader that provides access to the material data of the input file.
+    * @return The checked material type.
+    */
+   MaterialType InitializeMaterialType( unsigned int const material_index, MaterialReader const& material_reader ) {
+      // Read the material type (default to Fluid if not given)
+      MaterialType const material_type( material_reader.ReadMaterialType( material_index, MaterialType::Fluid ) );
+
+      // Make consistency checks, that the type corresponds to a type that is allowed with current user specifications
+      if constexpr( !CC::SolidBoundaryActive() ) {
+         if( material_type == MaterialType::SolidBoundary ) {
+            throw std::runtime_error( "To use solid boundary materials active the compile time constants." );
+         }
+      }
+
+      return material_type;
+   }
+
+   /**
     * @brief Initializes a complete material with the given input reader.
     * @param material_index Index of the material to be read from the input file.
     * @param material_reader Reader that provides access to the material data of the input file.
@@ -241,11 +261,14 @@ namespace Initialization {
     * @note during the initialization checks are done to read only variables that are required with the given
     *       compile time settings.
     */
-   Material InitializeMaterial( unsigned int const material_index,
-                                MaterialReader const& material_reader,
-                                UnitHandler const& unit_handler ) {
+   std::tuple<MaterialType, Material> InitializeMaterial( unsigned int const material_index,
+                                                          MaterialReader const& material_reader,
+                                                          UnitHandler const& unit_handler ) {
 
       // Read all data from input file
+      // Read the material type (default to Fluid if not given)
+      MaterialType const material_type( InitializeMaterialType( material_index + 1, material_reader ) );
+
       // Always read the data for the equation of state
       EquationOfStateName const eos_name( material_reader.ReadEquationOfStateName( material_index + 1 ) );
       // data map cannot be const since specific heat is added below in case for NobelAbelStiffened Gas
@@ -306,11 +329,16 @@ namespace Initialization {
          eos_data[specific_heat_name] = material_reader.ReadFixedValue( material_indices, MaterialProperty::SpecificHeatCapacity );
       }
 
-      // Create final data (eos + modles) and log information
+      // Create final data (type + eos + models) and log information
       // logger
       LogWriter& logger = LogWriter::Instance();
       logger.LogMessage( " " );
       logger.LogMessage( "Material " + std::to_string( material_index + 1 ) + ":" );
+
+      // Material type
+      logger.LogMessage( std::string( 60, '-' ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Material type: " + MaterialTypeToString( material_type ) );
+
       // Equation of state
       logger.LogMessage( std::string( 60, '-' ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Equation of state:" );
@@ -367,14 +395,13 @@ namespace Initialization {
       logger.LogMessage( std::string( 60, '-' ) );
 
       // Return the final fully initialized material ( move operations to transfer pointer ownership (deleted move constructor))
-      return Material(
-            std::move( eos ),
-            bulk_viscosity_fixed_value,
-            shear_viscosity_fixed_value,
-            thermal_conductivity_fixed_value,
-            specific_heat_capacity_fixed_value,
-            std::move( shear_viscosity_model ),
-            std::move( thermal_conductivity_model ),
-            unit_handler );
+      return std::make_tuple( material_type, Material( std::move( eos ),
+                                                       bulk_viscosity_fixed_value,
+                                                       shear_viscosity_fixed_value,
+                                                       thermal_conductivity_fixed_value,
+                                                       specific_heat_capacity_fixed_value,
+                                                       std::move( shear_viscosity_model ),
+                                                       std::move( thermal_conductivity_model ),
+                                                       unit_handler ) );
    }
 }// namespace Initialization

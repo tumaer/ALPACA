@@ -121,7 +121,7 @@ class MultiPhaseManager {
                                                                                                       geometry_calculator_(),
                                                                                                       buffer_handler_( material_manager_ ),
                                                                                                       interface_state_calculator_( material_manager_ ),
-                                                                                                      cut_cell_mixer_( halo_manager ),
+                                                                                                      cut_cell_mixer_( halo_manager, material_manager_ ),
                                                                                                       levelset_reinitializer_( halo_manager ),
                                                                                                       scale_separator_( material_manager_, halo_manager ),
                                                                                                       ghost_fluid_extender_( material_manager_, halo_manager ),

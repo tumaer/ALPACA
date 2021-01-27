@@ -79,6 +79,7 @@ SpaceSolver::SpaceSolver( MaterialManager const& material_manager, std::array<do
                                                                                                            riemann_solver_( material_manager, eigendecomposition_calculator_ ),
                                                                                                            source_term_solver_( material_manager, gravity ),
                                                                                                            interface_term_solver_( material_manager ),
+                                                                                                           material_manager_( material_manager ),
                                                                                                            levelset_advector_() {
    /* Empty besides initializer list*/
 }
@@ -118,6 +119,10 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
    double const one_cell_size = 1.0 / cell_size;
 
    for( auto& phase : node.GetPhases() ) {
+      if constexpr( CC::SolidBoundaryActive() ) {
+         if( material_manager_.IsSolidBoundary( phase.first ) ) continue;
+      }
+
       // RHS-buffers have to be reset for each phase!
       for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
          for( unsigned int i = 0; i < CC::ICX() + 1; ++i ) {

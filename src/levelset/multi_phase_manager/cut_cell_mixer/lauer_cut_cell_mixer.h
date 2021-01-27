@@ -81,7 +81,7 @@ class LauerCutCellMixer : public TwoPhaseCutCellMixer<LauerCutCellMixer> {
 
 public:
    LauerCutCellMixer() = delete;
-   explicit LauerCutCellMixer( HaloManager& halo_manager );
+   explicit LauerCutCellMixer( HaloManager& halo_manager, MaterialManager const& material_manager );
    ~LauerCutCellMixer()                          = default;
    LauerCutCellMixer( LauerCutCellMixer const& ) = delete;
    LauerCutCellMixer& operator=( LauerCutCellMixer const& ) = delete;

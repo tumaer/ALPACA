@@ -77,7 +77,7 @@
 namespace Initialization {
 
    // Initialize function fot the full set of materials
-   std::vector<Material> InitializeMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler );
+   std::vector<std::tuple<MaterialType, Material>> InitializeMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler );
 
    // Initialize function for the full set of material pairings
    std::vector<MaterialPairing> InitializeMaterialPairings( MaterialReader const& material_reader, UnitHandler const& unit_handler );

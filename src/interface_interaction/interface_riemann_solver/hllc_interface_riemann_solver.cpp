@@ -94,7 +94,6 @@ HllcInterfaceRiemannSolver::HllcInterfaceRiemannSolver( MaterialManager const& m
 std::array<double, 3> HllcInterfaceRiemannSolver::SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
                                                                                               double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
                                                                                               double const ) const {
-
    // obtain parameters of the left (negative) material
    double const one_rho_left   = 1.0 / std::max( rho_left, std::numeric_limits<double>::epsilon() );
    double const c_left         = material_manager_.GetMaterial( material_left ).GetEquationOfState().SpeedOfSound( rho_left, p_left );

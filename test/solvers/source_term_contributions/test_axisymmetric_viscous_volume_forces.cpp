@@ -81,13 +81,14 @@ namespace {
       std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
 
       // Define material properties and initialize material
+      MaterialType const material_type       = MaterialType::Fluid;
       double const specific_heat_capacity    = 3.0;
       double const thermal_heat_conductivity = 4.0;
 
       // Instantiate material
-      std::vector<Material> materials;
-      materials.emplace_back( Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
-                                        nullptr, nullptr, unit_handler ) );
+      std::vector<std::tuple<MaterialType, Material>> materials;
+      materials.emplace_back( std::make_tuple( material_type, Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
+                                                                        nullptr, nullptr, unit_handler ) ) );
 
       // Instantiate material pairing
       std::vector<MaterialPairing> material_pairings;

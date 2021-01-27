@@ -75,8 +75,8 @@
 
 /**
  * @brief Class that implements the actual reading procedure of material data from input files of xml-type.
- *        Here, no consistency checks of the read parameter are done. Only the validity of the correct variable type 
- *        (double, int, string) is done.  
+ *        Here, no consistency checks of the read parameter are done. Only the validity of the correct variable type
+ *        (double, int, string) is done.
  */
 class XmlMaterialReader : public MaterialReader {
 
@@ -85,6 +85,7 @@ class XmlMaterialReader : public MaterialReader {
 
    // Functions that are required from base class
    int DoReadNumberOfMaterials() const override;
+   std::string DoReadMaterialType( unsigned int const material_index ) const override;
    std::string DoReadEquationOfStateName( unsigned int const material_index ) const override;
    std::unordered_map<std::string, double> DoReadEquationOfStateData( unsigned int const material_index ) const override;
    double DoReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const override;

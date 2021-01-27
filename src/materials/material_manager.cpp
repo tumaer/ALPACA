@@ -76,7 +76,7 @@
  * @param materials All already initialized materials.
  * @param material_pairing_data All already initialized material pairings.
  */
-MaterialManager::MaterialManager( std::vector<Material> materials,
+MaterialManager::MaterialManager( std::vector<std::tuple<MaterialType, Material>> materials,
                                   std::vector<MaterialPairing> material_pairings ) :// Start initializer list
                                                                                      materials_( std::move( materials ) ),
                                                                                      material_pairings_( std::move( material_pairings ) ),
@@ -147,7 +147,7 @@ std::vector<MaterialName> MaterialManager::GetMaterialNames() const {
  */
 Material const& MaterialManager::GetMaterial( std::size_t const index ) const {
 
-   return materials_[index];
+   return std::get<1>( materials_[index] );
 }
 
 /**
@@ -159,7 +159,19 @@ Material const& MaterialManager::GetMaterial( std::size_t const index ) const {
  */
 Material const& MaterialManager::GetMaterial( MaterialName const material ) const {
 
-   return materials_[MTI( material )];
+   return std::get<1>( materials_[MTI( material )] );
+}
+
+/**
+ * @brief Gives the material type of the material with the given identifier.
+ * @param material The material identifier.
+ * @return The material type.
+ * @note No sanity check is done here, since in general all present material names that are created should be
+ *       checked by the MaterialName enum class itself.
+ */
+MaterialType MaterialManager::GetMaterialType( MaterialName const material ) const {
+
+   return std::get<0>( materials_[MTI( material )] );
 }
 
 /**
@@ -169,6 +181,14 @@ Material const& MaterialManager::GetMaterial( MaterialName const material ) cons
  */
 MaterialPairing const& MaterialManager::GetMaterialPairing( MaterialName const first_material, MaterialName const second_material ) const {
    return material_pairings_[MapPairingToIndex( first_material, second_material )];
+}
+
+/**
+ * @brief
+ * @return
+ */
+bool MaterialManager::IsSolidBoundary( MaterialName const material ) const {
+   return GetMaterialType( material ) == MaterialType::SolidBoundary;
 }
 
 /**

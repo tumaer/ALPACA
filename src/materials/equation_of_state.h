@@ -69,6 +69,7 @@
 #define EQUATION_OF_STATE_H
 
 #include <vector>
+#include "equation_of_state_definitions.h"
 
 /**
  * @brief The EquationOfState class defines an interface for different discretizations of the equation of states to model a certain material.

@@ -104,6 +104,17 @@ unsigned int MaterialReader::ReadNumberOfMaterials() const {
 }
 
 /**
+ * @brief Gives the material type for a given material index.
+ * @param material_index The index of the material (index start: 1).
+ * @param type_default The default type to be used if no is given.
+ * @return Identifier of the material type.
+ */
+MaterialType MaterialReader::ReadMaterialType( unsigned int const material_index, MaterialType const default_type ) const {
+   std::string const material_type( DoReadMaterialType( material_index ) );
+   return material_type.empty() ? default_type : StringToMaterialType( material_type );
+}
+
+/**
  * @brief Gives the equation of state name for a given material index.
  * @param material_index The index of the material (index start: 1).
  * @return Identifier of the equation of state name.

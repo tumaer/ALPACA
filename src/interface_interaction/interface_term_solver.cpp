@@ -76,7 +76,8 @@
  */
 InterfaceTermSolver::InterfaceTermSolver( MaterialManager const& material_manager ) : material_manager_( material_manager ),
                                                                                       geometry_calculator_(),
-                                                                                      interface_stress_tensor_fluxes_( MaterialSignCapsule::PositiveMaterial(), material_manager_.GetMaterial( MaterialSignCapsule::PositiveMaterial() ).GetShearAndBulkViscosity(),
+                                                                                      interface_stress_tensor_fluxes_( material_manager,
+                                                                                                                       MaterialSignCapsule::PositiveMaterial(), material_manager_.GetMaterial( MaterialSignCapsule::PositiveMaterial() ).GetShearAndBulkViscosity(),
                                                                                                                        MaterialSignCapsule::NegativeMaterial(), material_manager_.GetMaterial( MaterialSignCapsule::NegativeMaterial() ).GetShearAndBulkViscosity() ),
                                                                                       heat_exchange_fluxes_( material_manager_.GetMaterial( MaterialSignCapsule::PositiveMaterial() ).GetThermalConductivity(),
                                                                                                              material_manager_.GetMaterial( MaterialSignCapsule::NegativeMaterial() ).GetThermalConductivity() ) {

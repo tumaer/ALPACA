@@ -80,7 +80,7 @@ namespace {
  * @brief The default constructor of the LauerCutCellMixer class. Calls the default constructor of the base class.
  * @param communicator Instance to a CommunicationManager which provides MPI-related methods.
  */
-LauerCutCellMixer::LauerCutCellMixer( HaloManager& halo_manager ) : TwoPhaseCutCellMixer( halo_manager, lauer_mixer_number_of_mixing_contributions )//The 9 is hardcoded on purpose (maximum number of mixing contributions)
+LauerCutCellMixer::LauerCutCellMixer( HaloManager& halo_manager, MaterialManager const& material_manager ) : TwoPhaseCutCellMixer( halo_manager, lauer_mixer_number_of_mixing_contributions, material_manager )//The 9 is hardcoded on purpose (maximum number of mixing contributions)
 {
    // Empty Constructor, besides call of base class constructor
 }

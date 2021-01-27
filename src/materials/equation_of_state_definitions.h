@@ -85,7 +85,7 @@ enum class EquationOfStateName {
    StiffenedGasCompleteSafe,
    NobleAbelStiffenedGas,
    WaterlikeFluid,
-   Isentropic,
+   Isentropic
 };
 
 /**

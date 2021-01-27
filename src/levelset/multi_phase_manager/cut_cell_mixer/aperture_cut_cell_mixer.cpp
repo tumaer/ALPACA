@@ -80,7 +80,7 @@ namespace {
  * @brief The default constructor of the ApertureCutCellMixer class. Calls the default constructor of the base class.
  * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
  */
-ApertureCutCellMixer::ApertureCutCellMixer( HaloManager& halo_manager ) : TwoPhaseCutCellMixer( halo_manager, aperture_mixer_number_of_mixing_contributions ) {
+ApertureCutCellMixer::ApertureCutCellMixer( HaloManager& halo_manager, MaterialManager const& material_manager ) : TwoPhaseCutCellMixer( halo_manager, aperture_mixer_number_of_mixing_contributions, material_manager ) {
    // Empty Constructor, besides call of base class constructor
 }
 
