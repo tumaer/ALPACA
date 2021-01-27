@@ -71,6 +71,7 @@
 #include "halo_manager.h"
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator_setup.h"
+#include "materials/material_manager.h"
 
 using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geometry_calculator>::type;
 
@@ -84,13 +85,15 @@ class CutCellMixer {
 protected:
    const GeometryCalculatorConcretization geometry_calculator_;
    HaloManager& halo_manager_;
+   MaterialManager const& material_manager_;
 
    /**
     * @brief Default constructor of the CutCellMixer class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit CutCellMixer( HaloManager& halo_manager ) : geometry_calculator_(),
-                                                        halo_manager_( halo_manager ) {
+   explicit CutCellMixer( HaloManager& halo_manager, MaterialManager const& material_manager ) : geometry_calculator_(),
+                                                                                                 halo_manager_( halo_manager ),
+                                                                                                 material_manager_( material_manager ) {
       // Empty Constructor, besides initializer list.
    }
 

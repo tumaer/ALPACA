@@ -71,19 +71,20 @@
 #include <memory>
 #include <vector>
 
+#include "materials/material_type_definitions.h"
 #include "materials/material_definitions.h"
 #include "materials/material.h"
 #include "materials/material_pairing.h"
 #include "unit_handler.h"
 
 /**
- * @brief The MaterialManager class provides access to all materials and material pairings present in the current simulation and forwards the appropriate 
+ * @brief The MaterialManager class provides access to all materials and material pairings present in the current simulation and forwards the appropriate
  *        object to the caller. The MaterialManager does not change any data. It provides the functionality to map material names and indices to the correct
- *        material or pairing class. 
+ *        material or pairing class.
  */
 class MaterialManager {
    // Vector with all materials
-   std::vector<Material> const materials_;
+   std::vector<std::tuple<MaterialType, Material>> const materials_;
    // Vector with all material pairings
    std::vector<MaterialPairing> const material_pairings_;
 
@@ -97,7 +98,7 @@ class MaterialManager {
 
 public:
    MaterialManager() = delete;
-   explicit MaterialManager( std::vector<Material> materials,
+   explicit MaterialManager( std::vector<std::tuple<MaterialType, Material>> materials,
                              std::vector<MaterialPairing> material_pairings );
    ~MaterialManager()                        = default;
    MaterialManager( MaterialManager const& ) = delete;
@@ -117,8 +118,14 @@ public:
    // provides a material for a given identifier
    Material const& GetMaterial( MaterialName const material ) const;
 
+   // provides the material type for a given identifier
+   MaterialType GetMaterialType( MaterialName const material ) const;
+
    // provides the pairing of two material identifier
    MaterialPairing const& GetMaterialPairing( MaterialName const first_material, MaterialName const second_material ) const;
+
+   // checks whether the given material is a solid boundary
+   bool IsSolidBoundary( MaterialName const material ) const;
 };
 
 #endif// MATERIAL_MANAGER_H

@@ -187,6 +187,11 @@ LogWriter::LogWriter( bool const save_all_ranks ) : logfile_name_( "Unnamed_Simu
    } else {
       LogMessage( "FP control for symmetry : NOT active" );
    }
+   if constexpr( CC::SolidBoundaryActive() ) {
+      LogMessage( "Solid boundaries        : ACTIVE" );
+   } else {
+      LogMessage( "Solid boundaries        : NOT active" );
+   }
    AddBreakLine( true );
 
    LogMessage( "Equation set                                  : " + SetToString( active_equations ) );

@@ -98,11 +98,12 @@ class CompileTimeConstants {
    static constexpr unsigned int space_time_discretization_order_ = 3;
 
    //Flags to enable/disable contributions for the right-hand side/advection terms of the Navier-Stokes equations
-   static constexpr bool inviscid_exchange_active_ = true;// Enables advection term
-   static constexpr bool gravitation_active_       = true;// Enables gravitational term
-   static constexpr bool viscosity_active_         = true;// Enables viscosity term
-   static constexpr bool heat_conduction_active_   = true;// Enables heat conduction term
-   static constexpr bool capillary_forces_active_  = true;// Enables surface tension term
+   static constexpr bool inviscid_exchange_active_ = true; // Enables advection term
+   static constexpr bool gravitation_active_       = true; // Enables gravitational term
+   static constexpr bool viscosity_active_         = true; // Enables viscosity term
+   static constexpr bool heat_conduction_active_   = true; // Enables heat conduction term
+   static constexpr bool capillary_forces_active_  = true; // Enables surface tension term
+   static constexpr bool solid_boundary_active_    = false;// Enables solid boundary treatment
 
    // Flags to activate material property models
    static constexpr bool viscosity_model_active_                   = false;
@@ -347,6 +348,12 @@ public:
     * @return True if capillary forces are to be calculated. False otherwise.
     */
    static constexpr bool CapillaryForcesActive() { return capillary_forces_active_; }
+
+   /**
+    * @brief Indicates if solid boundary treatment is activated.
+    * @return True if algorithm is adapted according to solid boundary treatment. False otherwise.
+    */
+   static constexpr bool SolidBoundaryActive() { return solid_boundary_active_; }
 
    /**
     * @brief Indicates whether scale separation is to be done for multi-phase simulations or not.

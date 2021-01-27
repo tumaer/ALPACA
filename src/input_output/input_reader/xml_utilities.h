@@ -138,6 +138,20 @@ namespace XmlUtilities {
    }
 
    /**
+    * @brief Checks whether the child exists for the given parent node.
+    * @param xml_document the full xml document containing all xml information.
+    * @param child_names List of child names (passed in subsequent).
+    * @return True if exists.
+    */
+   inline bool ExistsChild( tinyxml2::XMLDocument const& xml_document, std::vector<std::string> child_names ) {
+      try {
+         return GetChild( xml_document, child_names ) != nullptr;
+      } catch( std::logic_error const& err ) {
+         return false;
+      }
+   }
+
+   /**
     * @brief Reads out a numeric value from an XML node, treats and converts it into a double value.
     * @param node The XML node holding the desired information.
     * @return The read-out and converted value.

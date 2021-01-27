@@ -108,21 +108,23 @@
       </initialConditions>
    </domain>
 
-    <!-- Xml nodes defining the equation of state and its properties for each material. -->
-    <!-- Explanation:
-         type: Choose the equation of state that has to be applied.
-               Possible choices are: StiffenedGas or WaterlikeFluid (Tait), NobleAbelStiffenedGas, StiffenedGasComplete.
-               For each equation of state a set of parameter must be specified.
-         -->
+   <!-- Xml nodes defining the equation of state and its properties for each material. -->
+   <!-- Explanation:
+        type: Choose the equation of state that has to be applied.
+              Possible choices are: StiffenedGas or WaterlikeFluid (Tait), NobleAbelStiffenedGas, StiffenedGasComplete.
+              For each equation of state a set of parameter must be specified.
+        -->
    <materials>
       <!-- The number of materials in the simulation. Note: Currently, 2 is the maximum. -->
       <numberOfMaterials>  2  </numberOfMaterials>
       <material1>
-         <equationOfState>
+         <!-- available options are: Fluid, SolidBoundary -->
+	 <type> Fluid </type>
+	 <equationOfState>
             <type> StiffenedGas </type>
             <gamma>               1.4   </gamma>
             <backgroundPressure>  0.0   </backgroundPressure>
-	      </equationOfState>
+	 </equationOfState>
          <properties>
             <specificHeatCapacity> 0.0 </specificHeatCapacity>
             <thermalConductivity>
@@ -149,13 +151,15 @@
       </material1>
 
       <material2>
+	 <!-- available options are: Fluid, SolidBoundary -->
+	 <type> Fluid </type>
          <equationOfState>
             <type> WaterlikeFluid </type>
             <gamma>               1.4   </gamma>
             <A> 1.0 </A>
             <B> 1.0 </B>
             <rho0>  1.0   </rho0>
-	      </equationOfState>
+	 </equationOfState>
          <properties>
             <specificHeatCapacity> 0.0 </specificHeatCapacity>
             <thermalConductivity>
@@ -193,7 +197,7 @@
                </parameter>
             </model>
          </surfaceTensionCoefficient>
-	   </material1_2>
+      </material1_2>
    </materialPairings>
 
    <!-- Define a volume force, due to gravity in this case, in x/y/z direction.  -->
@@ -212,7 +216,7 @@
 
       <refinementCriterion>
          <!-- The reference error on the given reference level for the wavelet-based refinement decisions. -->
-         <epsilonReference>    0.01 </epsilonReference>
+         <epsilonReference> 0.01 </epsilonReference>
          <!-- The level on which the stated epsilon value should be enforced.
               Note: allowed values are 0-13. -->
          <levelOfEpsilonReference> 1  </levelOfEpsilonReference>

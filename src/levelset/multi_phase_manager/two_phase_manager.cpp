@@ -235,8 +235,16 @@ void TwoPhaseManager::UpdateIntegratedBufferImplementation( std::vector<std::ref
        */
    }
 
-   bool const reinitialize = ( ( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) || ReinitializationConstants::ReinitializeAfterMixing ) ? false : true;
-
+   bool reinitialize = ( ( ReinitializationConstants::ReinitializeOnlyInLastRkStage && !is_last_stage ) || ReinitializationConstants::ReinitializeAfterMixing ) ? false : true;
+   if constexpr( CC::SolidBoundaryActive() ) {
+      for( Node& node : nodes ) {
+         for( auto& phase : node.GetPhases() ) {
+            if( material_manager_.IsSolidBoundary( phase.first ) ) {
+               reinitialize = false;
+            }
+         }
+      }
+   }
    if( reinitialize ) {
       levelset_reinitializer_.Reinitialize( nodes, InterfaceDescriptionBufferType::Integrated, is_last_stage );
    }

@@ -65,78 +65,53 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include <catch.hpp>
+#ifndef MATERIAL_TYPE_DEFINITIONS_H
+#define MATERIAL_TYPE_DEFINITIONS_H
 
-#include "prime_states/prime_state_handler.h"
+#include "utilities/string_operations.h"
 
-#include "materials/equations_of_state/stiffened_gas.h"
-#include "materials/material_type_definitions.h"
+/**
+ * @brief The MaterialType enum gives all types a unique identifier.
+ */
+enum class MaterialType { Fluid,
+                          SolidBoundary
+};
 
-SCENARIO( "Conservative quantities and prime state values can be converted into each other", "[1rank]" ) {
+/**
+ * @brief Converts a string to its corresponding equation of state name.
+ * @param eos_name The equation of state name.
+ * @return Name of the equation of state.
+ */
+inline MaterialType StringToMaterialType( std::string const& material_type_name ) {
+   // transform string to upper case without spaces
+   std::string const type_upper_case( StringOperations::ToUpperCaseWithoutSpaces( material_type_name ) );
+   // switch statements cannot be used with strings
+   if( type_upper_case == "FLUID" ) {
+      return MaterialType::Fluid;
+   } else if( type_upper_case == "SOLIDBOUNDARY" ) {
+      return MaterialType::SolidBoundary;
+   } else {
+      throw std::logic_error( "Material type " + type_upper_case + " is not known!" );
+   }
+}
 
-   // Initialize the unit handler class
-   UnitHandler const unit_handler( 1.0, 1.0, 1.0, 1.0 );
-
-   // Here the stiffened gas complete safe equation of state is used since it provides a temperature computation and the unit test does not depend on the
-   // activation of the temperature in the primestate struct
-   std::unordered_map<std::string, double> const eos_data = { { "gamma", 1.4 }, { "backgroundPressure", 1.0 } };
-   std::unique_ptr<EquationOfState const> equation_of_state( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
-
-   // Define material properties and initialize material
-   MaterialType const material_type       = MaterialType::Fluid;
-   double const shear_viscosity           = 1.0;
-   double const bulk_viscosity            = 2.0;
-   double const specific_heat_capacity    = 3.0;
-   double const thermal_heat_conductivity = 4.0;
-
-   // Instantiate material
-   std::vector<std::tuple<MaterialType, Material>> materials;
-   materials.emplace_back( std::make_tuple( material_type, Material( std::move( equation_of_state ), bulk_viscosity, shear_viscosity, thermal_heat_conductivity, specific_heat_capacity,
-                                                                     nullptr, nullptr, unit_handler ) ) );
-
-   // Instantiate material pairing
-   std::vector<MaterialPairing> material_pairings;
-
-   auto const material_manager    = MaterialManager( std::move( materials ), std::move( material_pairings ) );
-   auto const prime_state_handler = PrimeStateHandler( material_manager );
-
-   GIVEN( "A set of prime states" ) {
-      std::array<double, MF::ANOP()> prime_states;
-      for( unsigned int p = 0; p < MF::ANOP(); ++p ) {
-         prime_states[p] = double( p + 2 );
+/**
+ * @brief Gives the string for each material type.
+ * @param type Material type for which the string should be returned.
+ * @return string of material type.
+ */
+inline std::string MaterialTypeToString( MaterialType const type ) {
+   switch( type ) {
+      case MaterialType::Fluid: {
+         return "Fluid";
       }
-
-      // Obtain the material name of the single initialized material
-      MaterialName const material_name = material_manager.GetMaterialNames().front();
-
-      WHEN( "Prime states are converted to conservatives" ) {
-         std::array<double, MF::ANOE()> conservatives;
-         prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
-         THEN( "Momenta equal the product of density and velocity" ) {
-            for( unsigned int m = 0; m < DTI( CC::DIM() ); ++m ) {
-               REQUIRE( conservatives[ETI( MF::AME()[m] )] == Approx( prime_states[PTI( PrimeState::Density )] * prime_states[PTI( MF::AV()[m] )] ) );
-            }
-         }
-
-         THEN( "Density equals mass" ) {
-            REQUIRE( conservatives[ETI( Equation::Mass )] == Approx( prime_states[PTI( PrimeState::Density )] ) );
-         }
-         // Energy is not suitable to be checked since it depends on the used equation of state
+      case MaterialType::SolidBoundary: {
+         return "Solid boundary";
       }
-
-      WHEN( "Prime states are converted to conservatives and converted back to prime states" ) {
-         std::array<double, MF::ANOE()> conservatives;
-         std::array<double, MF::ANOP()> prime_states_new;
-         prime_state_handler.ConvertPrimeStatesToConservatives( material_name, prime_states, conservatives );
-         prime_state_handler.ConvertConservativesToPrimeStates( material_name, conservatives, prime_states_new );
-
-         THEN( "The resulting prime states equal the original prime states" ) {
-            // Do not take the temperature or pressure, since they depends on the equation of state.
-            REQUIRE( prime_states_new[PTI( PrimeState::Density )] == Approx( prime_states[PTI( PrimeState::Density )] ) );
-            for( auto const& prime : MF::AV() ) {
-               REQUIRE( prime_states_new[PTI( prime )] == Approx( prime_states[PTI( prime )] ) );
-            }
-         }
+      default: {
+         throw std::logic_error( "Material type not known!" );
       }
    }
 }
+
+#endif// MATERIAL_TYPE_DEFINITIONS_H

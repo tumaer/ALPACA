@@ -91,6 +91,22 @@ int XmlMaterialReader::DoReadNumberOfMaterials() const {
 /**
  * @brief See base class definition.
  */
+std::string XmlMaterialReader::DoReadMaterialType( unsigned int const material_index ) const {
+   // Define the material tag
+   std::string const material_tag( "material" + std::to_string( material_index ) );
+   if( XmlUtilities::ExistsChild( *xml_input_file_, { "configuration", "materials", material_tag, "type" } ) ) {
+      // Get correct node (directly to the final node to get error back propagation in case)
+      tinyxml2::XMLElement const* type_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "type" } );
+
+      return XmlUtilities::ReadString( type_node );
+   } else {
+      return "";
+   }
+}
+
+/**
+ * @brief See base class definition.
+ */
 std::string XmlMaterialReader::DoReadEquationOfStateName( unsigned int const material_index ) const {
    // Define the material tag
    std::string const material_tag( "material" + std::to_string( material_index ) );

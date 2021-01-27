@@ -91,6 +91,7 @@ class SpaceSolver {
    RiemannSolverConcretization const riemann_solver_;
    SourceTermSolver const source_term_solver_;
    InterfaceTermSolver const interface_term_solver_;
+   MaterialManager const& material_manager_;
    LevelsetAdvectorConcretization const levelset_advector_;
 
 public:

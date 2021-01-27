@@ -75,11 +75,12 @@
 
 #include "materials/equation_of_state_definitions.h"
 #include "materials/material_property_definitions.h"
+#include "materials/material_type_definitions.h"
 
 /**
  * @brief Defines the class that provides access to the material data in the input file.
- *        It serves as a proxy class for different material reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ *        It serves as a proxy class for different material reader types (xml,...) that only read the actual data.
+ *        Here, consistency checks are done that all read data are valid.
  */
 class MaterialReader {
 
@@ -89,6 +90,7 @@ protected:
 
    // Functions that must be implemented by the derived classes
    virtual int DoReadNumberOfMaterials() const                                                                                                                 = 0;
+   virtual std::string DoReadMaterialType( unsigned int const material_index ) const                                                                           = 0;
    virtual std::string DoReadEquationOfStateName( unsigned int const material_index ) const                                                                    = 0;
    virtual std::unordered_map<std::string, double> DoReadEquationOfStateData( unsigned int const material_index ) const                                        = 0;
    virtual double DoReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const                                 = 0;
@@ -107,6 +109,7 @@ public:
 
    // functions that return the different parameters
    unsigned int ReadNumberOfMaterials() const;
+   MaterialType ReadMaterialType( unsigned int const material_index, MaterialType const default_type ) const;
    EquationOfStateName ReadEquationOfStateName( unsigned int const material_index ) const;
    std::unordered_map<std::string, double> ReadEquationOfStateData( unsigned int const material_index ) const;
    double ReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const;

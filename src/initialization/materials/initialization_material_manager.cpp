@@ -78,7 +78,7 @@ namespace Initialization {
     * @param unit_handler Instance to provide (non-)dimensionalization of values.
     * @return The fully initialized set of materials present in the simulation.
     */
-   std::vector<Material> InitializeMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler ) {
+   std::vector<std::tuple<MaterialType, Material>> InitializeMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler ) {
       // read the number of materials present in the simulation
       unsigned int const number_of_materials( material_reader.ReadNumberOfMaterials() );
 
@@ -88,7 +88,7 @@ namespace Initialization {
       }
 
       // declare vector that is returned and reserve enough memory
-      std::vector<Material> materials;
+      std::vector<std::tuple<MaterialType, Material>> materials;
       materials.reserve( number_of_materials );
       // Initialize each material individually
       for( unsigned int mat_index = 0; mat_index < number_of_materials; mat_index++ ) {
@@ -154,7 +154,7 @@ namespace Initialization {
    MaterialManager InitializeMaterialManager( InputReader const& input_reader, UnitHandler const& unit_handler ) {
 
       // First create and then move for proper logging inside (correct order)
-      std::vector<Material> materials( InitializeMaterials( input_reader.GetMaterialReader(), unit_handler ) );
+      std::vector<std::tuple<MaterialType, Material>> materials( InitializeMaterials( input_reader.GetMaterialReader(), unit_handler ) );
       std::vector<MaterialPairing> material_pairings( InitializeMaterialPairings( input_reader.GetMaterialReader(), unit_handler ) );
 
       // Log a final empty line

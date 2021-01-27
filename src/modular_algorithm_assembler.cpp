@@ -1410,6 +1410,10 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
 
    for( Node& node : tree_.Leaves() ) {
       for( auto const& [material, block] : node.GetPhases() ) {
+         if constexpr( CC::SolidBoundaryActive() ) {
+            if( material_manager_.IsSolidBoundary( material ) ) continue;
+         }
+
          // Compute the material sign
          auto const material_sign                                              = MaterialSignCapsule::SignOfMaterial( material );
          std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();

@@ -85,6 +85,7 @@ class TwoPhaseCutCellMixer : public CutCellMixer<DerivedTwoPhaseCutCellMixer> {
 
 private:
    unsigned int const number_of_mixing_operations_;
+   using CutCellMixer<DerivedTwoPhaseCutCellMixer>::material_manager_;
 
    /**
      * @brief FICMO Gives the index of the First Internal Cell Minus One in a block per dimension.
@@ -104,8 +105,8 @@ private:
     * @brief The default constructor for the TwoPhaseCutCellMixer class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit TwoPhaseCutCellMixer( HaloManager& halo_manager, unsigned int const number_of_mixing_operations ) : CutCellMixer<DerivedTwoPhaseCutCellMixer>( halo_manager ),
-                                                                                                                number_of_mixing_operations_( number_of_mixing_operations ) {
+   explicit TwoPhaseCutCellMixer( HaloManager& halo_manager, unsigned int const number_of_mixing_operations, MaterialManager const& material_manager ) : CutCellMixer<DerivedTwoPhaseCutCellMixer>( halo_manager, material_manager ),
+                                                                                                                                                         number_of_mixing_operations_( number_of_mixing_operations ) {
       // Empty Constructor, besides call of base class constructor.
    }
 
@@ -128,6 +129,11 @@ private:
 
       for( auto const& phase : node.GetPhases() ) {
          MaterialName const material = phase.first;
+         if constexpr( CC::SolidBoundaryActive() ) {
+            if( material_manager_.IsSolidBoundary( material ) ) {
+               continue;
+            }
+         }
          //reset mixing fluxes and mixing contributions for the respective phase
          for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
             for( unsigned int i = 0; i < CC::TCX(); ++i ) {

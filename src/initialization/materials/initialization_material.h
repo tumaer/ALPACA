@@ -95,10 +95,13 @@ namespace Initialization {
                                                                                      std::unordered_map<std::string, double> const& model_data,
                                                                                      UnitHandler const& unit_handler );
 
+   // initialize function for the material type
+   MaterialType InitializeMaterialType( unsigned int const material_index, MaterialReader const& material_reader );
+
    // initialize function for the complete material
-   Material InitializeMaterial( unsigned int const material_index,
-                                MaterialReader const& material_reader,
-                                UnitHandler const& unit_handler );
+   std::tuple<MaterialType, Material> InitializeMaterial( unsigned int const material_index,
+                                                          MaterialReader const& material_reader,
+                                                          UnitHandler const& unit_handler );
 }// namespace Initialization
 
 #endif// INITIALIZATION_MATERIAL_H

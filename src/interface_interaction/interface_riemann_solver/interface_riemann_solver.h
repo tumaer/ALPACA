@@ -114,6 +114,14 @@ public:
    std::array<double, 3> SolveInterfaceRiemannProblem( double const& rho_left, double const& p_left, double const& velocity_normal_left, MaterialName const& material_left,
                                                        double const& rho_right, double const& p_right, double const& velocity_normal_right, MaterialName const& material_right,
                                                        double const& delta_p ) const {
+      if constexpr( CC::SolidBoundaryActive() ) {
+         if( material_manager_.IsSolidBoundary( material_left ) ) {
+            return { velocity_normal_left, p_right, 0.0 };
+         }
+         if( material_manager_.IsSolidBoundary( material_right ) ) {
+            return { velocity_normal_right, 0.0, p_left };
+         }
+      }
       return static_cast<DerivedInterfaceRiemannSolver const&>( *this ).SolveInterfaceRiemannProblemImplementation( rho_left, p_left, velocity_normal_left, material_left,
                                                                                                                     rho_right, p_right, velocity_normal_right, material_right,
                                                                                                                     delta_p );

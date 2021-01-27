@@ -80,8 +80,9 @@
  * @param[in]  material_negative  The material of the negative material.
  * @param[in]  mu_negative        The shear and bulk viscosity of the negative material.
  */
-InterfaceStressTensorFluxes::InterfaceStressTensorFluxes( MaterialName const material_positive, std::vector<double> const mu_positive,
-                                                          MaterialName const material_negative, std::vector<double> const mu_negative ) : positive_material_properties_( material_positive, mu_positive ),
+InterfaceStressTensorFluxes::InterfaceStressTensorFluxes( MaterialManager const& material_manager, MaterialName const material_positive, std::vector<double> const mu_positive,
+                                                          MaterialName const material_negative, std::vector<double> const mu_negative ) : material_manager_( material_manager ),
+                                                                                                                                          positive_material_properties_( material_positive, mu_positive ),
                                                                                                                                           negative_material_properties_( material_negative, mu_negative ) {
 }
 
@@ -145,10 +146,8 @@ void InterfaceStressTensorFluxes::ComputeInterfaceFluxes( Node& node, double con
  */
 void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node, double const ( &delta_aperture_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3], double const ( &u_interface_normal_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3], double const ( &interface_stress_tensor_positive_material )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )], double const ( &interface_stress_tensor_negative_material )[CC::ICX()][CC::ICY()][CC::ICZ()][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const {
 
-   double const one_cell_size = 1.0 / node.GetCellSize();
-
+   double const one_cell_size                                            = 1.0 / node.GetCellSize();
    std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
-   double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]            = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
    Conservatives& right_hand_side_positive_material = node.GetPhaseByMaterial( positive_material_properties_.material_ ).GetRightHandSideBuffer();
    Conservatives& right_hand_side_negative_material = node.GetPhaseByMaterial( negative_material_properties_.material_ ).GetRightHandSideBuffer();
@@ -160,17 +159,14 @@ void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node, double c
 
             if( std::abs( interface_tags[indices[0]][indices[1]][indices[2]] ) <= ITTI( IT::NewCutCell ) ) {
 
-               double const delta_gamma           = std::sqrt( ConsistencyManagedSum( delta_aperture_field[i][j][k][0] * delta_aperture_field[i][j][k][0], delta_aperture_field[i][j][k][1] * delta_aperture_field[i][j][k][1], delta_aperture_field[i][j][k][2] * delta_aperture_field[i][j][k][2] ) );
-               std::array<double, 3> const normal = GetNormal( levelset, indices[0], indices[1], indices[2] );
-
                std::array<double, DTI( CC::DIM() )> momentum_fluxes_positive_material;
                std::array<double, DTI( CC::DIM() )> momentum_fluxes_negative_material;
                for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
                   momentum_fluxes_positive_material[r] = 0.0;
                   momentum_fluxes_negative_material[r] = 0.0;
                   for( unsigned int s = 0; s < DTI( CC::DIM() ); ++s ) {
-                     momentum_fluxes_positive_material[r] += interface_stress_tensor_positive_material[i][j][k][r][s] * normal[s] * delta_gamma;
-                     momentum_fluxes_negative_material[r] += interface_stress_tensor_negative_material[i][j][k][r][s] * normal[s] * delta_gamma;
+                     momentum_fluxes_positive_material[r] += interface_stress_tensor_positive_material[i][j][k][r][s] * delta_aperture_field[i][j][k][s];
+                     momentum_fluxes_negative_material[r] += interface_stress_tensor_negative_material[i][j][k][r][s] * delta_aperture_field[i][j][k][s];
                   }
                }
 
@@ -180,7 +176,6 @@ void InterfaceStressTensorFluxes::AddFluxesToRightHandSide( Node& node, double c
                   enery_flux_positive_material += momentum_fluxes_positive_material[r] * u_interface_normal_field[i][j][k][r];
                   enery_flux_negative_material += momentum_fluxes_negative_material[r] * u_interface_normal_field[i][j][k][r];
                }
-
                if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
                   right_hand_side_positive_material[Equation::Energy][indices[0]][indices[1]][indices[2]] -= enery_flux_positive_material * one_cell_size;
                   right_hand_side_negative_material[Equation::Energy][indices[0]][indices[1]][indices[2]] += enery_flux_negative_material * one_cell_size;
@@ -265,6 +260,9 @@ void InterfaceStressTensorFluxes::AddViscousPartToInterfaceStressTensor( Node co
 
    std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
 
+   bool const is_negative_material_solid = material_manager_.IsSolidBoundary( negative_material_properties_.material_ );
+   bool const is_positive_material_solid = material_manager_.IsSolidBoundary( positive_material_properties_.material_ );
+
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {
          for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
@@ -272,8 +270,12 @@ void InterfaceStressTensorFluxes::AddViscousPartToInterfaceStressTensor( Node co
             if( std::abs( interface_tags[indices[0]][indices[1]][indices[2]] ) <= ITTI( IT::NewCutCell ) ) {
                for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {
                   for( unsigned int s = 0; s < DTI( CC::DIM() ); ++s ) {
-                     interface_stress_tensor_positive_material[i][j][k][r][s] += tau[i][j][k][r][s];
-                     interface_stress_tensor_negative_material[i][j][k][r][s] += tau[i][j][k][r][s];
+                     if( !is_negative_material_solid ) {
+                        interface_stress_tensor_negative_material[i][j][k][r][s] += tau[i][j][k][r][s];
+                     }
+                     if( !is_positive_material_solid ) {
+                        interface_stress_tensor_positive_material[i][j][k][r][s] += tau[i][j][k][r][s];
+                     }
                   }// s
                }   // r
             }      //if
