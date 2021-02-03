@@ -65,44 +65,30 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#include "instantiation/halo_manager/instantiation_halo_manager.h"
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+namespace Instantiation {
 
-/**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
- */
-class MultiResolutionReader {
+   /**
+    * @brief Instantiates the complete internal halo manager class with the given input classes.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param tree Tree class providing local (on current rank) node information.
+    * @param external_halo_manager Instance for handling external boundary conditions.
+    * @param internal_halo_manager Instance for handling internal boundary conditions.
+    * @param communication_manager Calls providing communication handling between different ranks.
+    * @return The fully instantiated HaloManager class.
+    */
+   HaloManager InstantiateHaloManager( TopologyManager const& topology_manager,
+                                       Tree& tree,
+                                       ExternalHaloManager const& external_halo_manager,
+                                       InternalHaloManager& internal_halo_manager,
+                                       CommunicationManager& communication_manager ) {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
-
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
-
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
-
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
-
-#endif// MULTI_RESOLUTION_READER_H
+      // return the initializedhalo manager
+      return HaloManager( tree,
+                          external_halo_manager,
+                          internal_halo_manager,
+                          communication_manager,
+                          topology_manager.GetMaximumLevel() );
+   }
+}// namespace Instantiation

@@ -98,9 +98,9 @@ public:
    OutputReader& operator=( OutputReader&& ) = delete;
 
    // Return functions proivded by the reader
-   double ReadTimeNamingFactor() const;
-   OutputTimesType ReadOutputTimesType( OutputType const output_type ) const;
-   double ReadOutputInterval( OutputType const output_type ) const;
+   TEST_VIRTUAL double ReadTimeNamingFactor() const;
+   TEST_VIRTUAL OutputTimesType ReadOutputTimesType( OutputType const output_type ) const;
+   TEST_VIRTUAL double ReadOutputInterval( OutputType const output_type ) const;
    std::vector<double> ReadOutputTimeStamps( OutputType const output_type ) const;
 };
 

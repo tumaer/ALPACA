@@ -65,44 +65,44 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#ifndef INITIALIZATION_MATERIAL_H
+#define INITIALIZATION_MATERIAL_H
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+#include <unordered_map>
+#include <string>
+#include <memory>
+
+#include "input_output/input_reader/material_reader/material_reader.h"
+#include "materials/material.h"
 
 /**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ * @brief Defines all instantiation functions required for one single material.
  */
-class MultiResolutionReader {
+namespace Instantiation {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+   // Instantiate function for the equation of state
+   std::unique_ptr<EquationOfState const> InstantiateEquationOfState( EquationOfStateName const eos_name,
+                                                                      std::unordered_map<std::string, double> const& eos_data,
+                                                                      UnitHandler const& unit_handler );
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+   // Instantiate function for the shear viscosity model
+   std::unique_ptr<MaterialParameterModel const> InstantiateShearViscosityModel( MaterialPropertyModelName const model_name,
+                                                                                 std::unordered_map<std::string, double> const& model_data,
+                                                                                 UnitHandler const& unit_handler );
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
+   // Instantiate function for the thermal conductivity model
+   std::unique_ptr<MaterialParameterModel const> InstantiateThermalConductivityModel( MaterialPropertyModelName const model_name,
+                                                                                      std::unordered_map<std::string, double> const& model_data,
+                                                                                      UnitHandler const& unit_handler );
 
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
+   // instantiate function for the material type
+   MaterialType InstantiateMaterialType( unsigned int const material_index, MaterialReader const& material_reader );
 
-#endif// MULTI_RESOLUTION_READER_H
+   // instantiate function for the complete material
+   std::tuple<MaterialType, Material> InstantiateMaterial( unsigned int const material_index,
+                                                           MaterialReader const& material_reader,
+                                                           UnitHandler const& unit_handler );
+
+}// namespace Instantiation
+
+#endif// INITIALIZATION_MATERIAL_H

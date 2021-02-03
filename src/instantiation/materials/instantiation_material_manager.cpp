@@ -65,44 +65,103 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#include "instantiation/materials/instantiation_material_manager.h"
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+#include "instantiation/materials/instantiation_material.h"
+#include "instantiation/materials/instantiation_material_pairing.h"
 
-/**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
- */
-class MultiResolutionReader {
+namespace Instantiation {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+   /**
+    * @brief Instantiates the complete set of materials with the given input reader.
+    * @param material_reader Reader that provides access to the material data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully instantiated set of materials present in the simulation.
+    */
+   std::vector<std::tuple<MaterialType, Material>> InstantiateMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler ) {
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+      // read the number of materials present in the simulation
+      unsigned int const number_of_materials( material_reader.ReadNumberOfMaterials() );
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
+      // Check if too much materials have been specified
+      if( number_of_materials + 1 >= MTI( MaterialName::MaterialOutOfBounds ) ) {
+         throw std::invalid_argument( "This number of materials is not currently not supported!" );
+      }
 
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
+      // declare vector that is returned and reserve enough memory
+      std::vector<std::tuple<MaterialType, Material>> materials;
+      materials.reserve( number_of_materials );
+      // Instantiate each material individually
+      for( unsigned int mat_index = 0; mat_index < number_of_materials; mat_index++ ) {
+         materials.push_back( InstantiateMaterial( mat_index, material_reader, unit_handler ) );
+      }
 
-#endif// MULTI_RESOLUTION_READER_H
+      // return the created vector
+      return materials;
+   }
+
+   /**
+    * @brief Instantiates the complete set of material pairings with the given input reader.
+    * @param material_reader Reader that provides access to the material data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully instantiated set of material pairings present in the simulation.
+    */
+   std::vector<MaterialPairing> InstantiateMaterialPairings( MaterialReader const& material_reader, UnitHandler const& unit_handler ) {
+      // First read the number of all materials
+      unsigned int const number_of_materials = material_reader.ReadNumberOfMaterials();
+      // Check if too much materials have been specified
+      if( number_of_materials + 1 >= MTI( MaterialName::MaterialOutOfBounds ) ) {
+         throw std::invalid_argument( "This number of materials is currently not supported!" );
+      }
+
+      // Generate all combinations of indices
+      std::vector<std::vector<unsigned int>> pairing_indices( GetMaterialPairingIndices( number_of_materials ) );
+
+      // Check if too much material pairing combinations have been specified
+      if( pairing_indices.size() + 1 >= MPTI( MaterialPairingName::MaterialPairingOutOfBounds ) ) {
+         throw std::invalid_argument( "This number of material pairings is currently not supported!" );
+      }
+
+      // declare vector that is returned
+      std::vector<MaterialPairing> material_pairings;
+      // Definition and Initialization of the materialPairing vector depending on Single or Multiphase ( for later correct access )
+      // NOTE: This if else can be removed if the general multimaterial approach is incorporated in the framework or the call to fill surface tension coefficient
+      //       in capillary forces calculator is removed
+      // Single material
+      if( pairing_indices.size() == 0 ) {
+         material_pairings.reserve( 1 );
+         material_pairings.push_back( MaterialPairing() );
+      }
+      // Multimaterial
+      else {
+         // Reserve enough entries in the material pairing vector
+         material_pairings.reserve( pairing_indices.size() );
+         // Instantiate each pairing individually
+         for( auto const& indices : pairing_indices ) {
+            material_pairings.push_back( InstantiateMaterialPairing( indices, material_reader, unit_handler ) );
+         }
+      }
+
+      // return the created vector
+      return material_pairings;
+   }
+
+   /**
+    * @brief Instantiates the complete material manager class with the given input reader.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully instantiated MaterialManager class.
+    */
+   MaterialManager InstantiateMaterialManager( InputReader const& input_reader, UnitHandler const& unit_handler ) {
+
+      // First create and then move for proper logging inside (correct order)
+      std::vector<std::tuple<MaterialType, Material>> materials( InstantiateMaterials( input_reader.GetMaterialReader(), unit_handler ) );
+      std::vector<MaterialPairing> material_pairings( InstantiateMaterialPairings( input_reader.GetMaterialReader(), unit_handler ) );
+
+      // Log a final empty line
+      LogWriter& logger = LogWriter::Instance();
+      logger.LogMessage( " " );
+
+      return MaterialManager( std::move( materials ), std::move( material_pairings ) );
+   }
+}// namespace Instantiation

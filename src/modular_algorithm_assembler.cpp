@@ -241,7 +241,7 @@ void ModularAlgorithmAssembler::Initialization() {
    } else {//otherwise finalize the restart
       FinalizeSimulationRestart( restart_time );
    }
-   logger_.LogMessage( "Simulation successfully initialized" );
+   logger_.LogMessage( "Simulation successfully instantiated" );
 
    // Information Logging
    LogNodeNumbers();

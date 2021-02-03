@@ -92,9 +92,9 @@ public:
    TimeControlReader& operator=( TimeControlReader&& ) = delete;
 
    // Return functions with prepreparation of the data
-   double ReadStartTime() const;
-   double ReadEndTime() const;
-   double ReadCFLNumber() const;
+   TEST_VIRTUAL double ReadStartTime() const;
+   TEST_VIRTUAL double ReadEndTime() const;
+   TEST_VIRTUAL double ReadCFLNumber() const;
 };
 
 #endif// TIME_CONTROL_READER_H

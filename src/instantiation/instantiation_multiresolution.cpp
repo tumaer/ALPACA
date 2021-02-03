@@ -65,44 +65,43 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#include "instantiation/instantiation_multiresolution.h"
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+namespace Instantiation {
 
-/**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
- */
-class MultiResolutionReader {
+   /**
+    * @brief Creates a Multiresolution object.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @return A multiresolution object with thresholding conditions accroding to given input.
+    */
+   Multiresolution InstantiateMultiresolution( InputReader const& input_reader, TopologyManager const& topology_manager ) {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+      // Get the data local (for logging)
+      unsigned int const maximum_level           = topology_manager.GetMaximumLevel();
+      unsigned int const epsilon_reference_level = input_reader.GetMultiResolutionReader().ReadEpsilonLevelReference();
+      double const epsilon_reference             = input_reader.GetMultiResolutionReader().ReadEpsilonReference();
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+      // Create the thresholder
+      Thresholder thresholder = Thresholder( maximum_level, epsilon_reference_level, epsilon_reference );
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
+      // Log data
+      LogWriter& logger = LogWriter::Instance();
+      logger.LogMessage( " " );
+      if( maximum_level > 1 ) {
+         // tmp string for maximum size determination
+         std::string const level_string( std::to_string( maximum_level - 1 ) + std::to_string( maximum_level ) );
 
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
+         logger.LogMessage( "Epsilon Level 0 and Level 1" + std::string( level_string.size() - 2, ' ' ) + " : " + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( 1 ), 9 ) );
+         logger.LogMessage( "Epsilon Level " + std::to_string( maximum_level - 1 ) + " and Level " + std::to_string( maximum_level ) + " : " + StringOperations::ToScientificNotationString( thresholder.ThresholdOnLevel( maximum_level ), 9 ) );
+      } else if( maximum_level == 1 ) {
+         logger.LogMessage( "Homogenous Mesh - Level 1 cannot be coarsened. Provided Epsilon is ignored" );
+      } else {
+         logger.LogMessage( "Homogenous Mesh - Provided Epsilon is ignored " );
+      }
+      logger.LogMessage( " " );
 
-#endif// MULTI_RESOLUTION_READER_H
+      // Return the created multiresolution with the thresholder
+      return Multiresolution( std::move( thresholder ) );
+   }
+}// namespace Instantiation

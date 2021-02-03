@@ -71,7 +71,7 @@
 #include <xmmintrin.h>
 #endif
 
-#include "initialization/input_output/initialization_input_reader.h"
+#include "instantiation/input_output/instantiation_input_reader.h"
 #include "log_writer.h"
 #include "simulation_runner.h"
 
@@ -103,7 +103,7 @@ namespace Alpaca {
          logger.LogMessage( "Using executable: ALPACAlib" );
 
          // Instance to provide interface to the input file/data
-         InputReader const input_reader( Initialization::InitializeInputReader( inputfile ) );
+         InputReader const input_reader( Initialization::InstantiateInputReader( inputfile ) );
 
          Simulation::Run( input_reader );
       }
