@@ -123,16 +123,16 @@ public:
    InputReader& operator=( InputReader&& ) = delete;
 
    // Return functions of the input reader
-   std::string GetInputFile() const;
-   InputType GetInputType() const;
-   MaterialReader const& GetMaterialReader() const;
-   BoundaryConditionReader const& GetBoundaryConditionReader() const;
-   InitialConditionReader const& GetInitialConditionReader() const;
-   MultiResolutionReader const& GetMultiResolutionReader() const;
+   TEST_VIRTUAL std::string GetInputFile() const;
+   TEST_VIRTUAL InputType GetInputType() const;
+   TEST_VIRTUAL MaterialReader const& GetMaterialReader() const;
+   TEST_VIRTUAL BoundaryConditionReader const& GetBoundaryConditionReader() const;
+   TEST_VIRTUAL InitialConditionReader const& GetInitialConditionReader() const;
+   TEST_VIRTUAL MultiResolutionReader const& GetMultiResolutionReader() const;
    DimensionalizationReader const& GetDimensionalizationReader() const;
-   OutputReader const& GetOutputReader() const;
-   RestartReader const& GetRestartReader() const;
-   SourceTermReader const& GetSourceTermReader() const;
-   TimeControlReader const& GetTimeControlReader() const;
+   TEST_VIRTUAL OutputReader const& GetOutputReader() const;
+   TEST_VIRTUAL RestartReader const& GetRestartReader() const;
+   TEST_VIRTUAL SourceTermReader const& GetSourceTermReader() const;
+   TEST_VIRTUAL TimeControlReader const& GetTimeControlReader() const;
 };
 #endif// INPUT_READER_H

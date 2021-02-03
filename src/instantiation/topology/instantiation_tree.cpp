@@ -65,44 +65,57 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#include "instantiation/topology/instantiation_tree.h"
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+namespace Instantiation {
 
-/**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
- */
-class MultiResolutionReader {
+   /**
+    * @brief Instantiates the complete tree class with the given input classes.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @param topology_manager Class providing global (on all ranks) node information.
+    * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @return The fully instantiated tree class.
+    */
+   Tree InstantiateTree( InputReader const& input_reader, TopologyManager& topology_manager, UnitHandler const& unit_handler ) {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+      // Get the data for initializing and/or logging
+      unsigned int const maximum_level                  = topology_manager.GetMaximumLevel();
+      std::array<unsigned int, 3> const number_of_nodes = topology_manager.GetNumberOfNodesOnLevelZero();
+      double const node_size_on_level_zero              = input_reader.GetMultiResolutionReader().ReadNodeSizeOnLevelZero();
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+      // Logging of data
+      LogWriter& logger = LogWriter::Instance();
+      std::string tmp_string;
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
+      logger.LogMessage( " " );
+      // Domain size
+      tmp_string = "Domain size                : " + StringOperations::ToScientificNotationString( number_of_nodes[0] * node_size_on_level_zero, 6 );
+      tmp_string += CC::DIM() != Dimension::One ? " x " + StringOperations::ToScientificNotationString( number_of_nodes[1] * node_size_on_level_zero, 6 ) : "";
+      tmp_string += CC::DIM() == Dimension::Three ? " x " + StringOperations::ToScientificNotationString( number_of_nodes[2] * node_size_on_level_zero, 6 ) : "";
+      logger.LogMessage( tmp_string );
+      // Internal cells per block
+      logger.LogMessage( "Internal cell per block    : " + std::to_string( CC::ICX() ) );
+      // Maximum level
+      logger.LogMessage( "Maximum level              : " + std::to_string( maximum_level ) );
+      // Resolution level zero
+      tmp_string = "Resolution on level zero   : " + std::to_string( number_of_nodes[0] * CC::ICX() );
+      tmp_string += CC::DIM() != Dimension::One ? " x " + std::to_string( number_of_nodes[1] * CC::ICX() ) : "";
+      tmp_string += CC::DIM() == Dimension::Three ? " x " + std::to_string( number_of_nodes[2] * CC::ICX() ) : "";
+      logger.LogMessage( tmp_string + " internal cells" );
+      // Cell size on level zero
+      logger.LogMessage( "Cell size on level zero    : " + StringOperations::ToScientificNotationString( node_size_on_level_zero / double( CC::ICX() ), 9 ) );
+      // Resolution level maximum
+      tmp_string = "Resolution on maximum level: " + std::to_string( number_of_nodes[0] * CC::ICX() * ( 1 << maximum_level ) );
+      tmp_string += CC::DIM() != Dimension::One ? " x " + std::to_string( number_of_nodes[1] * CC::ICX() * ( 1 << maximum_level ) ) : "";
+      tmp_string += CC::DIM() == Dimension::Three ? " x " + std::to_string( number_of_nodes[2] * CC::ICX() * ( 1 << maximum_level ) ) : "";
+      logger.LogMessage( tmp_string + " internal cells" );
+      // Cell size on level maximum
+      logger.LogMessage( "Cell size on maximum level : " + StringOperations::ToScientificNotationString( node_size_on_level_zero / double( CC::ICX() ) / double( 1 << maximum_level ), 9 ) );
+      logger.LogMessage( " " );
 
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
-
-#endif// MULTI_RESOLUTION_READER_H
+      // return the initialized tree
+      return Tree( topology_manager,
+                   topology_manager.GetMaximumLevel(),
+                   unit_handler.NonDimensionalizeValue( node_size_on_level_zero, UnitType::Length ) );
+   }
+}// namespace Instantiation

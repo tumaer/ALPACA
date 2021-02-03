@@ -65,44 +65,35 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#include "instantiation/instantiation_unit_handler.h"
+#include "input_output/input_reader.h"
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+namespace Instantiation {
 
-/**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
- */
-class MultiResolutionReader {
+   /**
+    * @brief Instantiates the complete unit handler class with the given input reader.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @return The fully instantiated UnitHandler class.
+    */
+   UnitHandler InstantiateUnitHandler( InputReader const& input_reader ) {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+      // read data
+      double const reference_density     = input_reader.GetDimensionalizationReader().ReadReferenceDensity();
+      double const reference_velocity    = input_reader.GetDimensionalizationReader().ReadReferenceVelocity();
+      double const reference_length      = input_reader.GetDimensionalizationReader().ReadReferenceLength();
+      double const reference_temperature = input_reader.GetDimensionalizationReader().ReadReferenceTemperature();
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+      // Log data
+      LogWriter& logger = LogWriter::Instance();
+      logger.LogMessage( " " );
+      logger.LogMessage( "Dimensionalization parameter:" );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Density reference    : " + StringOperations::ToScientificNotationString( reference_density, 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Velocity reference   : " + StringOperations::ToScientificNotationString( reference_velocity, 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Length reference     : " + StringOperations::ToScientificNotationString( reference_length, 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Temperature reference: " + StringOperations::ToScientificNotationString( reference_temperature, 9 ) );
+      logger.LogMessage( " " );
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
-
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
-
-#endif// MULTI_RESOLUTION_READER_H
+      // Initialize the unit handler
+      return UnitHandler( reference_density, reference_velocity, reference_length, reference_temperature );
+   }
+}// namespace Instantiation

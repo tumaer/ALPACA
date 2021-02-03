@@ -71,7 +71,7 @@
 #include <xmmintrin.h>
 #endif
 
-#include "initialization/input_output/initialization_input_reader.h"
+#include "instantiation/input_output/instantiation_input_reader.h"
 #include "log_writer.h"
 #include "simulation_runner.h"
 
@@ -107,7 +107,7 @@ int main( int argc, char* argv[] ) {
       logger.LogMessage( "Using executable: " + executable_name );
 
       // Instance to provide interface to the input file/data
-      InputReader const input_reader( Initialization::InitializeInputReader( input_file ) );
+      InputReader const input_reader( Instantiation::InstantiateInputReader( input_file ) );
 
       Simulation::Run( input_reader );
    }

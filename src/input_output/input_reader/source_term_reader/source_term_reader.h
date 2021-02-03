@@ -94,7 +94,7 @@ public:
    SourceTermReader& operator=( SourceTermReader&& ) = delete;
 
    // return function of the reader
-   double ReadGravity( Direction const direction ) const;
+   TEST_VIRTUAL double ReadGravity( Direction const direction ) const;
 };
 
 #endif// SOURCE_TERM_READER_H

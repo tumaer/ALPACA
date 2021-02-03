@@ -108,11 +108,11 @@ public:
    MaterialReader& operator=( MaterialReader&& ) = delete;
 
    // functions that return the different parameters
-   unsigned int ReadNumberOfMaterials() const;
-   MaterialType ReadMaterialType( unsigned int const material_index, MaterialType const default_type ) const;
-   EquationOfStateName ReadEquationOfStateName( unsigned int const material_index ) const;
-   std::unordered_map<std::string, double> ReadEquationOfStateData( unsigned int const material_index ) const;
-   double ReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const;
+   TEST_VIRTUAL MaterialType ReadMaterialType( unsigned int const material_index, MaterialType const default_type ) const;
+   TEST_VIRTUAL unsigned int ReadNumberOfMaterials() const;
+   TEST_VIRTUAL EquationOfStateName ReadEquationOfStateName( unsigned int const material_index ) const;
+   TEST_VIRTUAL std::unordered_map<std::string, double> ReadEquationOfStateData( unsigned int const material_index ) const;
+   TEST_VIRTUAL double ReadFixedValue( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const;
    MaterialPropertyModelName ReadModelName( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const;
    std::unordered_map<std::string, double> ReadModelData( std::vector<unsigned int> const& material_indices, MaterialProperty const property ) const;
 };

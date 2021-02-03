@@ -82,7 +82,7 @@
  *        2. Add for this name an entry with default values to the function DataOfInterfaceFieldQuantity below
  *           ( for scalar quantities follow e.g. levelset, for vectorial quantities follow e.g. velocity in material_field_quantity_definitions.h)
  *        3. Add an output constants expression in user_specifications/output_constants.h
- *        4. Add the constructor call in the "initialization_output_writer.cpp" function.
+ *        4. Add the constructor call in the "instantiation_output_writer.cpp" function.
  */
 enum class InterfaceFieldQuantityName {
    // interface descriptions

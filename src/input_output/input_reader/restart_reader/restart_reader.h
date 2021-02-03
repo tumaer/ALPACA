@@ -99,9 +99,9 @@ public:
    RestartReader& operator=( RestartReader&& ) = delete;
 
    // Return functions wiht included consistency checks
-   RestoreMode ReadRestoreMode() const;
+   TEST_VIRTUAL RestoreMode ReadRestoreMode() const;
    std::string ReadRestoreFilename() const;
-   SnapshotTimesType ReadSnapshotTimesType() const;
+   TEST_VIRTUAL SnapshotTimesType ReadSnapshotTimesType() const;
    unsigned int ReadSnapshotIntervalsToKeep() const;
    unsigned int ReadSnapshotInterval() const;
    std::vector<double> ReadSnapshotTimeStamps() const;

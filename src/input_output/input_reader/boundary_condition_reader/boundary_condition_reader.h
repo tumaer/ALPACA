@@ -98,9 +98,9 @@ public:
    BoundaryConditionReader& operator=( BoundaryConditionReader&& ) = delete;
 
    // Functions that must be implemented by the derived classes
-   MaterialBoundaryType ReadMaterialBoundaryType( BoundaryLocation const location ) const;
-   LevelSetBoundaryType ReadLevelsetBoundaryType( BoundaryLocation const location ) const;
-   std::array<double, MF::ANOP()> ReadMaterialFixedValueBoundaryConditions( BoundaryLocation const location ) const;
+   TEST_VIRTUAL MaterialBoundaryType ReadMaterialBoundaryType( BoundaryLocation const location ) const;
+   TEST_VIRTUAL LevelSetBoundaryType ReadLevelsetBoundaryType( BoundaryLocation const location ) const;
+   TEST_VIRTUAL std::array<double, MF::ANOP()> ReadMaterialFixedValueBoundaryConditions( BoundaryLocation const location ) const;
 };
 
 #endif// BOUNDARY_CONDITION_READER_H

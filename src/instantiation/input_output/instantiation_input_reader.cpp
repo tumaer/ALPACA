@@ -65,44 +65,67 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#include "instantiation/input_output/instantiation_input_reader.h"
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+#include <stdexcept>
+#include <memory>
 
-/**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
- */
-class MultiResolutionReader {
+#include <tinyxml2.h>
+#include "input_output/input_reader/input_definitions.h"
+#include "utilities/file_operations.h"
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+#include "input_output/input_reader/boundary_condition_reader/xml_boundary_condition_reader.h"
+#include "input_output/input_reader/initial_condition_reader/xml_initial_condition_reader.h"
+#include "input_output/input_reader/material_reader/xml_material_reader.h"
+#include "input_output/input_reader/multi_resolution_reader/xml_multi_resolution_reader.h"
+#include "input_output/input_reader/dimensionalization_reader/xml_dimensionalization_reader.h"
+#include "input_output/input_reader/output_reader/xml_output_reader.h"
+#include "input_output/input_reader/restart_reader/xml_restart_reader.h"
+#include "input_output/input_reader/source_term_reader/xml_source_term_reader.h"
+#include "input_output/input_reader/time_control_reader/xml_time_control_reader.h"
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+namespace Instantiation {
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
+   /**
+    * @brief Instantiates the full input reader class with the given input file.
+    * @param input_filename Name of the file use for input.
+    * @return The fully instantiated InputReader class.
+    */
+   InputReader InstantiateInputReader( std::string const& input_filename ) {
+      // Check whether the file exists
+      if( !FileOperations::CheckIfPathExists( input_filename ) ) {
+         throw std::logic_error( "Input file " + input_filename + " does not exist!" );
+      }
 
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
+      // Determine the input type
+      InputType const input_type( StringToInputType( FileOperations::GetFileExtension( input_filename ) ) );
+      // Instantiate correct reader
+      switch( input_type ) {
+         case InputType::Xml: {
+            // Open the file (here std::make_shared not possible)
+            // shared pinter required to distribute the open input file on different reader
+            std::shared_ptr<tinyxml2::XMLDocument> input_file( new tinyxml2::XMLDocument );
+            tinyxml2::XMLError error = input_file->LoadFile( input_filename.c_str() );
+            // Check if eversthing worked properly
+            if( error != tinyxml2::XML_SUCCESS ) {
+               throw std::logic_error( "Syntax error parsing the XML inputfile file, check opening and closing tags!" );
+            }
+            // Create the input reader properly
+            return InputReader( input_filename, input_type,
+                                std::make_unique<XmlMaterialReader const>( input_file ),
+                                std::make_unique<XmlBoundaryConditionReader const>( input_file ),
+                                std::make_unique<XmlInitialConditionReader const>( input_file ),
+                                std::make_unique<XmlMultiResolutionReader const>( input_file ),
+                                std::make_unique<XmlDimensionalizationReader const>( input_file ),
+                                std::make_unique<XmlOutputReader const>( input_file ),
+                                std::make_unique<XmlRestartReader const>( input_file ),
+                                std::make_unique<XmlSourceTermReader const>( input_file ),
+                                std::make_unique<XmlTimeControlReader const>( input_file ) );
+         }
 
-#endif// MULTI_RESOLUTION_READER_H
+         default: {
+            throw std::invalid_argument( "Input file extension not known! Cannot choose correct reader!" );
+         }
+      }
+   }
+}// namespace Instantiation

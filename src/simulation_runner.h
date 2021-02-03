@@ -70,20 +70,20 @@
 
 #include "log_writer.h"
 
-#include "initialization/input_output/initialization_input_output_manager.h"
-#include "initialization/input_output/initialization_output_writer.h"
-#include "initialization/input_output/initialization_restart_manager.h"
-#include "initialization/halo_manager/initialization_external_halo_manager.h"
-#include "initialization/halo_manager/initialization_internal_halo_manager.h"
-#include "initialization/halo_manager/initialization_halo_manager.h"
-#include "initialization/materials/initialization_material_manager.h"
-#include "initialization/topology/initialization_topology_manager.h"
-#include "initialization/topology/initialization_tree.h"
-#include "initialization/initialization_initial_condition.h"
-#include "initialization/initialization_communication_manager.h"
-#include "initialization/initialization_multiresolution.h"
-#include "initialization/initialization_unit_handler.h"
-#include "initialization/initialization_modular_algorithm_assembler.h"
+#include "instantiation/input_output/instantiation_input_output_manager.h"
+#include "instantiation/input_output/instantiation_output_writer.h"
+#include "instantiation/input_output/instantiation_restart_manager.h"
+#include "instantiation/halo_manager/instantiation_external_halo_manager.h"
+#include "instantiation/halo_manager/instantiation_internal_halo_manager.h"
+#include "instantiation/halo_manager/instantiation_halo_manager.h"
+#include "instantiation/materials/instantiation_material_manager.h"
+#include "instantiation/topology/instantiation_topology_manager.h"
+#include "instantiation/topology/instantiation_tree.h"
+#include "instantiation/instantiation_initial_condition.h"
+#include "instantiation/instantiation_communication_manager.h"
+#include "instantiation/instantiation_multiresolution.h"
+#include "instantiation/instantiation_unit_handler.h"
+#include "instantiation/instantiation_modular_algorithm_assembler.h"
 
 #include "user_specifications/space_filling_curve_settings.h"
 
@@ -103,37 +103,37 @@ namespace Simulation {
       logger.AddBreakLine( true );
 
       // Instance for dimensionalization and non-dimensionalization of variables
-      UnitHandler const unit_handler( Initialization::InitializeUnitHandler( input_reader ) );
+      UnitHandler const unit_handler( Instantiation::InstantiateUnitHandler( input_reader ) );
       logger.AddBreakLine( true );
       // Instance for handling of material and material pairing data
-      MaterialManager const material_manager( Initialization::InitializeMaterialManager( input_reader, unit_handler ) );
+      MaterialManager const material_manager( Instantiation::InstantiateMaterialManager( input_reader, unit_handler ) );
       logger.AddBreakLine( true );
       // Instance for handling global node data (cannot be const due to changes in loop)
-      TopologyManager topology_manager( Initialization::InitializeTopologyManager( input_reader, material_manager ) );
-      Tree tree( Initialization::InitializeTree( input_reader, topology_manager, unit_handler ) );
+      TopologyManager topology_manager( Instantiation::InstantiateTopologyManager( input_reader, material_manager ) );
+      Tree tree( Instantiation::InstantiateTree( input_reader, topology_manager, unit_handler ) );
       logger.AddBreakLine( true );
       // Instance that provides multi-resolution information
-      Multiresolution const multiresolution( Initialization::InitializeMultiresolution( input_reader, topology_manager ) );
+      Multiresolution const multiresolution( Instantiation::InstantiateMultiresolution( input_reader, topology_manager ) );
       logger.AddBreakLine( true );
       // Instance to provide communication
-      CommunicationManager communication_manager( Initialization::InitializeCommunicationManager( topology_manager ) );
-      // Instances for handling boundary conditions (internal and external). The external and internal halo managera are not initialized inside the halo manager
+      CommunicationManager communication_manager( Instantiation::InstantiateCommunicationManager( topology_manager ) );
+      // Instances for handling boundary conditions (internal and external). The external and internal halo managers are not instantiated inside the halo manager
       // due to delete move constructors of both classes. A creation of the external halo manager inside not suitable due to the inclusion of the input reader.
       // The internal cannot be created inside due to constness of some functions.
-      ExternalHaloManager const external_halo_manager( Initialization::InitializeExternalHaloManager( input_reader, unit_handler, material_manager ) );
-      InternalHaloManager internal_halo_manager( Initialization::InitializeInternalHaloManager( topology_manager, tree, communication_manager, material_manager ) );
-      HaloManager halo_manager( Initialization::InitializeHaloManager( topology_manager, tree, external_halo_manager, internal_halo_manager, communication_manager ) );
+      ExternalHaloManager const external_halo_manager( Instantiation::InstantiateExternalHaloManager( input_reader, unit_handler, material_manager ) );
+      InternalHaloManager internal_halo_manager( Instantiation::InstantiateInternalHaloManager( topology_manager, tree, communication_manager, material_manager ) );
+      HaloManager halo_manager( Instantiation::InstantiateHaloManager( topology_manager, tree, external_halo_manager, internal_halo_manager, communication_manager ) );
       logger.AddBreakLine( true );
       // Instance to restart simulation from snapshot and write output files (cannot be const due to vector eraseing inside)
-      OutputWriter const output_writer( Initialization::InitializeOutputWriter( topology_manager, tree, material_manager, unit_handler ) );
-      RestartManager const restart_manager( Initialization::InitializeRestartManager( topology_manager, tree, unit_handler ) );
-      InputOutputManager input_output_manager( Initialization::InitializeInputOutputManager( input_reader, output_writer, restart_manager, unit_handler ) );
+      OutputWriter const output_writer( Instantiation::InstantiateOutputWriter( topology_manager, tree, material_manager, unit_handler ) );
+      RestartManager const restart_manager( Instantiation::InstantiateRestartManager( topology_manager, tree, unit_handler ) );
+      InputOutputManager input_output_manager( Instantiation::InstantiateInputOutputManager( input_reader, output_writer, restart_manager, unit_handler ) );
       logger.AddBreakLine( true );
       // Instance for handling the initial conditions of the simulation
-      InitialCondition const initial_condition( Initialization::InitializeInitialCondition( input_reader, topology_manager, tree, material_manager, unit_handler ) );
+      InitialCondition const initial_condition( Instantiation::InstantiateInitialCondition( input_reader, topology_manager, tree, material_manager, unit_handler ) );
 
       // Instance for the whole computation loop
-      ModularAlgorithmAssembler mr_based_algorithm( Initialization::InitializeModularAlgorithmAssembler( input_reader, topology_manager, tree,
+      ModularAlgorithmAssembler mr_based_algorithm( Instantiation::InstantiateModularAlgorithmAssembler( input_reader, topology_manager, tree,
                                                                                                          communication_manager, halo_manager, multiresolution,
                                                                                                          material_manager, input_output_manager, initial_condition,
                                                                                                          unit_handler ) );

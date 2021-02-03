@@ -82,7 +82,7 @@
  *        2. Add for this name an entry with default values to the function DataOfMaterialFieldQuantity below
  *           ( for scalar quantities follow e.g. mass, for vectorial quantities follow e.g. velocity)
  *        3. Add an output constants expression in user_specifications/output_constants.h
- *        4. Add the constructor call in the "initialization_output_writer.cpp" function.
+ *        4. Add the constructor call in the "instantiation_output_writer.cpp" function.
  */
 enum class MaterialFieldQuantityName {
    // conservatives

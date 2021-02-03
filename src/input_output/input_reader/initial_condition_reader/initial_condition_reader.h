@@ -94,8 +94,8 @@ public:
    InitialConditionReader& operator=( InitialConditionReader&& ) = delete;
 
    // return functions of the reader class
-   std::string ReadMaterialInitialConditions( unsigned int const material_index ) const;
-   std::string ReadLevelsetInitialConditions( unsigned int const levelset_index ) const;
+   TEST_VIRTUAL std::string ReadMaterialInitialConditions( unsigned int const material_index ) const;
+   TEST_VIRTUAL std::string ReadLevelsetInitialConditions( unsigned int const levelset_index ) const;
 };
 
 #endif// INITIAL_CONDITION_READER_H

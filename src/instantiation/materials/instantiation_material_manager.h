@@ -65,44 +65,26 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#ifndef INITIALIZATION_MATERIAL_MANAGER_H
+#define INITIALIZATION_MATERIAL_MANAGER_H
 
-#include <array>
-#include <vector>
-#include "enums/direction_definition.h"
+#include "input_output/input_reader.h"
+#include "materials/material_manager.h"
 
 /**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ * @brief Defines all instantiation functions required for the material manager.
  */
-class MultiResolutionReader {
+namespace Instantiation {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+   // Instantiation function fot the full set of materials
+   std::vector<std::tuple<MaterialType, Material>> InstantiateMaterials( MaterialReader const& material_reader, UnitHandler const& unit_handler );
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+   // Instantiation function for the full set of material pairings
+   std::vector<MaterialPairing> InstantiateMaterialPairings( MaterialReader const& material_reader, UnitHandler const& unit_handler );
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
+   // Instantiation function for the complete material manager
+   MaterialManager InstantiateMaterialManager( InputReader const& input_reader, UnitHandler const& unit_handler );
 
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
+}// namespace Instantiation
 
-#endif// MULTI_RESOLUTION_READER_H
+#endif// INITIALIZATION_MATERIAL_MANAGER_H

@@ -65,44 +65,32 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef MULTI_RESOLUTION_READER_H
-#define MULTI_RESOLUTION_READER_H
+#ifndef INSTANTIATION_OUTPUT_WRITER_H
+#define INSTANTIATION_OUTPUT_WRITER_H
 
-#include <array>
 #include <vector>
-#include "enums/direction_definition.h"
+#include <memory>
+
+#include "input_output/output_writer.h"
 
 /**
- * @brief Defines the class that provides access to the multiresolution data in the input file.
- *        It serves as a proxy class for different multiresolution reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ * @brief Defines all instantiation functions required for the output writer.
  */
-class MultiResolutionReader {
+namespace Instantiation {
 
-protected:
-   // constructor can only be called from derived classes
-   explicit MultiResolutionReader() = default;
+   // factory functions for the output writer
+   std::unique_ptr<MeshGenerator const> GetStandardMeshGenerator( UnitHandler const& unit_handler,
+                                                                  TopologyManager const& topology,
+                                                                  Tree const& flower,
+                                                                  double const node_size_on_level_zero );
+   std::vector<std::unique_ptr<OutputQuantity const>> GetMaterialOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager );
+   std::vector<std::unique_ptr<OutputQuantity const>> GetInterfaceOutputQuantities( UnitHandler const& unit_handler, MaterialManager const& material_manager );
 
-   // Functions that must be implemented by the derived classes
-   virtual double DoReadNodeSizeOnLevelZero() const                   = 0;
-   virtual int DoReadNumberOfNodes( Direction const direction ) const = 0;
-   virtual int DoReadMaximumLevel() const                             = 0;
-   virtual double DoReadEpsilonReference() const                      = 0;
-   virtual int DoReadEpsilonLevelReference() const                    = 0;
+   // Instantiation function for the input_output manager
+   OutputWriter InstantiateOutputWriter( TopologyManager& topology_manager,
+                                         Tree& tree,
+                                         MaterialManager const& material_manager,
+                                         UnitHandler const& unit_handler );
+}// namespace Instantiation
 
-public:
-   virtual ~MultiResolutionReader()                      = default;
-   MultiResolutionReader( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader const& ) = delete;
-   MultiResolutionReader( MultiResolutionReader&& )                 = delete;
-   MultiResolutionReader& operator=( MultiResolutionReader&& ) = delete;
-
-   // Function to return values with additional checks
-   TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
-   TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
-   TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
-};
-
-#endif// MULTI_RESOLUTION_READER_H
+#endif// INSTANTIATION_OUTPUT_WRITER_H

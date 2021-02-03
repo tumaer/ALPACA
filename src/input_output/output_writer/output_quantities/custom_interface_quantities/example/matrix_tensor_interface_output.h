@@ -78,7 +78,7 @@
  * To define a new matrix/tensor interface quantity this file can be used to define the appropriate functions. Simply take the current loop structure and
  * add required operations at the already specified locations. To use the output quantity the following two steps are required:
  *    1. An output setting must be written in the file "user_specifications/output_constants.h" (see examples there)
- *    2. Add the constructor call in the "initialization_output_writer.cpp" function
+ *    2. Add the constructor call in the "instantiation_output_writer.cpp" function
  * An output quantity is defiend as a matrix if any component exceeds the current dimension of the simulation or the matrix is not of type n x n. Otherwise it is a tensor.
  */
 class MatrixTensorInterfaceOutput : public OutputQuantity {
