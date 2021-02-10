@@ -71,6 +71,7 @@
 #include "utilities/mathematical_functions.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
+#include "utilities/vector_utilities.h"
 
 /**
  * @brief constructor to create the vortex stretching output.
@@ -136,7 +137,7 @@ void VortexStretchingOutput::DoComputeCellData( Node const& node, std::vector<do
                      vortex_stretching[l] += vorticity[l] * velocity_gradient[l][m];
                   }
                }
-               cell_data[cell_data_counter++] = L2Norm( vortex_stretching ) * dimensionalization_factor;
+               cell_data[cell_data_counter++] = VU::L2Norm( vortex_stretching ) * dimensionalization_factor;
             }
          }
       }
@@ -170,7 +171,7 @@ void VortexStretchingOutput::DoComputeCellData( Node const& node, std::vector<do
                      vortex_stretching[l] += vorticity[l] * velocity_gradient[l][m];
                   }
                }
-               cell_data[cell_data_counter++] = L2Norm( vortex_stretching ) * dimensionalization_factor;
+               cell_data[cell_data_counter++] = VU::L2Norm( vortex_stretching ) * dimensionalization_factor;
             }
          }
       }

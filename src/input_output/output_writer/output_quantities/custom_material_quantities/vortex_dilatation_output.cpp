@@ -71,6 +71,7 @@
 #include "utilities/mathematical_functions.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
+#include "utilities/vector_utilities.h"
 
 /**
  * @brief constructor to create the vortex dilatation output.
@@ -138,7 +139,7 @@ void VortexDilatationOutput::DoComputeCellData( Node const& node, std::vector<do
                for( unsigned int l = 0; l < 3; ++l ) {
                   vortex_dilatation[l] = vorticity[l] * velocity_divergence;
                }
-               cell_data[cell_data_counter++] = L2Norm( vortex_dilatation ) * dimensionalization_factor;
+               cell_data[cell_data_counter++] = VU::L2Norm( vortex_dilatation ) * dimensionalization_factor;
             }
          }
       }
@@ -174,7 +175,7 @@ void VortexDilatationOutput::DoComputeCellData( Node const& node, std::vector<do
                for( unsigned int l = 0; l < 3; ++l ) {
                   vortex_dilatation[l] = vorticity[l] * velocity_divergence;
                }
-               cell_data[cell_data_counter++] = L2Norm( vortex_dilatation ) * dimensionalization_factor;
+               cell_data[cell_data_counter++] = VU::L2Norm( vortex_dilatation ) * dimensionalization_factor;
             }
          }
       }

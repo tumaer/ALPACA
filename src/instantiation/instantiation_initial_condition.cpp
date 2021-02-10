@@ -69,18 +69,24 @@
 
 #include <stdexcept>
 #include "utilities/string_operations.h"
+
+#include "initial_condition/levelset_initializer.h"
+#include "initial_condition/functional_levelset_initializer.h"
+#include "initial_condition/stl_levelset_initializer.h"
+#include "initial_condition/parametric_levelset_initializer.h"
+
 namespace Instantiation {
 
    /**
     * @brief Reads the initial material condition expression string for all materials.
     * @param initial_condition_reader Instance that provides access to the initial condition data in the input file.
     * @param number_of_materials Number of materials present in the current simulation.
-    * @param variable_names_prime_states All names of the prime states that are read (contains empty strings for prime states that should not be read).
+    * @param prime_state_variable_names All names of the prime states that are read (contains empty strings for prime states that should not be read).
     * @return Initial condition expression strings for all materials.
     */
    std::vector<std::string> GetMaterialInitialConditions( InitialConditionReader const& initial_condition_reader,
                                                           unsigned int const number_of_materials,
-                                                          std::vector<std::string> const& variable_names_prime_states ) {
+                                                          std::vector<std::string> const& prime_state_variable_names ) {
       // logger for warning logging
       LogWriter& logger = LogWriter::Instance();
 
@@ -91,7 +97,7 @@ namespace Instantiation {
          // material index +1 is used since in input file the indices start at 1 and internally at 0
          material_initial_conditions[material_index] = initial_condition_reader.ReadMaterialInitialConditions( material_index + 1 );
          // Check if all non-empty prime state variables are given. Otherwise throw a warning
-         for( auto const& variable_name : variable_names_prime_states ) {
+         for( auto const& variable_name : prime_state_variable_names ) {
             if( !variable_name.empty() ) {
                if( material_initial_conditions[material_index].find( variable_name ) == std::string::npos ) {
                   logger.LogMessage( " " );
@@ -106,37 +112,86 @@ namespace Instantiation {
    }
 
    /**
-    * @brief Reads the initial levelset condition expressions of all interfaces.
-    * @param initial_condition_reader Instance that provides access to the initial condition data in the input file.
-    * @param number_of_materials Number of materials present in the current simulation.
-    * @param variable_name_levelset Name of the levelset variable that is used.
-    * @return Initial condition expression strings for all levelsets.
+    * @brief Gives the variables for the parametric initializer.
+    * @param initial_condition_reader Instance to read the initial condition data.
+    * @param levelset_index The levelset index for which the variables should be read.
+    * @return The array of parametric variables.
     */
-   std::vector<std::string> GetLevelsetInitialConditions( InitialConditionReader const& initial_condition_reader,
-                                                          unsigned int number_of_materials,
-                                                          std::string const& variable_name_levelset ) {
-      // If the number of materials is 1 (single material) do not require reading
-      if( number_of_materials == 1 ) {
-         return {};
+   std::array<ParametricVariable, 2> CreateParametricVariables( InitialConditionReader const& initial_condition_reader, unsigned int const levelset_index ) {
+      // Read all variables
+      std::vector<ParametricVariable> const parametric_variables( initial_condition_reader.ReadParametricLevelsetInitializerVariables( levelset_index ) );
+      // Assign the correct number of variables depending on the given input an used dimensions
+      if( parametric_variables.size() >= 2 && CC::DIM() == Dimension::Three ) {
+         return { parametric_variables[0], parametric_variables[1] };
+      } else if( parametric_variables.size() >= 1 ) {
+         return { parametric_variables[0], ParametricVariable() };
+      } else {
+         return { ParametricVariable(), ParametricVariable() };
       }
+   }
 
-      // logger for warning logging
+   /**
+    * @brief Returns a pointer to the levelset initializer obtained from the given input data.
+    * @param initial_condition_reader Instance to read the initial condition data.
+    * @param levelset_index The levelset index for which the variables should be read.
+    * @param material_names Names of the materials in the simulation.
+    * @param node_size_on_level_zero_ Dimensional size of each node on level zero.
+    * @param maximum_level Maximum level of the simulation.
+    * @return Unique pointer to the const base class of the levelset initializer.
+    */
+   std::unique_ptr<LevelsetInitializer> InstantiateLevelsetInitializer( InitialConditionReader const& initial_condition_reader,
+                                                                        unsigned int const levelset_index,
+                                                                        std::vector<MaterialName> const& material_names,
+                                                                        double const node_size_on_level_zero_,
+                                                                        unsigned int const maximum_level ) {
+
+      // If the number of materials is 1 (single material) do not require reading and assign a constant expression (cannot be empty. UserExpression throws error otherwise.)
+      if( material_names.size() == 1 ) {
+         return std::make_unique<FunctionalLevelsetInitializer>( "phi := 1.0;", std::vector<std::array<double, 6>>(), material_names, node_size_on_level_zero_, maximum_level );
+      }
+      // read the type and input of the levelset initializer
+      LevelsetInitializerType const initializer_type{ initial_condition_reader.ReadLevelsetInitializerType( levelset_index, LevelsetInitializerType::Functional ) };
+      std::string const initializer_input{ initial_condition_reader.ReadLevelsetInitializerInput( levelset_index ) };
+      // read the bounding boxex
+      std::vector<std::array<double, 6>> bounding_boxes{ initial_condition_reader.ReadLevelsetInitializerBoundingBoxes( levelset_index ) };
+
+      // logger
       LogWriter& logger = LogWriter::Instance();
+      logger.LogMessage( " " );
+      // input data
+      logger.LogMessage( "Levelset initializer: " );
 
-      // Vector that is returned (one element less than number of materials since all levelset initial conditions are referred to material 1)
-      std::vector<std::string> levelset_initial_conditions( number_of_materials - 1 );
-      // Loop through all levelsets (start at one since input file starts at 1). Only N-1 interfaces are present 1 <-> 2, 1 <-> 3, 1 <-> 4, ...
-      for( unsigned int levelset_index = 0; levelset_index < number_of_materials - 1; levelset_index++ ) {
-         levelset_initial_conditions[levelset_index] = initial_condition_reader.ReadLevelsetInitialConditions( levelset_index + 1 );
-         // Check if levelset variables is given in the string. Otherwise throw a warning
-         if( levelset_initial_conditions[levelset_index].find( variable_name_levelset ) == std::string::npos ) {
+      // switch between different levelset initializer types to call specific constructor
+      switch( initializer_type ) {
+         case LevelsetInitializerType::Functional: {
+            // 1. Create, 2. Log, 3. Return levelset_initializer
+            std::unique_ptr<LevelsetInitializer> levelset_initializer( std::make_unique<FunctionalLevelsetInitializer>( initializer_input, bounding_boxes, material_names, node_size_on_level_zero_, maximum_level ) );
+            logger.LogLinebreakMessage( levelset_initializer->GetLogData( 2 ) );
             logger.LogMessage( " " );
-            logger.LogMessage( "Warning!! The levelset variable name '" + variable_name_levelset + "' is not contained in the initial condition string for levelset " + std::to_string( levelset_index + 1 ) + "!" );
+            return levelset_initializer;
+         }
+         case LevelsetInitializerType::STL: {
+            // 1. Create, 2. Log, 3. Return levelset_initializer
+            std::unique_ptr<LevelsetInitializer> levelset_initializer( std::make_unique<StlLevelsetInitializer>( initializer_input, bounding_boxes, material_names, node_size_on_level_zero_, maximum_level ) );
+            logger.LogLinebreakMessage( levelset_initializer->GetLogData( 2 ) );
             logger.LogMessage( " " );
+            return levelset_initializer;
+         }
+         case LevelsetInitializerType::Parametric: {
+            // For this type of initializer we need to read additional data
+            std::array<ParametricVariable, 2> const parametric_variables( CreateParametricVariables( initial_condition_reader, levelset_index ) );
+            std::array<double, 3> const reference_point( initial_condition_reader.ReadParametricLevelsetInitializerReferencePoint( levelset_index ) );
+            // 1. Create, 2. Log, 3. Return levelset_initializer
+            std::unique_ptr<LevelsetInitializer> levelset_initializer( std::make_unique<ParametricLevelsetInitializer>( initializer_input, parametric_variables, reference_point,
+                                                                                                                        bounding_boxes, material_names, node_size_on_level_zero_, maximum_level ) );
+            logger.LogLinebreakMessage( levelset_initializer->GetLogData( 2 ) );
+            logger.LogMessage( " " );
+            return levelset_initializer;
+         }
+         default: {
+            throw std::logic_error( "The chosen levelset initialization method has not been implemented!" );
          }
       }
-
-      return levelset_initial_conditions;
    }
 
    /**
@@ -148,38 +203,37 @@ namespace Instantiation {
     * @param unit_handler Instance to provide (non-)dimensionalization of values.
     * @return The fully instantiated InititalCondition class.
     */
-   InitialCondition InstantiateInitialCondition( InputReader const& input_reader,
-                                                 TopologyManager const& topology_manager,
-                                                 Tree const& tree,
-                                                 MaterialManager const& material_manager,
-                                                 UnitHandler const& unit_handler ) {
+   std::unique_ptr<InitialCondition> InstantiateInitialCondition( InputReader const& input_reader,
+                                                                  TopologyManager const& topology_manager,
+                                                                  Tree const& tree,
+                                                                  MaterialManager const& material_manager,
+                                                                  UnitHandler const& unit_handler ) {
 
       // Create the prime states variable names
       // Get all variables that used in the initial condition string (defined in field details)
-      std::vector<std::string> variable_names_prime_states( MF::ANOP() );
+      std::vector<std::string> prime_state_variable_names( MF::ANOP() );
       for( PrimeState const p : MF::ASOP() ) {
          // No check is done here if variable should be used for input. Later 0 is assigned to those
-         variable_names_prime_states[PTI( p )] = StringOperations::RemoveSpaces( std::string( MF::InputName( p ) ) );
+         prime_state_variable_names[PTI( p )] = StringOperations::RemoveSpaces( std::string( MF::InputName( p ) ) );
       }
 
-      // Create the levelset variable in case multi fluid simulations are used
-      std::string variable_name_levelset = "";
-      if( material_manager.GetNumberOfMaterials() > 1 ) {
-         variable_name_levelset = StringOperations::RemoveSpaces( std::string( IF::InputName( InterfaceDescription::Levelset ) ) );
-         // Check if empty and throw error in that case
-         if( variable_name_levelset.empty() ) {
-            throw std::logic_error( "The input name of the levelset field must be given for multi material simulations!" );
-         }
-      }
+      //For more than one initializer this must be a loop and the resulting initializer a vector
+      unsigned int const levelset_index = 0;
 
-      return InitialCondition( GetMaterialInitialConditions( input_reader.GetInitialConditionReader(), material_manager.GetNumberOfMaterials(), variable_names_prime_states ),
-                               GetLevelsetInitialConditions( input_reader.GetInitialConditionReader(), material_manager.GetNumberOfMaterials(), variable_name_levelset ),
-                               material_manager.GetMaterialNames(),
-                               variable_names_prime_states,
-                               variable_name_levelset,
-                               unit_handler.DimensionalizeValue( tree.GetNodeSizeOnLevelZero(), UnitType::Length ),
-                               topology_manager.GetMaximumLevel(),
-                               unit_handler );
+      std::unique_ptr<LevelsetInitializer> levelset_initializer( InstantiateLevelsetInitializer( input_reader.GetInitialConditionReader(),
+                                                                                                 levelset_index + 1,
+                                                                                                 material_manager.GetMaterialNames(),
+                                                                                                 unit_handler.DimensionalizeValue( tree.GetNodeSizeOnLevelZero(), UnitType::Length ),
+                                                                                                 topology_manager.GetMaximumLevel() ) );
+
+      // Initialize the prime state handler
+      std::vector<std::string> const material_initial_conditions{ GetMaterialInitialConditions( input_reader.GetInitialConditionReader(), material_manager.GetNumberOfMaterials(), prime_state_variable_names ) };
+      std::unique_ptr<PrimeStateInitializer const> prime_state_initializer{ std::make_unique<PrimeStateInitializer const>( material_initial_conditions,
+                                                                                                                           prime_state_variable_names,
+                                                                                                                           unit_handler.DimensionalizeValue( tree.GetNodeSizeOnLevelZero(), UnitType::Length ),
+                                                                                                                           unit_handler ) };
+      return std::make_unique<InitialCondition>( std::move( prime_state_initializer ),
+                                                 std::move( levelset_initializer ) );
    }
 
 }// namespace Instantiation

@@ -74,7 +74,7 @@
 #include "log_writer.h"
 // #include "topology/topology_manager.h"
 // #include "topology/tree.h"
-#include "utilities/file_operations.h"
+#include "input_output/utilities/file_utilities.h"
 #include "unit_handler.h"
 // #include "materials/material_manager.h"
 #include "input_output/output_writer.h"
@@ -197,7 +197,7 @@ class InputOutputManager {
     * @brief Checks whether the restore file specified in the input file exists.
     * @return True is the file exists, false otherwise.
     */
-   inline bool CheckIfRestoreFileExists() const { return FileOperations::CheckIfPathExists( restore_filename_ ); }
+   inline bool CheckIfRestoreFileExists() const { return FileUtilities::CheckIfPathExists( restore_filename_ ); }
 
 public:
    explicit InputOutputManager( std::string const& input_file,
@@ -224,7 +224,7 @@ public:
    * @brief Checks whether the file "ABORTFILE" exists in the output folder indicating that the simulation should be aborted.
    * @return True if "ABORTFILE" exists, false otherwise.
    */
-   inline bool CheckIfAbortfileExists() const { return FileOperations::CheckIfPathExists( output_folder_name_ + "/ABORTFILE" ); }
+   inline bool CheckIfAbortfileExists() const { return FileUtilities::CheckIfPathExists( output_folder_name_ + "/ABORTFILE" ); }
 
    // Function to write the time information to a file
    void WriteTimestepFile( std::vector<double> const& timesteps_on_finest_level ) const;

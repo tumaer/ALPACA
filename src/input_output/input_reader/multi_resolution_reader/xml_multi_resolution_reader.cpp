@@ -68,7 +68,7 @@
 #include "input_output/input_reader/multi_resolution_reader/xml_multi_resolution_reader.h"
 
 #include "user_specifications/compile_time_constants.h"
-#include "input_output/input_reader/xml_utilities.h"
+#include "input_output/utilities/xml_utilities.h"
 
 /**
  * @brief Default constructor for the multiresolution reader for xml-type input files.

@@ -84,8 +84,8 @@
 PowerLawShearViscosityModel::PowerLawShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                                           UnitHandler const& unit_handler ) :// Start initializer list
                                                                                               ShearRateMaterialParameterModel<PowerLawShearViscosityModel>(),
-                                                                                              consistency_factor_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "consistencyFactor", "PowerLawShearViscosityModel" ), UnitType::Viscosity ) ),
-                                                                                              power_law_exponent_( GetCheckedParameter( dimensional_parameter_map, "powerLawExponent", "PowerLawShearViscosityModel" ) ),
+                                                                                              consistency_factor_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "consistencyFactor", "PowerLawShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                              power_law_exponent_( GetCheckedParameter<double>( dimensional_parameter_map, "powerLawExponent", "PowerLawShearViscosityModel" ) ),
                                                                                               exponent_( power_law_exponent_ - 1.0 ) {
    /** Empty besides initializer list and friend class constructor call  */
 }

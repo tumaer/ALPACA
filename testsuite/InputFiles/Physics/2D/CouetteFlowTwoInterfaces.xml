@@ -79,11 +79,11 @@ Sharp-Interface Method, Buhendwa, 2018: 3.2.1 Couette Flow -->
             </material2>
 
             <levelSet1>
-            if (y &gt; 0.5)
-	       phi := y - 0.7;
-	    else
-	       phi := 0.3 - y;
-
+                if (y &gt; 0.5) {
+	                phi := y - 0.7;
+                } else {
+	                phi := 0.3 - y;
+                }
             </levelSet1>
         </initialConditions>
     </domain>

@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output/input_reader/output_reader/xml_output_reader.h"
 
-#include "input_output/input_reader/xml_utilities.h"
+#include "input_output/utilities/xml_utilities.h"
 
 /**
  * @brief Default constructor for the output reader for xml-type input files.

@@ -46,9 +46,7 @@
             </material2>
 
             <levelSet1>
-
                 phi := 0.4 - sqrt( pow(x,2) + pow(y,2) );
-
             </levelSet1>
         </initialConditions>
     </domain>

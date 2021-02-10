@@ -71,6 +71,7 @@
 #include "utilities/mathematical_functions.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
+#include "utilities/vector_utilities.h"
 
 /**
  * @brief constructor to create the material Mach number output.
@@ -106,14 +107,14 @@ void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                if( interface_tags[i][j][k] > 0 ) {
-                  cell_data[cell_data_counter++] = L2Norm( { positive_prime_states[PrimeState::VelocityX][i][j][k],
-                                                             CC::DIM() != Dimension::One ? positive_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
-                                                             CC::DIM() == Dimension::Three ? positive_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
+                  cell_data[cell_data_counter++] = VU::L2Norm( { positive_prime_states[PrimeState::VelocityX][i][j][k],
+                                                                 CC::DIM() != Dimension::One ? positive_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
+                                                                 CC::DIM() == Dimension::Three ? positive_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
                                                    positive_material_eos.SpeedOfSound( positive_prime_states[PrimeState::Density][i][j][k], positive_prime_states[PrimeState::Pressure][i][j][k] );
                } else {
-                  cell_data[cell_data_counter++] = L2Norm( { negative_prime_states[PrimeState::VelocityX][i][j][k],
-                                                             CC::DIM() != Dimension::One ? negative_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
-                                                             CC::DIM() == Dimension::Three ? negative_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
+                  cell_data[cell_data_counter++] = VU::L2Norm( { negative_prime_states[PrimeState::VelocityX][i][j][k],
+                                                                 CC::DIM() != Dimension::One ? negative_prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
+                                                                 CC::DIM() == Dimension::Three ? negative_prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
                                                    negative_material_eos.SpeedOfSound( negative_prime_states[PrimeState::Density][i][j][k], negative_prime_states[PrimeState::Pressure][i][j][k] );
                }
             }
@@ -128,9 +129,9 @@ void MachNumberOutput::DoComputeCellData( Node const& node, std::vector<double>&
       for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-               cell_data[cell_data_counter++] = L2Norm( { prime_states[PrimeState::VelocityX][i][j][k],
-                                                          CC::DIM() != Dimension::One ? prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
-                                                          CC::DIM() == Dimension::Three ? prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
+               cell_data[cell_data_counter++] = VU::L2Norm( { prime_states[PrimeState::VelocityX][i][j][k],
+                                                              CC::DIM() != Dimension::One ? prime_states[PrimeState::VelocityY][i][j][k] : 0.0,
+                                                              CC::DIM() == Dimension::Three ? prime_states[PrimeState::VelocityZ][i][j][k] : 0.0 } ) /
                                                 material_eos.SpeedOfSound( prime_states[PrimeState::Density][i][j][k], prime_states[PrimeState::Pressure][i][j][k] );
             }
          }

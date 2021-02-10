@@ -69,7 +69,7 @@
 #define MODULAR_ALGORITHM_ASSEMBLER_H
 
 #include "halo_manager.h"
-#include "initial_condition.h"
+#include "initial_condition/initial_condition.h"
 #include "integrator/time_integrator_setup.h"
 #include "levelset/multi_phase_manager/multi_phase_manager_setup.h"
 #include "prime_states/prime_state_handler.h"
@@ -105,8 +105,6 @@ class ModularAlgorithmAssembler {
    std::vector<unsigned int> const all_levels_;
 
    // Additional classes used
-   InitialCondition const& initial_condition_;
-
    TimeIntegratorConcretization time_integrator_;
 
    Tree& tree_;
@@ -131,7 +129,7 @@ class ModularAlgorithmAssembler {
 
    LogWriter& logger_;
 
-   void CreateNewSimulation();
+   void CreateNewSimulation( InitialCondition& initial_condition );
    void FinalizeSimulationRestart( double const restart_time );
 
    void Advance();
@@ -152,7 +150,7 @@ class ModularAlgorithmAssembler {
 
    void LoadBalancing( std::vector<unsigned int> const updated_levels, bool const force = false );
 
-   void ImposeInitialCondition( unsigned int const level );
+   void ImposeInitialCondition( unsigned int const level, InitialCondition& initial_condition );
 
    void UpdateInterfaceTags( std::vector<unsigned int> const levels_with_updated_parents_descending ) const;
    void SenseApproachingInterface( std::vector<unsigned int> const levels_ascending, bool refine_if_necessary = true );
@@ -194,7 +192,6 @@ public:
                                        std::vector<unsigned int> all_levels,
                                        double const cell_size_on_maximum_level,
                                        UnitHandler const& unit_handler,
-                                       InitialCondition const& initial_condition,
                                        Tree& tree,
                                        TopologyManager& topology,
                                        HaloManager& halo_manager,
@@ -210,7 +207,7 @@ public:
 
    void ComputeLoop();
 
-   void Initialization();
+   void Initialization( InitialCondition& initial_condition );
 };
 
 #endif// MODULAR_ALGORITHM_ASSEMBLER_H

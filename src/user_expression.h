@@ -100,7 +100,10 @@ class UserExpression {
 
 public:
    UserExpression() = delete;
-   explicit UserExpression( std::string const expression_string, std::vector<std::tuple<std::string, double&>> const variables_in, std::vector<std::string> const variables_out );
+   explicit UserExpression( std::string const& expression,
+                            std::vector<std::string> const& variables_out,
+                            std::vector<std::string> const& function_variables_names,
+                            std::vector<double>& function_variables_values );
    ~UserExpression()                       = default;
    UserExpression( UserExpression const& ) = delete;
    UserExpression& operator=( UserExpression const& ) = delete;

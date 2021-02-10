@@ -76,8 +76,8 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-Isentropic::Isentropic( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "Isentropic" ) ),
-                                                                                                                                 A_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "A", "Isentropic" ), UnitType::Pressure ) ) {
+Isentropic::Isentropic( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "Isentropic" ) ),
+                                                                                                                                 A_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "A", "Isentropic" ), UnitType::Pressure ) ) {
    /* Empty besides initializer list*/
 }
 

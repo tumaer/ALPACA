@@ -69,6 +69,7 @@
 
 #include <algorithm>//lower_bound, sort
 #include "utilities/mathematical_functions.h"
+#include "utilities/vector_utilities.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
 
@@ -131,7 +132,7 @@ void BaroclinicityOutput::DoComputeCellData( Node const& node, std::vector<doubl
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                std::array<double, 3> const pressure_gradient = SU::GradientVector<DerivativeStencil>( real_pressure, i, j, k, cell_size );
                std::array<double, 3> const density_gradient  = SU::GradientVector<DerivativeStencil>( real_density, i, j, k, cell_size );
-               cell_data[cell_data_counter++]                = L2Norm( CrossProduct( density_gradient, pressure_gradient ) ) / ( real_density[i][j][k] * real_density[i][j][k] ) * dimensionalization_factor;
+               cell_data[cell_data_counter++]                = VU::L2Norm( VU::CrossProduct( density_gradient, pressure_gradient ) ) / ( real_density[i][j][k] * real_density[i][j][k] ) * dimensionalization_factor;
             }
          }
       }
@@ -147,7 +148,7 @@ void BaroclinicityOutput::DoComputeCellData( Node const& node, std::vector<doubl
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                std::array<double, 3> const pressure_gradient = SU::GradientVector<DerivativeStencil>( real_pressure, i, j, k, cell_size );
                std::array<double, 3> const density_gradient  = SU::GradientVector<DerivativeStencil>( real_density, i, j, k, cell_size );
-               cell_data[cell_data_counter++]                = L2Norm( CrossProduct( density_gradient, pressure_gradient ) ) / ( real_density[i][j][k] * real_density[i][j][k] ) * dimensionalization_factor;
+               cell_data[cell_data_counter++]                = VU::L2Norm( VU::CrossProduct( density_gradient, pressure_gradient ) ) / ( real_density[i][j][k] * real_density[i][j][k] ) * dimensionalization_factor;
             }
          }
       }

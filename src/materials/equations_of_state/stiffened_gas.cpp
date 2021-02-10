@@ -71,8 +71,6 @@
 #include "utilities/mathematical_functions.h"
 #include <cmath>
 
-#include <iostream>
-
 /**
  * @brief Constructs a stiffened gas equation of state with eos parameters given as input.
  * @param dimensional_eos_data Map containing all data for the equation of state.
@@ -81,8 +79,8 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
-                                                                                                                                     background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
+StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
+                                                                                                                                     background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
    /* Empty besides initializer list*/
 }
 

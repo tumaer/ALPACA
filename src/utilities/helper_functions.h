@@ -73,7 +73,15 @@
 #include <unordered_map>
 
 // Check existence of parameter in unordered map
-double GetCheckedParameter( std::unordered_map<std::string, double> const& parameter_map, std::string const& parameter, std::string const& map_name );
+template<typename T>
+T GetCheckedParameter( std::unordered_map<std::string, T> const& parameter_map, std::string const& parameter, std::string const& map_name ) {
+   // checks whether the given parameter is defined
+   if( parameter_map.find( parameter ) == parameter_map.end() ) {
+      throw std::logic_error( "Variable " + parameter + " not found in map for " + map_name + "!" );
+   }
+   // returns the parameter if it is present
+   return parameter_map.at( parameter );
+}
 
 /**
  * @brief Creates an std::array from the given arguments. Template magic.

@@ -128,7 +128,7 @@ SCENARIO( "A string can be converted to a string with scientific notation", "[1r
    }
 }
 
-SCENARIO( "LEading numbers from strings can be removed", "[1rank]" ) {
+SCENARIO( "Leading numbers from strings can be removed", "[1rank]" ) {
    GIVEN( "String with single leading number" ) {
       std::string const single_string = "1string";
       REQUIRE( StringOperations::RemoveLeadingNumbers( single_string ) == "string" );
@@ -140,5 +140,84 @@ SCENARIO( "LEading numbers from strings can be removed", "[1rank]" ) {
    GIVEN( "String with multiple single leading number and numbers at the end" ) {
       std::string const single_string = "1string2";
       REQUIRE( StringOperations::RemoveLeadingNumbers( single_string ) == "string2" );
+   }
+}
+
+SCENARIO( "Strings can be trimmed", "[1rank]" ) {
+   GIVEN( "String with leading and trailing whitespaces" ) {
+      std::string const single_string = "   string  ";
+      REQUIRE( StringOperations::Trim( single_string ) == "string" );
+   }
+   GIVEN( "String with leading and trailing newline characters" ) {
+      std::string const single_string = "\n\nstring\n";
+      REQUIRE( StringOperations::Trim( single_string ) == "string" );
+   }
+   GIVEN( "String with leading and trailing tab characters" ) {
+      std::string const single_string = "\tstring\t\t\t";
+      REQUIRE( StringOperations::Trim( single_string ) == "string" );
+   }
+   GIVEN( "String with mixture of leading and trailing whitespaces, newline and tab characters" ) {
+      std::string const single_string = "\n  \t\t\nstring \n\t \t";
+      REQUIRE( StringOperations::Trim( single_string ) == "string" );
+   }
+}
+
+SCENARIO( "Strings can be converted to values", "[1rank]" ) {
+   GIVEN( "String of double value that is converted" ) {
+      std::string const single_string = "1.0";
+      REQUIRE( StringOperations::ConvertStringToValue<double>( single_string ) == 1.0 );
+   }
+   GIVEN( "String of int value that is converted" ) {
+      std::string const single_string = "-1";
+      REQUIRE( StringOperations::ConvertStringToValue<int>( single_string ) == -1 );
+   }
+   GIVEN( "String of unsigned int value that is converted" ) {
+      std::string const single_string = "1";
+      REQUIRE( StringOperations::ConvertStringToValue<unsigned int>( single_string ) == 1 );
+   }
+   GIVEN( "String of true bool value that is converted" ) {
+      std::string const single_string = "1";
+      REQUIRE( StringOperations::ConvertStringToValue<bool>( single_string ) );
+   }
+   GIVEN( "String of false bool value that is converted" ) {
+      std::string const single_string = "0";
+      REQUIRE( !StringOperations::ConvertStringToValue<bool>( single_string ) );
+   }
+}
+
+SCENARIO( "Strings with space delimiter can be converted to vector of values", "[1rank]" ) {
+   GIVEN( "String of four double values that is converted" ) {
+      std::string const single_string = "0.12345 -1.2345 2.3456 -3.4567";
+      std::vector<double> const vec   = StringOperations::ConvertStringToVector<double>( single_string );
+      REQUIRE( vec.size() == 4 );
+      REQUIRE( vec[0] == 0.12345 );
+      REQUIRE( vec[1] == -1.2345 );
+      REQUIRE( vec[2] == 2.3456 );
+      REQUIRE( vec[3] == -3.4567 );
+   }
+   GIVEN( "String of three int values that is converted" ) {
+      std::string const single_string = "-1 5 -4";
+      std::vector<int> const vec      = StringOperations::ConvertStringToVector<int>( single_string );
+      REQUIRE( vec.size() == 3 );
+      REQUIRE( vec[0] == -1 );
+      REQUIRE( vec[1] == 5 );
+      REQUIRE( vec[2] == -4 );
+   }
+   GIVEN( "String of three unsigned int values that is converted" ) {
+      std::string const single_string     = "1 9 11";
+      std::vector<unsigned int> const vec = StringOperations::ConvertStringToVector<unsigned int>( single_string );
+      REQUIRE( vec.size() == 3 );
+      REQUIRE( vec[0] == 1 );
+      REQUIRE( vec[1] == 9 );
+      REQUIRE( vec[2] == 11 );
+   }
+   GIVEN( "String of four bool values that is converted" ) {
+      std::string const single_string = "1 0 0 1";
+      std::vector<bool> const vec     = StringOperations::ConvertStringToVector<bool>( single_string );
+      REQUIRE( vec.size() == 4 );
+      REQUIRE( vec[0] );
+      REQUIRE( !vec[1] );
+      REQUIRE( !vec[2] );
+      REQUIRE( vec[3] );
    }
 }

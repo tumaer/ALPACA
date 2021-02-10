@@ -353,7 +353,7 @@ SCENARIO( "Interface mesh generator: Vertex IDs start index to write is correctl
 /********************************************************************************************************************************************/
 /*                                             TEST COMBINATION VERTEX IDs AND COORDINATES                                               */
 /********************************************************************************************************************************************/
-SCENARIO( "Interface mesh generator: Check that vertex IDs and coordinates are computed properly in combination", "[1rank]" ) {
+SCENARIO( "Interface mesh generator: Check that vertex IDs and coordinates are computed properly in combination", "[.slow1rank]" ) {
 
    GIVEN( "Underlying topology with Lmax being one" ) {
       // Parameter for the creation of the mesh geenrator

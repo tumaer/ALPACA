@@ -103,9 +103,11 @@ namespace Instantiation {
    bool IsMaterialPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction ) {
       // Declare the boundary locations
       BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East :
-                                                                          direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
+                                                                          direction == Direction::Y ? BoundaryLocation::North :
+                                                                                                      BoundaryLocation::Bottom;
       BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West :
-                                                                           direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
+                                                                           direction == Direction::Y ? BoundaryLocation::South :
+                                                                                                       BoundaryLocation::Top;
       // Declare the two boundary conditions
       MaterialBoundaryType const first_boundary  = boundary_condition_reader.ReadMaterialBoundaryType( first_location );
       MaterialBoundaryType const second_boundary = boundary_condition_reader.ReadMaterialBoundaryType( second_location );
@@ -132,9 +134,11 @@ namespace Instantiation {
    bool IsLevelsetPeriodic( BoundaryConditionReader const& boundary_condition_reader, Direction const direction ) {
       // Declare the boundary locations
       BoundaryLocation const first_location = direction == Direction::X ? BoundaryLocation::East :
-                                                                          direction == Direction::Y ? BoundaryLocation::North : BoundaryLocation::Bottom;
+                                                                          direction == Direction::Y ? BoundaryLocation::North :
+                                                                                                      BoundaryLocation::Bottom;
       BoundaryLocation const second_location = direction == Direction::X ? BoundaryLocation::West :
-                                                                           direction == Direction::Y ? BoundaryLocation::South : BoundaryLocation::Top;
+                                                                           direction == Direction::Y ? BoundaryLocation::South :
+                                                                                                       BoundaryLocation::Top;
       // Declare the two boundary conditions
       LevelSetBoundaryType const first_boundary  = boundary_condition_reader.ReadLevelsetBoundaryType( first_location );
       LevelSetBoundaryType const second_boundary = boundary_condition_reader.ReadLevelsetBoundaryType( second_location );

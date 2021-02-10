@@ -79,7 +79,7 @@
 ConstantSurfaceTensionCoefficientModel::ConstantSurfaceTensionCoefficientModel( std::unordered_map<std::string, double> const& parameter_map,
                                                                                 UnitHandler const& unit_handler ) :// Start initializer list
                                                                                                                     ConstantInterfaceParameterModel<ConstantSurfaceTensionCoefficientModel>(),
-                                                                                                                    sigma_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( parameter_map, "sigmaConstant", "ConstantSurfaceTensionCoefficientModel" ), UnitType::SurfaceTensionCoefficient ) ) {
+                                                                                                                    sigma_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( parameter_map, "sigmaConstant", "ConstantSurfaceTensionCoefficientModel" ), UnitType::SurfaceTensionCoefficient ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 

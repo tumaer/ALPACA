@@ -67,7 +67,8 @@
 *****************************************************************************************/
 #include "input_output/input_reader/source_term_reader/xml_source_term_reader.h"
 
-#include "input_output/input_reader/xml_utilities.h"
+#include <string>
+#include "input_output/utilities/xml_utilities.h"
 
 /**
  * @brief Default constructor for the source term reader for xml-type input files.

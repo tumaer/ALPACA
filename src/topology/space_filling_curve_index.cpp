@@ -70,7 +70,6 @@
 #include <algorithm>
 #include <array>
 #include <bitset>
-#include <iostream>
 #include <limits>
 #include "topology/id_information.h"
 #include "topology/node_id_type.h"

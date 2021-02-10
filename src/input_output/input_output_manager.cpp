@@ -72,7 +72,7 @@
 #include <unistd.h>
 #include <algorithm>
 
-#include "utilities/file_operations.h"
+#include "input_output/utilities/file_utilities.h"
 
 #include "user_specifications/debug_and_profile_setup.h"
 #include "input_output/output_writer/output_definitions.h"
@@ -145,12 +145,12 @@ InputOutputManager::InputOutputManager( std::string const& input_file,
       CreateOutputFolder();
 
       // Create the log file name
-      logger_.SetLogfileName( output_folder_name_ + "/" + FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) + ".log" );
+      logger_.SetLogfileName( output_folder_name_ + "/" + FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) + ".log" );
 
       // copy inputfile into directory
       if( !input_file.empty() ) {
          std::ifstream input_stream( input_file, std::ios::binary );
-         std::ofstream output_stream( output_folder_name_ + "/" + FileOperations::RemoveFilePath( input_file ), std::ios::binary );
+         std::ofstream output_stream( output_folder_name_ + "/" + FileUtilities::RemoveFilePath( input_file ), std::ios::binary );
          output_stream << input_stream.rdbuf();
          output_stream.flush();
          output_stream.close();
@@ -201,20 +201,20 @@ InputOutputManager::~InputOutputManager() {
  */
 void InputOutputManager::CreateOutputFolder() const {
    // create output folder
-   FileOperations::CreateFolder( output_folder_name_ );
+   FileUtilities::CreateFolder( output_folder_name_ );
    // create output folder only if output is enabled
    if( standard_output_enabled_ ) {
-      FileOperations::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Standard ) );
+      FileUtilities::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Standard ) );
    }
    if( interface_output_enabled_ ) {
-      FileOperations::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Interface ) );
+      FileUtilities::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Interface ) );
    }
    if constexpr( DP::DebugOutput() ) {
-      FileOperations::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Debug ) );
+      FileUtilities::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Debug ) );
    }
 
    // create restart folder
-   FileOperations::CreateFolder( output_folder_name_ + RestartSubfolderName() );
+   FileUtilities::CreateFolder( output_folder_name_ + RestartSubfolderName() );
 
 #ifndef PERFORMANCE
    // create an .gitignore file in the output folder
@@ -238,7 +238,7 @@ void InputOutputManager::WriteTimestepFile( std::vector<double> const& timesteps
          timesteps += std::to_string( timestep ) + "\n";
       }
       // append to file
-      FileOperations::AppendToTextBasedFile( output_folder_name_ + "/micro_timesteps.txt", timesteps );
+      FileUtilities::AppendToTextBasedFile( output_folder_name_ + "/micro_timesteps.txt", timesteps );
    }
 }
 
@@ -418,7 +418,7 @@ void InputOutputManager::WriteRestartFile( double const timestep, bool const for
 
          // update symbolic link to latest snapshot file
          std::remove( symlink_latest_restart_name_.c_str() );
-         [[maybe_unused]] int const result_io = symlink( FileOperations::RemoveFilePath( snapshot_filename ).c_str(), symlink_latest_restart_name_.c_str() );
+         [[maybe_unused]] int const result_io = symlink( FileUtilities::RemoveFilePath( snapshot_filename ).c_str(), symlink_latest_restart_name_.c_str() );
 
          // only consider non-timestamp snapshots for deletion
          if( !snapshot_timestamp_triggered ) {

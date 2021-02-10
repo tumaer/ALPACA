@@ -69,6 +69,7 @@
 
 #include <algorithm>//lower_bound, sort
 #include "utilities/mathematical_functions.h"
+#include "utilities/vector_utilities.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
 
@@ -131,7 +132,7 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>& c
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                std::array<double, 3> const curl = SU::Curl<DerivativeStencil>( real_velocity_x, real_velocity_y, real_velocity_z, i, j, k, cell_size );
-               cell_data[cell_data_counter++]   = L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
+               cell_data[cell_data_counter++]   = VU::L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
             }
          }
       }
@@ -158,7 +159,7 @@ void HelicityOutput::DoComputeCellData( Node const& node, std::vector<double>& c
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                std::array<double, 3> const curl = SU::Curl<DerivativeStencil>( real_velocity_x, real_velocity_y, real_velocity_z, i, j, k, cell_size );
-               cell_data[cell_data_counter++]   = L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
+               cell_data[cell_data_counter++]   = VU::L2Norm( { curl[0] * real_velocity_x[i][j][k], curl[1] * real_velocity_y[i][j][k], curl[2] * real_velocity_z[i][j][k] } ) * dimensionalization_factor;
             }
          }
       }

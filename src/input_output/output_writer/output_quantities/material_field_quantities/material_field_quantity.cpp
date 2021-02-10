@@ -66,7 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "input_output/output_writer/output_quantities/material_field_quantities/material_field_quantity.h"
-#include "input_output/output_writer/xdmf_utilities.h"
+#include "input_output/utilities/xdmf_utilities.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 
 /**

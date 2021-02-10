@@ -72,7 +72,7 @@
 
 #include <tinyxml2.h>
 #include "input_output/input_reader/input_definitions.h"
-#include "utilities/file_operations.h"
+#include "input_output/utilities/file_utilities.h"
 
 #include "input_output/input_reader/boundary_condition_reader/xml_boundary_condition_reader.h"
 #include "input_output/input_reader/initial_condition_reader/xml_initial_condition_reader.h"
@@ -93,12 +93,12 @@ namespace Instantiation {
     */
    InputReader InstantiateInputReader( std::string const& input_filename ) {
       // Check whether the file exists
-      if( !FileOperations::CheckIfPathExists( input_filename ) ) {
+      if( !FileUtilities::CheckIfPathExists( input_filename ) ) {
          throw std::logic_error( "Input file " + input_filename + " does not exist!" );
       }
 
       // Determine the input type
-      InputType const input_type( StringToInputType( FileOperations::GetFileExtension( input_filename ) ) );
+      InputType const input_type( StringToInputType( FileUtilities::GetFileExtension( input_filename ) ) );
       // Instantiate correct reader
       switch( input_type ) {
          case InputType::Xml: {

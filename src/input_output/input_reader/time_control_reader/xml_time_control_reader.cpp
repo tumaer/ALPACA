@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output/input_reader/time_control_reader/xml_time_control_reader.h"
 
-#include "input_output/input_reader/xml_utilities.h"
+#include "input_output/utilities/xml_utilities.h"
 
 /**
  * @brief Default constructor for the time-control reader for xml-type input files.

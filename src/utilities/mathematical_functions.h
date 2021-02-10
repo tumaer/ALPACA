@@ -70,6 +70,7 @@
 
 #include <algorithm>
 #include <cmath>
+
 #include "user_specifications/compile_time_constants.h"
 
 /**
@@ -194,26 +195,6 @@ constexpr double DimensionAwareConsistencyManagedSum( std::array<double, 3> cons
  */
 constexpr double ConsistencyManagedSum( std::array<double, 4> const values ) {
    return ConsistencyManagedSum( values[0], values[1], values[2], values[3] );
-}
-
-/**
- * @brief Computes the L2 norm of vector.
- * @param vector Vector for which the L2 norm should be computed.
- * @return L2 norm of the vector.
- */
-inline double L2Norm( std::array<double, 3> const vector ) {
-   return std::sqrt( DimensionAwareConsistencyManagedSum( vector[0] * vector[0], vector[1] * vector[1], vector[2] * vector[2] ) );
-}
-
-/**
- * @brief Computes the cross product between two vectors.
- * @param vector1, vector2 Two vectors for which the cross product should be computed.
- * @return cross product between the two vectors.
- */
-constexpr std::array<double, 3> CrossProduct( std::array<double, 3> const vector1, std::array<double, 3> const vector2 ) {
-   return { vector1[1] * vector2[2] - vector1[2] * vector2[1],
-            vector1[2] * vector2[0] - vector1[0] * vector2[2],
-            vector1[0] * vector2[1] - vector1[1] * vector2[0] };
 }
 
 /**

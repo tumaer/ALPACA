@@ -185,12 +185,15 @@ namespace {
 
    Mock<InitialConditionReader> InstantiateInitialConditionReader( std::string const density_one, std::string const density_two,
                                                                    std::string const pressure_one, std::string const pressure_two,
-                                                                   std::string const velocity_one, std::string const velocity_two, std::string const levelset ) {
+                                                                   std::string const velocity_one, std::string const velocity_two,
+                                                                   std::string const levelset ) {
       Mock<InitialConditionReader> initial_condition_reader;
 
       When( Method( initial_condition_reader, ReadMaterialInitialConditions ).Using( 1 ) ).Return( density_one + velocity_one + pressure_one );
       When( Method( initial_condition_reader, ReadMaterialInitialConditions ).Using( 2 ) ).Return( density_two + velocity_two + pressure_two );
-      When( Method( initial_condition_reader, ReadLevelsetInitialConditions ).Using( 1 ) ).Return( levelset );
+      When( Method( initial_condition_reader, ReadLevelsetInitializerType ) ).AlwaysReturn( LevelsetInitializerType::Functional );
+      When( Method( initial_condition_reader, ReadLevelsetInitializerInput ) ).AlwaysReturn( levelset );
+      When( Method( initial_condition_reader, ReadLevelsetInitializerBoundingBoxes ) ).AlwaysReturn( {} );
 
       return initial_condition_reader;
    }
@@ -388,7 +391,6 @@ SCENARIO( "Instantiation of initial condition", "[1rank]" ) {
       Mock<InitialConditionReader> third_initial_condition_reader( InstantiateInitialConditionReader( scenario_two_material_one_density, scenario_two_material_one_velocity,
                                                                                                       scenario_two_pressure, scenario_two_material_two_density,
                                                                                                       scenario_two_material_two_velocity, scenario_two_pressure, scenario_two_levelset ) );
-
       Mock<InputReader> input_reader_for_material_manager( InstantiateInputReaderForMaterialManager( material_reader ) );
       Mock<InputReader> input_reader_for_topology_manager( InstantiateInputReaderForTopologyManager( multiresolution, boundary_condition_reader ) );
       Mock<InputReader> first_input_reader( InstantiateInputReaderForInitialCondition( first_initial_condition_reader ) );
@@ -400,13 +402,13 @@ SCENARIO( "Instantiation of initial condition", "[1rank]" ) {
       Tree tree( Instantiation::InstantiateTree( input_reader_for_topology_manager.get(), topology_manager, unit_handler ) );
 
       WHEN( "An initial condition is instantiated using given mock input reader" ) {
-         InitialCondition initial_condition( Instantiation::InstantiateInitialCondition( first_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
+         std::unique_ptr<InitialCondition> initial_condition( Instantiation::InstantiateInitialCondition( first_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
          double initial_prime_states_material_one[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
-         initial_condition.GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_material_one );
+         initial_condition->GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_material_one );
          double initial_prime_states_material_two[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
-         initial_condition.GetInitialPrimeStates( InstantiationConstants::root_node_id, material_two, initial_prime_states_material_two );
+         initial_condition->GetInitialPrimeStates( InstantiationConstants::root_node_id, material_two, initial_prime_states_material_two );
          THEN( "The initial material and prime state values return by the initial condition are equal to the expected values" ) {
-            REQUIRE( initial_condition.GetInitialMaterials( InstantiationConstants::root_node_id ).size() == InstantiationConstants::number_of_materials );
+            REQUIRE( initial_condition->GetInitialMaterials( InstantiationConstants::root_node_id ).size() == InstantiationConstants::number_of_materials );
             constexpr double expected_pressure_material_one = ( 0.5 * ( 1.0 / CC::ICX() ) ) * ( 0.5 * ( 1.0 / CC::ICX() ) );
             REQUIRE( initial_prime_states_material_one[PTI( PrimeState::Density )][FIX][FIY][FIZ] == Approx( InstantiationConstants::density_material_one_scenario_one ) );
             REQUIRE( initial_prime_states_material_two[PTI( PrimeState::Density )][LIX][LIY][LIZ] == Approx( InstantiationConstants::density_material_two_scenario_one ) );
@@ -416,21 +418,21 @@ SCENARIO( "Instantiation of initial condition", "[1rank]" ) {
       }
 
       WHEN( "Two initial conditions are instantiated with identical initial conditions" ) {
-         InitialCondition first_initial_condition( Instantiation::InstantiateInitialCondition( first_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
-         InitialCondition second_initial_condition( Instantiation::InstantiateInitialCondition( second_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
+         std::unique_ptr<InitialCondition> first_initial_condition( Instantiation::InstantiateInitialCondition( first_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
+         std::unique_ptr<InitialCondition> second_initial_condition( Instantiation::InstantiateInitialCondition( second_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
          double levelset_temp_one[CC::TCX()][CC::TCY()][CC::TCZ()];
          double levelset_temp_two[CC::TCX()][CC::TCY()][CC::TCZ()];
          double initial_prime_states_one[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
          double initial_prime_states_two[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
 
-         first_initial_condition.GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_one );
-         second_initial_condition.GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_two );
+         first_initial_condition->GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_one );
+         second_initial_condition->GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_two );
 
-         first_initial_condition.GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_one );
-         second_initial_condition.GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_two );
+         first_initial_condition->GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_one );
+         second_initial_condition->GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_two );
          THEN( "The number of materials, material and levelset values returned by both initial conditions are equal" ) {
 
-            REQUIRE( first_initial_condition.GetInitialMaterials( InstantiationConstants::root_node_id ).size() == second_initial_condition.GetInitialMaterials( InstantiationConstants::root_node_id ).size() );
+            REQUIRE( first_initial_condition->GetInitialMaterials( InstantiationConstants::root_node_id ).size() == second_initial_condition->GetInitialMaterials( InstantiationConstants::root_node_id ).size() );
 
             for( unsigned int i = 0; i < CC::TCX(); i++ ) {
                for( unsigned int j = 0; j < CC::TCY(); j++ ) {
@@ -447,18 +449,18 @@ SCENARIO( "Instantiation of initial condition", "[1rank]" ) {
       }
 
       WHEN( "Two initial conditions are instantiated with different initial conditions" ) {
-         InitialCondition first_initial_condition( Instantiation::InstantiateInitialCondition( first_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
-         InitialCondition second_initial_condition( Instantiation::InstantiateInitialCondition( third_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
+         std::unique_ptr<InitialCondition> first_initial_condition( Instantiation::InstantiateInitialCondition( first_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
+         std::unique_ptr<InitialCondition> second_initial_condition( Instantiation::InstantiateInitialCondition( third_input_reader.get(), topology_manager, tree, material_manager, unit_handler ) );
          double levelset_temp_one[CC::TCX()][CC::TCY()][CC::TCZ()];
          double levelset_temp_two[CC::TCX()][CC::TCY()][CC::TCZ()];
          double initial_prime_states_one[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
          double initial_prime_states_two[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
 
-         first_initial_condition.GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_one );
-         second_initial_condition.GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_two );
+         first_initial_condition->GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_one );
+         second_initial_condition->GetInitialLevelset( InstantiationConstants::root_node_id, levelset_temp_two );
 
-         first_initial_condition.GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_one );
-         second_initial_condition.GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_two );
+         first_initial_condition->GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_one );
+         second_initial_condition->GetInitialPrimeStates( InstantiationConstants::root_node_id, material_one, initial_prime_states_two );
          THEN( "The material and levelset values returned by both initial conditions are not equal" ) {
             for( unsigned int i = 0; i < CC::TCX(); i++ ) {
                for( unsigned int j = 0; j < CC::TCY(); j++ ) {

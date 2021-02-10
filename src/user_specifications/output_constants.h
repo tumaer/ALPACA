@@ -104,7 +104,7 @@ namespace MaterialFieldOutputSettings {
     * Indicates whether the Temperature should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
-   constexpr std::array<bool, 3> Temperature = { false, false, false };
+   constexpr std::array<bool, 3> Temperature = { true, false, false };
    static std::string const TemperatureName  = "temperature";
    /**
     * Indicates whether the Pressure should be written to the output or not.
@@ -183,6 +183,12 @@ namespace CustomOutputSettings {
     */
    constexpr std::array<bool, 3> Partition = { false, false, false };
    static std::string const PartitionName  = "partition";
+   /**
+    * Indicates whether the interface tags should be written to the output or not.
+    * The array marks { 0: standard output, 1: interface output, 2: debug output }
+    */
+   constexpr std::array<bool, 3> InterfaceTags = { false, false, false };
+   static std::string const InterfaceTagsName  = "partition";
    /**
     * Indicates whether the MachNumber should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }

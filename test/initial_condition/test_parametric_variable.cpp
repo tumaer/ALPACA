@@ -65,70 +65,31 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef INITIAL_CONDITION_H
-#define INITIAL_CONDITION_H
+#include <catch.hpp>
 
-#include <vector>
-#include <array>
-#include <string>
-#include <memory>
+#include "initial_condition/parametric_variable.h"
 
-#include "topology/id_information.h"
-#include "unit_handler.h"
-#include "user_specifications/compile_time_constants.h"
-#include "block_definitions/field_material_definitions.h"
-#include "materials/material_definitions.h"
-
-#include "user_expression.h"
-
-/**
- * @brief The InitialCondition class is used to set the state of all cells according to the user input at the beginning of the simulation.
- * @note Uses the C++ Mathematical Expression Toolkit Library by Arash Partow, see respective files for License and Copyright information.
- */
-class InitialCondition {
-   // Instance for dimensionalization and non-dimensionalization
-   UnitHandler const& unit_handler_;
-
-   // Member variables providing the user expression of input data
-   std::vector<std::string> const material_initial_expressions_;
-   std::vector<std::string> const levelset_initial_expressions_;
-
-   // Variables to define the name of parameters in the input expression
-   std::vector<MaterialName> const material_names_;
-   std::vector<std::string> const variable_names_prime_states_;
-   std::string const variable_name_levelset_;
-   std::string const variable_name_x_ = "x";
-   std::string const variable_name_y_ = "y";
-   std::string const variable_name_z_ = "z";
-   // Additional required variables
-   double const dimensionalized_node_size_on_level_zero_;
-   unsigned int const maximum_level_;
-
-   // local function to create expression that can be evaluated
-   std::unique_ptr<UserExpression const> CreateInputExpression( std::string const& expression, std::vector<std::string> const& variables_out, double& x, double& y, double& z ) const;
-
-public:
-   InitialCondition() = delete;
-   explicit InitialCondition( std::vector<std::string> const& material_initial_expressions,
-                              std::vector<std::string> const& levelset_initial_expressions,
-                              std::vector<MaterialName> const& material_names,
-                              std::vector<std::string> const& variable_names_prime_states,
-                              std::string const& variable_name_levelset,
-                              double const node_size_on_level_zero_,
-                              unsigned int const maximum_level,
-                              UnitHandler const& unit_handler );
-   ~InitialCondition()                         = default;
-   InitialCondition( InitialCondition const& ) = delete;
-   InitialCondition& operator=( InitialCondition const& ) = delete;
-   InitialCondition( InitialCondition&& )                 = delete;
-   InitialCondition& operator=( InitialCondition&& ) = delete;
-
-   // Fills the prime state buffer with appropriate values of the input expression
-   void GetInitialPrimeStates( nid_t const node_id, MaterialName const material, double ( &initial_values )[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
-   // Fills the levelset buffer with appropriate value of the input expressions
-   void GetInitialLevelset( nid_t const node_id, double ( &initial_levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const;
-   // Gives the initial materials present
-   std::vector<MaterialName> GetInitialMaterials( nid_t const node_id ) const;
-};
-
-#endif// INITIAL_CONDITION_H
+SCENARIO( "Delta computation of the parametric variable", "[1rank]" ) {
+   GIVEN( "A parametric variable with values: name = s, start = 0.0, end = 1.0" ) {
+      std::string const name = "s";
+      constexpr double start = 0.0;
+      constexpr double end   = 1.0;
+      WHEN( "The number of points is 11" ) {
+         ParametricVariable const variable( name, start, end, 11 );
+         THEN( "The the delta value should be 0.1" ) {
+            REQUIRE( variable.delta == 0.1 );
+         }
+      }
+      WHEN( "The number of points is 0" ) {
+         ParametricVariable const variable( name, start, end, 0 );
+         THEN( "The number of points should be 1" ) {
+            REQUIRE( variable.points == 1 );
+         }
+      }
+   }
+   GIVEN( "A parametric variable with values: name = s, start = 2.0, end = 1.0" ) {
+      THEN( "An exception should be thrown" ) {
+         REQUIRE_THROWS( ParametricVariable( "s", 2.0, 1.0, 11 ) );
+      }
+   }
+}

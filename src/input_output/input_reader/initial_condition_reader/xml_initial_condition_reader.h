@@ -86,7 +86,11 @@ class XmlInitialConditionReader : public InitialConditionReader {
 
    // Functions that are required from base class
    std::string DoReadMaterialInitialConditions( unsigned int const material_index ) const override;
-   std::string DoReadLevelsetInitialConditions( unsigned int const levelset_index ) const override;
+   std::string DoReadLevelsetInitializerType( unsigned int const material_index ) const override;
+   std::string DoReadLevelsetInitializerInput( unsigned int const levelset_index ) const override;
+   std::vector<std::tuple<std::string, double, double, std::uint64_t>> DoReadParametricLevelsetInitializerVariables( unsigned int const levelset_index ) const override;
+   std::array<double, 3> DoReadParametricLevelsetInitializerReferencePoint( unsigned int const levelset_index ) const override;
+   std::vector<std::array<double, 6>> DoReadLevelsetInitializerBoundingBoxes( unsigned int const material_index ) const override;
 
 public:
    XmlInitialConditionReader() = delete;

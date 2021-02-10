@@ -102,8 +102,18 @@
             pressure := 1.0;
          </material2>
 
+         <!-- Xml node defining the levelset input. Possible types are: functional, STL, parametric. For each type, a set of parameters must be specified.  -->
          <levelSet1>
-            phi := 1.0;
+            <type> functional </type>
+            <input> phi := 1.0; </input>
+            <boundingBox>
+               <xMin> 0.0 1.0 </xMin>
+               <xMax> 1.0 2.0 </xMax>
+               <yMin> 0.0 1.0 </yMin>
+               <yMax> 1.0 2.0 </yMax>
+               <zMin> 0.0 1.0 </zMin>
+               <zMax> 1.0 2.0 </zMax>
+            </boundingBox>
          </levelSet1>
       </initialConditions>
    </domain>

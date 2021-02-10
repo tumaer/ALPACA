@@ -79,10 +79,10 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "WaterlikeFluid" ) ),
-                                                                                                                                         A_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "A", "WaterlikeFluid" ), UnitType::Pressure ) ),
-                                                                                                                                         B_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "B", "WaterlikeFluid" ), UnitType::Pressure ) ),
-                                                                                                                                         rho0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "rho0", "WaterlikeFluid" ), UnitType::Density ) ) {
+WaterlikeFluid::WaterlikeFluid( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "WaterlikeFluid" ) ),
+                                                                                                                                         A_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "A", "WaterlikeFluid" ), UnitType::Pressure ) ),
+                                                                                                                                         B_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "B", "WaterlikeFluid" ), UnitType::Pressure ) ),
+                                                                                                                                         rho0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "rho0", "WaterlikeFluid" ), UnitType::Density ) ) {
    /* Empty besides initializer list*/
 }
 
