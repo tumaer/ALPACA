@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output/input_reader/restart_reader/xml_restart_reader.h"
 
-#include "input_output/input_reader/xml_utilities.h"
+#include "input_output/utilities/xml_utilities.h"
 #include "utilities/string_operations.h"
 
 /**

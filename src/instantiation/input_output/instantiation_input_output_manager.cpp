@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "instantiation/input_output/instantiation_input_output_manager.h"
 
-#include "utilities/file_operations.h"
+#include "input_output/utilities/file_utilities.h"
 #include "utilities/string_operations.h"
 
 namespace Instantiation {
@@ -231,7 +231,7 @@ namespace Instantiation {
       InputType const input_type   = input_reader.GetInputType();
       std::string const input_file = input_reader.GetInputFile();
       // Output
-      std::string output_folder_name                        = FileOperations::AddUnusedNumberToPath( FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) );
+      std::string output_folder_name                        = FileUtilities::AddUnusedNumberToPath( FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) );
       std::vector<double> const standard_output_timestamps  = ComputeOutputTimes( output_reader, time_control_reader, unit_handler, OutputType::Standard );
       std::vector<double> const interface_output_timestamps = ComputeOutputTimes( output_reader, time_control_reader, unit_handler, OutputType::Interface );
       double const time_naming_factor                       = output_reader.ReadTimeNamingFactor();
@@ -253,7 +253,7 @@ namespace Instantiation {
       // input data
       logger.LogMessage( "File/Folder information: " );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Input type        : " + InputTypeToString( input_type ) );
-      logger.LogMessage( StringOperations::Indent( 2 ) + "Simulation Name   : " + FileOperations::RemoveFilePath( FileOperations::RemoveFileExtension( input_file ) ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Simulation Name   : " + FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Output Folder     : " + output_folder_name );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Time naming factor: " + StringOperations::ToScientificNotationString( time_naming_factor, 9 ) );
       logger.LogMessage( " " );

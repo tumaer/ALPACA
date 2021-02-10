@@ -62,9 +62,7 @@ Sharp-Interface Method, Buhendwa, 2018: 3.3.1 Deformation of a drop in a shear f
             </material2>
 
             <levelSet1>
-
-                    phi := 1 - sqrt(pow(x-4.0,2) + pow(y-4.0,2));
-
+                phi := 1 - sqrt(pow(x-4.0,2) + pow(y-4.0,2));
             </levelSet1>
         </initialConditions>
     </domain>

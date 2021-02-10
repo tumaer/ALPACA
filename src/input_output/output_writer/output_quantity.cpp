@@ -66,7 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "output_quantity.h"
-#include "input_output/output_writer/xdmf_utilities.h"
+#include "input_output/utilities/xdmf_utilities.h"
 
 /**
  * @brief Explicit constructor to be used to create an output quantity.

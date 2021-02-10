@@ -122,6 +122,23 @@ namespace StringOperations {
    }
 
    /**
+    * @brief Removes all leading and trailing whitespaces, newline characters and tabs from a string.
+    * @param word String that has to be converted.
+    * @return trimmed string.
+    */
+   std::string Trim( std::string const& word ) {
+      // Make it local due to erasing
+      std::string word_without_spaces( word );
+      // Get the first element that does not contain any of the deilimiters
+      auto const substring_start = word.find_first_not_of( " \n\t" );
+      if( substring_start == std::string::npos ) {
+         return "";
+      }
+      auto const substring_end = word.find_last_not_of( " \n\t" );
+      return word.substr( substring_start, substring_end - substring_start + 1 );
+   }
+
+   /**
     * @brief Gives an empty string of certain width.
     * @param width Width of the string.
     * @return String.
@@ -139,5 +156,4 @@ namespace StringOperations {
       std::string name_without_leading_number( word );
       return name_without_leading_number.erase( 0, std::min( word.find_first_not_of( "0123456789" ), word.size() - 1 ) );
    }
-
 }// namespace StringOperations

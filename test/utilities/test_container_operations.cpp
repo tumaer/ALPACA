@@ -74,6 +74,7 @@
 #include <math.h>
 #include <unordered_map>
 #include <vector>
+#include <array>
 #include "utilities/container_operations.h"
 
 SCENARIO( "Containers can be checked for uniqueness", "[1rank]" ) {

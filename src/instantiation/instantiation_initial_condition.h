@@ -68,12 +68,16 @@
 #ifndef INSTANTIATION_INITIAL_CONDITION_H
 #define INSTANTIATION_INITIAL_CONDITION_H
 
-#include "initial_condition.h"
-#include "input_output/input_reader.h"
-#include "unit_handler.h"
-#include "materials/material_manager.h"
+#include "topology/node_id_type.h"
+#include "topology/id_information.h"
 #include "topology/topology_manager.h"
 #include "topology/tree.h"
+#include "materials/material_manager.h"
+
+#include "input_output/input_reader.h"
+#include "input_output/input_reader/initial_condition_reader/initial_condition_reader.h"
+#include "initial_condition/levelset_initializer.h"
+#include "initial_condition/initial_condition.h"
 
 /**
  * @brief Defines all instantiation functions required for the initial condition.
@@ -82,14 +86,22 @@ namespace Instantiation {
 
    // factory functions
    std::vector<std::string> GetMaterialInitialConditions( InitialConditionReader const& initial_condition_reader, unsigned int number_of_materials );
-   std::vector<std::string> GetLevelsetInitialConditions( InitialConditionReader const& initial_condition_reader, unsigned int number_of_materials );
 
-   // Instantiation function for the initial condition class
-   InitialCondition InstantiateInitialCondition( InputReader const& input_reader,
-                                                 TopologyManager const& topology_manager,
-                                                 Tree const& tree,
-                                                 MaterialManager const& material_manager,
-                                                 UnitHandler const& unit_handler );
+   std::array<ParametricVariable, 2> CreateParametricVariables( InitialConditionReader const& initial_condition_reader );
+
+   std::unique_ptr<LevelsetInitializer> InstantiateLevelsetInitializer( InitialConditionReader const& initial_condition_reader,
+                                                                        unsigned int const levelset_index,
+                                                                        std::vector<MaterialName> const& material_names,
+                                                                        unsigned int const number_of_materials,
+                                                                        double const node_size_on_level_zero_,
+                                                                        unsigned int const maximum_level );
+
+   // Initialization function for the initial condition class
+   std::unique_ptr<InitialCondition> InstantiateInitialCondition( InputReader const& input_reader,
+                                                                  TopologyManager const& topology_manager,
+                                                                  Tree const& tree,
+                                                                  MaterialManager const& material_manager,
+                                                                  UnitHandler const& unit_handler );
 }// namespace Instantiation
 
 #endif// INSTANTIATION_INITIAL_CONDITION_H

@@ -67,7 +67,7 @@
 *****************************************************************************************/
 #include "input_output/input_reader/material_reader/xml_material_reader.h"
 
-#include "input_output/input_reader/xml_utilities.h"
+#include "input_output/utilities/xml_utilities.h"
 
 /**
  * @brief Default constructor for the material reader for xml-type input files.
@@ -94,7 +94,7 @@ int XmlMaterialReader::DoReadNumberOfMaterials() const {
 std::string XmlMaterialReader::DoReadMaterialType( unsigned int const material_index ) const {
    // Define the material tag
    std::string const material_tag( "material" + std::to_string( material_index ) );
-   if( XmlUtilities::ExistsChild( *xml_input_file_, { "configuration", "materials", material_tag, "type" } ) ) {
+   if( XmlUtilities::ChildExists( *xml_input_file_, { "configuration", "materials", material_tag, "type" } ) ) {
       // Get correct node (directly to the final node to get error back propagation in case)
       tinyxml2::XMLElement const* type_node = XmlUtilities::GetChild( *xml_input_file_, { "configuration", "materials", material_tag, "type" } );
 

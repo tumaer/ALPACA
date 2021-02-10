@@ -125,7 +125,7 @@ std::pair<bool, std::string> ProvidedTagsAreValid( int argc, char* argv[], int c
       return std::make_pair( false, "Paco needs exactly one tag argument to run the correct suite of tests" );
    }
 
-   if( arguments.front() == "[1rank]" && number_of_ranks != 1 ) {
+   if( ( arguments.front() == "[1rank]" or arguments.front() == "[.slow1rank]" ) && number_of_ranks != 1 ) {
       return std::make_pair( false, "Single-core suite can only be run with one MPI-rank" );
    }
 

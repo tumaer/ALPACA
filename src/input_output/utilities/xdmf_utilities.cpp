@@ -65,15 +65,9 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef Xdmf_UTILITIES_H
-#define Xdmf_UTILITIES_H
-
+#include "input_output/utilities/xdmf_utilities.h"
 #include "utilities/string_operations.h"
 
-/**
- * @brief The XdmfUtilities serves as a helper class to provide the complete set of properly formatted strings required
- *        for writing a xdmf file.
- */
 namespace XdmfUtilities {
 
    namespace {
@@ -106,7 +100,7 @@ namespace XdmfUtilities {
     * @param output_time Time to be added to the data item.
     * @return string for the time data item.
     */
-   inline std::string TimeDataItem( double const output_time ) {
+   std::string TimeDataItem( double const output_time ) {
       return StringOperations::Indent( 6 ) + "<Time TimeType=\"Single\" Value=\"" + StringOperations::ToScientificNotationString( output_time ) + "\" />\n";
    }
 
@@ -118,7 +112,7 @@ namespace XdmfUtilities {
     * @param dimensions Dimensions the data item consists of ({1,1} : scalar, {3,1} : vector, {n,m} : matrix/tensor).
     * @return string for data item item.
     */
-   inline std::string DataItemString( std::string const& hdf5_filename, std::string const& item_name, unsigned long long int const number_of_cells, std::array<unsigned int, 2> const& dimensions ) {
+   std::string DataItemString( std::string const& hdf5_filename, std::string const& item_name, unsigned long long int const number_of_cells, std::array<unsigned int, 2> const& dimensions ) {
 
       return "<DataItem Format=\"HDF\" NumberType=\"Float\" Precision=\"8\" Dimensions=\"" + std::to_string( number_of_cells ) + DimensionsToString( dimensions ) + "\"> " + hdf5_filename + ":/" + item_name + " </DataItem>\n";
    }
@@ -133,7 +127,7 @@ namespace XdmfUtilities {
     * @param number_of_cells total number of cells of the complete domain.
     * @return Attribute string for the topology.
     */
-   inline std::string TopologyString( std::string const& data_item, unsigned long long int const number_of_cells ) {
+   std::string TopologyString( std::string const& data_item, unsigned long long int const number_of_cells ) {
       return StringOperations::Indent( 6 ) + "<Topology TopologyType=\"Hexahedron\" NumberOfElements=\"" + std::to_string( number_of_cells ) + "\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Topology>\n";
    }
 
@@ -147,7 +141,7 @@ namespace XdmfUtilities {
     * @param number_of_vertices total number of vertices of the complete domain.
     * @return Attribute string for the geometry.
     */
-   inline std::string GeometryString( std::string const& data_item, unsigned long long int const number_of_vertices ) {
+   std::string GeometryString( std::string const& data_item, unsigned long long int const number_of_vertices ) {
       return StringOperations::Indent( 6 ) + "<Geometry name=\"geometry\" GeometryType=\"XYZ\" NumberOfElements=\"" + std::to_string( number_of_vertices ) + "\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Geometry>\n";
    }
 
@@ -157,7 +151,7 @@ namespace XdmfUtilities {
     * @param data_item The data item information placed into the attribute (where the data vector can be found in the hdf5 file).
     * @return the complete attribute string.
     */
-   inline std::string ScalarAttributeString( std::string const& attribute_name, std::string const& data_item ) {
+   std::string ScalarAttributeString( std::string const& attribute_name, std::string const& data_item ) {
       return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Scalar\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
@@ -167,7 +161,7 @@ namespace XdmfUtilities {
     * @param data_item The data item information placed into the attribute (where the data vector can be found in the hdf5 file).
     * @return the complete attribute string.
     */
-   inline std::string VectorAttributeString( std::string const& attribute_name, std::string const& data_item ) {
+   std::string VectorAttributeString( std::string const& attribute_name, std::string const& data_item ) {
       return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Vector\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
@@ -177,7 +171,7 @@ namespace XdmfUtilities {
     * @param data_item The data item information placed into the attribute (where the data vector can be found in the hdf5 file).
     * @return the complete attribute string.
     */
-   inline std::string MatrixAttributeString( std::string const& attribute_name, std::string const& data_item ) {
+   std::string MatrixAttributeString( std::string const& attribute_name, std::string const& data_item ) {
       return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Matrix\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
@@ -187,7 +181,7 @@ namespace XdmfUtilities {
     * @param data_item The data item information placed into the attribute (where the data vector can be found in the hdf5 file).
     * @return the complete attribute string.
     */
-   inline std::string TensorAttributeString( std::string const& attribute_name, std::string const& data_item ) {
+   std::string TensorAttributeString( std::string const& attribute_name, std::string const& data_item ) {
       return StringOperations::Indent( 6 ) + "<Attribute Name=\"" + attribute_name + "\" AttributeType=\"Tensor\" Center=\"Cell\">\n" + StringOperations::Indent( 8 ) + data_item + StringOperations::Indent( 6 ) + "</Attribute>\n";
    }
 
@@ -197,7 +191,7 @@ namespace XdmfUtilities {
     * @param spatial_data_information Complete data information (topology and data item).
     * @return Complete formatted spatial data string.
     */
-   inline std::string SpatialDataInformation( std::string const& spatial_data_name, std::string const& spatial_data_information ) {
+   std::string SpatialDataInformation( std::string const& spatial_data_name, std::string const& spatial_data_information ) {
       return StringOperations::Indent( 4 ) + "<Grid Name=\"" + spatial_data_name + "\" GridType=\"Uniform\">\n" + spatial_data_information + StringOperations::Indent( 4 ) + "</Grid>\n";
    }
 
@@ -206,7 +200,7 @@ namespace XdmfUtilities {
    * @param data_name Name of the complete data stored for this file.
    * @return string with header information.
    */
-   inline std::string HeaderInformation( std::string const& data_name ) {
+   std::string HeaderInformation( std::string const& data_name ) {
       return StringOperations::Indent( 0 ) + "<?xml version=\"1.0\" ?>\n<!DOCTYPE Xdmf SYSTEM \"Xdmf.dtd\" []>\n" + StringOperations::Indent( 0 ) + "<Xdmf Version=\"3.0\">\n" + StringOperations::Indent( 1 ) + "<Domain>\n" + StringOperations::Indent( 2 ) + "<Grid Name=\"" + data_name + "\" GridType=\"Collection\" CollectionType=\"Temporal\">\n";
    }
 
@@ -214,9 +208,7 @@ namespace XdmfUtilities {
    * @brief Give a properly formatted string for the XDMF file footer (closes all tags opened by the header).
    * @return The footer string.
    */
-   inline std::string FooterInformation() {
+   std::string FooterInformation() {
       return StringOperations::Indent( 2 ) + "</Grid>\n" + StringOperations::Indent( 1 ) + "</Domain>\n" + StringOperations::Indent( 0 ) + "</Xdmf>";
    }
 }// namespace XdmfUtilities
-
-#endif// Xdmf_UTILITIES_H

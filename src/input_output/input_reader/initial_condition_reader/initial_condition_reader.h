@@ -69,7 +69,12 @@
 #define INITIAL_CONDITION_READER_H
 
 #include <string>
+#include <array>
 #include <vector>
+#include <tuple>
+
+#include "initial_condition/levelset_initializer_definitions.h"
+#include "initial_condition/parametric_variable.h"
 
 /**
  * @brief Defines the class that provides access to the initial condition data in the input file.
@@ -83,8 +88,12 @@ protected:
    explicit InitialConditionReader() = default;
 
    // Functions that must be implemented by the derived classes
-   virtual std::string DoReadMaterialInitialConditions( unsigned int const material_index ) const = 0;
-   virtual std::string DoReadLevelsetInitialConditions( unsigned int const levelset_index ) const = 0;
+   virtual std::string DoReadMaterialInitialConditions( unsigned int const material_index ) const                                                                      = 0;
+   virtual std::string DoReadLevelsetInitializerType( unsigned int const material_index ) const                                                                        = 0;
+   virtual std::string DoReadLevelsetInitializerInput( unsigned int const levelset_index ) const                                                                       = 0;
+   virtual std::vector<std::tuple<std::string, double, double, std::uint64_t>> DoReadParametricLevelsetInitializerVariables( unsigned int const levelset_index ) const = 0;
+   virtual std::array<double, 3> DoReadParametricLevelsetInitializerReferencePoint( unsigned int const levelset_index ) const                                          = 0;
+   virtual std::vector<std::array<double, 6>> DoReadLevelsetInitializerBoundingBoxes( unsigned int const material_index ) const                                        = 0;
 
 public:
    virtual ~InitialConditionReader()                       = default;
@@ -95,7 +104,11 @@ public:
 
    // return functions of the reader class
    TEST_VIRTUAL std::string ReadMaterialInitialConditions( unsigned int const material_index ) const;
-   TEST_VIRTUAL std::string ReadLevelsetInitialConditions( unsigned int const levelset_index ) const;
+   TEST_VIRTUAL LevelsetInitializerType ReadLevelsetInitializerType( unsigned int const levelset_index, LevelsetInitializerType const default_type ) const;
+   TEST_VIRTUAL std::string ReadLevelsetInitializerInput( unsigned int const levelset_index ) const;
+   std::vector<ParametricVariable> ReadParametricLevelsetInitializerVariables( unsigned int const levelset_index ) const;
+   std::array<double, 3> ReadParametricLevelsetInitializerReferencePoint( unsigned int const levelset_index ) const;
+   TEST_VIRTUAL std::vector<std::array<double, 6>> ReadLevelsetInitializerBoundingBoxes( unsigned int const material_index ) const;
 };
 
 #endif// INITIAL_CONDITION_READER_H

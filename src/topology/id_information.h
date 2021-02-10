@@ -72,6 +72,7 @@
 #include <vector>
 #include "topology/node_id_type.h"
 #include "boundary_condition/boundary_specifications.h"
+#include "user_specifications/compile_time_constants.h"
 
 nid_t EastNeighborOfNodeWithId( nid_t const id );
 nid_t WestNeighborOfNodeWithId( nid_t const id );
@@ -109,6 +110,26 @@ constexpr unsigned int LevelOfNode( nid_t const id ) {
    }
 
    return level;
+}
+
+/**
+ * @brief Gives the cell size for a node a given level.
+ * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
+ * @param level The level for which the cell size is evaluated.
+ * @return The cell size of a node on the given level.
+ */
+constexpr double CellSizeOfLevel( double const node_size_on_level_zero, unsigned int const level ) {
+   return node_size_on_level_zero / double( CC::ICX() ) / double( 1 << level );
+}
+
+/**
+ * @brief Gives the cell size for the node of the given id.
+ * @param id Id of the node whose cell size is to be evaluated.
+ * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
+ * @return The cell size of the node.
+ */
+constexpr double CellSizeOfId( nid_t const id, double const node_size_on_level_zero ) {
+   return CellSizeOfLevel( node_size_on_level_zero, LevelOfNode( id ) );
 }
 
 /**

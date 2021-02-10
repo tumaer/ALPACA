@@ -71,6 +71,7 @@
 #include "utilities/mathematical_functions.h"
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "stencils/stencil_utilities.h"
+#include "utilities/vector_utilities.h"
 
 /**
  * @brief constructor to create a numerical schlieren output.
@@ -110,9 +111,9 @@ void NumericalSchlierenOutput::DoComputeCellData( Node const& node, std::vector<
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
                if( interface_tags[i][j][k] > 0 ) {
-                  cell_data[cell_data_counter++] = L2Norm( SU::GradientVector<DerivativeStencil>( positive_density, i, j, k, cell_size ) ) * dimensionalization_factor;
+                  cell_data[cell_data_counter++] = VU::L2Norm( SU::GradientVector<DerivativeStencil>( positive_density, i, j, k, cell_size ) ) * dimensionalization_factor;
                } else {
-                  cell_data[cell_data_counter++] = L2Norm( SU::GradientVector<DerivativeStencil>( negative_density, i, j, k, cell_size ) ) * dimensionalization_factor;
+                  cell_data[cell_data_counter++] = VU::L2Norm( SU::GradientVector<DerivativeStencil>( negative_density, i, j, k, cell_size ) ) * dimensionalization_factor;
                }
             }
          }
@@ -125,7 +126,7 @@ void NumericalSchlierenOutput::DoComputeCellData( Node const& node, std::vector<
       for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
          for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
             for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
-               cell_data[cell_data_counter++] = L2Norm( SU::GradientVector<DerivativeStencil>( density, i, j, k, cell_size ) ) * dimensionalization_factor;
+               cell_data[cell_data_counter++] = VU::L2Norm( SU::GradientVector<DerivativeStencil>( density, i, j, k, cell_size ) ) * dimensionalization_factor;
             }
          }
       }

@@ -4,7 +4,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-*  \\\\                                                                                  *
+*  \\                                                                                    *
 *  l '>                                                                                  *
 *  | |                                                                                   *
 *  | |                                                                                   *
@@ -12,97 +12,57 @@
 *  ||    ||                                                                              *
 *  ''    ''                                                                              *
 *                                                                                        *
-* ALPACA                                                                                 *
-* Copyright (c) 2017-2018 Nikolaus A. Adams and contributors (see AUTHORS list)          *
-* All rights reserved.                                                                   *
-*                                                                                        *
-* Chair of Aerodynamics and Fluid Mechanics                                              *
-* Technical University of Munich                                                         *
+* ALPACA is a MPI-parallelized C++ code framework to simulate compressible multiphase    *
+* flow physics. It allows for advanced high-resolution sharp-interface modeling          *
+* empowered with efficient multiresolution compression. The modular code structure       *
+* offers a broad flexibility to select among many most-recent numerical methods covering *
+* WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-  *
+* Kutta time integration schemes, level set methods and many more.                       *
 *                                                                                        *
 * This code is developed by the 'Nanoshock group' at the Chair of Aerodynamics and       *
 * Fluid Mechanics, Technical University of Munich.                                       *
 *                                                                                        *
-* This project has received funding from the European Reseach Council (ERC)              *
-* under the European Union's Horizon 2020 research and innovation programme              *
-* (grant agreement No 667483).                                                           *
+******************************************************************************************
 *                                                                                        *
-* ERC Advanced Grant No 667483, Prof. Dr. Nikolaus A. Adams:                             *
-* "NANOSHOCK - Manufacturing Shock Interactions for Innovative Nanoscale Processes"      *
+* LICENSE                                                                                *
+*                                                                                        *
+* ALPACA - Adaptive Level-set PArallel Code Alpaca                                       *
+* Copyright (C) 2020 Nikolaus A. Adams and contributors (see AUTHORS list)               *
+*                                                                                        *
+* This program is free software: you can redistribute it and/or modify it under          *
+* the terms of the GNU General Public License as published by the Free Software          *
+* Foundation version 3.                                                                  *
+*                                                                                        *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY        *
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A        *
+* PARTICULAR PURPOSE. See the GNU General Public License for more details.               *
+*                                                                                        *
+* You should have received a copy of the GNU General Public License along with           *
+* this program (gpl-3.0.txt).  If not, see <https://www.gnu.org/licenses/gpl-3.0.html>   *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Redistribution and use in source and binary forms, with or without                     *
-* modification, are permitted provided that the following conditions are met:            *
+* THIRD-PARTY tools                                                                      *
 *                                                                                        *
-* 1. Redistributions of source code must retain the above copyright notice,              *
-*    this list of conditions and the following disclaimer.                               *
+* Please note, several third-party tools are used by ALPACA. These tools are not shipped *
+* with ALPACA but available as git submodule (directing to their own repositories).      *
+* All used third-party tools are released under open-source licences, see their own      *
+* license agreement in 3rdParty/ for further details.                                    *
 *                                                                                        *
-* 2. Redistributions in binary form must reproduce the above copyright notice            *
-*    this list of conditions and the following disclaimer in the documentation           *
-*    and/or other materials provided with the distribution.                              *
-*                                                                                        *
-* 3. Neither the name of the copyright holder nor the names of its                       *
-*    contributors may be used to endorse or promote products derived from this           *
-*    software without specific prior written permission.                                 *
-*                                                                                        *
-* 4. Any redistribution of substantial fractions of the code as a                        *
-*    different project should preserve the word ALPACA in the name                       *
-*    of the code                                                                         *
-*                                                                                        *
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"            *
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE              *
-* IMPLIED WARRANTIES OF  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE            *
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE              *
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR                    *
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF                   *
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS               *
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN                *
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)                *
-* ARISING IN ANY WAY OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE            *
-* POSSIBILITY OF SUCH DAMAGE.                                                            *
-*                                                                                        *
-* Please note, several third-party tools are used within the ALPACA code under           *
-* their own license agreement.                                                           *
-*                                                                                        *
-* 1. tiny_xml           : TinyXML-2 is released under the zlib license.                  *
-*                         This software is provided 'as-is', without any express or      *
-*                         implied warranty. In no event will the authors be held liable  *
-*                         for any damages arising from the use of this software.         *
-*                         https://opensource.org/licenses/Zlib                           *
-*                         See COPYING_TINY_XML.txt for more information.                 *
-*                                                                                        *
-* 2. expression_toolkit : Free use of the C++ Mathematical Expression Library is         *
-*                         permitted under the guidelines and in accordance with the MIT  *
-*                         License.                                                       *
-*                         https://opensource.org/licenses/MIT                            *
-*                         See COPYING_EXPRESSION_TOOLKIT.txt for more information.       *
-*                                                                                        *
-******************************************************************************************
-*                                                                                        *
-* AUTHORS                                                                                *
-*                                                                                        *
-*   Prof. Dr. Nikolaus A. Adams                                                          *
-*                                                                                        *
-*   Dr. Stefan Adami                                                                     *
-*   Vladimir Bogdanov                                                                    *
-*   Aaron Buhendwa                                                                       *
-*   Nico Fleischmann                                                                     *
-*   Nils Hoppe                                                                           *
-*   Naeimeh Hosseini                                                                     *
-*   Jakob Kaiser                                                                         *
-*   Aleksandr Lunkov                                                                     *
-*   Thomas Paula                                                                         *
-*   Josef Winter                                                                         *
+* 1. tiny_xml           : See LICENSE_TINY_XML.txt for more information.                 *
+* 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
+* 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
+* 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
 * CONTACT                                                                                *
 *                                                                                        *
-*   nanoshock@aer.mw.tum.de                                                              *
+* nanoshock@aer.mw.tum.de                                                                *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, June 13th 2019                                                                 *
+* Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef WENOHM_H

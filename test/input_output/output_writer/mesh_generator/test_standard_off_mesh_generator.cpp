@@ -524,7 +524,7 @@ SCENARIO( "Standard mesh generator without mpi-filtering: Vertex IDs start index
 /********************************************************************************************************************************************/
 /*                                             TEST COMBINATION VERTEX IDs AND COORDINATES                                               */
 /********************************************************************************************************************************************/
-SCENARIO( "Standard mesh generator without mpi-filtering: Check that vertex IDs and coordinates are computed properly in combination", "[1rank]" ) {
+SCENARIO( "Standard mesh generator without mpi-filtering: Check that vertex IDs and coordinates are computed properly in combination", "[.slow1rank]" ) {
 
    GIVEN( "Underlying topology with Lmax being one" ) {
       // Parameter for the creation of the mesh geenrator
@@ -549,7 +549,7 @@ SCENARIO( "Standard mesh generator without mpi-filtering: Check that vertex IDs 
             REQUIRE( *std::max_element( vertex_ids.begin(), vertex_ids.end() ) < coordinates.size() );
 
             // Loop through all cells and check the coordinates of all vertex ids.
-            /** 
+            /**
              * A cell must be build in the following order (numbers correspond to vertex ID increment)
              *
              *                 7-------6
@@ -607,7 +607,7 @@ SCENARIO( "Standard mesh generator without mpi-filtering: Check that vertex IDs 
             REQUIRE( *std::max_element( vertex_ids.begin(), vertex_ids.end() ) < coordinates.size() );
 
             // Loop through all cells and check the coordinates of all vertex ids.
-            /** 
+            /**
              * A cell must be build in the following order (numbers correspond to vertex ID increment)
              *
              *                 7-------6

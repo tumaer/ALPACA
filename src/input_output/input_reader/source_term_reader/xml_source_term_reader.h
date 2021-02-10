@@ -69,14 +69,14 @@
 #define XML_SOURCE_TERM_READER_H
 
 #include <memory>
-
 #include <tinyxml2.h>
+
 #include "input_output/input_reader/source_term_reader/source_term_reader.h"
 
 /**
  * @brief Class that implements the actual reading procedure of source term data from input files of xml-type.
- *        Here, no consistency checks of the read parameter are done. Only the validity of the correct variable type 
- *        (double, int, string) is done.  
+ *        Here, no consistency checks of the read parameter are done. Only the validity of the correct variable type
+ *        (double, int, string) is done.
  */
 class XmlSourceTermReader : public SourceTermReader {
 

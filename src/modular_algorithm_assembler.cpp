@@ -111,7 +111,6 @@ ModularAlgorithmAssembler::ModularAlgorithmAssembler( double const start_time,
                                                       std::vector<unsigned int> all_levels,
                                                       double const cell_size_on_maximum_level,
                                                       UnitHandler const& unit_handler,
-                                                      InitialCondition const& initial_condition,
                                                       Tree& tree,
                                                       TopologyManager& topology,
                                                       HaloManager& halo_manager,
@@ -124,7 +123,6 @@ ModularAlgorithmAssembler::ModularAlgorithmAssembler( double const start_time,
                                                                                            cell_size_on_maximum_level_( cell_size_on_maximum_level ),
                                                                                            gravity_( gravity ),
                                                                                            all_levels_( all_levels ),
-                                                                                           initial_condition_( initial_condition ),
                                                                                            time_integrator_( start_time_ ),
                                                                                            tree_( tree ),
                                                                                            topology_( topology ),
@@ -222,7 +220,7 @@ void ModularAlgorithmAssembler::ComputeLoop() {
 /**
  * @brief Sets-up the starting point of the simulation based on either a restart file or the initial conditions depending on the configuration.
  */
-void ModularAlgorithmAssembler::Initialization() {
+void ModularAlgorithmAssembler::Initialization( InitialCondition& initial_condition ) {
 
    double time_measurement_start;
    double time_measurement_end;
@@ -236,7 +234,7 @@ void ModularAlgorithmAssembler::Initialization() {
    double const restart_time = input_output_.RestoreSimulationFromSnapshot();
    // If no restart was carried out (negative restart time) create new simulation
    if( restart_time < 0.0 ) {
-      CreateNewSimulation();
+      CreateNewSimulation( initial_condition );
       logger_.LogMessage( "Initializing new simulation" );
    } else {//otherwise finalize the restart
       FinalizeSimulationRestart( restart_time );
@@ -290,7 +288,7 @@ void ModularAlgorithmAssembler::FinalizeSimulationRestart( double const restart_
  * sampled at the cell center coordinates. In the subsequent multi-resolution analysis this can - commonly only for pathological cases - lead to slight
  * inacuracies and might in a worst-case situation alter the mesh-structure compared to (memory-wise infeasable) top-down approach.
  */
-void ModularAlgorithmAssembler::CreateNewSimulation() {
+void ModularAlgorithmAssembler::CreateNewSimulation( InitialCondition& initial_condition ) {
 
    double levelset_temp[CC::TCX()][CC::TCY()][CC::TCZ()];
    std::int8_t initial_interface_tags[CC::TCX()][CC::TCY()][CC::TCZ()];
@@ -312,10 +310,16 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
          nid_t parent_id = ParentIdOfNode( node_id );
          if( level == 0 || topology_.IsNodeMultiPhase( parent_id ) ) {//Evaluated left to right, makes it safe on level zero
             // get the materials that initially exists in this node ( this is determined on the finest level to avoid losing structures that are unresolved by this node )
-            initial_materials = initial_condition_.GetInitialMaterials( node_id );
+            // for single fluid simulations, no need to call levelset initializer
+            if( material_manager_.GetMaterialNames().size() == 1 ) {
+               initial_materials = material_manager_.GetMaterialNames();
+            } else {
+               //for multi fluid simulations, call the initial material function from the initial condition class
+               initial_materials = initial_condition.GetInitialMaterials( node_id );
+            }
             if( initial_materials.size() > 1 ) {
                // we have a multi node, thus we need the correct levelset to determine the interface tags
-               initial_condition_.GetInitialLevelset( node_id, levelset_temp );
+               initial_condition.GetInitialLevelset( node_id, levelset_temp );
                InterfaceTagFunctions::InitializeInternalInterfaceTags( initial_interface_tags );
                InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( levelset_temp, initial_interface_tags );
             } else {
@@ -361,7 +365,8 @@ void ModularAlgorithmAssembler::CreateNewSimulation() {
       }
       halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( { level } );
       SenseApproachingInterface( { level }, false );// setting refine=false might cause an ill-defined tree afterwards which is corrected in next loop ( ++level )
-      ImposeInitialCondition( level );
+      ImposeInitialCondition( level, initial_condition );
+
       halo_manager_.MaterialHaloUpdateOnLevel( level, MaterialFieldType::Conservatives );
       if( level == all_levels_.back() ) {
          halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
@@ -926,7 +931,6 @@ void ModularAlgorithmAssembler::UpdateInterfaceTags( std::vector<unsigned int> c
     * Step 4: Update also integrated interface tags on all levels.
     */
    for( unsigned int const level : all_levels_ ) {
-      //std::cout << level << std::endl;
       for( auto const node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
          BO::CopySingleBuffer( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() );
       }
@@ -1701,7 +1705,7 @@ void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const u
  * @brief Sets the values in the internal cells on the given level to match the user-input initial condition
  * @param level The level on which the initial condition values are applied to.
  */
-void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level ) {
+void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level, InitialCondition& initial_condition ) {
 
    double initial_prime_states[MF::ANOP()][CC::ICX()][CC::ICY()][CC::ICZ()];
 
@@ -1714,7 +1718,7 @@ void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level
 
          Conservatives& conservatives = block.GetRightHandSideBuffer();
 
-         initial_condition_.GetInitialPrimeStates( id, material, initial_prime_states );
+         initial_condition.GetInitialPrimeStates( id, material, initial_prime_states );
 
          auto const material_sign = MaterialSignCapsule::SignOfMaterial( material );
 
@@ -1725,8 +1729,8 @@ void ModularAlgorithmAssembler::ImposeInitialCondition( unsigned int const level
                   // the following evaluates to true only in bulk cells of DIFFERENT sign
                   if( material_sign * interface_tags[i][j][k] > 0 || std::abs( interface_tags[i][j][k] ) < ITTI( IT::BulkPhase ) ) {
                      std::array<double, MF::ANOP()> prime_states_cell;
-                     for( unsigned int p = 0; p < MF::ANOP(); ++p ) {
-                        prime_states_cell[p] = initial_prime_states[p][i - CC::FICX()][j - CC::FICY()][k - CC::FICZ()];
+                     for( PrimeState const p : MF::ASOP() ) {
+                        prime_states_cell[PTI( p )] = initial_prime_states[PTI( p )][i - CC::FICX()][j - CC::FICY()][k - CC::FICZ()];
                      }
                      auto&& conservatives_cell = conservatives.GetCellView( i, j, k );
                      prime_state_handler_.ConvertPrimeStatesToConservatives( material, prime_states_cell, conservatives_cell );

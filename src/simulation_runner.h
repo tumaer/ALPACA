@@ -130,12 +130,12 @@ namespace Simulation {
       InputOutputManager input_output_manager( Instantiation::InstantiateInputOutputManager( input_reader, output_writer, restart_manager, unit_handler ) );
       logger.AddBreakLine( true );
       // Instance for handling the initial conditions of the simulation
-      InitialCondition const initial_condition( Instantiation::InstantiateInitialCondition( input_reader, topology_manager, tree, material_manager, unit_handler ) );
-
+      std::unique_ptr<InitialCondition> initial_condition( Instantiation::InstantiateInitialCondition( input_reader, topology_manager, tree, material_manager, unit_handler ) );
+      logger.AddBreakLine( true );
       // Instance for the whole computation loop
       ModularAlgorithmAssembler mr_based_algorithm( Instantiation::InstantiateModularAlgorithmAssembler( input_reader, topology_manager, tree,
                                                                                                          communication_manager, halo_manager, multiresolution,
-                                                                                                         material_manager, input_output_manager, initial_condition,
+                                                                                                         material_manager, input_output_manager,
                                                                                                          unit_handler ) );
       logger.AddBreakLine( true );
 
@@ -143,9 +143,11 @@ namespace Simulation {
       // Flush first here to ensure that the log file is set
       logger.Flush();
 
-      // Calling the functions for simulation execution
-      mr_based_algorithm.Initialization();
-
+      // Initialize the simulation
+      mr_based_algorithm.Initialization( *initial_condition );
+      // Delete the initial condition by setting it to null
+      initial_condition = nullptr;
+      // Start loop computation
       mr_based_algorithm.ComputeLoop();
 
       logger.Flush();

@@ -118,7 +118,6 @@ namespace Instantiation {
     * @param multiresolution Instance to provide mutliresolution computations for remeshing and so fourth.
     * @param material_manager Instance providing instantiated material data.
     * @param input_output_manager Instance to provide restart handling and output writing.
-    * @param initial_condition Instance for handling initial conditions.
     * @param unit_handler Instance to provide (non-)dimensionalization of values.
     * @return The fully instantiated Modular algorithm assembler class.
     */
@@ -130,7 +129,6 @@ namespace Instantiation {
                                                                    Multiresolution const& multiresolution,
                                                                    MaterialManager const& material_manager,
                                                                    InputOutputManager& input_output_manager,
-                                                                   InitialCondition const& initial_condition,
                                                                    UnitHandler const& unit_handler ) {
 
       // Get data that is logged
@@ -159,7 +157,6 @@ namespace Instantiation {
                                         GetAllLevels( maximum_level ),
                                         cell_size_on_maximum_level,
                                         unit_handler,
-                                        initial_condition,
                                         tree,
                                         topology_manager,
                                         halo_manager,

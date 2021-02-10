@@ -80,7 +80,7 @@
 ConstantShearViscosityModel::ConstantShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                                           UnitHandler const& unit_handler ) :// Start initializer list
                                                                                               ConstantMaterialParameterModel<ConstantShearViscosityModel>(),
-                                                                                              mu_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muConstant", "ConstantShearViscosityModel" ), UnitType::Viscosity ) ) {
+                                                                                              mu_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "muConstant", "ConstantShearViscosityModel" ), UnitType::Viscosity ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 

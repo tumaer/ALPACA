@@ -359,7 +359,7 @@ SCENARIO( "Debug mesh generator: Vertex IDs start index to write is correctly de
 /********************************************************************************************************************************************/
 /*                                             TEST COMBINATION VERTEX IDs AND COORDINATES                                               */
 /********************************************************************************************************************************************/
-SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are computed properly in combination", "[1rank]" ) {
+SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are computed properly in combination", "[.slow1rank]" ) {
 
    GIVEN( "Underlying topology with Lmax being one" ) {
       // Parameter for the creation of the mesh geenrator
@@ -384,7 +384,7 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
 
          THEN( "The coordinates of the IDs of each cell must be in an order where first x is increased, then y and last z" ) {
             // Loop through all cells and check the coordinates of all vertex ids.
-            /** 
+            /**
              * A cell must be build in the following order (numbers correspond to vertex ID increment)
              *
              *                 7-------6
@@ -442,7 +442,7 @@ SCENARIO( "Debug mesh generator: Check that vertex IDs and coordinates are compu
 
          THEN( "The coordinates of the IDs of each cell must be in an order where first x is increased, then y and last z" ) {
             // Loop through all cells and check the coordinates of all vertex ids.
-            /** 
+            /**
              * A cell must be build in the following order (numbers correspond to vertex ID increment)
              *
              *                 7-------6

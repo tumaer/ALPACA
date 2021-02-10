@@ -65,24 +65,30 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#include "utilities/helper_functions.h"
+#ifndef Xdmf_UTILITIES_H
+#define Xdmf_UTILITIES_H
 
-#include <sys/stat.h>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
+#include <string>
+#include <array>
 
 /**
- * @brief Returns a requested parameter if it is present in map, otherwise error is thrown.
- * @param parameter Parameter, which is requested from the map.
- * @param parameter_map unordered_map storing all parameters.
- * @return Returns the requested parameter if present.
+ * @brief The XdmfUtilities serves as a helper class to provide the complete set of properly formatted strings required
+ *        for writing a xdmf file.
  */
-double GetCheckedParameter( std::unordered_map<std::string, double> const& parameter_map, std::string const& parameter, std::string const& map_name ) {
-   // checks whether the given parameter is defined
-   if( parameter_map.find( parameter ) == parameter_map.end() ) {
-      throw std::logic_error( "Variable " + parameter + " not found in map for " + map_name + "!" );
-   }
-   // returns the parameter if it is present
-   return parameter_map.at( parameter );
-}
+namespace XdmfUtilities {
+
+   std::string TimeDataItem( double const output_time );
+   std::string DataItemString( std::string const& hdf5_filename, std::string const& item_name, unsigned long long int const number_of_cells, std::array<unsigned int, 2> const& dimensions );
+   std::string TopologyString( std::string const& data_item, unsigned long long int const number_of_cells );
+   std::string GeometryString( std::string const& data_item, unsigned long long int const number_of_vertices );
+   std::string ScalarAttributeString( std::string const& attribute_name, std::string const& data_item );
+   std::string VectorAttributeString( std::string const& attribute_name, std::string const& data_item );
+   std::string MatrixAttributeString( std::string const& attribute_name, std::string const& data_item );
+   std::string TensorAttributeString( std::string const& attribute_name, std::string const& data_item );
+   std::string SpatialDataInformation( std::string const& spatial_data_name, std::string const& spatial_data_information );
+   std::string HeaderInformation( std::string const& data_name );
+   std::string FooterInformation();
+
+}// namespace XdmfUtilities
+
+#endif// Xdmf_UTILITIES_H

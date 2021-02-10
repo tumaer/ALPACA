@@ -66,6 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "input_output/input_reader/dimensionalization_reader/dimensionalization_reader.h"
+#include <stdexcept>
 
 /**
  * @brief Gives the checked reference length of the dimensionalization parameter.

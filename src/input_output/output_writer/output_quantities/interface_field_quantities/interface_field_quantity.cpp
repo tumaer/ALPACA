@@ -66,7 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "input_output/output_writer/output_quantities/interface_field_quantities/interface_field_quantity.h"
-#include "input_output/output_writer/xdmf_utilities.h"
+#include "input_output/utilities/xdmf_utilities.h"
 #include "utilities/mathematical_functions.h"
 
 /**

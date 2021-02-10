@@ -65,12 +65,11 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
+#include <catch.hpp>
+
 #include <array>
 
-#include <catch.hpp>
-#include "input_output/output_writer/xdmf_utilities.h"
-
-using namespace XdmfUtilities;
+#include "input_output/utilities/xdmf_utilities.h"
 
 SCENARIO( "TimeDataItems can be correctly populated", "[1rank]" ) {
    GIVEN( "Output time t = 0.5 " ) {

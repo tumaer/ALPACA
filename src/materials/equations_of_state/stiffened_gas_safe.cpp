@@ -79,8 +79,8 @@
  * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
  *       Furthermore, dimensionalization of each value is done.
  */
-StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter( dimensional_eos_data, "gamma", "StiffenedGasSafe" ) ),
-                                                                                                                                             background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_eos_data, "backgroundPressure", "StiffenedGasSafe" ), UnitType::Pressure ) ) {
+StiffenedGasSafe::StiffenedGasSafe( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "StiffenedGasSafe" ) ),
+                                                                                                                                             background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "backgroundPressure", "StiffenedGasSafe" ), UnitType::Pressure ) ) {
    /** Empty besides initializer list */
 }
 

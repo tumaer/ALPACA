@@ -88,7 +88,6 @@ namespace Instantiation {
                                                                    Multiresolution const& multiresolution,
                                                                    MaterialManager const& material_manager,
                                                                    InputOutputManager& input_output_manager,
-                                                                   InitialCondition const& initial_condition,
                                                                    UnitHandler const& unit_handler );
 }// namespace Instantiation
 

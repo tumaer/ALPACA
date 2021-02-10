@@ -86,10 +86,10 @@
 CrossShearViscosityModel::CrossShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                                     UnitHandler const& unit_handler ) :// Start initializer list
                                                                                         ShearRateMaterialParameterModel<CrossShearViscosityModel>(),
-                                                                                        mu_infinite_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muInfiniteShearRates", "CrossShearViscosityModel" ), UnitType::Viscosity ) ),
-                                                                                        mu_zero_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "muZeroShearRates", "CrossShearViscosityModel" ), UnitType::Viscosity ) ),
-                                                                                        power_law_exponent_( GetCheckedParameter( dimensional_parameter_map, "powerLawExponent", "CrossShearViscosityModel" ) ),
-                                                                                        shear_rate_mu_half_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "shearRateHalfMu", "CrossShearViscosityModel" ), {}, { UnitType::Time } ) ),
+                                                                                        mu_infinite_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "muInfiniteShearRates", "CrossShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                        mu_zero_shear_rates_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "muZeroShearRates", "CrossShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                        power_law_exponent_( GetCheckedParameter<double>( dimensional_parameter_map, "powerLawExponent", "CrossShearViscosityModel" ) ),
+                                                                                        shear_rate_mu_half_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "shearRateHalfMu", "CrossShearViscosityModel" ), {}, { UnitType::Time } ) ),
                                                                                         mu_zero_minus_infinite_( mu_zero_shear_rates_ - mu_infinite_shear_rates_ ),
                                                                                         one_shear_rate_mu_half_( 1.0 / shear_rate_mu_half_ ) {
    /** Empty besides initializer list and friend class constructor call  */

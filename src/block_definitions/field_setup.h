@@ -115,13 +115,13 @@ namespace FieldSetup {
       constexpr auto equations = MakeArray(
             // clang-format off
             //           conservative           unit                input name
-            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "mass" },
-            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "momentumX" }
+            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "" },
+            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "" }
 #if DIMENSION != 1
-           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "momentumY" }
+           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "" }
 #endif
 #if DIMENSION == 3
-           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "momentumZ" }
+           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "" }
 #endif
             // clang-format on
       );
@@ -146,14 +146,14 @@ namespace FieldSetup {
       constexpr auto equations = MakeArray(
             // clang-format off
             //           conservative           unit                name
-            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "mass" },
-            FieldInfo{ EquationPool::Energy,    UnitType::Energy,   "energy" },
-            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "momentumX" }
+            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "" },
+            FieldInfo{ EquationPool::Energy,    UnitType::Energy,   "" },
+            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "" }
 #if DIMENSION != 1
-           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "momentumY" }
+           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "" }
 #endif
 #if DIMENSION == 3
-           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "momentumZ" }
+           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "" }
 #endif
             // clang-format on
       );
@@ -178,14 +178,14 @@ namespace FieldSetup {
       constexpr auto equations = MakeArray(
             // clang-format off
             //         conservative             unit                name
-            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "mass" },
-            FieldInfo{ EquationPool::Energy,    UnitType::Energy,   "energy" },
-            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "momentumX" }
+            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "" },
+            FieldInfo{ EquationPool::Energy,    UnitType::Energy,   "" },
+            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "" }
 #if DIMENSION != 1
-           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "momentumY" }
+           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "" }
 #endif
 #if DIMENSION == 3
-           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "momentumZ" }
+           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "" }
 #endif
             // clang-format on
       );
@@ -276,7 +276,7 @@ namespace FieldSetup {
          constexpr auto default_quantities = MakeArray(
                // clang-format off
                //           interface quantity                    unit                  name
-               FieldInfo{ InterfaceStatePool::Velocity,         UnitType::Velocity, "interface_velocity" },
+               FieldInfo{ InterfaceStatePool::Velocity,         UnitType::Velocity, "" },
                FieldInfo{ InterfaceStatePool::PressurePositive, UnitType::Pressure, "" },
                FieldInfo{ InterfaceStatePool::PressureNegative, UnitType::Pressure, "" } );
          // clang-format on

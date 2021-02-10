@@ -79,7 +79,7 @@
 ConstantThermalConductivityModel::ConstantThermalConductivityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                                                     UnitHandler const& unit_handler ) :// Start initializer list
                                                                                                         ConstantMaterialParameterModel<ConstantThermalConductivityModel>(),
-                                                                                                        lambda_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "lambdaConstant", "ConstantThermalConductivityModel" ), UnitType::ThermalConductivity ) ) {
+                                                                                                        lambda_constant_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "lambdaConstant", "ConstantThermalConductivityModel" ), UnitType::ThermalConductivity ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }
 

@@ -67,64 +67,88 @@
 *****************************************************************************************/
 #include <catch.hpp>
 
-#include "utilities/file_operations.h"
+#include <string>
+#include <memory>
 
-SCENARIO( "File extensions can be changed", "[1rank]" ) {
-   GIVEN( "A filename with absolute path and .txt extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.txt";
-      REQUIRE( FileOperations::ChangeFileExtension( txt_filename_with_path, ".oop" ) == "/scratch/directory/file.oop" );
-   }
-   GIVEN( "A filename with absolute paths containing dots" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/fi.le.txt";
-      REQUIRE( FileOperations::ChangeFileExtension( txt_filename_with_path, ".oop" ) == "/scratch/directory/fi.le.oop" );
-   }
-   GIVEN( "A filename with long extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.longext";
-      REQUIRE( FileOperations::ChangeFileExtension( txt_filename_with_path, ".oop" ) == "/scratch/directory/file.oop" );
-   }
-}
+#include "input_output/input_reader/time_control_reader/time_control_reader.h"
+#include "input_output/input_reader/time_control_reader/xml_time_control_reader.h"
 
-SCENARIO( "File extensions can be removed", "[1rank]" ) {
-   GIVEN( "A filename with absolute path and .txt extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.txt";
-      REQUIRE( FileOperations::RemoveFileExtension( txt_filename_with_path ) == "/scratch/directory/file" );
+SCENARIO( "Check that the xml time control reader works properly", "[1rank]" ) {
+   GIVEN( "A xml document with the valid content to read the time control data." ) {
+      std::string const xml_data( "<configuration>"
+                                  "  <timeControl>"
+                                  "     <CFLNumber> 0.6 </CFLNumber>"
+                                  "     <startTime> 0.0 </startTime>"
+                                  "     <endTime>   1.0 </endTime>"
+                                  "  </timeControl>"
+                                  "</configuration>" );
+      // Create the xml document
+      std::shared_ptr<tinyxml2::XMLDocument> xml_tree( std::make_shared<tinyxml2::XMLDocument>() );
+      xml_tree->Parse( xml_data.c_str() );
+      // Create the xml reader
+      std::unique_ptr<TimeControlReader const> const reader( std::make_unique<XmlTimeControlReader const>( xml_tree ) );
+      WHEN( "The Cfl number is read from the tree." ) {
+         THEN( "The Cfl number should be 0.6" ) {
+            REQUIRE( reader->ReadCFLNumber() == 0.6 );
+         }
+      }
+      WHEN( "The Start time is read from the tree." ) {
+         THEN( "The start time should be 0.0" ) {
+            REQUIRE( reader->ReadStartTime() == 0.0 );
+         }
+      }
+      WHEN( "The End time is read from the tree." ) {
+         THEN( "The end time should be 1.0" ) {
+            REQUIRE( reader->ReadEndTime() == 1.0 );
+         }
+      }
    }
-   GIVEN( "A filename with absolute paths containing dots" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/fi.le.txt";
-      REQUIRE( FileOperations::RemoveFileExtension( txt_filename_with_path ) == "/scratch/directory/fi.le" );
+   GIVEN( "A xml document with invalid content to read the time control data." ) {
+      std::string const xml_data( "<configuration>"
+                                  "  <timeControl>"
+                                  "     <CFLNumber> 1.1 </CFLNumber>"
+                                  "     <startTime> -1.0 </startTime>"
+                                  "     <endTime> -5.0 </endTime>"
+                                  "  </timeControl>"
+                                  "</configuration>" );
+      // Create the xml document
+      std::shared_ptr<tinyxml2::XMLDocument> xml_tree( std::make_shared<tinyxml2::XMLDocument>() );
+      xml_tree->Parse( xml_data.c_str() );
+      // Create the xml reader
+      std::unique_ptr<TimeControlReader const> const reader( std::make_unique<XmlTimeControlReader const>( xml_tree ) );
+      WHEN( "The Cfl number is read from the tree." ) {
+         THEN( "An std::invalid_argument exception should be thrown" ) {
+            REQUIRE_THROWS_AS( reader->ReadCFLNumber(), std::invalid_argument );
+         }
+      }
+      WHEN( "The Start time is read from the tree." ) {
+         THEN( "An std::invalid_argument exception should be thrown" ) {
+            REQUIRE_THROWS_AS( reader->ReadStartTime(), std::invalid_argument );
+         }
+      }
+      WHEN( "The End time is read from the tree." ) {
+         THEN( "An std::invalid_argument exception should be thrown" ) {
+            REQUIRE_THROWS_AS( reader->ReadEndTime(), std::invalid_argument );
+         }
+      }
    }
-   GIVEN( "A filename with long extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.longext";
-      REQUIRE( FileOperations::RemoveFileExtension( txt_filename_with_path ) == "/scratch/directory/file" );
-   }
-}
 
-SCENARIO( "File extensions can be obtained", "[1rank]" ) {
-   GIVEN( "A filename with absolute path and .txt extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.txt";
-      REQUIRE( FileOperations::GetFileExtension( txt_filename_with_path ) == "txt" );
-   }
-   GIVEN( "A filename with absolute paths containing dots" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/fi.le.txt";
-      REQUIRE( FileOperations::GetFileExtension( txt_filename_with_path ) == "txt" );
-   }
-   GIVEN( "A filename with long extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.longext";
-      REQUIRE( FileOperations::GetFileExtension( txt_filename_with_path ) == "longext" );
-   }
-}
-
-SCENARIO( "File paths can be removed", "[1rank]" ) {
-   GIVEN( "A filename with absolute path and .txt extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.txt";
-      REQUIRE( FileOperations::RemoveFilePath( txt_filename_with_path ) == "file.txt" );
-   }
-   GIVEN( "A filename with absolute paths containing dots" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/fi.le.txt";
-      REQUIRE( FileOperations::RemoveFilePath( txt_filename_with_path ) == "fi.le.txt" );
-   }
-   GIVEN( "A filename with long extension" ) {
-      std::string const txt_filename_with_path = "/scratch/directory/file.longext";
-      REQUIRE( FileOperations::RemoveFilePath( txt_filename_with_path ) == "file.longext" );
+   GIVEN( "A xml document with the non-existent tags to read the time control data." ) {
+      std::string const xml_data( "<configuration>"
+                                  "  <timeControl>"
+                                  "  </timeControl>"
+                                  "</configuration>" );
+      // Create the xml document
+      std::shared_ptr<tinyxml2::XMLDocument> xml_tree( std::make_shared<tinyxml2::XMLDocument>() );
+      xml_tree->Parse( xml_data.c_str() );
+      // Create the xml reader
+      std::unique_ptr<TimeControlReader const> const reader( std::make_unique<XmlTimeControlReader const>( xml_tree ) );
+      WHEN( "Any data is read." ) {
+         THEN( "All should throw std::logic_error exception" ) {
+            REQUIRE_THROWS_AS( reader->ReadCFLNumber(), std::logic_error );
+            REQUIRE_THROWS_AS( reader->ReadStartTime(), std::logic_error );
+            REQUIRE_THROWS_AS( reader->ReadEndTime(), std::logic_error );
+         }
+      }
    }
 }

@@ -78,6 +78,7 @@
 #include "input_output/output_writer/output_quantities/material_field_quantities/material_field_quantity.h"
 #include "input_output/output_writer/output_quantities/interface_field_quantities/interface_field_quantity.h"
 #include "input_output/output_writer/output_quantities/custom_material_quantities/partition_output.h"
+#include "input_output/output_writer/output_quantities/custom_material_quantities/interface_tags_output.h"
 #include "input_output/output_writer/output_quantities/custom_material_quantities/mach_number_output.h"
 #include "input_output/output_writer/output_quantities/custom_material_quantities/numerical_schlieren_output.h"
 #include "input_output/output_writer/output_quantities/custom_material_quantities/vorticity_absolute_output.h"
@@ -85,8 +86,6 @@
 #include "input_output/output_writer/output_quantities/custom_material_quantities/baroclinicity_output.h"
 #include "input_output/output_writer/output_quantities/custom_material_quantities/vortex_dilatation_output.h"
 #include "input_output/output_writer/output_quantities/custom_material_quantities/vortex_stretching_output.h"
-
-#include "input_output/output_writer/output_quantities/custom_material_quantities/example/matrix_tensor_material_output.h"
 
 namespace {
    /**
@@ -229,6 +228,9 @@ namespace Instantiation {
 
       if( IsAnyActive( COS::Partition ) ) {
          output_quantities.push_back( std::make_unique<PartitionOutput const>( unit_handler, material_manager, COS::PartitionName, COS::Partition ) );
+      }
+      if( IsAnyActive( COS::InterfaceTags ) ) {
+         output_quantities.push_back( std::make_unique<InterfaceTagsOutput const>( unit_handler, material_manager, COS::InterfaceTagsName, COS::InterfaceTags ) );
       }
       if( IsAnyActive( COS::MachNumber ) ) {
          output_quantities.push_back( std::make_unique<MachNumberOutput const>( unit_handler, material_manager, COS::MachNumberName, COS::MachNumber ) );

@@ -66,7 +66,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "mesh_generator.h"
-#include "input_output/output_writer/xdmf_utilities.h"
+#include "input_output/utilities/xdmf_utilities.h"
 
 /**
  * @brief Constructor for a generic mesh generator to be called from derived classes.

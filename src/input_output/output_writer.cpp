@@ -70,9 +70,9 @@
 #include "topology/id_information.h"
 #include "communication/mpi_utilities.h"
 
-#include "utilities/file_operations.h"
+#include "input_output/utilities/file_utilities.h"
 #include "utilities/string_operations.h"
-#include "input_output/output_writer/xdmf_utilities.h"
+#include "input_output/utilities/xdmf_utilities.h"
 #include "input_output/output_writer/output_definitions.h"
 
 /**
@@ -114,7 +114,7 @@ void OutputWriter::InitializeTimeSeriesFile( std::string const& time_series_file
       // Get the header of the time series file
       std::string const xdmf_content = XdmfUtilities::HeaderInformation( "TimeSeries" );
       // Append content to the file of the time series
-      FileOperations::WriteTextBasedFile( time_series_filename_without_extension + ".xdmf", xdmf_content );
+      FileUtilities::WriteTextBasedFile( time_series_filename_without_extension + ".xdmf", xdmf_content );
    }
 }
 
@@ -128,7 +128,7 @@ void OutputWriter::FinalizeTimeSeriesFile( std::string const& time_series_filena
       // Get the footer of the time series file
       std::string const xdmf_content = XdmfUtilities::FooterInformation();
       // Append content to the file of the time series
-      FileOperations::AppendToTextBasedFile( time_series_filename_without_extension + ".xdmf", xdmf_content );
+      FileUtilities::AppendToTextBasedFile( time_series_filename_without_extension + ".xdmf", xdmf_content );
    }
 }
 
@@ -178,12 +178,12 @@ void OutputWriter::WriteXdmfTimeStepFile( double const output_time,
    // Append header of the file
    std::string xdmf_content( XdmfUtilities::HeaderInformation( "TimeStep" ) );
    // Append core information of the xdmf file (topology, geometry and cell data)
-   xdmf_content += XdmfSpatialDataInformation( output_time, FileOperations::RemoveFilePath( hdf5_filename ), mesh_generator, output_type );
+   xdmf_content += XdmfSpatialDataInformation( output_time, FileUtilities::RemoveFilePath( hdf5_filename ), mesh_generator, output_type );
    // Append the footer information
    xdmf_content += XdmfUtilities::FooterInformation();
 
    // Write the complete content to the xdmf file
-   FileOperations::WriteTextBasedFile( FileOperations::ChangeFileExtension( hdf5_filename, ".xdmf" ), xdmf_content );
+   FileUtilities::WriteTextBasedFile( FileUtilities::ChangeFileExtension( hdf5_filename, ".xdmf" ), xdmf_content );
 }
 
 /**
@@ -200,9 +200,9 @@ void OutputWriter::AppendToXdmfTimeSeriesFile( double const output_time,
                                                OutputType const output_type ) const {
 
    // Generate the core which should be appended to the file (use incrementing grid names)
-   std::string const xdmf_content = XdmfSpatialDataInformation( output_time, FileOperations::RemoveFilePath( hdf5_filename ), mesh_generator, output_type );
+   std::string const xdmf_content = XdmfSpatialDataInformation( output_time, FileUtilities::RemoveFilePath( hdf5_filename ), mesh_generator, output_type );
    // Append content to the file of the time series
-   FileOperations::AppendToTextBasedFile( time_series_filename_without_extension + ".xdmf", xdmf_content );
+   FileUtilities::AppendToTextBasedFile( time_series_filename_without_extension + ".xdmf", xdmf_content );
 }
 
 /**

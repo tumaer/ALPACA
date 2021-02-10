@@ -83,9 +83,9 @@
 SutherlandShearViscosityModel::SutherlandShearViscosityModel( std::unordered_map<std::string, double> const& dimensional_parameter_map,
                                                               UnitHandler const& unit_handler ) :// Start initializer list
                                                                                                   TemperatureMaterialParameterModel<SutherlandShearViscosityModel>(),
-                                                                                                  mu0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "mu0", "SutherlandShearViscosityModel" ), UnitType::Viscosity ) ),
-                                                                                                  T0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "T0", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
-                                                                                                  S_( unit_handler.NonDimensionalizeValue( GetCheckedParameter( dimensional_parameter_map, "S", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
+                                                                                                  mu0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "mu0", "SutherlandShearViscosityModel" ), UnitType::Viscosity ) ),
+                                                                                                  T0_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "T0", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
+                                                                                                  S_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_parameter_map, "S", "SutherlandShearViscosityModel" ), UnitType::Temperature ) ),
                                                                                                   constant_( mu0_ * ( T0_ + S_ ) / std::pow( T0_, 1.5 ) ) {
    /** Empty besides initializer list and friend class constructor call  */
 }

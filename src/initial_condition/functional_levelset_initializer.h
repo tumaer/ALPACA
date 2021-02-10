@@ -65,24 +65,44 @@
 * Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef FILE_OPERATIONS_H
-#define FILE_OPERATIONS_H
+#ifndef FUNCTIONAL_LEVELSET_INITIALIZER_H
+#define FUNCTIONAL_LEVELSET_INITIALIZER_H
 
-#include <string>
+#include "user_expression.h"
+#include "initial_condition/levelset_initializer.h"
+#include "block_definitions/field_interface_definitions.h"
 
-namespace FileOperations {
+/**
+ * @brief The FunctionalLevelsetInitializer class allows for a levelset initialization based on a levelset function. It contains the levelset computation,
+ *        the loop structure is in the base class.
+ * @note Uses the C++ Mathematical Expression Toolkit Library by Arash Partow, see respective files for License and Copyright information.
+ * @note For the functional levelset initializer some things need to be considered:
+ *       1. The function must be a signed distance function.
+ *       2. The signed distance must be in the magnitude O(1) and must be in the range [-8, 8] in the first cells near the interface.
+ */
+class FunctionalLevelsetInitializer : public LevelsetInitializer {
+   // Member variables for this class only
+   std::string const levelset_variable_name_ = std::string( IF::InputName( InterfaceDescription::Levelset ) );
+   std::string const levelset_expression_string_;
+   std::vector<double> expression_point_ = { 0.0, 0.0, 0.0 };
+   UserExpression const levelset_expression_;
 
-   // operations for file and path modification
-   std::string RemoveFileExtension( std::string const& filename );
-   std::string RemoveFilePath( std::string const& filename );
-   std::string ChangeFileExtension( std::string const& filename_with_path, std::string const extension );
-   std::string GetFileExtension( std::string const& filename );
-   bool CheckIfPathExists( std::string const& path );
-   bool CreateFolder( std::string const& path );
-   std::string AddUnusedNumberToPath( std::string const& path, unsigned int const start_number = 0 );
-   void WriteTextBasedFile( std::string const& filename, std::string const& content );
-   void AppendToTextBasedFile( std::string const& filename, std::string const& content );
+   // Functions required from base class
+   double ComputeSignedLevelsetValue( std::array<double, 3> const& point ) override;
+   std::string GetTypeLogData( unsigned int const indent ) const override;
 
-}// namespace FileOperations
+public:
+   FunctionalLevelsetInitializer() = delete;
+   explicit FunctionalLevelsetInitializer( std::string const& levelset_expression_string,
+                                           std::vector<std::array<double, 6>> const& bounding_boxes,
+                                           std::vector<MaterialName> const& material_names,
+                                           double const node_size_on_level_zero,
+                                           unsigned int const maximum_level );
+   virtual ~FunctionalLevelsetInitializer()                              = default;
+   FunctionalLevelsetInitializer( FunctionalLevelsetInitializer const& ) = delete;
+   FunctionalLevelsetInitializer& operator=( FunctionalLevelsetInitializer const& ) = delete;
+   FunctionalLevelsetInitializer( FunctionalLevelsetInitializer&& )                 = delete;
+   FunctionalLevelsetInitializer& operator=( FunctionalLevelsetInitializer&& ) = delete;
+};
 
-#endif// FILE_OPERATIONS_H
+#endif//FUNCTIONAL_LEVELSET_INITIALIZER_H

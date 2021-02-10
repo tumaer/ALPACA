@@ -68,8 +68,6 @@
 #ifndef DIMENSIONALIZATION_READER_H
 #define DIMENSIONALIZATION_READER_H
 
-#include <iostream>
-
 /**
  * @brief Defines the class that provides access to the dimensionalization data in the input file.
  *        It serves as a proxy class for different dimensionalization reader types (xml,...) that only read the actual data.
