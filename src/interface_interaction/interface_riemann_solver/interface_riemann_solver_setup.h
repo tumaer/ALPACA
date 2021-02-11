@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INTERFACE_RIEMANN_SOLVER_SETUP_H
@@ -81,7 +82,7 @@ namespace InterfaceRiemannSolverSetup {
 
    /**
     * @brief Function returning the typedef of a InterfaceRiemannSolver based on a constexpr template.
-    * 
+    *
     * @tparam InterfaceRiemannSolvers The constexpr template parameter to specify the exact InterfaceRiemannSolver type.
     */
    template<InterfaceRiemannSolvers>

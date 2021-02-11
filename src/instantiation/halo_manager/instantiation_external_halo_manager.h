@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INITIALIZATION_EXTERNAL_HALO_MANAGER_H
@@ -89,16 +90,16 @@
  */
 namespace Instantiation {
 
-   // Initialization of the full external halo manager
+   // Instantiation of the full external halo manager
    ExternalHaloManager InstantiateExternalHaloManager( InputReader const& input_reader,
                                                        UnitHandler const& unit_handler,
                                                        MaterialManager const& material_manager );
 
-   // Initialization of the full set of material boundary conditions
+   // Instantiation of the full set of material boundary conditions
    std::array<std::unique_ptr<MaterialBoundaryCondition const>, 6> InstantiateMaterialBoundaryConditions( BoundaryConditionReader const& bc_reader,
                                                                                                           UnitHandler const& unit_handler,
                                                                                                           MaterialManager const& material_manager );
-   // Initialization of the full set of levelset boundary conditions
+   // Instantiation of the full set of levelset boundary conditions
    std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> InstantiateLevelsetBoundaryConditions( BoundaryConditionReader const& bc_reader );
 
    // Converts the (reduced) set of prime states into a full set of conservatives

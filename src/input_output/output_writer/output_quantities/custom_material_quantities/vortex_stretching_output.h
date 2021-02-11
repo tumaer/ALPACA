@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef VORTEX_STRETCHING_OUTPUT_H
@@ -72,7 +73,7 @@
 #include "topology/node.h"
 
 /**
- * @brief The VortexStretchingOutput class handles the output of the vortex stretching term of the vorticity transport equation 
+ * @brief The VortexStretchingOutput class handles the output of the vortex stretching term of the vorticity transport equation
  *        into a output file (currently Xdmf + HDF5). VortexStretchingOutput must not change any data.
  */
 class VortexStretchingOutput : public OutputQuantity {

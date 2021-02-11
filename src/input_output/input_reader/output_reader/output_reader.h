@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef OUTPUT_READER_H
@@ -75,8 +76,8 @@
 
 /**
  * @brief Defines the class that provides access to the output data in the input file.
- *        It serves as a proxy class for different output reader types (xml,...) that only read the actual data. 
- *        Here, consistency checks are done that all read data are valid.  
+ *        It serves as a proxy class for different output reader types (xml,...) that only read the actual data.
+ *        Here, consistency checks are done that all read data are valid.
  */
 class OutputReader {
 
