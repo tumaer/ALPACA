@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INSTANTIATION_COMMUNICATION_MANAGER_H
@@ -75,7 +76,7 @@
  */
 namespace Instantiation {
 
-   // Initialization of the communication manager
+   // Instantiation of the communication manager
    CommunicationManager InstantiateCommunicationManager( TopologyManager& topology_manager );
 }// namespace Instantiation
 

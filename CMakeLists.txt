@@ -30,8 +30,6 @@ INCLUDE_DIRECTORIES(src)
 # Include directories of third party libraries
 INCLUDE_DIRECTORIES(3rdParty/expression_toolkit)
 INCLUDE_DIRECTORIES(3rdParty/tiny_xml)
-INCLUDE_DIRECTORIES(3rdParty/FakeIt/single_header/catch)
-INCLUDE_DIRECTORIES(3rdParty/Catch2/single_include/catch2)
 
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 list(APPEND SOURCE_FILES "./3rdParty/tiny_xml/tinyxml2.cpp")
@@ -63,6 +61,16 @@ file(GLOB_RECURSE TEST_FILES "test/*.cpp")
 list(FILTER SOURCE_FILES EXCLUDE REGEX "src/main.cpp$")
 list(APPEND TEST_FILES "${SOURCE_FILES}")
 add_executable(Paco EXCLUDE_FROM_ALL ${TEST_FILES})
+
+##Include testing libraries into Paco
+# First build target for approval tests
+add_subdirectory(3rdParty/ApprovalTests.cpp EXCLUDE_FROM_ALL )
+target_link_libraries( Paco ApprovalTests::ApprovalTests )
+
+# Then simple includes for the res
+target_include_directories( Paco PRIVATE 3rdParty/FakeIt/single_header/catch)
+target_include_directories( Paco PRIVATE 3rdParty/Catch2/single_include )
+target_include_directories( Paco PRIVATE test )
 
 if( IPOPOSSIBLE AND NOT DBG )
    set_property(TARGET ALPACA PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
@@ -132,8 +140,6 @@ set_target_properties(ALPACAlib PROPERTIES EXCLUDE_FROM_ALL TRUE)
 if( PYMODULE )
    set_target_properties(alpacapy PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif( PYMODULE )
-
-INCLUDE_DIRECTORIES(test)
 
 # Use additional flags for test coverage extraction
 set(PACO_CXX_FLAGS "-O0 -fprofile-arcs -ftest-coverage")

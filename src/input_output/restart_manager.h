@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef RESTART_MANAGER_H
@@ -76,8 +77,8 @@
 #include "input_output/hdf5/hdf5_manager.h"
 
 /**
- * @brief The RestartManager class handles the writing and reading of restart snapshot files. The restart files are written in 
- *        HDF5 Format (without XDMF file). No mesh information is used for the restart file. Only data relevant for setting up 
+ * @brief The RestartManager class handles the writing and reading of restart snapshot files. The restart files are written in
+ *        HDF5 Format (without XDMF file). No mesh information is used for the restart file. Only data relevant for setting up
  *        the simulations are required. The restart file cannot be visualized in ParaView.
  */
 class RestartManager {
