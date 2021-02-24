@@ -88,15 +88,14 @@ class TimeIntegrator {
 
    friend DerivedTimeIntegrator;
 
-   double start_time_;
+   double current_run_time_;
    std::vector<double> micro_timestep_sizes_;
-   std::vector<double> macro_timestep_sizes_;
 
    /**
      * @brief Constructor.
      * @param start_time Time when the simulation should start.
      */
-   explicit TimeIntegrator( double const start_time = 0.0 ) : start_time_( start_time ) {}
+   explicit TimeIntegrator( double const start_time = 0.0 ) : current_run_time_( start_time ) {}
 
    /**
      * @brief Performs the time integration (same Algorithm as in Integrate function) for the Jump Flux Buffers.
@@ -233,7 +232,7 @@ public:
      * @param The start time to use for the simlation.
      */
    void SetStartTime( double const start_time ) {
-      start_time_ = start_time;
+      current_run_time_ = start_time;
    }
 
    /**
@@ -249,7 +248,7 @@ public:
      * @brief Computes the macro time step size, adds it to the macro timestep list and empties the micro timestep list.
      */
    void FinishMacroTimestep() {
-      macro_timestep_sizes_.push_back( std::accumulate( micro_timestep_sizes_.cbegin(), micro_timestep_sizes_.cend(), 0.0 ) );
+      current_run_time_ += std::accumulate( micro_timestep_sizes_.cbegin(), micro_timestep_sizes_.cend(), 0.0 );
       micro_timestep_sizes_.clear();
    }
 
@@ -265,7 +264,7 @@ public:
      * @brief Returns the current run time, i.e. time of all fully passed MACRO timesteps.
      * @return Run time.
      */
-   inline double CurrentRunTime() const { return std::accumulate( macro_timestep_sizes_.cbegin(), macro_timestep_sizes_.cend(), start_time_ ); }
+   inline double CurrentRunTime() const { return current_run_time_; }
 
    /**
      * @brief Integrates all jump halos a node holds.
