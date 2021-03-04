@@ -68,8 +68,6 @@
 *****************************************************************************************/
 #include "input_output/input_reader/initial_condition_reader/initial_condition_reader.h"
 
-#include "utilities/string_operations.h"
-
 /**
  * @brief Reads the initial condition expression string for a given material index.
  * @param material_index Index of the material for which the data is read.
@@ -99,7 +97,7 @@ std::string InitialConditionReader::ReadLevelsetInitializerInput( unsigned int c
    if( initializer_input.empty() ) {
       throw std::invalid_argument( "The input for the levelset initial condition must be non-empty!" );
    }
-   return StringOperations::RemoveSpaces( initializer_input );
+   return initializer_input;
 }
 
 /**

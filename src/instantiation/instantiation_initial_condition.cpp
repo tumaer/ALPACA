@@ -173,7 +173,7 @@ namespace Instantiation {
          }
          case LevelsetInitializerType::STL: {
             // 1. Create, 2. Log, 3. Return levelset_initializer
-            std::unique_ptr<LevelsetInitializer> levelset_initializer( std::make_unique<StlLevelsetInitializer>( initializer_input, bounding_boxes, material_names, node_size_on_level_zero_, maximum_level ) );
+            std::unique_ptr<LevelsetInitializer> levelset_initializer( std::make_unique<StlLevelsetInitializer>( StringOperations::RemoveSpaces( initializer_input ), bounding_boxes, material_names, node_size_on_level_zero_, maximum_level ) );
             logger.LogLinebreakMessage( levelset_initializer->GetLogData( 2 ) );
             logger.LogMessage( " " );
             return levelset_initializer;
