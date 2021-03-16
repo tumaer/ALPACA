@@ -7,6 +7,7 @@ import os
 import sys
 # alpacapy modules
 from alpacapy.alpaca.specifications.user_specifications import UserSpecifications
+from alpacapy.alpaca.specifications.output_variables import OutputVariables
 from alpacapy.helper_functions import file_operations as fo
 from alpacapy.logger import Logger
 
@@ -20,8 +21,7 @@ def create_executable(alpaca_base_path: str,
                       enable_symmetry: bool = True,
                       compilation_cores: int = 1,
                       user_specifications: Optional[UserSpecifications] = None,
-                      output_variables: Optional[List[str]] = None,
-                      output_tags: Optional[List[int]] = None,
+                      output_variables: Optional[OutputVariables] = None,
                       print_progress: bool = True,
                       verbose: bool = False) -> IO:
     """ Creates an alpaca executable with a given set of user specifications and other additional options.
@@ -46,10 +46,8 @@ def create_executable(alpaca_base_path: str,
         The number of cores used for the compilation, by default 1.
     user_specifications : Optional[UserSpecifications], optional
         The user specifications that are used for the generation, by default None (takes the current file specifications).
-    output_variables : Optional[List[str]], optional
-        List of output variables that are enabled, by default None.
-    output_tags : Optional[List[int]], optional
-        List which output should be enabled for the output variables (0: standard, 1: interface), by default None.
+    output_variables : Optional[OutputVariables], optional
+        The output variables that are used for the generation, by default None (takes the current file output constans).
     print_progress : bool, optional
         Flag whether the progress of executable creation during compilation is printed, by default True.
     verbose : bool, optional
@@ -68,13 +66,17 @@ def create_executable(alpaca_base_path: str,
         logger.write("Start creating the executable " + executable_name, color="bold")
         logger.blank_line()
 
-    # Read the current values of the user specifications to reset them to those values after executable creation
+    # Read the current values of the user specifications and output variables to reset them to those values after executable creation or failure
     user_specifications_default = UserSpecifications()
     user_specifications_default.read_specifications(alpaca_base_path)
+    output_variables_default = OutputVariables()
+    output_variables_default.read_variables(alpaca_base_path)
 
-    # Modify the settings in compile time constants
+    # Modify the settings in user specifications and output variables
     if user_specifications is not None:
-        user_specifications.modify_specifications(alpaca_base_path, use_default_values=False, output_variables=output_variables, output_tags=output_tags)
+        user_specifications.modify_specifications(alpaca_base_path, use_default_values=False)
+    if output_variables is not None:
+        output_variables.modify_variables(alpaca_base_path, use_default_values=False)
 
     # Make all path absolute
     alpaca_base_path = fo.get_absolute_path(alpaca_base_path)
@@ -112,6 +114,11 @@ def create_executable(alpaca_base_path: str,
     if cmake_process.returncode != 0:
         if verbose:
             logger.write("Error creating the Makefile!", color="r")
+
+        # Reset the user specifications and output variables to the default values
+        user_specifications_default.modify_specifications(alpaca_base_path)
+        output_variables_default.modify_variables(alpaca_base_path)
+
         sys.exit(cmake_process.returncode)
 
     if verbose:
@@ -147,6 +154,11 @@ def create_executable(alpaca_base_path: str,
                 logger.write("Error creating the executable!", color="r")
                 logger.blank_line()
                 logger.star_line_flush()
+
+            # Reset the user specifications and output variables to the default values
+            user_specifications_default.modify_specifications(alpaca_base_path)
+            output_variables_default.modify_variables(alpaca_base_path)
+
             sys.exit(make_process.returncode)
 
         if verbose:
@@ -156,8 +168,9 @@ def create_executable(alpaca_base_path: str,
     # Move the executable to its desired name and move it to the desired location
     os.rename("ALPACA", os.path.join(executable_path, executable_name))
 
-    # Reset the user specifications to the default values
+    # Reset the user specifications and output variables to the default values
     user_specifications_default.modify_specifications(alpaca_base_path)
+    output_variables_default.modify_variables(alpaca_base_path)
 
     # Move back to the original working directory
     os.chdir(current_dir)

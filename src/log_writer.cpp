@@ -82,11 +82,12 @@
 #include "user_specifications/equation_settings.h"
 #include "user_specifications/compile_time_constants.h"
 #include "user_specifications/riemann_solver_settings.h"
+#include "user_specifications/state_reconstruction_settings.h"
 #include "utilities/helper_functions.h"
 #include "utilities/string_operations.h"
 #include "enums/flux_splitting.h"
 
-#include "solvers/riemann_solvers/riemann_solver_setup.h"
+#include "solvers/convective_term_contributions/riemann_solvers/riemann_solver_setup.h"
 #include "prime_states/prime_state_handler.h"
 #include "integrator/time_integrator_setup.h"
 #include "levelset/multi_phase_manager/multi_phase_manager_setup.h"
@@ -199,17 +200,18 @@ LogWriter::LogWriter( bool const save_all_ranks ) : logfile_name_( "Unnamed_Simu
    LogMessage( "Interface set                                 : " + SetToString( active_interface_quantities ) );
    LogMessage( "Parameter set                                 : " + SetToString( active_parameters ) );
    LogMessage( "Time integrator                               : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( TimeIntegratorSetup::Concretize<time_integrator>::type ).name() ) ) );
-   LogMessage( "Riemann solver                                : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( RiemannSolverSetup::Concretize<riemann_solver>::type ).name() ) ) );
-   if constexpr( riemann_solver == RiemannSolvers::Roe ) {
-      LogMessage( "Flux Splitting Scheme                         : " + FluxSplittingToString( RoeSolverSettings::flux_splitting_scheme ) );
+   if constexpr( convective_term_solver == ConvectiveTermSolvers::FluxSplitting ) {
+      LogMessage( "Flux Splitting Scheme                         : " + FluxSplittingToString( FluxSplittingSettings::flux_splitting_scheme ) );
+      if constexpr( FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::Roe_M || FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
+         LogMessage( "Low-Mach-number limit factor                  : " + std::to_string( FluxSplittingSettings::low_mach_number_limit_factor ) );
+      }
    }
-   if constexpr( riemann_solver == RiemannSolvers::Hllc || riemann_solver == RiemannSolvers::Hll ) {
-      LogMessage( "Signal Speed Selection                        : " + SignalSpeedToString( HllSolverSettings::signal_speed_selection ) );
-   }
-   if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe_M || RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
-      LogMessage( "Low-Mach-number limit factor                  : " + std::to_string( RoeSolverSettings::low_mach_number_limit_factor ) );
+   if constexpr( convective_term_solver == ConvectiveTermSolvers::FiniteVolume ) {
+      LogMessage( "Riemann solver                                : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( RiemannSolverSetup::Concretize<FiniteVolumeSettings::riemann_solver>::type ).name() ) ) );
+      LogMessage( "Signal Speed Selection                        : " + SignalSpeedToString( FiniteVolumeSettings::signal_speed_selection ) );
    }
    LogMessage( "Reconstruction stencil                        : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type ).name() ) ) );
+   LogMessage( "Reconstruction Type                           : " + SetToString( state_reconstruction_type ) );
    LogMessage( "Viscous fluxes reconstruction stencil         : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<viscous_fluxes_reconstruction_stencil>::type ).name() ) ) );
    LogMessage( "Heat fluxes reconstruction stencil            : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( ReconstructionStencilSetup::Concretize<heat_fluxes_reconstruction_stencil>::type ).name() ) ) );
    LogMessage( "Derivative stencil                            : " + StringOperations::RemoveLeadingNumbers( std::string( typeid( DerivativeStencilSetup::Concretize<derivative_stencil>::type ).name() ) ) );

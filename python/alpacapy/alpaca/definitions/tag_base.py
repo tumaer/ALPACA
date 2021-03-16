@@ -25,10 +25,12 @@ class TagBase:
         The type of the tag.
     __allowed_values : Optional[List[Union[int,BoolType,str]]]
          A list holding all allowed variables for this tag.
+    __no_tag : Optional[bool]
+         Flag whether tags for this specification should be printed or not.
     """
 
     def __init__(self, value_type: Type, default_value: Union[int, BoolType, str],
-                 allowed_values: Optional[List[Union[int, BoolType, str]]] = None) -> None:
+                 allowed_values: Optional[List[Union[int, BoolType, str]]] = None, no_tag: Optional[bool] = False) -> None:
         """Constructor
 
         Parameters
@@ -39,6 +41,8 @@ class TagBase:
             The default value used for the tag.
         allowed_values : Optional[List[Union[int,BoolType,str]]], optional
             A list holding all allowed variables for this tag.
+        no_tag : Optional[bool]
+            Flag whether tags for this specification should be printed or not, by default False.
         Raises
         ------
         TypeError
@@ -64,10 +68,12 @@ class TagBase:
         self.__default_value = default_value
         self.__value_type = value_type
         self.__allowed_values = allowed_values
+        self.__no_tag = no_tag
 
     def __repr__(self) -> str:
         """ Implementation of the built-in repr function """
         string = "Type           : " + str(self.__value_type) + "\n"
+        string += "Tag printed    : " + str(self.__no_tag) + "\n"
         string += "Value          : " + str(self.__value) + "\n"
         string += "Default value  : " + str(self.__default_value) + "\n"
         string += "Allowed values : " + str(self.__allowed_values) + "\n"
@@ -215,7 +221,7 @@ class TagBase:
             The name with the additional tag.
         """
         # In case the value of this specification is not set, do not provide any tag
-        if self.__value is None:
+        if self.__value is None or self.__no_tag:
             return ""
         if self.__value_type == np.dtype(BoolType):
             if self.__value == self.__default_value:

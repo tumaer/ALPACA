@@ -31,7 +31,7 @@ class UserSpecificationTag(TagBase):
 
     def __init__(self, value_type: Type, default_value: Union[int, BoolType, str],
                  specification_file: UserSpecificationFile, specification_file_tag: str, specification_file_prefix: Optional[str] = None,
-                 allowed_values: Optional[List[Union[int, BoolType, str]]] = None) -> None:
+                 allowed_values: Optional[List[Union[int, BoolType, str]]] = None, no_tag: Optional[bool] = False) -> None:
         """Constructor
 
         Parameters
@@ -48,6 +48,8 @@ class UserSpecificationTag(TagBase):
             Additional prefix that must be used to replace the value in the file, by default None (e.g., a Namespace::).
         allowed_values : Optional[List[Union[int,float,BoolType,str]]], optional
             A list holding all allowed values for this specification, by default None
+        no_tag : Optional[bool]
+            Flag whether tags for this specification should be printed or not, by default False.
         Raises
         ------
         ValueError
@@ -58,7 +60,7 @@ class UserSpecificationTag(TagBase):
             raise ValueError("The provided user specification file is not contained in the allowed variables of UserSpecificationFile")
 
         # Call the base class constructor with appropriate values
-        super().__init__(value_type, default_value, allowed_values)
+        super().__init__(value_type, default_value, allowed_values, no_tag)
         # Assign all class instance variables
         self.__specification_filename = specification_file
         self.__specification_file_tag = specification_file_tag

@@ -77,7 +77,7 @@ class DetailedSod(Testcase):
             check_reference = False
             if result_filename is None:
                 self.logger.write("No hdf5 file exist in '" + result_folder + "'. Cannot analyze sod case.")
-                return [ResultStatus.no_check, [], []]
+                return [ResultStatus.no_check, [], [], []]
             else:
                 self.logger.write("The expected result file data_0.200000 does not exist!\n"
                                   "Potentially, the simulation crashed or produced undesired behavior!\n"

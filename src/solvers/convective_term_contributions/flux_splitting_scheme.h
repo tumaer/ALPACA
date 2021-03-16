@@ -66,74 +66,44 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef RIEMANN_SOLVER_H
-#define RIEMANN_SOLVER_H
-#include <array>
+#ifndef FLUX_SPLITTING_SCHEME_H
+#define FLUX_SPLITTING_SCHEME_H
 
+#include "solvers/convective_term_contributions/convective_term_solver.h"
 #include "block_definitions/block.h"
-#include "solvers/eigendecomposition.h"
+#include "enums/direction_definition.h"
+#include "utilities/helper_functions.h"
+#include "materials/equation_of_state.h"
 #include "materials/material_manager.h"
-
-namespace {
-
-   /**
-    * @brief Helper function to create the index sequence used to enforce symmetry while summing up conservative equation contributions in characteristic decomposition.
-    * @tparam RemainingIndices Zero-based index sequence representing the non-momentum equations. Are transformed into real equation indices.
-    * @return The created index sequence.
-    */
-   template<std::size_t... NonMomentumIndices>
-   constexpr std::array<std::array<unsigned int, MF::ANOE()>, DTI( CC::DIM() )> MakeConservativeEquationSummationSequence( std::index_sequence<NonMomentumIndices...> const ) {
-#if DIMENSION == 1
-      return { { { ETI( Equation::MomentumX ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
-#elif DIMENSION == 2
-      return { { { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
-                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
-#else
-      return { { { ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
-                 { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
-                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
-#endif
-   }
-}// namespace
+#include "user_specifications/compile_time_constants.h"
 
 /**
- * @brief Interface to solve the underlying system of equations. Uses spatial reconstruction stencils to approximate the solution.
+ * @brief Discretization of the convective term solver using a flux-splitting procedure.
  */
-template<typename DerivedRiemannSolver>
-class RiemannSolver {
+class FluxSplittingScheme : public ConvectiveTermSolver<FluxSplittingScheme> {
 
-   friend DerivedRiemannSolver;
+   friend ConvectiveTermSolver;
 
-   static constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence( std::make_index_sequence<MF::ANOE() - DTI( CC::DIM() )>{} );
+   template<Direction DIR>
+   void ComputeFluxes( Block const& b, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double ( &advection )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
+                       double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double ( &fluxfunction_wavespeed )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const;
 
-   EigenDecomposition const& eigendecomposition_calculator_;
-   MaterialManager const& material_manager_;
-
-   explicit RiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : eigendecomposition_calculator_( eigendecomposition_calculator ),
-                                                                                                                                material_manager_( material_manager ) {
-      //Empty constructor besides initializer list.
-   }
+   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
 
 public:
-   RiemannSolver()                       = delete;
-   ~RiemannSolver()                      = default;
-   RiemannSolver( RiemannSolver const& ) = delete;
-   RiemannSolver& operator=( RiemannSolver const& ) = delete;
-   RiemannSolver( RiemannSolver&& )                 = delete;
-   RiemannSolver& operator=( RiemannSolver&& ) = delete;
-
-   /**
-    * @brief Solves the right hand side of the underlying system of equations within the provided node.
-    * @param mat_block Container holding the relevant fluid data to compute the update.
-    * @param cell_size The size of the cells in the block.
-    * @param fluxes_x, fluxes_y, fluxes_z The fluxes over the cell faces as computed by this Riemann solver. Indirect return parameter.
-    */
-   void Update( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-                double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
-      static_cast<DerivedRiemannSolver const&>( *this ).UpdateImplementation( mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z );
-   }
+   FluxSplittingScheme() = delete;
+   explicit FluxSplittingScheme( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
+   ~FluxSplittingScheme()                            = default;
+   FluxSplittingScheme( FluxSplittingScheme const& ) = delete;
+   FluxSplittingScheme& operator=( FluxSplittingScheme const& ) = delete;
+   FluxSplittingScheme( FluxSplittingScheme&& )                 = delete;
+   FluxSplittingScheme& operator=( FluxSplittingScheme&& ) = delete;
 };
 
-#endif// RIEMANN_SOLVER_H
+#endif// FLUX_SPLITTING_SCHEME_H

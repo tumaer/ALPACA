@@ -66,42 +66,105 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef HLLC_RIEMANN_SOLVER_H
-#define HLLC_RIEMANN_SOLVER_H
+#ifndef RIEMANN_SOLVER_SETUP_H
+#define RIEMANN_SOLVER_SETUP_H
 
-#include "solvers/riemann_solvers/riemann_solver.h"
-#include "block_definitions/block.h"
-#include "enums/direction_definition.h"
-#include "materials/equation_of_state.h"
-#include "materials/material_manager.h"
-#include "user_specifications/compile_time_constants.h"
+#include "user_specifications/numerical_setup.h"
+#include "user_specifications/equation_settings.h"
+#include "solvers/convective_term_contributions/riemann_solvers/hllc_riemann_solver.h"
+#include "solvers/convective_term_contributions/riemann_solvers/hllc_lm_riemann_solver.h"
+#include "solvers/convective_term_contributions/riemann_solvers/isentropic_hllc_riemann_solver.h"
+#include "solvers/convective_term_contributions/riemann_solvers/hll_riemann_solver.h"
+#include "solvers/convective_term_contributions/riemann_solvers/isentropic_hll_riemann_solver.h"
+#include "user_specifications/riemann_solver_settings.h"
 
 /**
- * @brief Discretization of the Riemann solver using the HLLC procedure according to \cite Toro2009, chapter 10.4.
+ * @brief A namespace to get a RiemannSolver type based on a specified constexpr.
  */
-class HllcRiemannSolver : public RiemannSolver<HllcRiemannSolver> {
+namespace RiemannSolverSetup {
 
-   friend RiemannSolver;
+   namespace Isentropic {
+      /**
+       * @brief Function returning the Isentropic Riemann solver matching the type in the template argument.
+       * @tparam RiemannSolvers Specification of the RiemannSolver type.
+       */
+      template<FiniteVolumeSettings::RiemannSolvers>
+      struct Concretize;
 
-   template<Direction DIR>
-   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double const cell_size ) const;
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hllc> {
+         using type = IsentropicHllcRiemannSolver;
+      };
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hll> {
+         using type = IsentropicHllRiemannSolver;
+      };
+   }// namespace Isentropic
 
-   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
+   namespace EulerNavierStokes {
+      /**
+       * @brief Function returning the Euler or Navier-Stokes equations Riemann solver matching the type in the template argument.
+       * @tparam RiemannSolvers Specification of the RiemannSolver type.
+       */
+      template<FiniteVolumeSettings::RiemannSolvers>
+      struct Concretize;
 
-public:
-   HllcRiemannSolver() = delete;
-   explicit HllcRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
-   ~HllcRiemannSolver()                          = default;
-   HllcRiemannSolver( HllcRiemannSolver const& ) = delete;
-   HllcRiemannSolver& operator=( HllcRiemannSolver const& ) = delete;
-   HllcRiemannSolver( HllcRiemannSolver&& )                 = delete;
-   HllcRiemannSolver& operator=( HllcRiemannSolver&& ) = delete;
-};
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hllc> {
+         using type = HllcRiemannSolver;
+      };
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hllc_LM> {
+         using type = HllcLMRiemannSolver;
+      };
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hll> {
+         using type = HllRiemannSolver;
+      };
+   }// namespace EulerNavierStokes
 
-#endif// HLLC_RIEMANN_SOLVER_H
+   /**
+   * @brief Function returning the Riemann solver matching the type in the template argument accroding to the equation set in the second template parameter.
+   * @tparam RiemannSolvers Specification of the RiemannSolver type.
+   * @tparam EquationSet Specification of the Equation(s) beeing solved.
+   */
+   template<FiniteVolumeSettings::RiemannSolvers R, EquationSet>
+   struct Dispatch {
+      using type = typename EulerNavierStokes::Concretize<R>::type;
+   };
+
+   /**
+    * @brief See generic implementation.
+    */
+   template<FiniteVolumeSettings::RiemannSolvers R>
+   struct Dispatch<R, EquationSet::Isentropic> {
+      using type = typename Isentropic::Concretize<R>::type;
+   };
+
+   /**
+    * @brief Function returning the Riemann solver for the (globally) selected Equation and the given Solver template argument.
+    * @tparam RiemannSolvers Specification of the RiemannSolver type.
+    */
+   template<FiniteVolumeSettings::RiemannSolvers R>
+   struct Concretize {
+      using type = typename Dispatch<R, active_equations>::type;
+   };
+
+}// namespace RiemannSolverSetup
+
+#endif// RIEMANN_SOLVER_SETUP_H

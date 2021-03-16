@@ -104,7 +104,6 @@ public:
                                       double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                                       double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                                       double ( &fluxfunction_eigenvalues )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const;
-   std::array<double, MF::ANOE()> const TransformToPhysicalSpace( std::array<double, MF::ANOE()> const& characteristic_values, double const ( &roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()] ) const;
 
    void ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
    void SetGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
@@ -160,6 +159,29 @@ namespace {
    constexpr Direction GetMinorDirection<Direction::Z>( unsigned int const minor_index ) {
       constexpr std::array<Direction, 2> minor_directions = { Direction::X, Direction::Y };
       return minor_directions[minor_index];
+   }
+
+   /**
+    * @brief Transforms the given values from characteristic space back into physical space via the given eigenvectors.
+    *        Underlying summations are done consistently in order to preserve symmetry.
+    * @param characteristic_values Values in characteristic space.
+    * @return Values in physical space.
+    */
+   inline std::array<double, MF::ANOE()> const TransformToPhysicalSpace( std::array<double, MF::ANOE()> const& characteristic_values, double const ( &roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()] ) {
+      std::array<double, MF::ANOE()> physical_values;
+
+      for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
+         physical_values[l] = 0.0;
+         // sum up linear contributions
+         for( unsigned int n = 1; n < MF::ANOE() - 1; ++n ) {
+            physical_values[l] += characteristic_values[n] * roe_eigenvectors_right[l][n];
+         }// n: characteristic fields
+         // Non-linear contributions have to be added together to maintain full symmetry
+         physical_values[l] += ( characteristic_values[0] * roe_eigenvectors_right[l][0] +
+                                 characteristic_values[MF::ANOE() - 1] * roe_eigenvectors_right[l][MF::ANOE() - 1] );
+      }// l: conservatives
+
+      return physical_values;
    }
 }// namespace
 
@@ -388,7 +410,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             // ****************************************************************
 
             // Flux-function artificial viscosity -> Roe eigenvalues
-            if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe ) {
+            if constexpr( FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::Roe ) {
                SaveForAllFields( eigenvalues,
                   std::abs(principal_velocity_roe_ave - c),
                   std::abs(principal_velocity_roe_ave),
@@ -396,15 +418,15 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             }
 
             // Flux-function artificial viscosity -> Roe-M eigenvalues
-            if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::Roe_M ) {
+            if constexpr( FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::Roe_M ) {
                SaveForAllFields( eigenvalues,
-                  std::abs( principal_velocity_roe_ave - std::min( c, RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_roe_ave ) ) ),
+                  std::abs( principal_velocity_roe_ave - std::min( c, FluxSplittingSettings::low_mach_number_limit_factor * std::abs( principal_velocity_roe_ave ) ) ),
                   std::abs( principal_velocity_roe_ave ),
-                  std::abs( principal_velocity_roe_ave + std::min( c, RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_roe_ave ) ) ) );
+                  std::abs( principal_velocity_roe_ave + std::min( c, FluxSplittingSettings::low_mach_number_limit_factor * std::abs( principal_velocity_roe_ave ) ) ) );
             }
 
             // Flux-function artificial viscosity -> Local-Lax-Friedrichs eigenvalues
-            if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs ) {
+            if constexpr( FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs ) {
                double const c_target   = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_target,   pressure_target);
                double const c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_neighbor, pressure_neighbor);
 
@@ -415,12 +437,12 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             }
 
             // Flux-function artificial viscosity -> LLF-M eigenvalues
-            if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
+            if constexpr( FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::LocalLaxFriedrichs_M ) {
                double const c_target   = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_target,   pressure_target);
                double const c_neighbor = material_manager_.GetMaterial(material).GetEquationOfState().SpeedOfSound(rho_neighbor, pressure_neighbor);
 
-               double const c_target_m   = std::min( RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_target )  , c_target );
-               double const c_neighbor_m = std::min( RoeSolverSettings::low_mach_number_limit_factor * std::abs( principal_velocity_neighbor ), c_neighbor );
+               double const c_target_m   = std::min( FluxSplittingSettings::low_mach_number_limit_factor * std::abs( principal_velocity_target )  , c_target );
+               double const c_neighbor_m = std::min( FluxSplittingSettings::low_mach_number_limit_factor * std::abs( principal_velocity_neighbor ), c_neighbor );
 
                SaveForAllFields( eigenvalues,
                   std::max(std::abs(principal_velocity_target - c_target_m),std::abs(principal_velocity_neighbor - c_neighbor_m)),
@@ -429,7 +451,7 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
             }
 
             // Flux-function artificial viscosity -> Global-Lax-Friedrichs or LaxFriedrichs scheme
-            if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::GlobalLaxFriedrichs ) {
+            if constexpr( FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::GlobalLaxFriedrichs ) {
                for(unsigned int l = 0; l < MF::ANOE(); ++l) {
                   eigenvalues[l] = global_eigenvalues_[0][l];
                }

@@ -66,7 +66,7 @@ class Physics(Testcase):
         # Sanity checks that it exists in the calculation dictionary
         if self.__passed_warning_norms.get(inputfile, None) is None:
             self.logger.write("Cannot check case, no norm barriers specified for inputfile!", color="y")
-            return [ResultStatus.no_check, [], []]
+            return [ResultStatus.no_check, [], [], []]
 
         # Differ the computation dependent on the inputfile
         if inputfile == "CouetteFlowTwoInterfaces":

@@ -1,2 +1,2 @@
-        Runtime,                 Inputfile,                                                                                                                                 Executable
-  3740.52500000,     ToroImplosionLevelset,     ALPACA_3D_20_4_LimitEndTime_TrackRuntimes_RK3_HjReconstructionStencil_Weno_Linearized_Fedkiw_Roe_Roe_Einfeldt_WENO5_HOUC5_NavierStokes
+        Runtime,                 Inputfile,                                                                                                                                       Executable
+  3740.52500000,     ToroImplosionLevelset,     ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_RoeCharacteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw

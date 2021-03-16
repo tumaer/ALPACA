@@ -7,6 +7,7 @@ import pandas as pd
 from alpacapy.testsuite.testcase import Testcase
 from alpacapy.testsuite.definitions.result_status import ResultStatus
 from alpacapy.post_analysis.check_symmetry import check_symmetry
+from alpacapy.helper_functions import hdf5_operations as h5o
 
 
 class Symmetry(Testcase):
@@ -41,19 +42,21 @@ class Symmetry(Testcase):
         result_filename = [file for file in os.listdir(domain_folder) if file.startswith("data_1.000000") and file.endswith(".h5")]
         # Check if the filename exists
         if not result_filename:
-            result_filename = get_last_hdf5_file(domain_folder)
+            result_filename = h5o.get_last_hdf5_file(domain_folder)
             if result_filename is None:
                 self.logger.write("No hdf5 file exist in '" + result_folder + "'. Cannot check symmetry.")
-                return [ResultStatus.no_check, [], []]
+                return [ResultStatus.no_check, [], [], []]
             else:
                 self.logger.write("The expected result file data_1.000000 does not exist!\n"
                                   "Potentially, the simulation crashed or produced undesired behavior!\n"
                                   "Instead use file: " + result_filename, color="y")
+        else:
+            result_filename = result_filename[0]
         # Check the symmetry of the case
-        symmetry_check = check_symmetry(os.path.join(domain_folder, result_filename[0]), False)
+        symmetry_check = check_symmetry(os.path.join(domain_folder, result_filename), False)
 
         if symmetry_check is None:
-            return [ResultStatus.no_check, [], []]
+            return [ResultStatus.no_check, [], [], []]
 
         # Return the status of the case
         return [ResultStatus.passed if symmetry_check else ResultStatus.failed, [], [], []]

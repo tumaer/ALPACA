@@ -71,7 +71,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "solvers/riemann_solvers/riemann_solver.h"
+#include "solvers/convective_term_contributions/convective_term_solver.h"
 
 SCENARIO( "Non-momentum equation indexing", "[1rank]" ) {
 
