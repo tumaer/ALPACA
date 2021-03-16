@@ -66,48 +66,47 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef SPACE_SOLVER_H
-#define SPACE_SOLVER_H
+#ifndef FINITE_VOLUME_SCHEME_H
+#define FINITE_VOLUME_SCHEME_H
 
-#include "user_specifications/numerical_setup.h"
+#include "solvers/convective_term_contributions/convective_term_solver.h"
 #include "block_definitions/block.h"
-#include "topology/node.h"
+#include "enums/direction_definition.h"
+#include "utilities/helper_functions.h"
+#include "materials/equation_of_state.h"
 #include "materials/material_manager.h"
-#include "source_term_solver.h"
-#include "eigendecomposition.h"
-#include "interface_interaction/interface_term_solver.h"
-
-#include "levelset/levelset_advector/levelset_advector_setup.h"
-#include "solvers/convective_term_contributions/convective_term_solver_setup.h"
-
-using ConvectiveTermSolverConcretization = ConvectiveTermSolverSetup::Concretize<convective_term_solver>::type;
-using LevelsetAdvectorConcretization     = LevelsetAdvectorSetup::Concretize<levelset_advector>::type;
+#include "user_specifications/compile_time_constants.h"
+#include "solvers/convective_term_contributions/riemann_solvers/riemann_solver_setup.h"
 
 /**
- * @brief The SpaceSolver solves right side of the underlying system of equations (including source terms) using a Riemann solver of choice with an interchangable spatial stencil.
+ * @brief Discretization of the convective term solver using a finite-volume procedure.
  */
-class SpaceSolver {
+class FiniteVolumeScheme : public ConvectiveTermSolver<FiniteVolumeScheme> {
 
-   EigenDecomposition const eigendecomposition_calculator_;
-   ConvectiveTermSolverConcretization const convective_term_solver_;
-   SourceTermSolver const source_term_solver_;
-   InterfaceTermSolver const interface_term_solver_;
-   MaterialManager const& material_manager_;
-   LevelsetAdvectorConcretization const levelset_advector_;
+   friend ConvectiveTermSolver;
+
+   using RiemannSolverConcretization = RiemannSolverSetup::Concretize<FiniteVolumeSettings::riemann_solver>::type;
+   RiemannSolverConcretization const riemann_solver_;
+
+   template<Direction DIR>
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                       double const cell_size ) const;
+
+   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
 
 public:
-   SpaceSolver() = delete;
-   explicit SpaceSolver( MaterialManager const& material_manager, std::array<double, 3> gravity );
-   ~SpaceSolver()                    = default;
-   SpaceSolver( SpaceSolver const& ) = delete;
-   SpaceSolver& operator=( SpaceSolver const& ) = delete;
-   SpaceSolver( SpaceSolver&& )                 = delete;
-   SpaceSolver& operator=( SpaceSolver&& ) = delete;
-
-   void UpdateFluxes( Node& node ) const;
-   void UpdateLevelsetFluxes( Node& node ) const;
-   void ComputeMaxEigenvaluesForPhase( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
-   void SetFluxFunctionGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
+   FiniteVolumeScheme() = delete;
+   explicit FiniteVolumeScheme( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
+   ~FiniteVolumeScheme()                           = default;
+   FiniteVolumeScheme( FiniteVolumeScheme const& ) = delete;
+   FiniteVolumeScheme& operator=( FiniteVolumeScheme const& ) = delete;
+   FiniteVolumeScheme( FiniteVolumeScheme&& )                 = delete;
+   FiniteVolumeScheme& operator=( FiniteVolumeScheme&& ) = delete;
 };
 
-#endif// SPACE_SOLVER_H
+#endif// FINITE_VOLUME_SCHEME_H

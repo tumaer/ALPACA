@@ -157,7 +157,7 @@ public:
 
    /**
     * @brief Specification of == operator for the id of topology nodes
-    * @param rhs right hand side value of == operator
+    * @param rhs right-hand side value of == operator
     * @return True if Ids of two nodes are equal, False otherwise
     */
    inline bool operator==( nid_t const rhs ) { return ( rhs == unique_id_ ); }

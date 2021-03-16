@@ -753,14 +753,14 @@ void ModularAlgorithmAssembler::ProvideDebugInformation( std::string const debug
 
 /**
  * @brief Computes the f( u ) term in the Runge-Kutta function u^i = u^( i-1 ) + c_i * dt * f( u ).
- *        Stores the result in the right hand side buffers. Computations only done in leaves.
- * @param levels For all leaves on these levels the right hand side will be computed.
+ *        Stores the result in the right-hand side buffers. Computations only done in leaves.
+ * @param levels For all leaves on these levels the right-hand side will be computed.
  * @param stage The current Runge-Kutta stage.
  */
 void ModularAlgorithmAssembler::ComputeRightHandSide( std::vector<unsigned int> const levels, unsigned int const stage ) {
 
    // Global Lax-Friedrich scheme
-   if constexpr( RoeSolverSettings::flux_splitting_scheme == FluxSplitting::GlobalLaxFriedrichs ) {
+   if constexpr( convective_term_solver == ConvectiveTermSolvers::FluxSplitting && FluxSplittingSettings::flux_splitting_scheme == FluxSplitting::GlobalLaxFriedrichs ) {
       // In case of Global Lax Friedrichs Eigenvalues must be collected across ranks and blocks
       double max_eigenvalues[DTI( CC::DIM() )][MF::ANOE()];
       // NH Initializing to zero necessary!
@@ -804,8 +804,8 @@ void ModularAlgorithmAssembler::ComputeRightHandSide( std::vector<unsigned int> 
 
 /**
  * @brief Computes the f(u) term of the level-set equation in the Runge-Kutta function u^i = u^(i-1) + c_i * dt * f(u).
- *        Stores the result in the right hand side buffers. Computations only done in leaves.
- * @param nodes The nodes for which the right hand side will be computed.
+ *        Stores the result in the right-hand side buffers. Computations only done in leaves.
+ * @param nodes The nodes for which the right-hand side will be computed.
  * @param stage The current Runge-Kutta stage.
  */
 void ModularAlgorithmAssembler::ComputeLevelsetRightHandSide( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage ) {
@@ -820,7 +820,7 @@ void ModularAlgorithmAssembler::ComputeLevelsetRightHandSide( std::vector<std::r
 }
 
 /**
- * @brief Swaps the content of the average and right hand side buffers of all nodes on the specified level. Thereby, it is ensured that
+ * @brief Swaps the content of the average and right-hand side buffers of all nodes on the specified level. Thereby, it is ensured that
  * the average buffer of the conservatives and the base buffer of the level set contain values based on which the right-hand side values
  * for the next RK-( sub )step can be calculated. In the last RK-stage it is also necessary to copy the values of the reinitialized level-set buffer
  * to the right-hand side level-set buffer before the swap is done. Thereby, it is ensured, that for the first RK-stage the level-set advection
@@ -1579,7 +1579,7 @@ void ModularAlgorithmAssembler::ResetJumpConservativeBuffers( std::vector<unsign
 
 /**
  * @brief Checks if DoLoadBalancing is necessary and eventually executes it.
- * @param updated_levels_descending Gives the list of levels which have integrated values in the righthand side buffers. For these sending the RHS Buffer is enough.
+ * @param updated_levels_descending Gives the list of levels which have integrated values in the right-hand side buffers. For these sending the RHS Buffer is enough.
  * @param force Enforces execution of load balancing independent of other indicators.
  */
 void ModularAlgorithmAssembler::LoadBalancing( std::vector<unsigned int> const updated_levels_descending, bool const force ) {

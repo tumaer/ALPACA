@@ -66,44 +66,41 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef ROE_RIEMANN_SOLVER_H
-#define ROE_RIEMANN_SOLVER_H
+#ifndef CONVECTIVE_TERM_SOLVER_SETUP_H
+#define CONVECTIVE_TERM_SOLVER_SETUP_H
 
-#include "solvers/riemann_solvers/riemann_solver.h"
-#include "block_definitions/block.h"
-#include "enums/direction_definition.h"
-#include "utilities/helper_functions.h"
-#include "materials/equation_of_state.h"
-#include "materials/material_manager.h"
-#include "user_specifications/compile_time_constants.h"
+#include "user_specifications/riemann_solver_settings.h"
+#include "solvers/convective_term_contributions/flux_splitting_scheme.h"
+#include "solvers/convective_term_contributions/finite_volume_scheme.h"
 
 /**
- * @brief Discretization of the RiemannSolver using Roe eigenvalues/-vectors.
+ * @brief A namespace to get a ConvectiveTermSolver type based on a specified constexpr.
  */
-class RoeRiemannSolver : public RiemannSolver<RoeRiemannSolver> {
+namespace ConvectiveTermSolverSetup {
 
-   friend RiemannSolver;
+   /**
+    * @brief Function returning the typedef of a ConvectiveTermSolvers based on a constexpr template.
+    * 
+    * @tparam ConvectiveTermSolvers The constexpr template parameter to specify the exact ConvectiveTermSolvers type.
+    */
+   template<ConvectiveTermSolvers>
+   struct Concretize;
 
-   template<Direction DIR>
-   void ComputeFluxes( Block const& b, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                       double ( &advection )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
-                       double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double ( &fluxfunction_wavespeed )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const;
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<ConvectiveTermSolvers::FluxSplitting> {
+      typedef FluxSplittingScheme type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<ConvectiveTermSolvers::FiniteVolume> {
+      typedef FiniteVolumeScheme type;
+   };
 
-   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
+}// namespace ConvectiveTermSolverSetup
 
-public:
-   RoeRiemannSolver() = delete;
-   explicit RoeRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
-   ~RoeRiemannSolver()                         = default;
-   RoeRiemannSolver( RoeRiemannSolver const& ) = delete;
-   RoeRiemannSolver& operator=( RoeRiemannSolver const& ) = delete;
-   RoeRiemannSolver( RoeRiemannSolver&& )                 = delete;
-   RoeRiemannSolver& operator=( RoeRiemannSolver&& ) = delete;
-};
-
-#endif// ROE_RIEMANN_SOLVER_H
+#endif// CONVECTIVE_TERM_SOLVER_SETUP_H

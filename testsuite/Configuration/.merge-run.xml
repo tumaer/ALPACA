@@ -55,106 +55,116 @@
    <oneDimensionalSetup>
       <indexBased> True </indexBased>
       <enablePerformance> False </enablePerformance>
-      <internalCells>          8                     8                     8                     8                     8                     8                     8
-                               24                    24                    24                    24                    24                    24                    24
-                               32                    32                    32                    32                    32                    32                    32                    </internalCells>
-      <haloSize>               6                     6                     6                     6                     6                     6                     6
-                               6                     6                     6                     6                     6                     6                     6
-                               4                     4                     4                     4                     4                     4                     4                     </haloSize>
-      <timeIntegrator>         RK2                   RK2                   RK2                   RK2                   RK2                   RK2                   RK2
-                               RK2                   RK2                   RK2                   RK2                   RK2                   RK2                   RK2
-                               RK3                   RK3                   RK3                   RK3                   RK3                   RK3                   RK3                   </timeIntegrator>
-      <riemannSolver>          Roe                   Roe                   Roe                   Roe                   Roe                   Hllc                  Hll
-                               Roe                   Roe                   Roe                   Roe                   Roe                   Hllc                  Hll
-                               Roe                   Roe                   Roe                   Roe                   Roe                   Hllc                  Hll                   </riemannSolver>
-      <fluxSplitting>          Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe
-                               Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe
-                               Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe                   </fluxSplitting>
-      <signalSpeed>            Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt
-                               Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt
-                               Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              </signalSpeed>
-      <reconstructionStencil>  WENO9                 WENO5Z                WENO7                 WENO9                 WENO5                 WENO7                 WENO5Z
-                               WENO7                 WENO9                 WENO5                 WENO3                 WENO5Z                WENO3                 WENO9
-                               WENO3                 WENO3                 WENO5Z                WENO7                 WENO3                 WENO5                 WENO3                 </reconstructionStencil>
-      <derivativeStencil>      HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
-                               HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
-                               HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 </derivativeStencil>
-      <levelsetAdvector>       DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil
-                               HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil
-                               ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil </levelsetAdvector>
-      <levelsetReinitializer>  Min                   Min                   Min                   Min                   Min                   Min                   Min
-                               Min                   Min                   Min                   Min                   Min                   Min                   Min
-                               Weno                  Weno                  Weno                  Weno                  Weno                  Weno                  Weno                  </levelsetReinitializer>
-      <interfaceRiemannSolver> Linearized            Exact                 TwoRarefaction        Hllc                  Linearized            Exact                 Hllc
-                               Hllc                  Linearized            Exact                 TwoRarefaction        Hllc                  Linearized            Linearized
-                               TwoRarefaction        Hllc                  Linearized            Exact                 TwoRarefaction        Hllc                  TwoRarefaction        </interfaceRiemannSolver>
-      <ghostFluidExtender>     Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw
-                               Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw
-                               Upwind                Upwind                Upwind                Upwind                Upwind                Upwind                Upwind                </ghostFluidExtender>
-      <gravity>                True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True                  </gravity>
-      <viscosity>              True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True                  </viscosity>
-      <capillaryForces>        True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True                  </capillaryForces>
-      <trackRuntimes>          True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True                  </trackRuntimes>
-      <limitEndTime>           True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True
-                               True                  True                  True                  True                  True                  True                  True                  </limitEndTime>
-      <equationSet>            NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes
-                               NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes
-                               NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          </equationSet>
+      <internalCells>           8                     8                     8                     8                     8                     8                     8
+                                24                    24                    24                    24                    24                    24                    24
+                                32                    32                    32                    32                    32                    32                    32                    </internalCells>
+      <haloSize>                6                     6                     6                     6                     6                     6                     6
+                                6                     6                     6                     6                     6                     6                     6
+                                4                     4                     4                     4                     4                     4                     4                     </haloSize>
+      <timeIntegrator>          RK2                   RK2                   RK2                   RK2                   RK2                   RK2                   RK2
+                                RK2                   RK2                   RK2                   RK2                   RK2                   RK2                   RK2
+                                RK3                   RK3                   RK3                   RK3                   RK3                   RK3                   RK3                   </timeIntegrator>
+      <convectiveTermSolver>    FluxSplitting         FluxSplitting         FluxSplitting         FluxSplitting         FluxSplitting         FiniteVolume          FiniteVolume
+                                FluxSplitting         FluxSplitting         FluxSplitting         FluxSplitting         FluxSplitting         FiniteVolume          FiniteVolume
+                                FluxSplitting         FluxSplitting         FluxSplitting         FluxSplitting         FluxSplitting         FiniteVolume          FiniteVolume          </convectiveTermSolver>
+      <fluxSplitting>           Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe
+                                Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe
+				Roe                   LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe_M                 LocalLaxFriedrichs_M  Roe                   Roe                   </fluxSplitting>
+      <riemannSolver>           Hllc                  Hllc                  Hllc                  Hllc                  Hllc                  Hllc                  Hll
+                                Hllc                  Hllc                  Hllc                  Hllc                  Hllc                  Hllc                  Hll
+                                Hllc                  Hllc                  Hllc                  Hllc                  Hllc                  Hllc                  Hll                   </riemannSolver>
+      <signalSpeed>             Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt
+                                Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt
+			        Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              Einfeldt              </signalSpeed>
+      <reconstructionStencil>   WENO9                 WENO5Z                WENO7                 WENO9                 WENO5                 WENO7                 WENO5Z
+                                WENO7                 WENO9                 WENO5                 WENO3                 WENO5Z                WENO3                 WENO9
+                                WENO3                 WENO3                 WENO5Z                WENO7                 WENO3                 WENO5                 WENO3                 </reconstructionStencil>
+      <stateReconstructionType> RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic
+                                RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic
+				RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic    </stateReconstructionType>
+      <derivativeStencil>       HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
+                                HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
+                                HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 </derivativeStencil>
+      <levelsetAdvector>        DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil     DerivativeStencil
+                                HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil   HjDerivativeStencil
+                                ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil ReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>   Min                   Min                   Min                   Min                   Min                   Min                   Min
+                                Min                   Min                   Min                   Min                   Min                   Min                   Min
+                                Weno                  Weno                  Weno                  Weno                  Weno                  Weno                  Weno                  </levelsetReinitializer>
+      <interfaceRiemannSolver>  Linearized            Exact                 TwoRarefaction        Hllc                  Linearized            Exact                 Hllc
+                                Hllc                  Linearized            Exact                 TwoRarefaction        Hllc                  Linearized            Linearized
+                                TwoRarefaction        Hllc                  Linearized            Exact                 TwoRarefaction        Hllc                  TwoRarefaction        </interfaceRiemannSolver>
+      <ghostFluidExtender>      Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw
+                                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw                Fedkiw
+                                Upwind                Upwind                Upwind                Upwind                Upwind                Upwind                Upwind                </ghostFluidExtender>
+      <gravity>                 True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True                  </gravity>
+      <viscosity>               True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True                  </viscosity>
+      <capillaryForces>         True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True                  </capillaryForces>
+      <trackRuntimes>           True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True                  </trackRuntimes>
+      <limitEndTime>            True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True
+                                True                  True                  True                  True                  True                  True                  True                  </limitEndTime>
+      <equationSet>             NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes
+                                NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes
+                                NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          NavierStokes          </equationSet>
    </oneDimensionalSetup>
 
    <twoDimensionalSetup>
       <indexBased> True </indexBased>
       <enablePerformance> False </enablePerformance>
-      <internalCells>          16                      16                    16                    16                      16                      </internalCells>
-      <haloSize>               4                       4                     4                     4                       4                       </haloSize>
-      <timeIntegrator>         RK3                     RK3                   RK3                   RK3                     RK3                     </timeIntegrator>
-      <riemannSolver>          Roe                     Roe                   Roe                   Hllc                    Hllc_LM                 </riemannSolver>
-      <fluxSplitting>          Roe                     LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe                     Roe                     </fluxSplitting>
-      <signalSpeed>            Einfeldt                Einfeldt              Einfeldt              Einfeldt                Einfeldt                </signalSpeed>
-      <reconstructionStencil>  WENO5                   WENOAO53              WENOAO53              WENO5                   WENO5                   </reconstructionStencil>
-      <derivativeStencil>      HOUC5                   HOUC5                 HOUC5                 HOUC5                   HOUC5                   </derivativeStencil>
-      <levelsetAdvector>       HjReconstructionStencil ReconstructionStencil ReconstructionStencil HjReconstructionStencil HjReconstructionStencil </levelsetAdvector>
-      <levelsetReinitializer>  Weno                    Weno                  Min                   Min                     Weno                    </levelsetReinitializer>
-      <interfaceRiemannSolver> Linearized              Linearized            TwoRarefaction        Hllc                    Linearized              </interfaceRiemannSolver>
-      <ghostFluidExtender>     Fedkiw                  Fedkiw                Fedkiw                Fedkiw                  Fedkiw                  </ghostFluidExtender>
-      <gravity>                True                    True                  True                  True                    True                    </gravity>
-      <viscosity>              True                    True                  True                  True                    True                    </viscosity>
-      <capillaryForces>        True                    True                  True                  True                    True                    </capillaryForces>
-      <trackRuntimes>          True                    True                  True                  True                    True                    </trackRuntimes>
-      <limitEndTime>           True                    True                  True                  True                    True                    </limitEndTime>
-      <equationSet>            NavierStokes            NavierStokes          NavierStokes          NavierStokes            NavierStokes            </equationSet>
+      <internalCells>           16                      16                    16                    16                      16                      </internalCells>
+      <haloSize>                4                       4                     4                     4                       4                       </haloSize>
+      <timeIntegrator>          RK3                     RK3                   RK3                   RK3                     RK3                     </timeIntegrator>
+      <convectiveTermSolver>    FluxSplitting           FluxSplitting         FluxSplitting         FiniteVolume            FiniteVolume            </convectiveTermSolver>
+      <fluxSplitting>           Roe                     LocalLaxFriedrichs    GlobalLaxFriedrichs   Roe                     Roe                     </fluxSplitting>
+      <riemannSolver>           Hllc                    Hllc                  Hllc                  Hllc                    Hllc_LM                 </riemannSolver>
+      <signalSpeed>             Einfeldt                Einfeldt              Einfeldt              Einfeldt                Einfeldt                </signalSpeed>
+      <reconstructionStencil>   WENO5                   WENOAO53              WENOAO53              WENO5                   WENO5                   </reconstructionStencil>
+      <stateReconstructionType> RoeCharacteristic       RoeCharacteristic     RoeCharacteristic     RoeCharacteristic       RoeCharacteristic       </stateReconstructionType>
+      <derivativeStencil>       HOUC5                   HOUC5                 HOUC5                 HOUC5                   HOUC5                   </derivativeStencil>
+      <levelsetAdvector>        HjReconstructionStencil ReconstructionStencil ReconstructionStencil HjReconstructionStencil HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>   Weno                    Weno                  Min                   Min                     Weno                    </levelsetReinitializer>
+      <interfaceRiemannSolver>  Linearized              Linearized            TwoRarefaction        Hllc                    Linearized              </interfaceRiemannSolver>
+      <ghostFluidExtender>      Fedkiw                  Fedkiw                Fedkiw                Fedkiw                  Fedkiw                  </ghostFluidExtender>
+      <gravity>                 True                    True                  True                  True                    True                    </gravity>
+      <viscosity>               True                    True                  True                  True                    True                    </viscosity>
+      <capillaryForces>         True                    True                  True                  True                    True                    </capillaryForces>
+      <trackRuntimes>           True                    True                  True                  True                    True                    </trackRuntimes>
+      <limitEndTime>            True                    True                  True                  True                    True                    </limitEndTime>
+      <equationSet>             NavierStokes            NavierStokes          NavierStokes          NavierStokes            NavierStokes            </equationSet>
    </twoDimensionalSetup>
 
    <threeDimensionalSetup>
       <indexBased> False </indexBased>
       <enablePerformance> True </enablePerformance>
-      <internalCells>          20                      </internalCells>
-      <haloSize>               4                       </haloSize>
-      <timeIntegrator>         RK3                     </timeIntegrator>
-      <riemannSolver>          Roe                     </riemannSolver>
-      <fluxSplitting>          Roe                     </fluxSplitting>
-      <signalSpeed>            Einfeldt                </signalSpeed>
-      <reconstructionStencil>  WENO5                   </reconstructionStencil>
-      <derivativeStencil>      HOUC5                   </derivativeStencil>
-      <levelsetAdvector>       HjReconstructionStencil </levelsetAdvector>
-      <levelsetReinitializer>  Weno                    </levelsetReinitializer>
-      <interfaceRiemannSolver> Linearized              </interfaceRiemannSolver>
-      <ghostFluidExtender>     Fedkiw                  </ghostFluidExtender>
-      <gravity>                True                    </gravity>
-      <viscosity>              True                    </viscosity>
-      <capillaryForces>        True                    </capillaryForces>
-      <trackRuntimes>          True                    </trackRuntimes>
-      <limitEndTime>           True                    </limitEndTime>
-      <equationSet>            NavierStokes            </equationSet>
+      <internalCells>           20                      </internalCells>
+      <haloSize>                4                       </haloSize>
+      <timeIntegrator>          RK3                     </timeIntegrator>
+      <convectiveTermSolver>    FluxSplitting           </convectiveTermSolver>
+      <fluxSplitting>           Roe                     </fluxSplitting>
+      <riemannSolver>           Hllc                    </riemannSolver>
+      <signalSpeed>             Einfeldt                </signalSpeed>
+      <reconstructionStencil>   WENO5                   </reconstructionStencil>
+      <stateReconstructionType> RoeCharacteristic       </stateReconstructionType>
+      <derivativeStencil>       HOUC5                   </derivativeStencil>
+      <levelsetAdvector>        HjReconstructionStencil </levelsetAdvector>
+      <levelsetReinitializer>   Weno                    </levelsetReinitializer>
+      <interfaceRiemannSolver>  Linearized              </interfaceRiemannSolver>
+      <ghostFluidExtender>      Fedkiw                  </ghostFluidExtender>
+      <gravity>                 True                    </gravity>
+      <viscosity>               True                    </viscosity>
+      <capillaryForces>         True                    </capillaryForces>
+      <trackRuntimes>           True                    </trackRuntimes>
+      <limitEndTime>            True                    </limitEndTime>
+      <equationSet>             NavierStokes            </equationSet>
    </threeDimensionalSetup>
 
 </configuration>

@@ -7,9 +7,11 @@ should be added in this module.
 # Classes and functions
 from .inputfile_specifications import InputfileSpecifications
 from .user_specifications import UserSpecifications
+from .output_variables import OutputVariables
 
 # Data for wildcard import (from . import *)
 __all__ = [
     "InputfileSpecifications",
-    "UserSpecifications"
+    "UserSpecifications",
+    "OutputVariables"
 ]

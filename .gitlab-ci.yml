@@ -47,7 +47,7 @@ Varied 1D Alpaca :
   stage: alltests
   script:
     - pip3 install ./python
-    - python3 ./python/scripts/create_executable.py ./ --dimension 1 --internal-cells 24 --riemann-solver Hllc --levelset-reinitializer Min
+    - python3 ./python/scripts/create_executable.py ./ --dimension 1 --internal-cells 24 --convective-term-solver FiniteVolume --levelset-reinitializer Min
       --limit-end-time True --executable-name A_1D_VAR --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_1D_VAR Utilities/Inputfiles/CiCd/1D-LevelsetSodX.xml
     - mpiexec -n 2 ./A_1D_VAR Utilities/Inputfiles/CiCd/1D-LevelsetSodX.xml
@@ -72,7 +72,7 @@ Two dimensional isentropic:
    stage: alltests
    script:
     - pip3 install ./python
-    - python3 ./python/scripts/create_executable.py ./ --dimension 2 --equation-set Isentropic --riemann-solver Hll --signal-speed Arithmetic --executable-name A_ISN --executable-path ./ --disable-progress
+    - python3 ./python/scripts/create_executable.py ./ --dimension 2 --equation-set Isentropic --convective-term-solver FiniteVolume --state-reconstruction-type Conservative --riemann-solver Hll --signal-speed Arithmetic --executable-name A_ISN --executable-path ./ --disable-progress
     - mpiexec -n 1 ./A_ISN Utilities/Inputfiles/CiCd/Isentropic.xml
     - mpiexec -n 2 ./A_ISN Utilities/Inputfiles/CiCd/Isentropic.xml
     - python3 ./python/scripts/remove_volatile_log_information.py Isentropic/Isentropic.log

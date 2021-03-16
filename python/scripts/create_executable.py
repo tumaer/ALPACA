@@ -3,11 +3,11 @@
 from argparse import ArgumentParser
 # alpacapy modules
 from alpacapy.alpaca.specifications.user_specifications import UserSpecifications
+from alpacapy.alpaca.specifications.output_variables import OutputVariables
 from alpacapy.alpaca.create_executable import create_executable
 from alpacapy.helper_functions import string_operations as so
 from alpacapy.name_style import NameStyle
 from alpacapy.logger import Logger
-from alpacapy.alpaca.specifications.user_specifications import OutputVariables
 
 
 def setup_argument_parser() -> ArgumentParser:
@@ -26,6 +26,7 @@ def setup_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(prog="Create Alpaca executable",
                             description="Creates an Alpaca executable for a desired set of user specifications")
     user_specifications = UserSpecifications()
+    output_variables = OutputVariables()
     # Add the basic other arguments
     parser.add_argument("alpaca_base_path", help="The path to the alpaca folder, where the src folder lies", type=str)
     parser.add_argument("--executable-build-path", help="The path where the executable is built", type=str, default="./Build")
@@ -54,10 +55,10 @@ def setup_argument_parser() -> ArgumentParser:
             parser.add_argument("--" + NameStyle.arg_parser.format(name), default=None, type=arg_type,
                                 help="Allows setting the user specification " + NameStyle.log.format(name) + " to create the executable")
 
-    parser.add_argument("--output-variables", nargs='*', default=None, type=str, dest="output_variables",
-                        help="Allows setting the output variables to create the executable", choices=OutputVariables.values)
-    parser.add_argument("--output-types", nargs='*', default=None, type=str, dest="output_tags",
-                        help="Allows the setting what outputs should be written", choices=["Standard", "Interface"])
+    for name, output_variable in output_variables.items():
+        parser.add_argument("--" + NameStyle.arg_parser.format(name), default=None, type=so.string_to_bool, nargs='*',
+                            help="Allows setting the output variable " + NameStyle.log.format(name) + " to create the executable")
+
     # Set the default values for the arguments that do not require a string
     parser.set_defaults(enable_performance=None, enable_symmetry=True)
     return parser
@@ -74,14 +75,15 @@ if __name__ == "__main__":
         if key in user_specifications:
             user_specifications[key].value = value
 
-    # Convert the output tags to int
-    if options.output_tags is not None:
-        options.output_tags = []
-        for type in output_tags:
-            if type == "Standard":
-                options.output_tags.append(0)
-            elif type == "Interface":
-                options.output_tags.append(1)
+    # Generate the output variables class
+    output_variables = OutputVariables()
+    for key, values in vars(options).items():
+        if key in output_variables:
+            if values is not None:
+                if len(values) < 3:
+                    values = values[:] + [0 for _ in range(len(values), 3)]
+                values = values[:3]
+            output_variables[key].values = values
 
     logger = Logger()
     logger.star_line_flush()
@@ -96,8 +98,7 @@ if __name__ == "__main__":
                       enable_symmetry=options.enable_symmetry,
                       compilation_cores=options.compile_cores,
                       user_specifications=user_specifications,
-                      output_variables=options.output_variables,
-                      output_tags=options.output_tags,
+                      output_variables=output_variables,
                       print_progress=options.print_progress,
                       verbose=options.verbose)
 

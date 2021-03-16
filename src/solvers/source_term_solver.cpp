@@ -82,7 +82,7 @@ SourceTermSolver::SourceTermSolver( MaterialManager const& material_manager, std
 }
 
 /**
- * @brief Computes additions to the right hand side solution due to the present source terms.
+ * @brief Computes additions to the right-hand side solution due to the present source terms.
  * @param mat_block The phase with its material identifier.
  * @param cell_size The cell size of the node.
  * @param node_origin_x The coordinate of the node origin in x-direction.

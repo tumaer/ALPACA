@@ -699,6 +699,9 @@ class Testcase:
             # Log initial information for each dimension
             self.logger.write("Check '" + self.__info.name + "' runtimes in " + str(dim) + "D", color="bold")
             self.logger.blank_line()
+            if dim == 1:
+                self.logger.write("For 1D no runtime information is logged. See final csv file for reference.")
+                self.logger.blank_line()
 
             # Loop through all cases
             for case_id, all_case_data in self.__result_data[dim - 1].itercases():
@@ -706,8 +709,9 @@ class Testcase:
                 case_string = self.__result_data[dim - 1].case_variation_string(case_id)
                 case_variation = self.__result_data[dim - 1].case_variation(case_id)
                 # Logging information
-                self.logger.write("Checking " + case_string)
-                self.logger.indent += 2
+                if dim != 1:
+                    self.logger.write("Checking " + case_string)
+                    self.logger.indent += 2
 
                 # Define the information that is written by all cases
                 status = ResultStatus.passed
@@ -749,16 +753,17 @@ class Testcase:
                 self.__result_data[dim - 1].set_value(case_id, "RuntimeToRef", mo.get_percentage(relative_error))
 
                 # Log information
-                if runtime is not None:
-                    self.logger.write("Runtime      : " + str(runtime) + " s")
-                else:
-                    self.logger.write("No reference case", color=status.color)
-                if status not in ResultStatus.no_data_results():
-                    self.logger.write("Ref-Runtime  : " + str(reference_runtime) + " s")
-                    self.logger.write("RuntimeToRef : " + str(so.convert_to_percentage(relative_error, precision=4)) + " %")
-                self.logger.write("=> Testcase " + str(status), color=status.color)
-                self.logger.blank_line()
-                self.logger.indent -= 2
+                if dim != 1:
+                    if runtime is not None:
+                        self.logger.write("Runtime      : " + str(runtime) + " s")
+                    else:
+                        self.logger.write("No reference case", color=status.color)
+                    if status not in ResultStatus.no_data_results():
+                        self.logger.write("Ref-Runtime  : " + str(reference_runtime) + " s")
+                        self.logger.write("RuntimeToRef : " + str(so.convert_to_percentage(relative_error, precision=4)) + " %")
+                    self.logger.write("=> Testcase " + str(status), color=status.color)
+                    self.logger.blank_line()
+                    self.logger.indent -= 2
 
             # End time measurement and append to list
             self.__compute_time_list[dim - 1] += time.time() - start_time
@@ -785,21 +790,25 @@ class Testcase:
 
         if self.__info.active:
             # Create a dictionary for all test case stat
-            keys = [ResultStatus.improved, ResultStatus.passed, ResultStatus.failed, ResultStatus.no_reference, ResultStatus.no_check,
+            keys = [ResultStatus.improved, ResultStatus.passed, ResultStatus.failed, ResultStatus.warning, ResultStatus.no_reference, ResultStatus.no_check,
                     ResultStatus.not_applicable, ResultStatus.simulation_failed, "TOTAL"]
-            table_dict = [{str(key): 0 for key in keys} for _ in [1, 2, 3]]
-            color_dict = [{str(key): key.color if key != "TOTAL" else "" for key in keys} for _ in [1, 2, 3]]
+            table_dict_cases = [{str(key): 0 for key in keys} for _ in [1, 2, 3]]
+            color_dict_cases = [{str(key): key.color if key != "TOTAL" else "" for key in keys} for _ in [1, 2, 3]]
+            table_dict_runtimes = [{str(key): 0 for key in keys} for _ in [1, 2, 3]]
+            color_dict_runtimes = [{str(key): key.color if key != "TOTAL" else "" for key in keys} for _ in [1, 2, 3]]
 
             # Loop through the different dimensions and add the information
             for dim in [1, 2, 3]:
                 if dim not in self.__info.dimensions or dim not in dimensions_to_run:
                     continue
                 # Total number of cases
-                table_dict[dim - 1]["TOTAL"] = len(self.__result_data[dim - 1])
+                table_dict_cases[dim - 1]["TOTAL"] = len(self.__result_data[dim - 1])
+                table_dict_runtimes[dim - 1]["TOTAL"] = len(self.__result_data[dim - 1])
                 # Loop through all cases in the data
                 for case_ids, case_data in self.__result_data[dim - 1].itercases():
                     # Increment counter at the correct dictionary position
-                    table_dict[dim - 1][case_data["TestcaseStatus"]] += 1
+                    table_dict_cases[dim - 1][case_data["TestcaseStatus"]] += 1
+                    table_dict_runtimes[dim - 1][case_data["RuntimeStatus"]] += 1
                     # Get whether the folders can be deleted and executables must be kept.
                     if case_data["TestcaseStatus"] in [str(status) for status in ResultStatus.passed_data_results()]:
                         result_folders_to_delete[dim - 1].append(case_data["ResultFolder"])
@@ -808,23 +817,53 @@ class Testcase:
                         if case_data[executable_tag] not in executables_to_keep[dim - 1]:
                             executables_to_keep[dim - 1].append(case_data[executable_tag])
 
-            # Create the table
-            summary_table = [["", "  1D  ", "  2D  ", " 3D  "]]
-            color_table = [["", "", "", ""]]
-            for key in table_dict[0].keys():
-                if key != "TOTAL":
-                    summary_table.append([key[0].upper() + key[1:].lower()] + [str(table_dict[dim - 1][key]) for dim in [1, 2, 3]])
-                    color_table.append([""] + [color_dict[dim - 1][key] if table_dict[dim - 1][key] != 0 else "" for dim in [1, 2, 3]])
-            summary_table.append([])
-            summary_table.append(["Total"] + [str(table_dict[dim - 1]["TOTAL"]) for dim in [1, 2, 3]])
-            color_table.append([])
-            color_table.append(["", "", "", ""])
-
-            # Log summary information for this test case
-            self.logger.write("Testcase \'" + self.__info.name + "\':", color="bold")
+            # Create the table and log it
+            self.logger.write("Summary Testcase \'" + self.__info.name + "\':", color="bold")
             self.logger.indent += 2
             self.logger.blank_line()
-            self.logger.write("Summary:", color="bold")
+
+            for table_name, table_dict, color_dict in zip(["Validation", "Runtime"], [table_dict_cases, table_dict_runtimes], [
+                                                          color_dict_cases, color_dict_runtimes]):
+                summary_table = [["", "|", "  1D  ", "  2D  ", " 3D  "]]
+                summary_table.append([])
+                color_table = [["", "", "", "", ""]]
+                color_table.append([])
+                for key in table_dict[0].keys():
+                    if key != "TOTAL":
+                        summary_table.append([key[0].upper() + key[1:].lower()] + ["|"] + [str(table_dict[dim - 1][key]) for dim in [1, 2, 3]])
+                        color_table.append([""] + [""] + [color_dict[dim - 1][key] if table_dict[dim - 1][key] != 0 else "" for dim in [1, 2, 3]])
+                summary_table.append([])
+                summary_table.append(["Total"] + ["|"] + [str(table_dict[dim - 1]["TOTAL"]) for dim in [1, 2, 3]])
+                color_table.append([])
+                color_table.append(["", "", "", "", ""])
+
+                # Log table
+                self.logger.write(table_name + ":", color="bold")
+                self.logger.blank_line()
+                self.logger.write_table(summary_table, color_table)
+                self.logger.blank_line()
+
+            # Compute the statistical information for the runtimes
+            relevant_runtimes = [np.array([case_data["RuntimeToRef"] for _, case_data in self.__result_data[dim - 1].itercases()
+                                           if case_data["RuntimeStatus"] not in ResultStatus.no_data_results()]) for dim in [1, 2, 3]]
+            min_runtimes = [np.min(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
+            max_runtimes = [np.max(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
+            mean_runtimes = [np.mean(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
+            std_runtimes = [np.std(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
+
+            # Create a nd log the statistical table
+            summary_table = [["", "|", "  1D  ", "  2D  ", " 3D  "]]
+            summary_table.append([])
+            color_table = [["", "", "", "", ""]]
+            color_table.append([])
+            for error_name, rel_errors in zip(["Best", "Worst", "Average"], [min_runtimes, max_runtimes, mean_runtimes]):
+                summary_table.append([error_name] + ["|"] + ["{:.2f}".format(rel_error) if rel_error != "N/A" else rel_error for rel_error in rel_errors])
+                color_table.append([""] + [""] + [ResultStatus.status_of_relative_error(rel_error, 2, 5, 0).color if rel_error != "N/A" else ""
+                                                  for rel_error in rel_errors])
+            summary_table.append(["Sigma"] + ["|"] + ["{:.2f}".format(rel_error) if rel_error != "N/A" else rel_error for rel_error in std_runtimes])
+            color_table.append(["", "", "", "", ""])
+
+            self.logger.write("Runtime values:", color="bold")
             self.logger.blank_line()
             self.logger.write_table(summary_table, color_table)
             self.logger.blank_line()

@@ -77,7 +77,7 @@
  * @param gravity Three-dimensional array holding the gravitational pull in x-, y-, z-direction.
  */
 SpaceSolver::SpaceSolver( MaterialManager const& material_manager, std::array<double, 3> const gravity ) : eigendecomposition_calculator_( material_manager ),
-                                                                                                           riemann_solver_( material_manager, eigendecomposition_calculator_ ),
+                                                                                                           convective_term_solver_( material_manager, eigendecomposition_calculator_ ),
                                                                                                            source_term_solver_( material_manager, gravity ),
                                                                                                            interface_term_solver_( material_manager ),
                                                                                                            material_manager_( material_manager ),
@@ -149,7 +149,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
 
       // Determine cell face fluxes unsing a Riemann solver
       if constexpr( CC::InviscidExchangeActive() ) {
-         riemann_solver_.Update( phase, cell_size, face_fluxes_x, face_fluxes_y, face_fluxes_z );
+         convective_term_solver_.UpdateConvectiveFluxes( phase, cell_size, face_fluxes_x, face_fluxes_y, face_fluxes_z );
       }
 
       // Determine source terms
@@ -200,7 +200,7 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
 }
 
 /**
- * @brief Computes right hand side of the level set advection equation.
+ * @brief Computes right-hand side of the level set advection equation.
  * @param node The node under consideration.
  */
 void SpaceSolver::UpdateLevelsetFluxes( Node& node ) const {

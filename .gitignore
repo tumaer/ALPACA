@@ -1,4 +1,5 @@
 ALPACA
+!ALPACA/
 *.log
 doc/html
 doc/latex

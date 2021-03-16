@@ -66,73 +66,93 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-
-#include "solvers/riemann_solvers/isentropic_hll_riemann_solver.h"
-
-#include "utilities/mathematical_functions.h"
-#include "solvers/riemann_solvers/hll_signal_speed_calculator.h"
+#include "solvers/convective_term_contributions/finite_volume_scheme.h"
 #include "stencils/stencil_utilities.h"
+#include "solvers/state_reconstruction.h"
+
+static_assert( !( active_equations == EquationSet::Isentropic && state_reconstruction_type == StateReconstructionType::RoeCharacteristic ), "RoeCharacteristic reconstruction not implemented for isentropic equations!" );
 
 /**
- * @brief Standard constructor using an already existing MaterialManager and EigenDecomposition object. See base class.
+ * @brief Standard constructor using an already existing MaterialManager and EigenDecomposition object.
  * @param material_manager .
  * @param eigendecomposition_calculator .
  */
-IsentropicHllRiemannSolver::IsentropicHllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : RiemannSolver( material_manager, eigendecomposition_calculator ) {
+FiniteVolumeScheme::FiniteVolumeScheme( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : ConvectiveTermSolver( material_manager, eigendecomposition_calculator ),
+                                                                                                                                             riemann_solver_( material_manager, eigendecomposition_calculator_ ) {
    /* Empty besides initializer list*/
 }
 
 /**
- * @brief Solving the right hand side of the underlying system of equations. Using spatial reconstruction of cell averaged values (finite volume approach) and flux determination by HLL procedure.
- * See base class.
+ * @brief Solving the convective term of the system. Using dimension splitting for fluxes in x, y, and z- direction. Also See base class.
+ * @note Hotpath function.
  */
-void IsentropicHllRiemannSolver::UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-                                                       double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                                                       double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                                                       double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
+void FiniteVolumeScheme::UpdateImplementation(
+      std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+      double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
 
-   ComputeFluxes<Direction::X>( mat_block, fluxes_x, cell_size );
+   double roe_eigenvectors_left[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
+   double roe_eigenvectors_right[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
+   double roe_eigenvalues[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()];
+
+   constexpr bool require_eigendecomposition = ( active_equations == EquationSet::NavierStokes || active_equations == EquationSet::Euler ) && state_reconstruction_type == StateReconstructionType::RoeCharacteristic;
+
+   if constexpr( require_eigendecomposition ) {
+      // Setting the eigenvectors, eigenvalues to zero is necessary for two-phase simulations as not every entry is necessarily set during eigendecomposition
+      for( unsigned int i = 0; i < CC::ICX() + 1; ++i ) {
+         for( unsigned int j = 0; j < CC::ICY() + 1; ++j ) {
+            for( unsigned int k = 0; k < CC::ICZ() + 1; ++k ) {
+               for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
+                  for( unsigned int f = 0; f < MF::ANOE(); ++f ) {
+                     roe_eigenvectors_left[i][j][k][e][f]  = 0.0;
+                     roe_eigenvectors_right[i][j][k][e][f] = 0.0;
+                  }
+                  roe_eigenvalues[i][j][k][e] = 0.0;
+               }
+            }
+         }
+      }
+
+      eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::X>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, roe_eigenvalues );
+   }
+   ComputeFluxes<Direction::X>( mat_block, fluxes_x, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
 
    if constexpr( CC::DIM() != Dimension::One ) {
-      ComputeFluxes<Direction::Y>( mat_block, fluxes_y, cell_size );
+      if constexpr( require_eigendecomposition ) {
+         eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::Y>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, roe_eigenvalues );
+      }
+      ComputeFluxes<Direction::Y>( mat_block, fluxes_y, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
    }
 
    if constexpr( CC::DIM() == Dimension::Three ) {
-      ComputeFluxes<Direction::Z>( mat_block, fluxes_z, cell_size );
+      if constexpr( require_eigendecomposition ) {
+         eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::Z>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, roe_eigenvalues );
+      }
+      ComputeFluxes<Direction::Z>( mat_block, fluxes_z, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
    }
 }
 
 /**
- * @brief Computes the cell face fluxes with the set stencil using HLL procedure
+ * @brief Computes the convective cell face fluxes by performing a finite-volume state reconstruction and solving a Riemann problem afterwards.
  * @param mat_block The block and material information of the phase under consideration.
  * @param fluxes Reference to an array which is filled with the computed fluxes (indirect return parameter).
+ * @param roe_eigenvectors_left .
+ * @param roe_eigenvectors_right .
  * @param cell_size .
  * @tparam DIR Indicates which spatial direction is to be computed.
  * @note Hotpath function.
  */
 template<Direction DIR>
-void IsentropicHllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-                                                double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                                                double const cell_size ) const {
-
-   using ReconstructionStencil = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
-
-   // declaration of applied vectors
-   std::array<double, ReconstructionStencil::StencilSize()> reconstruction_array;// storage for reconstructed values
-   std::array<double, MF::ANOE()> state_face_left;                               // variable vector containing interpolated states of left patch of cell face i/j/k+1/2
-   std::array<double, MF::ANOE()> state_face_right;                              // variable vector containing interpolated states of right patch of cell face i/j/k+1/2
-   std::array<double, MF::ANOE()> flux_left;                                     // F(state_face_left)
-   std::array<double, MF::ANOE()> flux_right;                                    // F(state_face_right)
-
-   constexpr unsigned int principal_momentum_index = ETI( MF::AME()[DTI( DIR )] );
+void FiniteVolumeScheme::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
+                                        double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                        double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                        double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                        double const cell_size ) const {
 
    constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
    constexpr unsigned int y_start = DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
    constexpr unsigned int z_start = DIR == Direction::Z ? CC::FICZ() - 1 : CC::FICZ();
-
-   constexpr unsigned int x_reconstruction_offset = DIR == Direction::X ? 1 : 0;
-   constexpr unsigned int y_reconstruction_offset = DIR == Direction::Y ? 1 : 0;
-   constexpr unsigned int z_reconstruction_offset = DIR == Direction::Z ? 1 : 0;
 
    constexpr unsigned int x_end = CC::LICX();
    constexpr unsigned int y_end = CC::LICY();
@@ -145,9 +165,6 @@ void IsentropicHllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Bl
    // Access the pair's elements directly.
    auto const& [material, block] = mat_block;
 
-   // Required for Toro signal speeds
-   double const gamma = material_manager_.GetMaterial( material ).GetEquationOfState().Gamma();
-
    for( unsigned int i = x_start; i <= x_end; ++i ) {
       for( unsigned int j = y_start; j <= y_end; ++j ) {
          for( unsigned int k = z_start; k <= z_end; ++k ) {
@@ -156,61 +173,21 @@ void IsentropicHllRiemannSolver::ComputeFluxes( std::pair<MaterialName const, Bl
             int const j_index = j - total_to_internal_offset_y;
             int const k_index = k - total_to_internal_offset_z;
 
-            // Reconstruct fluxes at face i+1/2 using a selected reconstruction procedure
-            for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
-               for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
-                  reconstruction_array[m] = block.GetAverageBuffer( MF::ASOE()[n] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
-                                                                                   [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
-                                                                                   [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )];
-               }
-               state_face_left[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( reconstruction_array, cell_size );
-               state_face_right[n] = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( reconstruction_array, cell_size );
-            }
+            auto const [reconstructed_conservatives_left, reconstructed_conservatives_right,
+                        reconstructed_primes_left, reconstructed_primes_right] = StateReconstruction<DIR, reconstruction_stencil>( block,
+                                                                                                                                   material_manager_.GetMaterial( material ).GetEquationOfState(),
+                                                                                                                                   Roe_eigenvectors_left[i_index][j_index][k_index],
+                                                                                                                                   Roe_eigenvectors_right[i_index][j_index][k_index],
+                                                                                                                                   cell_size, i, j, k );
+            // To check for invalid cells due to ghost fluid method
+            double const B = active_equations == EquationSet::Isentropic ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().B();
+            if( reconstructed_conservatives_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || reconstructed_conservatives_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
+            if( reconstructed_primes_left[PTI( PrimeState::Pressure )] <= -B || reconstructed_primes_right[PTI( PrimeState::Pressure )] <= -B ) continue;
 
-            // Check for invalid cells due to ghost fluid method
-            if( state_face_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || state_face_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
-
-            // Compute pressure, velocity and speed of sound for both cells for reconstructed values
-            double const pressure_left  = material_manager_.GetMaterial( material ).GetEquationOfState().Pressure( state_face_left[ETI( Equation::Mass )], 0.0, 0.0, 0.0, 0.0 );
-            double const pressure_right = material_manager_.GetMaterial( material ).GetEquationOfState().Pressure( state_face_right[ETI( Equation::Mass )], 0.0, 0.0, 0.0, 0.0 );
-
-            // Check for invalid cells due to ghost fluid method
-            if( pressure_left <= 0 || pressure_right <= 0 ) continue;
-
-            double const velocity_left        = state_face_left[principal_momentum_index] / state_face_left[ETI( Equation::Mass )];
-            double const velocity_right       = state_face_right[principal_momentum_index] / state_face_right[ETI( Equation::Mass )];
-            double const speed_of_sound_left  = material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( state_face_left[ETI( Equation::Mass )], pressure_left );
-            double const speed_of_sound_right = material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( state_face_right[ETI( Equation::Mass )], pressure_right );
-
-            // Calculation of signal speeds
-            auto const [wave_speed_left_simple, wave_speed_right_simple] = CalculateSignalSpeed( state_face_left[ETI( Equation::Mass )], state_face_right[ETI( Equation::Mass )],
-                                                                                                 velocity_left, velocity_right,
-                                                                                                 pressure_left, pressure_right,
-                                                                                                 speed_of_sound_left, speed_of_sound_right,
-                                                                                                 gamma );
-
-            double const wave_speed_left  = std::min( wave_speed_left_simple, 0.0 );
-            double const wave_speed_right = std::max( wave_speed_right_simple, 0.0 );
-
-            // Calculation of left and right flux
-            flux_left[ETI( Equation::Mass )]     = state_face_left[principal_momentum_index];
-            flux_left[principal_momentum_index]  = ( ( state_face_left[principal_momentum_index] * state_face_left[principal_momentum_index] ) / state_face_left[ETI( Equation::Mass )] ) + pressure_left;
-            flux_right[ETI( Equation::Mass )]    = state_face_right[principal_momentum_index];
-            flux_right[principal_momentum_index] = ( ( state_face_right[principal_momentum_index] * state_face_right[principal_momentum_index] ) / state_face_right[ETI( Equation::Mass )] ) + pressure_right;
-
-            // minor momenta
-            for( unsigned int d = 0; d < DTI( CC::DIM() ) - 1; ++d ) {
-               // get the index of this minor momentum
-               unsigned int const minor_momentum_index = ETI( MF::AME()[DTI( GetMinorDirection<DIR>( d ) )] );
-
-               flux_left[minor_momentum_index]  = velocity_left * state_face_left[minor_momentum_index];
-               flux_right[minor_momentum_index] = velocity_right * state_face_right[minor_momentum_index];
-            }
+            auto const face_fluxes = riemann_solver_.SolveRiemannProblem<DIR>( material, reconstructed_conservatives_left, reconstructed_conservatives_right, reconstructed_primes_left, reconstructed_primes_right );
 
             for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
-               fluxes[n][i_index][j_index][k_index] += ( ( ( wave_speed_right * flux_left[n] ) - ( wave_speed_left * flux_right[n] ) ) +
-                                                         ( ( wave_speed_right * wave_speed_left ) * ( state_face_right[n] - state_face_left[n] ) ) ) /
-                                                       ( wave_speed_right - wave_speed_left );
+               fluxes[n][i_index][j_index][k_index] += face_fluxes[n];
             }
          }// k
       }   // j

@@ -255,7 +255,7 @@ Conservatives const& Block::GetAverageBuffer() const {
 }
 
 /**
- * @brief Gives access to the right hand side buffer.
+ * @brief Gives access to the right-hand side buffer.
  * @return Right-hand side buffer struct.
  */
 Conservatives& Block::GetRightHandSideBuffer() {

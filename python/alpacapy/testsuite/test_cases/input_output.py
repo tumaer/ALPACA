@@ -52,7 +52,7 @@ class InputOutput(Testcase):
         log_file = fo.add_folder_to_files(fo.get_files_in_folder(str(result_folder), extension=".log"), result_folder)
         if len(log_file) != 1:
             self.logger.write("No log file or too many exists in result folder! Potentially something went wrong!", color="r")
-            return [ResultStatus.no_check, [], []]
+            return [ResultStatus.no_check, [], [], []]
 
         # Get the runtimes from the log file
         [init_runtime, output_runtime, _] = obtain_runtime_information(log_file[0])

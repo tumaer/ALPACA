@@ -13,7 +13,7 @@ from alpacapy.alpaca.definitions.user_specification_file import UserSpecificatio
 
 class ReconstructionStencil:
     """ Gives a list of all reconstruction stencils that are allowed. Own class for multiple usage. Add new stencils here. """
-    values = ['FirstOrder', 'WENO3', 'FourthOrderCentral', 'WENO5', 'WENO5AER', 'WENO5Z', 'WENOAO53', 'WENO5HM',
+    values = ['FirstOrder', 'WENO3', 'WENOF3P', 'FourthOrderCentral', 'WENO5', 'WENO5AER', 'WENO5Z', 'WENOAO53', 'WENO5HM', 'WENO5NU6P',
               'TENO5', 'WENOCU6', 'WENO7', 'WENO9']
 
     def __init__(self):
@@ -22,20 +22,7 @@ class ReconstructionStencil:
 
 class DerivativeStencil:
     """ Gives a list of all derivative stencils that are allowed. Own class for multiple usage. Add new stencils here. """
-    values = ['FirstOrderUpwind', 'CentralDifference', 'FourthOrderCentralDifference', 'FourthOrderCellFace', 'HOUC5']
-
-    def __init__(self):
-        pass
-
-
-class OutputVariables:
-    """ Gives a list of all output variables that can be chosen to be set."""
-    values = [  # Material
-        "Mass", "Momentum", "Energy", "Density", "Velocity", "Pressure", "Temperature", "ShearViscosity", "ThermalConductivity",
-        # Interface
-        "Levelset", "VolumeFraction", "InterfaceVelocity", "PressurePositive", "PressureNegative", "SurfaceTensionCoefficient",
-        # Custom
-        "Partition", "MachNumber", "NumericalSchlieren", "VorticityAbsolute", "Helicity", "Baroclinicity", "VortexDilatation", "VortexStretching"]
+    values = ['CentralDifference', 'FourthOrderCentralDifference', 'FourthOrderCellFace', 'HOUC5']
 
     def __init__(self):
         pass
@@ -122,8 +109,8 @@ class UserSpecifications(SpecificationsBase):
             "CapillaryForces": UserSpecificationTag(bool, True, UserSpecificationFile.compile_time_constants, "capillary_forces_active_"),
             "GruneisenDensityDependent": UserSpecificationTag(bool, False, UserSpecificationFile.compile_time_constants, "gruneisen_density_dependent_"),
             "Axisymmetric": UserSpecificationTag(bool, False, UserSpecificationFile.compile_time_constants, "axisymmetric_"),
-            "LimitEndTime": UserSpecificationTag(bool, False, UserSpecificationFile.compile_time_constants, "limit_end_time_"),
-            "TrackRuntimes": UserSpecificationTag(bool, False, UserSpecificationFile.compile_time_constants, "track_runtimes_"),
+            "LimitEndTime": UserSpecificationTag(bool, False, UserSpecificationFile.compile_time_constants, "limit_end_time_", no_tag=True),
+            "TrackRuntimes": UserSpecificationTag(bool, False, UserSpecificationFile.compile_time_constants, "track_runtimes_", no_tag=True),
             "LevelsetCutOffFactor": UserSpecificationTag(str, "8.0", UserSpecificationFile.compile_time_constants, "levelset_cutoff_factor_"),
             "FullSymmetry": UserSpecificationTag(bool, True, UserSpecificationFile.compile_time_constants, "full_symmetry_active"),
             "ReinitializationBand": UserSpecificationTag(int, 4, UserSpecificationFile.compile_time_constants, "reinitialization_band_"),
@@ -138,40 +125,38 @@ class UserSpecifications(SpecificationsBase):
             # Used in combination with time integrator
             "SpaceTimeDiscretizationOrder": UserSpecificationTag(int, 3, UserSpecificationFile.compile_time_constants, "space_time_discretization_order_"),
             # -----------------------
-            # Numerical setup
+            # Equation settings
+            # -----------------------
+            "EquationSet": UserSpecificationTag(str, "NavierStokes",
+                                                UserSpecificationFile.equation_settings,
+                                                "active_equations",
+                                                "EquationSet::",
+                                                ["Isentropic",
+                                                 "Euler",
+                                                 "NavierStokes",
+                                                 "Custom"]),
+            # -----------------------
+            # Numerical setup (single)
             # -----------------------
             "TimeIntegrator": UserSpecificationTag(str, "RK3", UserSpecificationFile.numerical_setup, "time_integrator", "TimeIntegrators::", ["RK2", "RK3"]),
-            "LevelsetAdvector": UserSpecificationTag(str,
-                                                     "DerivativeStencil",
-                                                     UserSpecificationFile.numerical_setup,
-                                                     "levelset_advector",
-                                                     "LevelsetAdvectors::",
-                                                     ["DerivativeStencil", "ReconstructionStencil", "HjReconstructionStencil", "HjDerivativeStencil"]),
-            "LevelsetReinitializer": UserSpecificationTag(str,
-                                                          "Weno",
-                                                          UserSpecificationFile.numerical_setup,
-                                                          "levelset_reinitializer", "LevelsetReinitializers::",
-                                                          ["Min", "Weno", "Explicit"]),
-            "InterfaceRiemannSolver": UserSpecificationTag(str,
-                                                           "Linearized",
-                                                           UserSpecificationFile.numerical_setup,
-                                                           "interface_riemann_solver",
-                                                           "InterfaceRiemannSolvers::",
-                                                           ["Linearized", "Exact", "TwoRarefaction", "Hllc"]),
-            "CutCellMixer": UserSpecificationTag(str, "ApertureBased", UserSpecificationFile.numerical_setup, "cut_cell_mixer", "CutCellMixers::",
-                                                 ["ApertureBased", "NormalBased", "Lauer"]),
-            "GhostFluidExtender": UserSpecificationTag(str, "Fedkiw", UserSpecificationFile.numerical_setup, "extender", "Extenders::",
-                                                       ["Fedkiw", "Upwind", "Explicit"]),
             # -----------------------
             # Riemann setting
             # -----------------------
-            "RiemannSolver": UserSpecificationTag(str, "Roe", UserSpecificationFile.riemann_solver_settings, "riemann_solver", "RiemannSolvers::",
-                                                  ["Roe", "Hllc", "Hll", "Hllc_LM"]),
+            "ConvectiveTermSolver": UserSpecificationTag(str, "FluxSplitting", UserSpecificationFile.riemann_solver_settings,
+                                                         "convective_term_solver", "ConvectiveTermSolvers::", ["FluxSplitting", "FiniteVolume"]),
             "FluxSplitting": UserSpecificationTag(str, "Roe", UserSpecificationFile.riemann_solver_settings, "flux_splitting_scheme", "FluxSplitting::",
                                                   ["Roe", "LocalLaxFriedrichs", "GlobalLaxFriedrichs", "Roe_M", "LocalLaxFriedrichs_M"]),
+            "LowMachNumberLimit": UserSpecificationTag(str, "5.0", UserSpecificationFile.riemann_solver_settings, "low_mach_number_limit_factor"),
+            "RiemannSolver": UserSpecificationTag(str, "Hllc", UserSpecificationFile.riemann_solver_settings, "riemann_solver", "RiemannSolvers::",
+                                                  ["Hllc", "Hll", "Hllc_LM"]),
             "SignalSpeed": UserSpecificationTag(str, "Einfeldt", UserSpecificationFile.riemann_solver_settings, "signal_speed_selection", "SignalSpeed::",
                                                 ["Einfeldt", "Davis", "Toro", "Arithmetic"]),
-            "LowMachNumberLimit": UserSpecificationTag(str, "5.0", UserSpecificationFile.riemann_solver_settings, "low_mach_number_limit_factor"),
+            # -----------------------
+            # State reconstruction setting
+            # -----------------------
+            "StateReconstructionType": UserSpecificationTag(str, "RoeCharacteristic", UserSpecificationFile.state_reconstruction_settings,
+                                                            "state_reconstruction_type", "StateReconstructionType::",
+                                                            ["Conservative", "Primitive", "RoeCharacteristic"]),
             # -----------------------
             # Stencil setup
             # -----------------------
@@ -207,12 +192,12 @@ class UserSpecifications(SpecificationsBase):
                                                                 "curvature_calculation_derivative_stencil",
                                                                 "DerivativeStencils::",
                                                                 DerivativeStencil.values),
-            "ViscosusFluxesDerivativeStencilCenter": UserSpecificationTag(str,
-                                                                          "FourthOrderCentralDifference",
-                                                                          UserSpecificationFile.stencil_setup,
-                                                                          "viscous_fluxes_derivative_stencil_cell_center",
-                                                                          "DerivativeStencils::",
-                                                                          DerivativeStencil.values),
+            "ViscosusFluxesDerivlevelsettencilCenter": UserSpecificationTag(str,
+                                                                            "FourthOrderCentralDifference",
+                                                                            UserSpecificationFile.stencil_setup,
+                                                                            "viscous_fluxes_derivative_stencil_cell_center",
+                                                                            "DerivativeStencils::",
+                                                                            DerivativeStencil.values),
             "ViscosusFluxesDerivativeStencilFace": UserSpecificationTag(str,
                                                                         "FourthOrderCellFace",
                                                                         UserSpecificationFile.stencil_setup,
@@ -232,17 +217,29 @@ class UserSpecifications(SpecificationsBase):
                                                                     "DerivativeStencils::",
                                                                     DerivativeStencil.values),
             # -----------------------
-            # Equation setttings
+            # Numerical setup (levelset)
             # -----------------------
-            "EquationSet": UserSpecificationTag(str, "NavierStokes",
-                                                UserSpecificationFile.equation_settings,
-                                                "active_equations",
-                                                "EquationSet::",
-                                                ["Isentropic",
-                                                 "Euler",
-                                                 "NavierStokes",
-                                                 "Custom"])
-
+            "LevelsetAdvector": UserSpecificationTag(str,
+                                                     "DerivativeStencil",
+                                                     UserSpecificationFile.numerical_setup,
+                                                     "levelset_advector",
+                                                     "LevelsetAdvectors::",
+                                                     ["DerivativeStencil", "ReconstructionStencil", "HjReconstructionStencil", "HjDerivativeStencil"]),
+            "LevelsetReinitializer": UserSpecificationTag(str,
+                                                          "Weno",
+                                                          UserSpecificationFile.numerical_setup,
+                                                          "levelset_reinitializer", "LevelsetReinitializers::",
+                                                          ["Min", "Weno", "Explicit"]),
+            "InterfaceRiemannSolver": UserSpecificationTag(str,
+                                                           "Linearized",
+                                                           UserSpecificationFile.numerical_setup,
+                                                           "interface_riemann_solver",
+                                                           "InterfaceRiemannSolvers::",
+                                                           ["Linearized", "Exact", "TwoRarefaction", "Hllc"]),
+            "CutCellMixer": UserSpecificationTag(str, "ApertureBased", UserSpecificationFile.numerical_setup, "cut_cell_mixer", "CutCellMixers::",
+                                                 ["ApertureBased", "NormalBased", "Lauer"]),
+            "GhostFluidExtender": UserSpecificationTag(str, "Fedkiw", UserSpecificationFile.numerical_setup, "extender", "Extenders::",
+                                                       ["Fedkiw", "Upwind", "Explicit"])
         }
         # ------------------------------------------------------------------------------------------------------------------------------------------------------
         # ONLY CHANGE THE IMPLEMENTATIONS BELOW CAREFULLY.
@@ -307,8 +304,7 @@ class UserSpecifications(SpecificationsBase):
             for spec in specs:
                 spec.read_from_file(file_content)
 
-    def modify_specifications(self, alpaca_base_path: str, use_default_values: bool = False,
-                              output_variables: Optional[List[str]] = None, output_tags: Optional[List[int]] = None) -> None:
+    def modify_specifications(self, alpaca_base_path: str, use_default_values: bool = False) -> None:
         """ Modifies the user specifications in each file.
 
         Modifies the values of all user specifications depending on the set values for each tag. In case no variables are set, the variables are
@@ -320,10 +316,6 @@ class UserSpecifications(SpecificationsBase):
             The relative or absolute path to the alpaca base folder, where the src folder lies.
         use_default_values : bool, optional
             Flag whether default values should be set for variables, by default False.
-        output_variables : Optional[List[str]], optional
-            A list specifying all output variables that should be changed, by default None.
-        output_tags : Optional[List[int]], optional
-            The tag(s) which output should be used (0: standard, 1: interface), by default None. Also both are possible in a list.
         Raises
         ------
         TypeError
@@ -348,28 +340,6 @@ class UserSpecifications(SpecificationsBase):
             # Overwrite all required data
             for spec in specs:
                 file_content = spec.modify_file(file_content, use_default_values)
-            # Write the content to the same file
-            with open(file_path, 'w') as file:
-                file.write(file_content)
-
-        # Only do something if output variables are given.
-        if output_variables is not None:
-            if not isinstance(output_tags, list):
-                raise TypeError("The output tags must be a list of values containing 0 and/or 1 for standard and interface output")
-            file_path = os.path.join(spec_folder, UserSpecificationFile.output_constants.value)
-            # Open the corresponding file and read the full content to the cache
-            with open(file_path, 'r') as file:
-                file_content = file.read()
-            # Overwrite all required data if the variable is in the set of allowed variables
-            for variable in output_variables:
-                if variable in OutputVariables.values:
-                    standard_tag = "true" if 0 in output_tags else "false"
-                    interface_tag = "true" if 1 in output_tags else "false"
-                else:
-                    standard_tag = "false"
-                    interface_tag = "false"
-                file_content = re.sub("( " + variable + " *)=( *{)(.+?),(.+?),(.+?)};",
-                                      r"\g<1>=\g<2> " + standard_tag + ", " + interface_tag + ", false };", file_content)
             # Write the content to the same file
             with open(file_path, 'w') as file:
                 file.write(file_content)

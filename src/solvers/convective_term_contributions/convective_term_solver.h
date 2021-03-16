@@ -66,42 +66,50 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef HLL_RIEMANN_SOLVER_H
-#define HLL_RIEMANN_SOLVER_H
+#ifndef CONVECTIVE_TERM_SOLVER_H
+#define CONVECTIVE_TERM_SOLVER_H
 
-#include "solvers/riemann_solvers/riemann_solver.h"
 #include "block_definitions/block.h"
-#include "enums/direction_definition.h"
-#include "materials/material.h"
+#include "solvers/eigendecomposition.h"
 #include "materials/material_manager.h"
-#include "user_specifications/compile_time_constants.h"
 
 /**
- * @brief Discretization of the Riemann solver using the HLL procedure according to \cite Toro2009, chapter 10.3.
+ * @brief The ConvectiveTermSolver calculates the convective term using a Riemann solver of choice with an interchangable stencil.
  */
-class HllRiemannSolver : public RiemannSolver<HllRiemannSolver> {
+template<typename DerivedConvectiveTermSolver>
+class ConvectiveTermSolver {
 
-   friend RiemannSolver;
+   friend DerivedConvectiveTermSolver;
 
-   template<Direction DIR>
-   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                       double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                       double const cell_size ) const;
+   EigenDecomposition const& eigendecomposition_calculator_;
+   MaterialManager const& material_manager_;
 
-   void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
-                              double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
+   explicit ConvectiveTermSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : eigendecomposition_calculator_( eigendecomposition_calculator ),
+                                                                                                                                       material_manager_( material_manager ) {
+      //Empty constructor besides initializer list.
+   }
 
 public:
-   HllRiemannSolver() = delete;
-   explicit HllRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator );
-   ~HllRiemannSolver()                         = default;
-   HllRiemannSolver( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver& operator=( HllRiemannSolver const& ) = delete;
-   HllRiemannSolver( HllRiemannSolver&& )                 = delete;
-   HllRiemannSolver& operator=( HllRiemannSolver&& ) = delete;
+   ConvectiveTermSolver() = delete;
+   explicit ConvectiveTermSolver( MaterialManager const& material_manager, std::array<double, 3> gravity );
+   ~ConvectiveTermSolver()                             = default;
+   ConvectiveTermSolver( ConvectiveTermSolver const& ) = delete;
+   ConvectiveTermSolver& operator=( ConvectiveTermSolver const& ) = delete;
+   ConvectiveTermSolver( ConvectiveTermSolver&& )                 = delete;
+   ConvectiveTermSolver& operator=( ConvectiveTermSolver&& ) = delete;
+
+   /**
+    * @brief Determines the contribution of the convective term of the underlying system of equations within the provided node.
+    * @param mat_block Container holding the relevant fluid data to compute the update.
+    * @param cell_size The size of the cells in the block.
+    * @param fluxes_x, fluxes_y, fluxes_z The fluxes over the cell faces as computed by this Riemann solver. Indirect return parameter.
+    */
+   void UpdateConvectiveFluxes( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
+                                double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
+      static_cast<DerivedConvectiveTermSolver const&>( *this ).UpdateImplementation( mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z );
+   }
 };
 
-#endif// HLL_RIEMANN_SOLVER_H
+#endif// CONVECTIVE_TERM_SOLVER_H

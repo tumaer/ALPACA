@@ -10,6 +10,7 @@ from alpacapy.logger import Logger
 from alpacapy.name_style import NameStyle
 from alpacapy.alpaca.create_executable import create_executable
 from alpacapy.alpaca.specifications.user_specifications import UserSpecifications
+from alpacapy.alpaca.specifications.output_variables import OutputVariables
 from alpacapy.testsuite.definitions.folder_setup import FolderSetup
 from alpacapy.testsuite.data_definitions.executable_data import ExecutableData
 from alpacapy.helper_functions import string_operations as so
@@ -68,7 +69,9 @@ class ExecutableSetup:
         self.__executable_list = []
         self.__compilation_time = 0.0
         # The output variables are fixed for the testsuite
-        self.__output_variables = ['Density', 'Velocity', 'Pressure', 'Levelset', 'VolumeFraction']
+        self.__output_variables = OutputVariables()
+        for var in ['Density', 'Velocity', 'Pressure', 'Levelset', 'VolumeFraction']:
+            self.__output_variables[var].values = [True, False, False]
 
     @property
     def executable_list(self) -> List[str]:
@@ -299,7 +302,6 @@ class ExecutableSetup:
                                       compilation_cores=compile_cores,
                                       user_specifications=UserSpecifications.from_pandas(self.__executable_data[case_id]),
                                       output_variables=self.__output_variables,
-                                      output_tags=[0],
                                       print_progress=print_progress,
                                       verbose=False)
                     # Log the status
@@ -319,7 +321,9 @@ class ExecutableSetup:
         self.logger.write("Executable setup for " + str(self.__dim) + "D simulations:", color="bold")
         self.logger.blank_line()
         # Get the maximum size of the attributes
-        max_size = max([len(NameStyle.log.format(key)) for key in self.__variations.keys()] + [len("Index based"), len("Performance flag active")])
+        max_size = max([len(NameStyle.log.format(key)) for key in self.__variations.keys()] +
+                       [len(NameStyle.log.format(key)) for key in self.__output_variables.keys()] +
+                       [len("Index based"), len("Performance flag active"), len("Symmetry flag active")])
         # Log all specification data
         self.logger.indent += 2
         self.logger.write("Variation information:")
@@ -337,4 +341,11 @@ class ExecutableSetup:
         self.logger.indent += 2
         for key, value_list in self.__variations.items():
             self.logger.write(NameStyle.log.format(key).ljust(max_size) + ": " + ", ".join(str(value) for value in value_list))
+        self.logger.indent -= 2
+        self.logger.blank_line()
+        self.logger.write("Specified output variables:")
+        self.logger.indent += 2
+        for key, variable in self.__output_variables.items():
+            if variable.values is not None:
+                self.logger.write(NameStyle.log.format(key).ljust(max_size) + ": [" + ", ".join(str(value) for value in variable.values) + "]")
         self.logger.indent -= 4

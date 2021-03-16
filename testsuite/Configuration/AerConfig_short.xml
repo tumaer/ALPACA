@@ -58,6 +58,7 @@
       <internalCells>          8                 32                    </internalCells>
       <haloSize>               6                 4                     </haloSize>
       <timeIntegrator>         RK2               RK3                   </timeIntegrator>
+      <convectiveTermSolver>   FluxSplitting     FiniteVolume          </convectiveTermSolver>
       <riemannSolver>          Roe               Hllc                  </riemannSolver>
       <fluxSplitting>          Roe               Roe                   </fluxSplitting>
       <signalSpeed>            Einfeldt          Einfeldt              </signalSpeed>

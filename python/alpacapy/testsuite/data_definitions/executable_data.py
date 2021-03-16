@@ -345,6 +345,11 @@ class ExecutableData:
             return None
         # First copy the DataFrame to a temporary object to allow formatting
         dataframe_to_write = self.__executable_data.copy()
+        # Loop through all rows and call the from UserSpecifications.from_pandas to ensure that dependent data are written correctly
+        for index, row in self.__executable_data.iterrows():
+            user_specs = UserSpecifications.from_pandas(row)
+            for spec_name, spec in user_specs.items():
+                dataframe_to_write.at[index, spec_name] = spec.value
         # Apply the string operation on all entries
         dataframe_to_write = data_func.format_dataframe(dataframe_to_write, format_type=str, include_header=False)
         # Compute the maximum length of each column and format the columns based on it

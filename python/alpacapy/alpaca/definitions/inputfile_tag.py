@@ -24,7 +24,8 @@ class InputfileTag(TagBase):
         The xml tags where the value of the inputfile tag can be found.
     """
 
-    def __init__(self, value_type: Type, default_value: Union[int, str], xml_tags: List[str], allowed_values: Optional[List[Union[int, str]]] = None) -> None:
+    def __init__(self, value_type: Type, default_value: Union[int, str], xml_tags: List[str],
+                 allowed_values: Optional[List[Union[int, str]]] = None, no_tag: Optional[bool] = False) -> None:
         """Constructor of the class
 
         Parameters
@@ -37,6 +38,8 @@ class InputfileTag(TagBase):
             A list of xml tags where the desired data can be found in the Alpaca inputfile. The tags must start at the <configuration> tag.
         allowed_values : Optional[List[Union[int,str]]], optional
             A list holding all allowed values for this tag, by default None
+        no_tag : Optional[bool]
+            Flag whether tags for this specification should be printed or not, by default False.
         Raises
         ------
         TypeError
@@ -52,7 +55,7 @@ class InputfileTag(TagBase):
             raise ValueError("Only ASCII characters are allowed in the name of an Alpaca inputfile tag")
 
         # Call the base class constructor with appropriate values
-        super().__init__(value_type, default_value, allowed_values)
+        super().__init__(value_type, default_value, allowed_values, no_tag)
         # Assign all class instance variables
         self.__xml_tags = xml_tags
 

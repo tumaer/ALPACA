@@ -66,8 +66,9 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include "solvers/riemann_solvers/roe_riemann_solver.h"
+#include "solvers/convective_term_contributions/flux_splitting_scheme.h"
 #include "stencils/stencil_utilities.h"
+#include "solvers/state_reconstruction.h"
 
 namespace {
    /**
@@ -110,16 +111,15 @@ namespace {
  * @param material_manager .
  * @param eigendecomposition_calculator .
  */
-RoeRiemannSolver::RoeRiemannSolver( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : RiemannSolver( material_manager, eigendecomposition_calculator ) {
+FluxSplittingScheme::FluxSplittingScheme( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : ConvectiveTermSolver( material_manager, eigendecomposition_calculator ) {
    /* Empty besides initializer list*/
 }
 
 /**
- * @brief Solving the right hand side of the Euler Equations. Using Roe transformation and flux splitting
- *        with the set stencil. Also See base class.
+ * @brief Solving the convective term of the system. Using dimension splitting for fluxes in x, y, and z- direction. Also See base class.
  * @note Hotpath function.
  */
-void RoeRiemannSolver::UpdateImplementation(
+void FluxSplittingScheme::UpdateImplementation(
       std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
       double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
       double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
@@ -187,12 +187,12 @@ void RoeRiemannSolver::UpdateImplementation(
  * @note Hotpath function.
  */
 template<Direction DIR>
-void RoeRiemannSolver::ComputeFluxes( Block const& block,
-                                      double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                                      double ( &advection )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
-                                      double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                                      double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                                      double ( &fluxfunction_wavespeed )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const {
+void FluxSplittingScheme::ComputeFluxes( Block const& block,
+                                         double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                         double ( &advection )[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size,
+                                         double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                         double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+                                         double ( &fluxfunction_wavespeed )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const {
 
    using ReconstructionStencil = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
 
@@ -206,6 +206,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
    constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
 
    unsigned int const reconstruction_stencil_downstream_size = ReconstructionStencil::DownstreamStencilSize();
+   constexpr auto conservative_equation_summation_sequence   = MakeConservativeEquationSummationSequence( std::make_index_sequence<MF::ANOE() - DTI( CC::DIM() )>{} );
 
    //NH Compiler likes loops counters to be fixed - so we help him.
    constexpr unsigned int x_start = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
@@ -240,7 +241,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
                   // This resetting is necessary!
                   positive_characteristic_flux[m] = 0.0;
                   negative_characteristic_flux[m] = 0.0;
-                  for( unsigned int const l : conservative_equation_summation_sequence_[DTI( DIR )] ) {// l is index of conservative equation, iterated in symmetry-preserving sequence
+                  for( unsigned int const l : conservative_equation_summation_sequence[DTI( DIR )] ) {// l is index of conservative equation, iterated in symmetry-preserving sequence
                      // Compute characteristics for U and advection
                      double const u_characteristic_temp         = conservatives[l][i + x_varying * ( m - reconstruction_stencil_downstream_size )][j + y_varying * ( m - reconstruction_stencil_downstream_size )][k + z_varying * ( m - reconstruction_stencil_downstream_size )] * roe_eigenvector_left_temp[l];
                      double const advection_characteristic_temp = advection[l][i + x_varying * ( m - reconstruction_stencil_downstream_size )][j + y_varying * ( m - reconstruction_stencil_downstream_size )][k + z_varying * ( m - reconstruction_stencil_downstream_size )] * roe_eigenvector_left_temp[l];
@@ -256,7 +257,7 @@ void RoeRiemannSolver::ComputeFluxes( Block const& block,
             }
 
             // reconstruct the fluxes at face i+1/2
-            auto const physical_flux = eigendecomposition_calculator_.TransformToPhysicalSpace( characteristic_flux, roe_eigenvectors_right[i_index][j_index][k_index] );
+            auto const physical_flux = TransformToPhysicalSpace( characteristic_flux, roe_eigenvectors_right[i_index][j_index][k_index] );
 
             for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
                fluxes[l][i_index][j_index][k_index] += physical_flux[l];

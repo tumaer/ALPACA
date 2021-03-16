@@ -17,6 +17,7 @@ class UserSpecificationFile(Enum):
     riemann_solver_settings = "riemann_solver_settings.h"
     output_constants = "output_constants.h"
     equation_settings = "equation_settings.h"
+    state_reconstruction_settings = "state_reconstruction_settings.h"
 
     def __str__(self) -> str:
         """Shows the class member identifier when using str() or print()"""
