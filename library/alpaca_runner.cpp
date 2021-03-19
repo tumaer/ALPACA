@@ -73,7 +73,7 @@
 #endif
 
 #include "instantiation/input_output/instantiation_input_reader.h"
-#include "log_writer.h"
+#include "input_output/log_writer/log_writer.h"
 #include "simulation_runner.h"
 
 namespace Alpaca {

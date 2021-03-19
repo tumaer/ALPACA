@@ -74,6 +74,7 @@
 
 #include <tinyxml2.h>
 #include "input_output/input_reader/input_definitions.h"
+#include "input_output/log_writer/log_writer.h"
 #include "input_output/utilities/file_utilities.h"
 
 #include "input_output/input_reader/boundary_condition_reader/xml_boundary_condition_reader.h"
@@ -113,6 +114,8 @@ namespace Instantiation {
                throw std::logic_error( "Syntax error parsing the XML inputfile file, check opening and closing tags!" );
             }
             // Create the input reader properly
+            LogWriter& logger = LogWriter::Instance();
+            logger.LogMessage( "Instantiating xml input reader" );
             return InputReader( input_filename, input_type,
                                 std::make_unique<XmlMaterialReader const>( input_file ),
                                 std::make_unique<XmlBoundaryConditionReader const>( input_file ),

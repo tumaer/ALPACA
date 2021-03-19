@@ -98,6 +98,16 @@ namespace MpiUtilities {
    }
 
    /**
+    * @brief Indicates whether the invoking rank is the master rank, i.e. rank 0.
+    * @return True if invoking is master, false otherwise.
+    */
+   inline bool MasterRank() {
+      int rank_id = -1;
+      MPI_Comm_rank( MPI_COMM_WORLD, &rank_id );
+      return rank_id == 0;
+   }
+
+   /**
     * @brief Gives the number of ranks in the MPI communicator "MPI_COMM_WORLD". Avoids handle creation, e.g. for const members in initializer list.
     * @return Communicator Size which is the number of ranks.
     */

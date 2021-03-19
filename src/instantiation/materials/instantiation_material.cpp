@@ -105,25 +105,25 @@ namespace Instantiation {
          case EquationOfStateName::StiffenedGas: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<StiffenedGas const> eos( std::make_unique<StiffenedGas const>( eos_data, unit_handler ) );
-            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            logger.LogMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
          case EquationOfStateName::StiffenedGasSafe: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<StiffenedGasSafe const> eos( std::make_unique<StiffenedGasSafe const>( eos_data, unit_handler ) );
-            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            logger.LogMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
          case EquationOfStateName::StiffenedGasCompleteSafe: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<StiffenedGasCompleteSafe const> eos( std::make_unique<StiffenedGasCompleteSafe const>( eos_data, unit_handler ) );
-            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            logger.LogMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
          case EquationOfStateName::WaterlikeFluid: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<WaterlikeFluid const> eos( std::make_unique<WaterlikeFluid const>( eos_data, unit_handler ) );
-            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            logger.LogMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
          case EquationOfStateName::NobleAbelStiffenedGas: {
@@ -133,13 +133,13 @@ namespace Instantiation {
             }
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<NobleAbelStiffenedGas const> eos( std::make_unique<NobleAbelStiffenedGas const>( eos_data, unit_handler ) );
-            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            logger.LogMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
          case EquationOfStateName::Isentropic: {
             // 1. Create, 2. Log, 3. Return eos
             std::unique_ptr<Isentropic const> eos( std::make_unique<Isentropic const>( eos_data, unit_handler ) );
-            logger.LogLinebreakMessage( eos->GetLogData( 4, unit_handler ) );
+            logger.LogMessage( eos->GetLogData( 4, unit_handler ) );
             return eos;
          }
          default: {
@@ -169,31 +169,31 @@ namespace Instantiation {
          case MaterialPropertyModelName::ShearViscosityConstant: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<ConstantShearViscosityModel const> model( std::make_unique<ConstantShearViscosityModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          case MaterialPropertyModelName::ShearViscosityPowerLaw: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<PowerLawShearViscosityModel const> model( std::make_unique<PowerLawShearViscosityModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          case MaterialPropertyModelName::ShearViscosityCarreauYasuda: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<CarreauYasudaShearViscosityModel const> model( std::make_unique<CarreauYasudaShearViscosityModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          case MaterialPropertyModelName::ShearViscosityCross: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<CrossShearViscosityModel const> model( std::make_unique<CrossShearViscosityModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          case MaterialPropertyModelName::ShearViscositySutherland: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<SutherlandShearViscosityModel const> model( std::make_unique<SutherlandShearViscosityModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          default: {
@@ -223,7 +223,7 @@ namespace Instantiation {
          case MaterialPropertyModelName::ThermalConductivityConstant: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<ConstantThermalConductivityModel const> model( std::make_unique<ConstantThermalConductivityModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          default: {

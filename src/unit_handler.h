@@ -72,7 +72,7 @@
 #include <vector>
 #include <cmath>
 #include <array>
-#include "log_writer.h"
+#include "input_output/log_writer/log_writer.h"
 #include "enums/unit_type.h"
 
 /**

@@ -66,33 +66,42 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef INSTANTIATION_INPUT_OUTPUT_MANAGER_H
-#define INSTANTIATION_INPUT_OUTPUT_MANAGER_H
 
 #include <filesystem>
-#include <vector>
-
-#include "input_output/input_reader.h"
-#include "input_output/input_output_manager.h"
+#include <memory>
 
 /**
- * @brief Defines all instantiation functions required for the input-output manager.
+ * @brief This class provides the functions to actually write logs to terminal or file output. Logged messages are buffered internally until they are actively flushed.
+ * @note This class must not be used in production code. The LogWriter class is provided for this purpose.
  */
-namespace Instantiation {
+class LogWriterImplementation {
 
-   // factory functions for the input output manager
-   std::vector<double> ComputeOutputTimes( OutputReader const& output_reader,
-                                           TimeControlReader const& time_control_reader,
-                                           UnitHandler const& unit_handler,
-                                           OutputType const output_type );
-   std::vector<double> ComputeSnapshotTimes( RestartReader const& restart_reader, TimeControlReader const& time_control_reader, UnitHandler const& unit_handler );
+   std::unique_ptr<std::stringstream> terminal_output_;
+   std::unique_ptr<std::stringstream> file_output_;
 
-   // Instantiation function for the input_output manager
-   InputOutputManager InstantiateInputOutputManager( InputReader const& input_reader,
-                                                     OutputWriter const& output_writer,
-                                                     RestartManager const& restart_manager,
-                                                     UnitHandler const& unit_handler,
-                                                     std::filesystem::path base_output_folder );
-}// namespace Instantiation
+   std::unique_ptr<std::filesystem::path> logfile_;
 
-#endif// INSTANTIATION_INPUT_OUTPUT_MANAGER_H
+   std::string delayed_log_;
+
+   void InsertMessageInAllStreams( std::string const& message );
+
+public:
+   explicit LogWriterImplementation( std::unique_ptr<std::stringstream>&& terminal_output = nullptr, std::unique_ptr<std::stringstream>&& file_output = nullptr );
+   ~LogWriterImplementation()                                = default;
+   LogWriterImplementation( LogWriterImplementation const& ) = delete;
+   LogWriterImplementation& operator=( LogWriterImplementation const& ) = delete;
+   LogWriterImplementation( LogWriterImplementation&& )                 = delete;
+   LogWriterImplementation& operator=( LogWriterImplementation&& ) = delete;
+
+   void WelcomeMessage();
+   void Flush();
+   void SetLogfile( std::filesystem::path const& logfile );
+   void RunningAlpaca( double const percentage, bool const fast_forward );
+   void LogMessage( std::string const& message );
+   void BufferMessage( std::string const& message );
+   void LogBufferedMessages();
+   void LogBreakLine();
+
+   std::unique_ptr<std::stringstream> SwapOutTerminalOutputStream( std::unique_ptr<std::stringstream>&& new_in_old_out );
+   std::unique_ptr<std::stringstream> SwapOutFileOutputStream( std::unique_ptr<std::stringstream>&& new_in_old_out );
+};

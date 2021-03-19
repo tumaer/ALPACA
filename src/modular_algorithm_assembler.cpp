@@ -162,7 +162,7 @@ void ModularAlgorithmAssembler::ComputeLoop() {
     * We have to catch division by zero in case only the initialization should be performed, i. e. start and end time are set to zero
     */
    double const flush_percentage = end_time_ == start_time_ ? 0.0 : ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ );
-   logger_.FlushAlpaca( flush_percentage, current_simulation_time > start_time_ );
+   logger_.RunningAlpaca( flush_percentage, current_simulation_time > start_time_ );
 
    while( current_simulation_time < end_time_ && timestep_size_is_healthy ) {
       MPI_Barrier( MPI_COMM_WORLD );//For Time measurement
@@ -186,7 +186,7 @@ void ModularAlgorithmAssembler::ComputeLoop() {
       time_integrator_.FinishMacroTimestep();
       current_simulation_time = time_integrator_.CurrentRunTime();
       logger_.LogMessage( "Macro timestep done t = " + StringOperations::ToScientificNotationString( unit_handler_.DimensionalizeValue( current_simulation_time, UnitType::Time ), 9 ) );
-      logger_.FlushAlpaca( ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ ) );
+      logger_.RunningAlpaca( ( current_simulation_time - start_time_ ) / ( end_time_ - start_time_ ) );
 
       // surround the output writing with time measurements to provide tunrim tracking if desired
       if constexpr( CC::TR() ) {
@@ -212,9 +212,9 @@ void ModularAlgorithmAssembler::ComputeLoop() {
    if constexpr( DP::Profile() ) {
       logger_.LogMessage( SummedCommunicationStatisticsString() );
    }
-   logger_.LogMessage( " Total Time Spent in Compute Loop ( seconds ): " + StringOperations::ToScientificNotationString( std::accumulate( loop_times.begin(), loop_times.end(), 0.0 ), 5 ) );
+   logger_.LogMessage( "Total Time Spent in Compute Loop ( seconds ): " + StringOperations::ToScientificNotationString( std::accumulate( loop_times.begin(), loop_times.end(), 0.0 ), 5 ) );
    if constexpr( CC::TR() ) {
-      logger_.LogMessage( " Total Time Spent for Output Writing ( seconds ): " + StringOperations::ToScientificNotationString( std::accumulate( output_runtimes.begin(), output_runtimes.end(), 0.0 ), 5 ) );
+      logger_.LogMessage( "Total Time Spent for Output Writing ( seconds ): " + StringOperations::ToScientificNotationString( std::accumulate( output_runtimes.begin(), output_runtimes.end(), 0.0 ), 5 ) );
    }
 }
 
@@ -253,7 +253,7 @@ void ModularAlgorithmAssembler::Initialization( InitialCondition& initial_condit
    if constexpr( CC::TR() ) {
       MPI_Barrier( MPI_COMM_WORLD );
       time_measurement_end = MPI_Wtime();
-      logger_.LogMessage( " Total Time Spent for Initialization ( seconds ): " + StringOperations::ToScientificNotationString( time_measurement_end - time_measurement_start, 5 ) );
+      logger_.LogMessage( "Total Time Spent for Initialization ( seconds ): " + StringOperations::ToScientificNotationString( time_measurement_end - time_measurement_start, 5 ) );
    }
 }
 
@@ -463,7 +463,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation( InitialCondition& initial_c
    if( exist_multi_nodes_global ) {
       multi_phase_manager_.ObtainInterfaceStates( nodes_needing_multiphase_treatment );
       if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-         logger_.DelayedLogMessage( true, true );
+         logger_.LogBufferedMessages();
       }
    }
 }
@@ -705,7 +705,7 @@ void ModularAlgorithmAssembler::Advance() {
             LogElapsedTimeSinceInProfileRuns( function_timer, "SetInterfaceQuantities             " );
             ProvideDebugInformation( "SetInterfaceQuantities - Done ", plot_this_step, print_this_step, debug_key );
             if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-               logger_.DelayedLogMessage( true, true );
+               logger_.LogBufferedMessages();
             }
          }
       }// stages

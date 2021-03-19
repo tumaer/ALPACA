@@ -68,7 +68,9 @@
 *****************************************************************************************/
 #include "input_output_manager.h"
 
+#include <cstdint>
 #include <cstdio>// needed for file deletion
+#include <filesystem>
 #include <fstream>
 #include <unistd.h>
 #include <algorithm>
@@ -109,7 +111,7 @@ namespace {
  * @param restart_intervals_to_keep Number of intervals that are kept in total.
  */
 InputOutputManager::InputOutputManager( std::string const& input_file,
-                                        std::string const& output_folder,
+                                        std::filesystem::path const& output_folder,
                                         UnitHandler const& unit_handler,
                                         OutputWriter const& output_writer,
                                         RestartManager const& restart_manager,
@@ -125,7 +127,7 @@ InputOutputManager::InputOutputManager( std::string const& input_file,
                                                                                          logger_( LogWriter::Instance() ),
                                                                                          output_writer_( output_writer ),
                                                                                          restart_manager_( restart_manager ),
-                                                                                         output_folder_name_( output_folder ),
+                                                                                         output_folder_name_( output_folder.string() ),
                                                                                          time_naming_factor_( time_naming_factor ),
                                                                                          standard_output_enabled_( !standard_output_timestamps.empty() ),
                                                                                          standard_output_timestamps_( standard_output_timestamps ),
@@ -144,9 +146,6 @@ InputOutputManager::InputOutputManager( std::string const& input_file,
    if( MpiUtilities::MyRankId() == 0 ) {
       // create output folder and subfolders
       CreateOutputFolder();
-
-      // Create the log file name
-      logger_.SetLogfileName( output_folder_name_ + "/" + FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) + ".log" );
 
       // copy inputfile into directory
       if( !input_file.empty() ) {
@@ -201,8 +200,6 @@ InputOutputManager::~InputOutputManager() {
  * @note  Only the master-rank "0" is supposed to create the folder.
  */
 void InputOutputManager::CreateOutputFolder() const {
-   // create output folder
-   FileUtilities::CreateFolder( output_folder_name_ );
    // create output folder only if output is enabled
    if( standard_output_enabled_ ) {
       FileUtilities::CreateFolder( output_folder_name_ + OutputSubfolderName( OutputType::Standard ) );
@@ -351,7 +348,7 @@ void InputOutputManager::WriteOutput( OutputType const output_type,
    output_writer_.WriteOutput( output_type, output_time, filename_without_extension, time_series_filename_without_extension );
 
    // Final logging
-   logger_.LogMessage( OutputTypeToString( output_type ) + " output file written at t = " + StringOperations::ToScientificNotationString( output_time, 9 ), true, true );
+   logger_.LogMessage( OutputTypeToString( output_type ) + " output file written at t = " + StringOperations::ToScientificNotationString( output_time, 9 ) );
 
    // Debug loggin information for full writing process
    if( DP::Profile() ) {
@@ -484,3 +481,27 @@ double InputOutputManager::RestoreSimulationFromSnapshot() {
 
    return restart_time;
 }
+
+namespace InputOutput {
+
+   /**
+    * @brief Determines the correct name and creates the folder used for output.
+    * @param input_file The input currently processed. Indicates the path of the output folder to be created.
+    * @note Only the master ranks creates the folder - the resulting path is then broadcasted to all ranks.
+    */
+   std::filesystem::path CreateOutputBaseFolder( std::filesystem::path const& input_file ) {
+      // due to MPI's lack of string-representation some bare metal code is needed here ...
+      std::uint64_t folder_path_size = 0;
+      std::filesystem::path output_folder;
+      if( MpiUtilities::MasterRank() ) {
+         output_folder = FileUtilities::AddUnusedNumberToPath( FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) );
+         FileUtilities::CreateFolder( output_folder );
+         folder_path_size = output_folder.string().size();
+      }
+      MPI_Bcast( &folder_path_size, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD );
+      std::string output_folder_name = MpiUtilities::MasterRank() ? output_folder.string() : std::string( folder_path_size, '#' );
+      MPI_Bcast( output_folder_name.data(), folder_path_size, MPI_CHAR, 0, MPI_COMM_WORLD );
+
+      return output_folder_name;
+   }
+}// namespace InputOutput

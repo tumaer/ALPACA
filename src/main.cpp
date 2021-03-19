@@ -66,14 +66,17 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
+#include "input_output/input_output_manager.h"
 #include <mpi.h>
+#include <filesystem>
 #include <fenv.h>// Floating-Point raising exceptions.
 #ifdef __APPLE__
 #include <xmmintrin.h>
 #endif
 
 #include "instantiation/input_output/instantiation_input_reader.h"
-#include "log_writer.h"
+#include "instantiation/input_output/instantiation_log_writer.h"
+#include "communication/mpi_utilities.h"
 #include "simulation_runner.h"
 
 /**
@@ -95,22 +98,22 @@ int main( int argc, char* argv[] ) {
    _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
 #endif
 
-   //NH Seperate Scope for MPI.
+   //NH separate scope for MPI.
    {
-      LogWriter& logger = LogWriter::Instance();
-
-      // determine the name of the input file (default: inputfile.xml)
-      std::string const input_file( argc > 1 ? argv[1] : "inputfile.xml" );
-      logger.LogMessage( "Using inputfile : " + input_file );
+      LogWriter& logger = Instantiation::InstantiateLogWriter( MpiUtilities::MasterRank() );
 
       // determine the name of the executable and write it to the logger
       std::string const executable_name( argv[0] );
       logger.LogMessage( "Using executable: " + executable_name );
+      logger.Flush();
 
+      // determine the name of the input file (default: inputfile.xml)
+      std::filesystem::path const input_file( argc > 1 ? argv[1] : "inputfile.xml" );
       // Instance to provide interface to the input file/data
       InputReader const input_reader( Instantiation::InstantiateInputReader( input_file ) );
 
       Simulation::Run( input_reader );
+      logger.Flush();
    }
 
    MPI_Finalize();

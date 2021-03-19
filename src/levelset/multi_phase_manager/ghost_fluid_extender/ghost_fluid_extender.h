@@ -190,12 +190,12 @@ public:
             // Write convergence to logger if desired or if maximum of iterations is reached
             if( convergence_tracking_quantities[0][MF::ANOF( field_type_ )] < ExtensionConstants::MaximumResiduum && convergence_tracking_quantities[1][MF::ANOF( field_type_ )] < ExtensionConstants::MaximumResiduum && iteration_number != 0 ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-                  logger_.AppendDelayedLog( "Ext: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
+                  logger_.BufferMessage( "Ext: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
                }
                break;
             } else if( iteration_number == ExtensionConstants::MaximumNumberOfIterations - 1 ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-                  logger_.AppendDelayedLog( "Ext: nc   !!!   " );
+                  logger_.BufferMessage( "Ext: nc   !!!   " );
                }
             }
             // Reset the maximum tracking quantity

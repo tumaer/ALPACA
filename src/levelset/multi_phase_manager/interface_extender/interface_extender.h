@@ -157,12 +157,12 @@ public:
 
             if( convergence_tracking_quantities[IF::NOFTE( field_type_ )] < InterfaceStateExtensionConstants::MaximumResiduum && iteration_number != 0 ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-                  logger_.AppendDelayedLog( "IntExt: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
+                  logger_.BufferMessage( "IntExt: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
                }
                break;
             } else if( iteration_number == InterfaceStateExtensionConstants::MaximumNumberOfIterations - 1 ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-                  logger_.AppendDelayedLog( "IntExt: nc   !!!   " );
+                  logger_.BufferMessage( "IntExt: nc   !!!   " );
                }
             }
             convergence_tracking_quantities[IF::NOFTE( field_type_ )] = 0.0;

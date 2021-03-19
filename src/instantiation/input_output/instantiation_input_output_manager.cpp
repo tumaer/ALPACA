@@ -216,12 +216,14 @@ namespace Instantiation {
     * @param tree Tree class providing local (on current rank) node information.
     * @param material_manager Instance providing initialized material data.
     * @param unit_handler Instance to provide (non-)dimensionalization of values.
+    * @param base_output_folder The folder in which the different outputs are to be written.
     * @return The fully instantiated MaterialManager class.
     */
    InputOutputManager InstantiateInputOutputManager( InputReader const& input_reader,
                                                      OutputWriter const& output_writer,
                                                      RestartManager const& restart_manager,
-                                                     UnitHandler const& unit_handler ) {
+                                                     UnitHandler const& unit_handler,
+                                                     std::filesystem::path base_output_folder ) {
 
       // Get the required readers
       TimeControlReader const& time_control_reader( input_reader.GetTimeControlReader() );
@@ -233,7 +235,6 @@ namespace Instantiation {
       InputType const input_type   = input_reader.GetInputType();
       std::string const input_file = input_reader.GetInputFile();
       // Output
-      std::string output_folder_name                        = FileUtilities::AddUnusedNumberToPath( FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) );
       std::vector<double> const standard_output_timestamps  = ComputeOutputTimes( output_reader, time_control_reader, unit_handler, OutputType::Standard );
       std::vector<double> const interface_output_timestamps = ComputeOutputTimes( output_reader, time_control_reader, unit_handler, OutputType::Interface );
       double const time_naming_factor                       = output_reader.ReadTimeNamingFactor();
@@ -256,7 +257,7 @@ namespace Instantiation {
       logger.LogMessage( "File/Folder information: " );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Input type        : " + InputTypeToString( input_type ) );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Simulation Name   : " + FileUtilities::RemoveFilePath( FileUtilities::RemoveFileExtension( input_file ) ) );
-      logger.LogMessage( StringOperations::Indent( 2 ) + "Output Folder     : " + output_folder_name );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Output Folder     : " + base_output_folder.string() );
       logger.LogMessage( StringOperations::Indent( 2 ) + "Time naming factor: " + StringOperations::ToScientificNotationString( time_naming_factor, 9 ) );
       logger.LogMessage( " " );
       // Output and restart
@@ -297,7 +298,7 @@ namespace Instantiation {
 
       // Instantiate the input output manager
       return InputOutputManager( input_file,
-                                 output_folder_name,
+                                 base_output_folder,
                                  unit_handler,
                                  output_writer,
                                  restart_manager,

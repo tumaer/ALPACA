@@ -66,52 +66,15 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef LOG_WRITER_H
-#define LOG_WRITER_H
 
-#include <string>
-#include <vector>
+#ifndef LOGGING_H
+#define LOGGING_H
 
 /**
- * @brief A light-weight logger to write output to the terminal and to a log file. Supports MPI execution; can log all or just the root rank.
- * @note Singleton.
+ * @brief Provides helper routine(s) to log essential states of the program.
  */
-class LogWriter {
+namespace Logging {
+   void LogCompiledSettings();
+}
 
-   std::string log_;
-   std::string logfile_name_;
-   int const rank_;
-   bool const save_all_ranks_;
-
-   std::string delayed_log_;
-
-   //Singleton has only privat Constructor
-   explicit LogWriter( bool const save_all_ranks );
-   std::vector<std::string> FormatMessage( std::string const& message ) const;
-
-   int ForwardRankId() const;
-
-public:
-   //Singelton "Constructor":
-   static LogWriter& Instance( bool const save_all_ranks = false );
-
-   //Singeltons may never call these methods.
-   LogWriter()                   = delete;
-   ~LogWriter()                  = default;
-   LogWriter( LogWriter const& ) = delete;
-   LogWriter& operator=( LogWriter const& ) = delete;
-   LogWriter( LogWriter&& )                 = delete;
-   LogWriter& operator=( LogWriter&& ) = delete;
-
-   void SetLogfileName( std::string const name );
-   void LogMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
-   void LogLinebreakMessage( std::string const& message, bool const print_to_terminal = true, bool const save_in_logfile = true );
-   void AddBreakLine( bool const print_to_terminal = false );
-   void FlushWelcomeMessage();
-   void Flush();
-   void FlushAlpaca( double const percentage, bool const fast_forward = false );
-   void AppendDelayedLog( std::string const delayed_log );
-   void DelayedLogMessage( bool const print_to_terminal = true, bool const save_in_logfile = true );
-};
-
-#endif// LOG_WRITER_H
+#endif// LOGGING_H
