@@ -70,9 +70,10 @@
 #define INPUT_OUTPUT_MANAGER_H
 
 #include <chrono>
+#include <filesystem>
 #include <memory>
 
-#include "log_writer.h"
+#include "input_output/log_writer/log_writer.h"
 // #include "topology/topology_manager.h"
 // #include "topology/tree.h"
 #include "input_output/utilities/file_utilities.h"
@@ -202,7 +203,7 @@ class InputOutputManager {
 
 public:
    explicit InputOutputManager( std::string const& input_file,
-                                std::string const& output_folder,
+                                std::filesystem::path const& output_folder,
                                 UnitHandler const& unit_handler,
                                 OutputWriter const& output_writer,
                                 RestartManager const& restart_manager,
@@ -236,5 +237,12 @@ public:
    void WriteRestartFile( double const timestep, bool const force_output = false );
    double RestoreSimulationFromSnapshot();
 };
+
+/**
+ * @brief Provides free I/O routines, i.e. those not relying on a class instance.
+ */
+namespace InputOutput {
+   std::filesystem::path CreateOutputBaseFolder( std::filesystem::path const& input_file );
+}
 
 #endif// INPUT_OUTPUT_MANAGER_H

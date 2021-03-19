@@ -173,7 +173,7 @@ namespace Instantiation {
 
             logger.LogMessage( StringOperations::Indent( 4 ) + BoundaryLocationToString( LOC, true ) + std::string( BoundaryLocationToString( BoundaryLocation::Bottom, true ).size() - BoundaryLocationToString( LOC, true ).size(), ' ' ) + ": Fixed value" );
             logger.LogMessage( " " );
-            logger.LogLinebreakMessage( LogFixedValueData( 4, fixed_value_prime_states, unit_handler ) );
+            logger.LogMessage( LogFixedValueData( 4, fixed_value_prime_states, unit_handler ) );
 
             return boundary_condition;
          }

@@ -67,6 +67,7 @@
 *                                                                                        *
 *****************************************************************************************/
 #include "input_output/input_reader.h"
+#include <filesystem>
 
 /**
  * @brief Standard constructor for the input reader class.
@@ -111,7 +112,7 @@ InputReader::InputReader( std::string const& input_filename,
  * @brief Gives the filename used as an input.
  * @return input filename.
  */
-std::string InputReader::GetInputFile() const {
+std::filesystem::path InputReader::GetInputFile() const {
    return input_filename_;
 }
 

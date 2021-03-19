@@ -66,33 +66,41 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef INSTANTIATION_INPUT_OUTPUT_MANAGER_H
-#define INSTANTIATION_INPUT_OUTPUT_MANAGER_H
+#ifndef LOG_WRITER_H
+#define LOG_WRITER_H
 
+#include "input_output/log_writer/log_writer_implementation.h"
 #include <filesystem>
-#include <vector>
-
-#include "input_output/input_reader.h"
-#include "input_output/input_output_manager.h"
 
 /**
- * @brief Defines all instantiation functions required for the input-output manager.
+ * @brief A light-weight logger to write output to the terminal and to a log file. Messages are internally buffered and only written to external terminal or file on command.
+ * @note Singleton.
  */
-namespace Instantiation {
+class LogWriter {
 
-   // factory functions for the input output manager
-   std::vector<double> ComputeOutputTimes( OutputReader const& output_reader,
-                                           TimeControlReader const& time_control_reader,
-                                           UnitHandler const& unit_handler,
-                                           OutputType const output_type );
-   std::vector<double> ComputeSnapshotTimes( RestartReader const& restart_reader, TimeControlReader const& time_control_reader, UnitHandler const& unit_handler );
+   LogWriterImplementation implementation_;
+   explicit LogWriter( std::unique_ptr<std::stringstream>&& terminal_output, std::unique_ptr<std::stringstream>&& file_output );
 
-   // Instantiation function for the input_output manager
-   InputOutputManager InstantiateInputOutputManager( InputReader const& input_reader,
-                                                     OutputWriter const& output_writer,
-                                                     RestartManager const& restart_manager,
-                                                     UnitHandler const& unit_handler,
-                                                     std::filesystem::path base_output_folder );
-}// namespace Instantiation
+public:
+   //Singelton "Constructor":
+   static LogWriter& Instance( std::unique_ptr<std::stringstream>&& terminal_output = nullptr, std::unique_ptr<std::stringstream>&& file_output = nullptr );
 
-#endif// INSTANTIATION_INPUT_OUTPUT_MANAGER_H
+   //Singeltons may never call these methods.
+   LogWriter()                   = delete;
+   ~LogWriter()                  = default;
+   LogWriter( LogWriter const& ) = delete;
+   LogWriter& operator=( LogWriter const& ) = delete;
+   LogWriter( LogWriter&& )                 = delete;
+   LogWriter& operator=( LogWriter&& ) = delete;
+
+   void WelcomeMessage();
+   void Flush();
+   void SetLogfile( std::filesystem::path const& logfile );
+   void RunningAlpaca( double const percentage, bool const fast_forward = false );
+   void LogMessage( std::string const& message );
+   void BufferMessage( std::string const& message );
+   void LogBufferedMessages();
+   void LogBreakLine();
+};
+
+#endif// LOG_WRITER_H

@@ -69,6 +69,7 @@
 #ifndef INPUT_READER_H
 #define INPUT_READER_H
 
+#include <filesystem>
 #include <memory>
 
 #include "input_output/input_reader/input_definitions.h"
@@ -124,7 +125,7 @@ public:
    InputReader& operator=( InputReader&& ) = delete;
 
    // Return functions of the input reader
-   TEST_VIRTUAL std::string GetInputFile() const;
+   TEST_VIRTUAL std::filesystem::path GetInputFile() const;
    TEST_VIRTUAL InputType GetInputType() const;
    TEST_VIRTUAL MaterialReader const& GetMaterialReader() const;
    TEST_VIRTUAL BoundaryConditionReader const& GetBoundaryConditionReader() const;

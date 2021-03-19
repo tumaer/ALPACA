@@ -66,33 +66,45 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef INSTANTIATION_INPUT_OUTPUT_MANAGER_H
-#define INSTANTIATION_INPUT_OUTPUT_MANAGER_H
 
-#include <filesystem>
-#include <vector>
+#include "instantiation/input_output/instantiation_log_writer.h"
+#include "input_output/log_writer/log_writer.h"
+#include <sstream>
+#include <memory>
+#include <stdexcept>
 
-#include "input_output/input_reader.h"
-#include "input_output/input_output_manager.h"
+namespace {
+   /**
+    * @brief Instantiates a 'talking' logger on the master rank and 'silent' ones on all other ranks.
+    * @param on_master_rank Indicator wether the function is executed on the master rank.
+    * @note Throws ('dies') if a logger could not be instantiated.
+    */
+   LogWriter& CreateLogWriterOrDieTrying( bool const on_master_rank ) {
+      try {
+         std::unique_ptr<std::stringstream> terminal_stream( nullptr );
+         std::unique_ptr<std::stringstream> file_stream( nullptr );
+         if( on_master_rank ) {
+            terminal_stream = std::make_unique<std::stringstream>( std::ios_base::out );
+            file_stream     = std::make_unique<std::stringstream>( std::ios_base::out );
+         }
+         return LogWriter::Instance( std::move( terminal_stream ), std::move( file_stream ) );
+      } catch( std::exception const& exception ) {
+         std::string message = "Could not instantiate a Logger. Reason: " + std::string( exception.what() );
+         throw std::logic_error( message );
+      }
+   }
+}// namespace
 
-/**
- * @brief Defines all instantiation functions required for the input-output manager.
- */
 namespace Instantiation {
-
-   // factory functions for the input output manager
-   std::vector<double> ComputeOutputTimes( OutputReader const& output_reader,
-                                           TimeControlReader const& time_control_reader,
-                                           UnitHandler const& unit_handler,
-                                           OutputType const output_type );
-   std::vector<double> ComputeSnapshotTimes( RestartReader const& restart_reader, TimeControlReader const& time_control_reader, UnitHandler const& unit_handler );
-
-   // Instantiation function for the input_output manager
-   InputOutputManager InstantiateInputOutputManager( InputReader const& input_reader,
-                                                     OutputWriter const& output_writer,
-                                                     RestartManager const& restart_manager,
-                                                     UnitHandler const& unit_handler,
-                                                     std::filesystem::path base_output_folder );
+   /**
+    * @brief Instantiates the logger. Only the logger. Only the logger on the master rank is instantiated such that it writes to terminal and/or logfile.
+    * @param on_master_rank Indicator wether the function is executed on the master rank.
+    */
+   LogWriter& InstantiateLogWriter( bool const on_master_rank ) {
+      LogWriter& logger = CreateLogWriterOrDieTrying( on_master_rank );
+      logger.WelcomeMessage();
+      logger.LogMessage( "Logger initialised" );
+      logger.Flush();
+      return logger;
+   }
 }// namespace Instantiation
-
-#endif// INSTANTIATION_INPUT_OUTPUT_MANAGER_H

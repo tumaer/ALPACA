@@ -68,8 +68,8 @@ add_subdirectory(3rdParty/ApprovalTests.cpp EXCLUDE_FROM_ALL )
 target_link_libraries( Paco ApprovalTests::ApprovalTests )
 
 # Then simple includes for the res
-target_include_directories( Paco PRIVATE 3rdParty/FakeIt/single_header/catch)
-target_include_directories( Paco PRIVATE 3rdParty/Catch2/single_include )
+target_include_directories( Paco SYSTEM PRIVATE 3rdParty/FakeIt/single_header/catch)
+target_include_directories( Paco SYSTEM PRIVATE 3rdParty/Catch2/single_include )
 target_include_directories( Paco PRIVATE test )
 
 if( IPOPOSSIBLE AND NOT DBG )

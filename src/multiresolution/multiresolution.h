@@ -73,7 +73,7 @@
 #include "enums/norms.h"
 #include "enums/remesh_identifier.h"
 #include "block_definitions/block.h"
-#include "log_writer.h"
+#include "input_output/log_writer/log_writer.h"
 #include "multiresolution/threshold_computer.h"
 #include "topology/id_information.h"
 #include "utilities/mathematical_functions.h"

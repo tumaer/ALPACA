@@ -95,7 +95,7 @@ namespace Instantiation {
          case MaterialPropertyModelName::SurfaceTensionCoefficientConstant: {
             // 1. Create, 2. Log, 3. Return model
             std::unique_ptr<ConstantSurfaceTensionCoefficientModel const> model( std::make_unique<ConstantSurfaceTensionCoefficientModel const>( model_data, unit_handler ) );
-            logger.LogLinebreakMessage( model->GetLogData( 6, unit_handler ) );
+            logger.LogMessage( model->GetLogData( 6, unit_handler ) );
             return model;
          }
          default: {

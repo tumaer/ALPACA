@@ -70,6 +70,7 @@
 #define FILE_UTILITIES_H
 
 #include <string>
+#include <filesystem>
 
 namespace FileUtilities {
 
@@ -83,6 +84,7 @@ namespace FileUtilities {
    std::string AddUnusedNumberToPath( std::string const& path, unsigned int const start_number = 0 );
    void WriteTextBasedFile( std::string const& filename, std::string const& content );
    void AppendToTextBasedFile( std::string const& filename, std::string const& content );
+   std::filesystem::path CreateOutputBaseFolder( std::filesystem::path const& inputfile );
 
 }// namespace FileUtilities
 

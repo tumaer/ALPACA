@@ -153,12 +153,12 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
 
             if( residuum < ReinitializationConstants::MaximumResiduum ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-                  logger_.AppendDelayedLog( "Reinit: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
+                  logger_.BufferMessage( "Reinit: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
                }
                break;
             } else if( iteration_number == ReinitializationConstants::MaximumNumberOfIterations - 1 ) {
                if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
-                  logger_.AppendDelayedLog( "Reinit: nc   !!!   " );
+                  logger_.BufferMessage( "Reinit: nc   !!!   " );
                }
             }
          }
