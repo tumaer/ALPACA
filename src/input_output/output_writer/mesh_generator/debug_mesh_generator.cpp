@@ -70,6 +70,54 @@
 #include "input_output/output_writer/mesh_generator/mesh_generator_utilities.h"
 #include "communication/mpi_utilities.h"
 #include "topology/id_information.h"
+#include <cmath>
+
+namespace {
+
+   /**
+    * @brief The vertical gap between all levels is equal. This method scales this gap such that higher levels have reduced gap.
+    * This is done only for 1D and 2D.
+    * @param node_level level of node to scale the Z coordinate offset accordingly. Higher level nodes have lower vertical gap.
+    * @param z_coordinates_offset Vertical gap that is to be scaled using this method.
+    * @return The scaled offset in the z-direction.
+    */
+   double GetLevelZOffset( unsigned int const node_level, double const z_coordinates_offset ) {
+      double const scaling_according_to_level     = CC::DIM() == Dimension::Three ? 1.0 : std::pow( 0.9, node_level - 1 ) / CC::TCX();
+      double const scaling_according_to_dimension = CC::DIM() == Dimension::Three ? 1.0 : CC::DIM() == Dimension::Two ? 0.09 : 0.5;
+      double const scaling_factor                 = scaling_according_to_level / scaling_according_to_dimension;
+
+      return z_coordinates_offset * node_level * scaling_factor;
+   }
+
+   /**
+    * @brief Determines block size of a node. In case of 1D and 2D, all nodes are scaled such that block_size(Ln+1) = 0.75 * block_size(Ln)
+    * and all level_zero nodes are scaled by 1.5 to align all the higher levels with level_zero nodes.
+    * @param node_id Id of node whose block size is to be calculated.
+    * @param dimensionalized_node_size_on_level_zero Already dimensionalized size of a node on level zero.
+    * @return The scaled block size.
+    */
+   double GetBlockSize( nid_t const node_id, unsigned int const level_of_node, double const dimensionalized_node_size_on_level_zero ) {
+      double const block_size = DomainSizeOfId( node_id, dimensionalized_node_size_on_level_zero );
+
+      if constexpr( CC::DIM() != Dimension::Three ) {
+         double const parent_block_size = level_of_node == 0 ? 0 : DomainSizeOfId( ParentIdOfNode( node_id ), dimensionalized_node_size_on_level_zero );
+         double const scaled_block_size = level_of_node == 0 ? 1.5 * block_size : 0.75 * parent_block_size;
+         return scaled_block_size;
+      }
+      return block_size;
+   }
+
+   /**
+    * @brief Determines the cell size for the output. Since the debug output only serves as a helping tool, the real coordinates are
+    * not important. Therefore, the internal block size is divided in equal spaced cells. To obtain an empty gap between to blocks
+    * an additional cell ("+1") is considered.
+    * @param block_size Size of given node
+    * @return The cell (artifical) cell size.
+    */
+   double GetCellSize( double const block_size ) {
+      return block_size / double( CC::TCX() + 1 );
+   }
+}//namespace
 
 /**
  * @brief Constructor to create the standard finest level mesh generator.
@@ -149,26 +197,18 @@ void DebugMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex
    std::size_t vertex_coordinates_counter = 0;
    for( auto const& id : local_node_ids ) {
       // Stores the current level of the node
-      unsigned int const level_of_node = LevelOfNode( id );
-      /**
-       * To obtain a gap between different levels add an additional block in z-direction for each level. This allows
-       * a representation of the full set of nodes and levels in a single ParaView file.
-       */
-      double const level_z_offset = level_of_node * z_coordinates_offset_;
-      /**
-       * Determine the cell size for the output. Since the debug output only serves as a helping tool, the real coordinates are
-       * not important. Therefore, the internal block size is divided in equal spaced cells. To obtain an empty gap between to blocks
-       * an additional cell ("+1") is considered.
-       */
-      // Get all coordinate information for the current node ( cell size and origin )
-      double const block_size                  = DomainSizeOfId( id, dimensionalized_node_size_on_level_zero_ );
-      double const cell_size                   = block_size / double( CC::TCX() + 1 );
+      unsigned int const level_of_node         = LevelOfNode( id );
+      double const level_z_offset              = GetLevelZOffset( level_of_node, z_coordinates_offset_ );
+      double const block_size                  = GetBlockSize( id, level_of_node, dimensionalized_node_size_on_level_zero_ );
+      double const cell_size                   = GetCellSize( block_size );
       std::array<double, 3> const block_origin = DomainCoordinatesOfId( id, block_size );
+      constexpr double horizontal_offset       = CC::DIM() == Dimension::Three ? 0 : 0.5;
+
       // Loop through all total cells to append coordinates
       for( unsigned int k = 0; k <= CC::TCZ(); ++k ) {
          for( unsigned int j = 0; j <= CC::TCY(); ++j ) {
             for( unsigned int i = 0; i <= CC::TCX(); ++i ) {
-               vertex_coordinates[vertex_coordinates_counter]     = block_origin[0] + double( i ) * cell_size;
+               vertex_coordinates[vertex_coordinates_counter]     = block_origin[0] + double( i + horizontal_offset ) * cell_size;
                vertex_coordinates[vertex_coordinates_counter + 1] = block_origin[1] + double( j ) * cell_size;
                vertex_coordinates[vertex_coordinates_counter + 2] = block_origin[2] + double( k ) * cell_size + level_z_offset;
                vertex_coordinates_counter += 3;
