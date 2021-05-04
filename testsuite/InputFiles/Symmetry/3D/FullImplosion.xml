@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- To appear in the symmetry paper of N. Fleishmann -->
 <configuration>
     <domain>
-        <!-- size of a single block on level 0 -->
+        <!-- size of a single node on level 0 -->
         <nodeSize> 0.6  </nodeSize>
 
-        <!-- number of blocks per dimension-->
+        <!-- number of nodes per dimension-->
         <nodeRatio>
             <x> 1 </x>
             <y> 1 </y>
@@ -126,12 +125,12 @@
    <restart>
       <restore>
          <mode> Off </mode> <!-- Off, Soft OR Forced -->
-         <fileName> full_implosion_xyz/restart/restart_***.h5 </fileName>
+         <fileName> FullImplosion/restart/restart_***.h5 </fileName>
       </restore>
       <snapshots>
          <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
-         <interval> 10000 </interval> <!-- in wall seconds -->
-         <intervalsToKeep> 1 </intervalsToKeep>
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep>
       </snapshots>
    </restart>
 
