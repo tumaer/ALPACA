@@ -26,7 +26,6 @@
                 <top>Symmetry</top>
             </material>
 
-            <!-- TO BE IMPLEMENTED -->
             <levelSet>
                 <!--types of level-set boundary conditions:
                 zeroGradient
@@ -39,7 +38,6 @@
                 <bottom> symmetry </bottom>
                 <top>    symmetry </top>
             </levelSet>
-            <!-- END - TO BE IMPLEMENTED -->
         </boundaryConditions>
 
         <initialConditions>
@@ -69,19 +67,9 @@
         	}
             </material1>
 
-            <!-- TO BE IMPLEMENTED -->
-            <material2>
-                density := 1.0;
-                velocityX := 0.75;
-                velocityY := 0.0;
-                velocityZ := 0.0;
-                pressure := 1.0;
-            </material2>
-
             <levelSet1>
                 phi := 1.0;
             </levelSet1>
-            <!-- END - TO BE IMPLEMENTED -->
         </initialConditions>
     </domain>
 
@@ -117,7 +105,6 @@
 
        <refinementCriterion>
            <epsilonReference>    0.01 </epsilonReference>
-           <!-- user_level_of_epsilon_ref: allowed values [0-12] -->
            <levelOfEpsilonReference> 2  </levelOfEpsilonReference>
        </refinementCriterion>
    </multiResolution>
@@ -138,7 +125,7 @@
    <restart>
       <restore>
          <mode> Off </mode> <!-- Off, Soft OR Forced -->
-         <fileName> inputfile/restart/restart_***.h5 </fileName>
+         <fileName> FullImplosion/restart/restart_***.h5 </fileName>
       </restore>
       <snapshots>
          <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->

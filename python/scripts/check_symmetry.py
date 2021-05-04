@@ -4,6 +4,7 @@ import sys
 from argparse import ArgumentParser as ArgParser
 # alpacapy modules
 from alpacapy.logger import Logger
+from alpacapy.helper_functions import file_operations as fo
 from alpacapy.post_analysis.check_symmetry import check_symmetry
 
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     logger = Logger()
 
     # Make the path to the result file absolute
-    options.hdf5_file_path = get_absolute_path(options.hdf5_file_path)
+    options.hdf5_file_path = fo.get_absolute_path(options.hdf5_file_path)
 
     logger.welcome_message("Symmetry check")
     logger.blank_line()
