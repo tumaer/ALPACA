@@ -95,6 +95,8 @@ public:
 
    void WelcomeMessage();
    void Flush();
+   void FlushToFile();
+   void FlushToTerminal();
    void SetLogfile( std::filesystem::path const& logfile );
    void RunningAlpaca( double const percentage, bool const fast_forward = false );
    void LogMessage( std::string const& message );

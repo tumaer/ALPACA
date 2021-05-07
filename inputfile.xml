@@ -107,12 +107,12 @@
             <type> functional </type>
             <input> phi := 1.0; </input>
             <boundingBox>
-               <xMin> 0.0 1.0 </xMin>
-               <xMax> 1.0 2.0 </xMax>
-               <yMin> 0.0 1.0 </yMin>
-               <yMax> 1.0 2.0 </yMax>
-               <zMin> 0.0 1.0 </zMin>
-               <zMax> 1.0 2.0 </zMax>
+               <xMin> 0.0 </xMin>
+               <xMax> 1.0 </xMax>
+               <yMin> 0.0 </yMin>
+               <yMax> 1.0 </yMax>
+               <zMin> 0.0 </zMin>
+               <zMax> 1.0 </zMax>
             </boundingBox>
          </levelSet1>
       </initialConditions>

@@ -74,7 +74,6 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -188,16 +187,23 @@ std::unique_ptr<std::stringstream> LogWriterImplementation::SwapOutFileOutputStr
 }
 
 /**
- * @brief Flushes the (so far) collected messages to the terminal and the logfile respectively. Thus external writes are limited to calls to this function.
- * @note This method cannot be unit-tested. By providing nullptr for the stream members no logging text is propated to the outside, hence the logger is silineced.
+ * @brief Flushes the (so far) collected messages to the terminal. Thus external writes are limited to calls to this function.
+ * @note This method cannot be unit-tested. By providing nullptr for the stream members no logging text is propagated to the outside, hence the logger is silenced.
  */
-void LogWriterImplementation::Flush() {
+void LogWriterImplementation::FlushToTerminal() {
    if( terminal_output_ ) {
       std::cout << terminal_output_->str();
       std::cout.flush();
       terminal_output_->clear();
       terminal_output_->str( std::string() );
    }
+}
+
+/**
+ * @brief Flushes the (so far) collected messages to the logfile. Thus external writes are limited to calls to this function.
+ * @note This method cannot be unit-tested. By providing nullptr for the stream members no logging text is propagated to the outside, hence the logger is silenced.
+ */
+void LogWriterImplementation::FlushToFile() {
    if( file_output_ && logfile_ ) {
       std::ofstream file_output_stream( *logfile_, std::ios::app );
       file_output_stream << file_output_->str();
@@ -206,6 +212,15 @@ void LogWriterImplementation::Flush() {
       file_output_->clear();
       file_output_->str( std::string() );
    }
+}
+
+/**
+ * @brief Flushes the (so far) collected messages to the terminal and the logfile respectively. Thus external writes are limited to calls to this function.
+ * @note This method cannot be unit-tested. By providing nullptr for the stream members no logging text is propagated to the outside, hence the logger is silenced.
+ */
+void LogWriterImplementation::Flush() {
+   FlushToFile();
+   FlushToTerminal();
 }
 
 /**
