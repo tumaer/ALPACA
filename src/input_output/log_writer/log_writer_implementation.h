@@ -69,6 +69,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <sstream>
 
 /**
  * @brief This class provides the functions to actually write logs to terminal or file output. Logged messages are buffered internally until they are actively flushed.
@@ -95,6 +96,8 @@ public:
 
    void WelcomeMessage();
    void Flush();
+   void FlushToFile();
+   void FlushToTerminal();
    void SetLogfile( std::filesystem::path const& logfile );
    void RunningAlpaca( double const percentage, bool const fast_forward );
    void LogMessage( std::string const& message );

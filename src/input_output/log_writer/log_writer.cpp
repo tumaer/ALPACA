@@ -98,6 +98,20 @@ void LogWriter::WelcomeMessage() {
 }
 
 /**
+ * @brief Triggers writing of logged messages to terminal.
+ */
+void LogWriter::FlushToTerminal() {
+   implementation_.FlushToTerminal();
+}
+
+/**
+ * @brief Triggers writing of logged messages to file.
+ */
+void LogWriter::FlushToFile() {
+   implementation_.FlushToFile();
+}
+
+/**
  * @brief Triggers writing of logged messages to terminal and/or file.
  */
 void LogWriter::Flush() {
