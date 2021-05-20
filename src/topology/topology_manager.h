@@ -69,8 +69,10 @@
 #ifndef TOPOLOGY_MANAGER_H
 #define TOPOLOGY_MANAGER_H
 
+#include <unordered_map>
 #include <vector>
 #include <mpi.h>
+#include "communication/mpi_utilities.h"
 #include "topology_node.h"
 #include "user_specifications/compile_time_constants.h"
 #include "topology/id_periodic_information.h"
@@ -93,17 +95,18 @@ class TopologyManager {
    std::tuple<std::vector<nid_t>, std::vector<MaterialName>> local_added_materials_list_;  //List holds id and added materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
    std::tuple<std::vector<nid_t>, std::vector<MaterialName>> local_removed_materials_list_;//List holds id and removed materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
 
-   std::vector<TopologyNode> forest_;// A collection of ( root ) trees is a forest
+   std::unordered_map<nid_t, TopologyNode> forest_;
 
    unsigned int coarsenings_since_load_balance_;
    unsigned int refinements_since_load_balance_;
 
-   int PositionOfNodeInZeroTopology( nid_t const id ) const;
-   void AssignBalancedLoad();
-   void ListNodeToBalance( std::vector<std::tuple<nid_t const, int const, int const>>& ids_current_future_rank_map );
+   void SetCurrentRanksAccordingToTargetRanks();
+   std::vector<std::tuple<nid_t const, int const, int const>> NodesToBalance();
 
    void AssignTargetRanksToLeavesInList( std::vector<nid_t> const& leaves, int const number_of_ranks );
    void AssignTargetRankToLeaves( int const number_of_ranks );
+
+   void AssignTargetRankToParents();
 
 public:
    explicit TopologyManager( std::array<unsigned int, 3> level_zero_blocks = { 1, 1, 1 }, unsigned int const maximum_level = 0, unsigned int active_periodic_locations = 0 );
@@ -119,14 +122,14 @@ public:
    std::pair<unsigned int, unsigned int> NodeAndLeafCount() const;
    std::pair<unsigned int, unsigned int> NodeAndBlockCount() const;
    // Rank-wise counters:
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndLeavesPerRank() const;
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndBlocksPerRank() const;
-   std::vector<unsigned int> InterfaceLeavesPerRank() const;
+   std::vector<std::pair<unsigned int, unsigned int>> NodesAndLeavesPerRank( int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   std::vector<std::pair<unsigned int, unsigned int>> NodesAndBlocksPerRank( int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   std::vector<unsigned int> InterfaceLeavesPerRank( int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
    // Offset-counters:
-   unsigned long long int LeafOffsetOfRank( int const rank ) const;
-   unsigned long long int InterfaceLeafOffsetOfRank( int const rank ) const;
-   unsigned long long int NodeOffsetOfRank( int const rank ) const;
-   std::pair<unsigned long long int, unsigned long long int> NodeAndBlockOffsetOfRank( int const rank ) const;
+   unsigned long long int LeafOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   unsigned long long int InterfaceLeafOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   unsigned long long int NodeOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   std::pair<unsigned long long int, unsigned long long int> NodeAndBlockOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
 
    //Single node testers:
    bool NodeExists( nid_t const id ) const;
@@ -158,9 +161,9 @@ public:
    std::vector<nid_t> LocalLeafIdsOnLevel( unsigned int const level ) const;
    std::vector<nid_t> LeafIdsOnLevel( unsigned int const level ) const;
    std::vector<nid_t> DescendantIdsOfNode( nid_t const id ) const;
-   std::vector<nid_t> LocalNodeIds() const;
-   std::vector<nid_t> GlobalIdsOnLevel( unsigned int const level ) const;
-   std::vector<nid_t> IdsOnLevelOfRank( unsigned int const level, int const rank_id ) const;
+   std::vector<nid_t> LocalIds() const;
+   std::vector<nid_t> IdsOnLevel( unsigned int const level ) const;
+   std::vector<nid_t> LocalIdsOnLevel( unsigned int const level ) const;
 
    // Node and/or topology altering:
    void RefineNodeWithId( nid_t const id );
@@ -170,7 +173,7 @@ public:
 
    bool UpdateTopology();
    std::vector<std::tuple<nid_t const, int const, int const>> PrepareLoadBalancedTopology( int const number_of_ranks );
-   std::vector<unsigned int> RestoreTopology( std::vector<nid_t> ids, std::vector<unsigned short> number_of_phases, std::vector<unsigned short> materials );
+   std::vector<unsigned int> RestoreTopology( std::vector<nid_t> ids, std::vector<unsigned short> number_of_phases, std::vector<MaterialName> materials );
 
    // Formatted information
    std::string LeafRankDistribution( int const number_of_ranks );

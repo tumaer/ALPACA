@@ -104,28 +104,11 @@ namespace ContainerOperations {
    }
 
    /**
-    * @brief Gives the element that is present most often in the container.
-    * @param non_empty The original container holding the elements.
-    * @tparam Container holding the elemnts must be iterable.
-    * @return The element which occurs most frequent in the container. If multiple elements occur the most, the first one (container ordering) is returned.
-    * @note Function is undefined if the container is empty.
+    * @brief Applies the given function element-wise to all elements in the container and returns an array of the results.
+    * @tparam Container A container holding elements providing at least a constexpr size and at function.
+    * @tparam Function The function to be applied to all elements
+    * @note Does not work with empty containers.
     */
-   template<typename Container>
-   typename Container::value_type MostFrequentElement( Container const& non_empty ) {
-      std::unordered_map<typename Container::value_type, std::size_t> count;
-      count.reserve( non_empty.size() );
-      for( auto const& element : non_empty ) {
-         count[element]++;
-      }
-      return std::get<0>( *std::max_element( std::cbegin( count ), std::cend( count ), []( auto const& a, auto const& b ) { return std::get<1>( a ) < std::get<1>( b ); } ) );
-   }
-
-   /**
- * @brief Applies the given function element-wise to all elements in the container and returns an array of the results.
- * @tparam Container A container holding elements providing at least a constexpr size and at function.
- * @tparam Function The function to be applied to all elements
- * @note Does not work with empty containers.
- */
    template<typename Container, typename Function>
    constexpr auto ArrayOfElementWiseFunctionApplication( Container const c, Function const f ) {
       using value_type                        = decltype( f( std::declval<typename Container::value_type>() ) );
@@ -134,6 +117,29 @@ namespace ContainerOperations {
          result[i] = f( c.at( i ) );
       }
       return result;
+   }
+
+   /**
+    * @brief Applies the given transform function on all elements between given first and last iterator if the given predicate is true.
+    * @tparam InputIt iterator.
+    * @tparam OutputIt iterator.
+    * @tparam Pred Predicate. If it is true, the given container is applied with the transformation.
+    * @tparam UnaryOperation. The transformation function to be applied.
+    * @param first Starting iterator.
+    * @param last Final iterator.
+    * @param dest Starting iterator of destination range.
+    * @param transfrom The function to apply to the matching elements.
+    * @note Does not work with empty containers.
+    * @note Naming leaned on STL convertions.
+    */
+   template<class InputIt, class OutputIt, class Pred, class UnaryOperation>
+   void transform_if( InputIt first, InputIt last, OutputIt dest, Pred pred, UnaryOperation transform ) {
+      while( first != last ) {
+         if( pred( *first ) ) {
+            *dest++ = transform( *first );
+         }
+         ++first;
+      }
    }
 
 }// namespace ContainerOperations

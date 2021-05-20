@@ -53,7 +53,6 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
-* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -63,59 +62,101 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, February 10th, 2021                                                            *
+* Munich, July 1st, 2020                                                                 *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef TOPOLOGY_NODE_H
-#define TOPOLOGY_NODE_H
-
-#include <vector>
-#include <tuple>
-#include "topology/node_id_type.h"
+#include <catch2/catch.hpp>
 #include "materials/material_definitions.h"
+#include "topology/topology_node.h"
 
-namespace TopologyNodeConstants {
-   constexpr int unassigned_rank = -1;
-}// namespace TopologyNodeConstants
+SCENARIO( "Topology Nodes created with different parameters, materials are modified, made parents and ranks are updated ", "[1rank]" ) {
+   constexpr int test_rank                       = 42;
+   std::vector<MaterialName> const two_materials = { MaterialName::MaterialOne, MaterialName::MaterialTwo };
+   GIVEN( "Three topology nodes are constructed. An empty one, a rank constructed node and one with two materials." ) {
+      TopologyNode empty_constructed    = TopologyNode();
+      TopologyNode rank_constructed     = TopologyNode( test_rank );
+      TopologyNode material_constructed = TopologyNode( two_materials );
+      THEN( "The nodes are leaves" ) {
+         REQUIRE( empty_constructed.IsLeaf() );
+         REQUIRE( rank_constructed.IsLeaf() );
+         REQUIRE( material_constructed.IsLeaf() );
+      }
+      THEN( "The rank constructed node is already on the given rank, the others are unassigned" ) {
+         REQUIRE( rank_constructed.Rank() == test_rank );
+         REQUIRE( empty_constructed.Rank() == TopologyNodeConstants::unassigned_rank );
+         REQUIRE( material_constructed.Rank() == TopologyNodeConstants::unassigned_rank );
+      }
+      THEN( "The material constructed node already holds two materials, the others hold none" ) {
+         REQUIRE( material_constructed.NumberOfMaterials() == two_materials.size() );
+         REQUIRE( rank_constructed.NumberOfMaterials() == 0 );
+         REQUIRE( empty_constructed.NumberOfMaterials() == 0 );
+      }
+      THEN( "Only the rank constructed yields true when asked if node is on the test rank" ) {
+         REQUIRE( rank_constructed.IsOnRank( test_rank ) );
+         REQUIRE_FALSE( empty_constructed.IsOnRank( test_rank ) );
+         REQUIRE_FALSE( material_constructed.IsOnRank( test_rank ) );
+      }
 
-/**
- * @brief The TopologyNode class organizes the light weight global ( over MPI ranks ) node information in a tree structure. Allowing the TopologyManager efficient searches.
- */
-class TopologyNode {
+      WHEN( "We make the nodes parents followed by making them leaves" ) {
+         empty_constructed.MakeParent();
+         rank_constructed.MakeParent();
+         material_constructed.MakeParent();
+         THEN( "The nodes become non-leaves" ) {
+            REQUIRE_FALSE( empty_constructed.IsLeaf() );
+            REQUIRE_FALSE( rank_constructed.IsLeaf() );
+            REQUIRE_FALSE( material_constructed.IsLeaf() );
+         }
+         empty_constructed.MakeLeaf();
+         rank_constructed.MakeLeaf();
+         material_constructed.MakeLeaf();
+         THEN( "The nodes become leaves again" ) {
+            REQUIRE( empty_constructed.IsLeaf() );
+            REQUIRE( rank_constructed.IsLeaf() );
+            REQUIRE( material_constructed.IsLeaf() );
+         }
+      }
 
-   int current_rank_;
-   int target_rank_;
-   bool is_leaf_;
-   std::vector<MaterialName> materials_;
+      WHEN( "We add the first of the materials to the empty constructed node and remove the second material form the material constructed node" ) {
+         empty_constructed.AddMaterial( two_materials.front() );
+         material_constructed.RemoveMaterial( two_materials.back() );
+         THEN( "Both nodes hold the same materials" ) {
+            REQUIRE( empty_constructed.Materials() == material_constructed.Materials() );
+         }
+         THEN( "The single material on both is the first of the two materials" ) {
+            REQUIRE( empty_constructed.SingleMaterial() == two_materials.front() );
+            REQUIRE( material_constructed.SingleMaterial() == two_materials.front() );
+         }
+      }
 
-public:
-   explicit TopologyNode( int const rank = TopologyNodeConstants::unassigned_rank );
-   explicit TopologyNode( std::vector<MaterialName> const material, int const rank = TopologyNodeConstants::unassigned_rank );
-   ~TopologyNode()                     = default;
-   TopologyNode( TopologyNode const& ) = delete;
-   TopologyNode& operator=( TopologyNode const& ) = delete;
-   TopologyNode( TopologyNode&& )                 = delete;
-   TopologyNode& operator=( TopologyNode&& ) = delete;
+      WHEN( "We assign the test rank as target rank to all nodes" ) {
+         empty_constructed.AssignTargetRank( test_rank );
+         rank_constructed.AssignTargetRank( test_rank );
+         material_constructed.AssignTargetRank( test_rank );
+         THEN( "This test_rank is correctly reported" ) {
+            REQUIRE( empty_constructed.TargetRank() == test_rank );
+            REQUIRE( rank_constructed.TargetRank() == test_rank );
+            REQUIRE( material_constructed.TargetRank() == test_rank );
+         }
+         THEN( "Only the rank constructed node is balanced" ) {
+            REQUIRE( rank_constructed.IsBalanced() );
+            REQUIRE_FALSE( empty_constructed.IsBalanced() );
+            REQUIRE_FALSE( material_constructed.IsBalanced() );
+         }
+      }
 
-   void AddMaterial( MaterialName const material );
-   void RemoveMaterial( MaterialName const material );
-
-   std::vector<MaterialName> Materials() const;
-   MaterialName SingleMaterial() const;
-   std::size_t NumberOfMaterials() const;
-
-   void MakeParent();
-   void MakeLeaf();
-
-   bool IsLeaf() const;
-
-   int Rank() const;
-   bool IsOnRank( int const rank ) const;
-   int TargetRank() const;
-   void AssignTargetRank( int const rank );
-   void SetCurrentRankAccordingToTargetRank();
-
-   bool IsBalanced() const;
-};
-
-#endif// TOPOLOGY_NODE_H
+      WHEN( "We assigning a different rank to all nodes and update the ranks" ) {
+         constexpr int other_rank = 2;
+         empty_constructed.AssignTargetRank( other_rank );
+         rank_constructed.AssignTargetRank( other_rank );
+         material_constructed.AssignTargetRank( other_rank );
+         empty_constructed.SetCurrentRankAccordingToTargetRank();
+         rank_constructed.SetCurrentRankAccordingToTargetRank();
+         material_constructed.SetCurrentRankAccordingToTargetRank();
+         THEN( "The rank is reported as other rank" ) {
+            REQUIRE( empty_constructed.Rank() == other_rank );
+            REQUIRE( rank_constructed.Rank() == other_rank );
+            REQUIRE( material_constructed.Rank() == other_rank );
+         }
+      }
+   }
+}

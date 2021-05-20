@@ -92,7 +92,7 @@ namespace {
     */
    void AddMaterialToAllNodes( TopologyManager& topology, MaterialName const material, int const rank = 0 ) {
       if( rank == 0 ) {
-         auto const root_nodes = topology.GlobalIdsOnLevel( 0 );
+         auto const root_nodes = topology.IdsOnLevel( 0 );
          std::vector<nid_t> all_nodes;
          for( auto& node : root_nodes ) {
             auto&& descendants = topology.DescendantIdsOfNode( node );
@@ -299,10 +299,11 @@ SCENARIO( "Topology manager gives correct nodes/leaf/multi-phase/offset/etc. cou
       }
 
       WHEN( "We distribute the toplogy onto three ranks" ) {
-         simplest_jump.PrepareLoadBalancedTopology( 3 );
+         constexpr int number_of_ranks = 3;
+         simplest_jump.PrepareLoadBalancedTopology( number_of_ranks );
          simplest_jump.UpdateTopology();
          THEN( "We count 4, 4 and 2 nodes as well as 4, 3 and 2 leaves on rank zero, one and two, respectively" ) {
-            auto const nodes_and_leaves_per_rank = simplest_jump.NodesAndLeavesPerRank();
+            auto const nodes_and_leaves_per_rank = simplest_jump.NodesAndLeavesPerRank( number_of_ranks );
             REQUIRE( nodes_and_leaves_per_rank.size() == 3 );
 
             auto const [nodes_rank_zero, leaves_rank_zero] = nodes_and_leaves_per_rank[0];
@@ -318,7 +319,7 @@ SCENARIO( "Topology manager gives correct nodes/leaf/multi-phase/offset/etc. cou
             REQUIRE( leaves_rank_two == SimplestJumpTopology::Distributed::leaves_on_rank_two );
          }
          THEN( "We count 4, 4 and 2 nodes on rank zero, one and two, respectively and the same amount of blocks" ) {
-            auto const nodes_and_blocks_per_rank = simplest_jump.NodesAndBlocksPerRank();
+            auto const nodes_and_blocks_per_rank = simplest_jump.NodesAndBlocksPerRank( number_of_ranks );
             REQUIRE( nodes_and_blocks_per_rank.size() == 3 );
 
             auto const [nodes_rank_zero, blocks_rank_zero] = nodes_and_blocks_per_rank[0];
@@ -337,43 +338,44 @@ SCENARIO( "Topology manager gives correct nodes/leaf/multi-phase/offset/etc. cou
 
       WHEN( "We add a second material and distribute on two ranks" ) {
          AddMaterialToWestmostNodesOnEveryLevel( simplest_jump, MaterialName::MaterialTwo );
-         simplest_jump.PrepareLoadBalancedTopology( 2 );
+         constexpr int number_of_ranks = 2;
+         simplest_jump.PrepareLoadBalancedTopology( number_of_ranks );
          simplest_jump.UpdateTopology();
          THEN( "We count two, and two interface leaves on rank zero and one, respectively" ) {
-            auto const interface_leaves_per_rank = simplest_jump.InterfaceLeavesPerRank();
+            auto const interface_leaves_per_rank = simplest_jump.InterfaceLeavesPerRank( number_of_ranks );
             REQUIRE( interface_leaves_per_rank.size() == 2 );
             REQUIRE( interface_leaves_per_rank[0] == 2 );
             REQUIRE( interface_leaves_per_rank[1] == 2 );
          }
 
          THEN( "The node offset of rank zero is zero and equal the node count on all other ranks " ) {
-            REQUIRE( simplest_jump.NodeOffsetOfRank( 0 ) == 0 );
-            REQUIRE( simplest_jump.NodeOffsetOfRank( 1 ) == SimplestJumpTopology::MaterialsAddedDistributed::node_offset_rank_one );
-            REQUIRE( simplest_jump.NodeOffsetOfRank( 42 ) == SimplestJumpTopology::node_count );
+            REQUIRE( simplest_jump.NodeOffsetOfRank( 0, number_of_ranks ) == 0 );
+            REQUIRE( simplest_jump.NodeOffsetOfRank( 1, number_of_ranks ) == SimplestJumpTopology::MaterialsAddedDistributed::node_offset_rank_one );
+            REQUIRE( simplest_jump.NodeOffsetOfRank( 42, number_of_ranks ) == SimplestJumpTopology::node_count );
          }
 
          THEN( "The leaf offset of rank zero is zero and of equal the leaf count on all others ranks" ) {
-            REQUIRE( simplest_jump.LeafOffsetOfRank( 0 ) == 0 );
-            REQUIRE( simplest_jump.LeafOffsetOfRank( 1 ) == SimplestJumpTopology::MaterialsAddedDistributed::leaf_offset_rank_one );
-            REQUIRE( simplest_jump.LeafOffsetOfRank( 42 ) == SimplestJumpTopology::MaterialsAddedDistributed::leaf_count );
+            REQUIRE( simplest_jump.LeafOffsetOfRank( 0, number_of_ranks ) == 0 );
+            REQUIRE( simplest_jump.LeafOffsetOfRank( 1, number_of_ranks ) == SimplestJumpTopology::MaterialsAddedDistributed::leaf_offset_rank_one );
+            REQUIRE( simplest_jump.LeafOffsetOfRank( 42, number_of_ranks ) == SimplestJumpTopology::MaterialsAddedDistributed::leaf_count );
          }
 
          THEN( "The interface offset of rank zero is zero and equal the block count on all other ranks" ) {
-            REQUIRE( simplest_jump.InterfaceLeafOffsetOfRank( 0 ) == 0 );
-            REQUIRE( simplest_jump.InterfaceLeafOffsetOfRank( 1 ) == SimplestJumpTopology::MaterialsAddedDistributed::interface_offset_rank_one );
-            REQUIRE( simplest_jump.InterfaceLeafOffsetOfRank( 42 ) == SimplestJumpTopology::MaterialsAddedDistributed::interface_count );
+            REQUIRE( simplest_jump.InterfaceLeafOffsetOfRank( 0, number_of_ranks ) == 0 );
+            REQUIRE( simplest_jump.InterfaceLeafOffsetOfRank( 1, number_of_ranks ) == SimplestJumpTopology::MaterialsAddedDistributed::interface_offset_rank_one );
+            REQUIRE( simplest_jump.InterfaceLeafOffsetOfRank( 42, number_of_ranks ) == SimplestJumpTopology::MaterialsAddedDistributed::interface_count );
          }
 
          THEN( "The node/block block offset of rank zero is zero and equal the node/block count on all other ranks" ) {
-            auto const [node_offset_rank_zero, block_offset_rank_zero] = simplest_jump.NodeAndBlockOffsetOfRank( 0 );
+            auto const [node_offset_rank_zero, block_offset_rank_zero] = simplest_jump.NodeAndBlockOffsetOfRank( 0, number_of_ranks );
             REQUIRE( node_offset_rank_zero == SimplestJumpTopology::MaterialsAddedDistributed::offset_rank_zero );
             REQUIRE( block_offset_rank_zero == SimplestJumpTopology::MaterialsAddedDistributed::offset_rank_zero );
 
-            auto const [node_offset_rank_one, block_offset_rank_one] = simplest_jump.NodeAndBlockOffsetOfRank( 1 );
+            auto const [node_offset_rank_one, block_offset_rank_one] = simplest_jump.NodeAndBlockOffsetOfRank( 1, number_of_ranks );
             REQUIRE( node_offset_rank_one == SimplestJumpTopology::MaterialsAddedDistributed::node_offset_rank_one );
             REQUIRE( block_offset_rank_one == SimplestJumpTopology::MaterialsAddedDistributed::block_offset_rank_one );
 
-            auto const [node_offset_rank_oob, block_offset_rank_oob] = simplest_jump.NodeAndBlockOffsetOfRank( 42 );
+            auto const [node_offset_rank_oob, block_offset_rank_oob] = simplest_jump.NodeAndBlockOffsetOfRank( 42, number_of_ranks );
             REQUIRE( node_offset_rank_oob == SimplestJumpTopology::node_count );
             REQUIRE( block_offset_rank_oob == SimplestJumpTopology::MaterialsAddedDistributed::block_count );
          }
@@ -383,9 +385,10 @@ SCENARIO( "Topology manager gives correct nodes/leaf/multi-phase/offset/etc. cou
 
 SCENARIO( "Single node states can be requested", "[1rank]" ) {
    GIVEN( "A single-phase topology with eight leaves on Lmax = 1 and two nodes on level zero" ) {
+      constexpr MaterialName first_material = MaterialName::MaterialOne;
       TopologyManager simplest_jump( { 2, 1, 1 }, 1 );
       RefineZerothRootNode( simplest_jump );
-      AddMaterialToAllNodes( simplest_jump, MaterialName::MaterialOne );
+      AddMaterialToAllNodes( simplest_jump, first_material );
       WHEN( "We ask some node states on this toplogy" ) {
          THEN( "We correctly tell if a node exists" ) {
             nid_t const first_left_child  = SimplestJumpTopology::FirstLeftChild();
@@ -426,9 +429,8 @@ SCENARIO( "Single node states can be requested", "[1rank]" ) {
             REQUIRE( simplest_jump.GetMaterialsOfNode( SimplestJumpTopology::ParentNode() ).size() == 2 );
             REQUIRE( simplest_jump.GetMaterialsOfNode( SimplestJumpTopology::LevelZeroLeafNode() ).size() == 1 );
          }
-         THEN( "Askign for a single material works only on the leaf not the parent" ) {
-            REQUIRE_THROWS( simplest_jump.SingleMaterialOfNode( SimplestJumpTopology::ParentNode() ) );
-            REQUIRE_NOTHROW( simplest_jump.SingleMaterialOfNode( SimplestJumpTopology::LevelZeroLeafNode() ) );
+         THEN( "We can ask the leaf for its single material and get the correct answer" ) {
+            REQUIRE( simplest_jump.SingleMaterialOfNode( SimplestJumpTopology::LevelZeroLeafNode() ) == first_material );
          }
       }
    }
@@ -514,8 +516,8 @@ SCENARIO( "Node listings are correctly produced", "[2rank]" ) {
             REQUIRE( simplest_jump.DescendantIdsOfNode( SimplestJumpTopology::LevelZeroLeafNode() ).size() == 0 );
          }
          THEN( "There are two nodes on level zero and eight on level one in the global list" ) {
-            REQUIRE( simplest_jump.GlobalIdsOnLevel( 0 ).size() == 2 );
-            REQUIRE( simplest_jump.GlobalIdsOnLevel( 1 ).size() == 8 );
+            REQUIRE( simplest_jump.IdsOnLevel( 0 ).size() == 2 );
+            REQUIRE( simplest_jump.IdsOnLevel( 1 ).size() == 8 );
          }
          THEN( "The amount of local leaves fits on both ranks" ) {
             REQUIRE( simplest_jump.LocalLeafIds().size() == SimplestJumpTopology::Parallel::LocalLeafCount( my_rank ) );
@@ -525,15 +527,11 @@ SCENARIO( "Node listings are correctly produced", "[2rank]" ) {
             REQUIRE( simplest_jump.LocalLeafIdsOnLevel( level_one ).size() == SimplestJumpTopology::Parallel::LocalLeafCountOnLevel( level_one, my_rank ) );
          }
          THEN( "The amount of local nodes fits on both ranks" ) {
-            REQUIRE( simplest_jump.LocalNodeIds().size() == SimplestJumpTopology::Parallel::LocalNodeCount( my_rank ) );
+            REQUIRE( simplest_jump.LocalIds().size() == SimplestJumpTopology::Parallel::LocalNodeCount( my_rank ) );
          }
          THEN( "The amounts of nodes per level per rank fits on both ranks for both ranks" ) {
-            constexpr int rank_zero = 0;
-            constexpr int rank_one  = 1;
-            REQUIRE( simplest_jump.IdsOnLevelOfRank( level_zero, rank_zero ).size() == SimplestJumpTopology::Parallel::NodeCountOnLevelOfRank( level_zero, rank_zero ) );
-            REQUIRE( simplest_jump.IdsOnLevelOfRank( level_zero, rank_one ).size() == SimplestJumpTopology::Parallel::NodeCountOnLevelOfRank( level_zero, rank_one ) );
-            REQUIRE( simplest_jump.IdsOnLevelOfRank( level_one, rank_zero ).size() == SimplestJumpTopology::Parallel::NodeCountOnLevelOfRank( level_one, rank_zero ) );
-            REQUIRE( simplest_jump.IdsOnLevelOfRank( level_one, rank_one ).size() == SimplestJumpTopology::Parallel::NodeCountOnLevelOfRank( level_one, rank_one ) );
+            REQUIRE( simplest_jump.LocalIdsOnLevel( level_zero ).size() == SimplestJumpTopology::Parallel::NodeCountOnLevelOfRank( level_zero, my_rank ) );
+            REQUIRE( simplest_jump.LocalIdsOnLevel( level_one ).size() == SimplestJumpTopology::Parallel::NodeCountOnLevelOfRank( level_one, my_rank ) );
          }
       }
       WHEN( "We add a second material to some nodes" ) {
@@ -562,8 +560,9 @@ SCENARIO( "Topology state can be pretty formatted", "[1rank]" ) {
 }
 
 SCENARIO( "Changes in the topology are correctly processed", "[2rank]" ) {
-   GIVEN( "A topology with a single root node and lmax one" ) {
-      TopologyManager topology( { 1, 1, 1 }, 1 );
+   constexpr int number_of_ranks = 2;
+   GIVEN( "A topology with a single root node and lmax two" ) {
+      TopologyManager topology( { 1, 1, 1 }, 2 );
       int const my_rank = MpiUtilities::MyRankId();
       WHEN( "We add two material to the root node and remove the first one" ) {
          constexpr MaterialName material_one = MaterialName::MaterialOne;
@@ -593,14 +592,14 @@ SCENARIO( "Changes in the topology are correctly processed", "[2rank]" ) {
          topology.RefineNodeWithId( root_node_id );
          topology.UpdateTopology();
          THEN( "All nodes are on the same rank" ) {
-            REQUIRE( topology.NodesAndLeavesPerRank().size() == 1 );
+            REQUIRE( topology.NodesAndLeavesPerRank().size() == 2 );
             REQUIRE( topology.NodesAndLeavesPerRank().front() == std::pair( 9u, 8u ) );
          }
       }
       WHEN( "We refine the root node and load balance the topology" ) {
          topology.RefineNodeWithId( root_node_id );
          topology.UpdateTopology();
-         topology.PrepareLoadBalancedTopology( 2 );
+         topology.PrepareLoadBalancedTopology( number_of_ranks );
          THEN( "The leafs are evenly distributed onto the ranks" ) {
             REQUIRE( std::get<1>( topology.NodesAndLeavesPerRank().front() ) == 4 );
             REQUIRE( std::get<1>( topology.NodesAndLeavesPerRank().back() ) == 4 );
@@ -609,20 +608,20 @@ SCENARIO( "Changes in the topology are correctly processed", "[2rank]" ) {
       WHEN( "We refine the root node, add a couple materials and create a second topology from the first one by restoring the topology" ) {
          topology.RefineNodeWithId( root_node_id );
          topology.UpdateTopology();
-         topology.PrepareLoadBalancedTopology( 2 );
+         topology.PrepareLoadBalancedTopology( number_of_ranks );
          AddMaterialToAllNodes( topology, MaterialName::MaterialOne, my_rank );
          AddMaterialToWestmostNodesOnEveryLevel( topology, MaterialName::MaterialTwo, my_rank );
 
          TopologyManager restored_topology( { 1, 1, 1 }, 1 );
-         auto&& level_one_ids = topology.GlobalIdsOnLevel( 1 );
+         auto&& level_one_ids = topology.IdsOnLevel( 1 );
          std::vector<nid_t> ids( std::cbegin( level_one_ids ), std::cend( level_one_ids ) );
          ids.push_back( root_node_id );
          std::vector<unsigned short> number_of_materials;
          std::transform( std::begin( ids ), std::end( ids ), std::back_inserter( number_of_materials ), [&topology]( auto const id ) { return topology.GetMaterialsOfNode( id ).size(); } );
-         std::vector<unsigned short> materials;
+         std::vector<MaterialName> materials;
          for( auto const id : ids ) {
             for( auto const mat : topology.GetMaterialsOfNode( id ) ) {
-               materials.push_back( static_cast<unsigned short>( mat ) );
+               materials.push_back( mat );
             }
          }
          REQUIRE_NOTHROW( restored_topology.RestoreTopology( ids, number_of_materials, materials ) );
@@ -631,6 +630,22 @@ SCENARIO( "Changes in the topology are correctly processed", "[2rank]" ) {
          }
          THEN( "The amount of fluids in the first child is the same on both nodes" ) {
             REQUIRE( topology.GetMaterialsOfNode( IdsOfChildren( root_node_id )[0] ) == restored_topology.GetMaterialsOfNode( IdsOfChildren( root_node_id )[0] ) );
+         }
+      }
+      WHEN( "We refine the root node and the first child" ) {
+         topology.RefineNodeWithId( root_node_id );
+         topology.RefineNodeWithId( IdsOfChildren( root_node_id ).front() );
+         topology.UpdateTopology();
+         auto const balance_list = topology.PrepareLoadBalancedTopology( number_of_ranks );
+         THEN( "Some nodes need to be load balanced" ) {
+            REQUIRE( balance_list.size() > 0 );
+         }
+         THEN( "Target ranks for load balancing are meaningful - current rank is always zero" ) {
+            for( auto const [id, current, target] : balance_list ) {
+               REQUIRE( target > 0 );
+               REQUIRE( target < number_of_ranks );
+               REQUIRE( current == 0 );
+            }
          }
       }
    }

@@ -186,7 +186,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
    std::vector<unsigned short> number_of_materials( global_number_of_nodes );
    hdf5_manager_.ReadFullDataset( "NumberOfMaterials", number_of_materials.data(), H5T_NATIVE_USHORT );
 
-   std::vector<unsigned short> materials( std::accumulate( number_of_materials.begin(), number_of_materials.end(), 0 ) );
+   std::vector<MaterialName> materials( std::accumulate( number_of_materials.begin(), number_of_materials.end(), 0 ) );
    hdf5_manager_.ReadFullDataset( "Materials", materials.data(), H5T_NATIVE_USHORT );
 
    std::vector<unsigned short> number_of_interface_blocks( global_number_of_nodes );
@@ -225,7 +225,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
 
       materials_of_node.clear();
       for( unsigned int material_index = 0; material_index < number_of_materials[node_index]; ++material_index ) {
-         materials_of_node.push_back( ITM( materials[material_block_offset + material_index] ) );
+         materials_of_node.push_back( materials[material_block_offset + material_index] );
       }
 
       // Declare the interface block as null_pointer
@@ -255,7 +255,7 @@ double RestartManager::RestoreSimulation( std::string const& restore_filename ) 
 
       // Read the conservative and prime state data
       for( unsigned int material_index = 0; material_index < number_of_materials[node_index]; ++material_index ) {
-         MaterialName const material = ITM( materials[material_block_offset + material_index] );
+         MaterialName const material = materials[material_block_offset + material_index];
          Block& material_block       = new_node.GetPhaseByMaterial( material );
 
          hsize_t const reading_offset = material_block_offset + material_index;

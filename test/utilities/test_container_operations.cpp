@@ -131,35 +131,6 @@ SCENARIO( "Containers can be copy rotated left", "[1rank]" ) {
    }
 }
 
-SCENARIO( "Most frequent elements can be found", "[1rank]" ) {
-   constexpr int most_occuring_element = 42;
-   GIVEN( "Two containers filled with some values with different occurent counts" ) {
-      std::vector<int> const v        = { 1, 2, most_occuring_element, most_occuring_element, most_occuring_element, 2, 0, -3 };
-      std::list<unsigned int> const l = { 1, 2, most_occuring_element, most_occuring_element, most_occuring_element };
-      WHEN( "We ask for the most frequent element" ) {
-         auto const most_frequent_in_v = ContainerOperations::MostFrequentElement( v );
-         auto const most_frequent_in_l = ContainerOperations::MostFrequentElement( l );
-         THEN( "The result is the most occuring element" ) {
-            REQUIRE( most_frequent_in_v == most_occuring_element );
-            REQUIRE( most_frequent_in_l == most_occuring_element );
-         }
-      }
-   }
-   GIVEN( "Two containers holding the same elements in reverse order of each other and two elemnts with highest count" ) {
-      constexpr int other_most_occuring_element = 69;
-      std::vector<int> const v                  = { 1, most_occuring_element, -2, most_occuring_element, 3, most_occuring_element, 4, other_most_occuring_element, -5, other_most_occuring_element, 6, other_most_occuring_element };
-      std::vector<int> const w( std::crbegin( v ), std::crend( v ) );
-      WHEN( "We ask for the most frequent element" ) {
-         auto const most_frequent_in_v = ContainerOperations::MostFrequentElement( v );
-         auto const most_frequent_in_w = ContainerOperations::MostFrequentElement( w );
-         THEN( "The result is the one of the most occuring elements and the found one is opposite in the two containers" ) {
-            REQUIRE( most_frequent_in_v == other_most_occuring_element );
-            REQUIRE( most_frequent_in_w == most_occuring_element );
-         }
-      }
-   }
-}
-
 SCENARIO( "Array of elementwise application is produced properly", "[1rank]" ) {
    GIVEN( "A container providing the necessary consexpr size and at functions" ) {
       constexpr std::array<double, 4> a = { 1, -2, 3, -4 };
@@ -174,6 +145,44 @@ SCENARIO( "Array of elementwise application is produced properly", "[1rank]" ) {
             constexpr std::array<double, a.size()> a_negated_expected = { -1, 2, -3, 4 };
             REQUIRE( array_of_a_squared == a_squared_expected );
             REQUIRE( array_of_a_negated == a_negated_expected );
+         }
+      }
+   }
+}
+SCENARIO( "Transform-If transforms a container into another one if the condition is met", "[1rank]" ) {
+   GIVEN( "Two containers of different type but holding same elements, and one without the common elements" ) {
+      constexpr int common_element       = 42;
+      std::deque<int> double_ended_queue = { 1, 2, common_element, 3, 4, common_element, 5, common_element };
+      std::unordered_map<int, int> umap  = { { 1, 1 }, { 2, 2 }, { 3, common_element }, { 4, 3 }, { 5, 4 }, { 6, common_element }, { 7, 5 }, { 8, common_element } };
+      std::list<int> list                = { 1, 2, 3, 4, 5 };
+      WHEN( "We transform the containers into a vector under the contion to exclude the common element and add one to the remaining entries" ) {
+         std::vector<int> vector_from_dequeue_transformation, vector_from_umap_transformation, vector_from_list_transformation;
+         ContainerOperations::transform_if(
+               std::cbegin( double_ended_queue ), std::cend( double_ended_queue ), std::back_inserter( vector_from_dequeue_transformation ), [c = common_element]( auto const& in ) { return !( in == c ); }, []( auto const& in ) { return in + 1; } );
+         ContainerOperations::transform_if(
+               std::cbegin( umap ), std::cend( umap ), std::back_inserter( vector_from_umap_transformation ), [c = common_element]( auto const& in ) { return !( std::get<1>( in ) == c ); }, []( auto const& in ) { return std::get<1>( in ) + 1; } );
+         ContainerOperations::transform_if(
+               std::begin( list ), std::end( list ), std::back_inserter( vector_from_list_transformation ), [c = common_element]( auto const& in ) { return !( in == c ); }, []( auto const& in ) { return in + 1; } );
+         THEN( "The resutling vectors hold the same elements" ) {
+            std::sort( std::begin( vector_from_umap_transformation ), std::end( vector_from_umap_transformation ) );
+            REQUIRE( vector_from_dequeue_transformation == vector_from_umap_transformation );
+            REQUIRE( vector_from_umap_transformation == vector_from_list_transformation );
+         }
+      }
+      WHEN( "We transform the containers into a vector under the condition to exclude everything but the common element and adding one" ) {
+         std::vector<int> vector_from_dequeue_transformation, vector_from_umap_transformation, vector_from_list_transformation;
+         ContainerOperations::transform_if(
+               std::cbegin( double_ended_queue ), std::cend( double_ended_queue ), std::back_inserter( vector_from_dequeue_transformation ), [c = common_element]( auto const& in ) { return in == c; }, []( auto const& in ) { return in + 1; } );
+         ContainerOperations::transform_if(
+               std::cbegin( umap ), std::cend( umap ), std::back_inserter( vector_from_umap_transformation ), [c = common_element]( auto const& in ) { return std::get<1>( in ) == c; }, []( auto const& in ) { return std::get<1>( in ) + 1; } );
+         ContainerOperations::transform_if(
+               std::begin( list ), std::end( list ), std::back_inserter( vector_from_list_transformation ), [c = common_element]( auto const& in ) { return in == c; }, []( auto const& in ) { return in + 1; } );
+         THEN( "The vectors derived form the first two containers are identical" ) {
+            std::sort( std::begin( vector_from_umap_transformation ), std::end( vector_from_umap_transformation ) );
+            REQUIRE( vector_from_dequeue_transformation == vector_from_umap_transformation );
+         }
+         THEN( "The vector derived from the last container is empty" ) {
+            REQUIRE( vector_from_list_transformation.size() == 0 );
          }
       }
    }

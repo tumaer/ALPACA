@@ -321,9 +321,9 @@ bool InputOutputManager::WriteFullOutput( double const timestep, bool const forc
  * @param output_key The output key indicating at which algorithm substep the output is triggered.
  * @param output_type Output type identifier that is used (standard, interface, debug). Default: Debug.
  */
-void InputOutputManager::WriteSingleOutput( unsigned int const output_key, OutputType const output_type ) const {
+void InputOutputManager::WriteSingleOutput( double const output_key, OutputType const output_type ) const {
    // correct file naming
-   std::string const time_name( std::to_string( double( output_key ) ) );
+   std::string const time_name( std::to_string( output_key ) );
    std::string const output_filename( OutputFileName( output_type ) + time_name );
    // Call the output function
    WriteOutput( output_type, double( output_key ), output_filename, "" );
