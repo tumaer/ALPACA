@@ -147,7 +147,7 @@ void CommunicationManager::GenerateNeighborRelationForHaloUpdate( unsigned int c
    tmp_external_id_location_vector.reserve( 6 );
    // Get List of Halos on this Level
    // All (globally existing) nodes are viewed by all ranks in order to have the same order on all ranks, so that the tagging system works properly.
-   for( auto const global_id : topology_.GlobalIdsOnLevel( level ) ) {
+   for( auto const global_id : topology_.IdsOnLevel( level ) ) {
       NeighborsOfNode( global_id, tmp_neighbor_location_vector, tmp_external_id_location_vector );
       if( topology_.NodeIsOnRank( global_id, my_rank_id_ ) ) {
          external_boundaries_[level].insert( external_boundaries_[level].end(), tmp_external_id_location_vector.begin(), tmp_external_id_location_vector.end() );

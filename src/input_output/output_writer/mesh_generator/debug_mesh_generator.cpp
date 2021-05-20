@@ -152,7 +152,7 @@ hsize_t DebugMeshGenerator::DoGetGlobalNumberOfCells() const {
  * @brief See base class implementation.
  */
 hsize_t DebugMeshGenerator::DoGetLocalNumberOfCells() const {
-   return hsize_t( topology_.LocalNodeIds().size() ) * MeshGeneratorUtilities::NumberOfTotalCellsPerBlock();
+   return hsize_t( topology_.LocalIds().size() ) * MeshGeneratorUtilities::NumberOfTotalCellsPerBlock();
 }
 
 /**
@@ -173,7 +173,7 @@ std::vector<hsize_t> DebugMeshGenerator::DoGetGlobalDimensionsOfVertexCoordinate
  * @brief See base class implementation.
  */
 std::vector<hsize_t> DebugMeshGenerator::DoGetLocalDimensionsOfVertexCoordinates() const {
-   return { hsize_t( topology_.LocalNodeIds().size() ) * MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock(), hsize_t( 3 ) };
+   return { hsize_t( topology_.LocalIds().size() ) * MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock(), hsize_t( 3 ) };
 }
 
 /**
@@ -189,7 +189,7 @@ hsize_t DebugMeshGenerator::DoGetLocalVertexCoordinatesStartIndex() const {
 void DebugMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex_coordinates ) const {
 
    // get the correct number of leaves fo the rank
-   std::vector<nid_t> local_node_ids = topology_.LocalNodeIds();
+   std::vector<nid_t> local_node_ids = topology_.LocalIds();
    // resize the vector to ensure enough memory for the cooridnates ( x,y,z coordinates for each vertex )
    vertex_coordinates.resize( local_node_ids.size() * MeshGeneratorUtilities::NumberOfTotalVerticesPerBlock() * 3 );
 
@@ -223,7 +223,7 @@ void DebugMeshGenerator::DoComputeVertexCoordinates( std::vector<double>& vertex
  */
 void DebugMeshGenerator::DoComputeVertexIDs( std::vector<unsigned long long int>& vertex_ids ) const {
    // Local leave definitions
-   std::size_t const number_of_local_nodes = topology_.LocalNodeIds().size();
+   std::size_t const number_of_local_nodes = topology_.LocalIds().size();
    // Global offset between ranks (global vector is filled in the order (rank0, rank1, ..., rankN))
    unsigned int const offset = topology_.NodeOffsetOfRank( MpiUtilities::MyRankId() );
    // Resize Vertex ID vector ( 8 vertices span one cell )

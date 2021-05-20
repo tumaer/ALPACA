@@ -109,7 +109,7 @@ void Averager::AverageMaterial( std::vector<unsigned int> const& child_levels_de
       unsigned int send_counter = 0;
 
       //sort by mpi necessary or not
-      for( nid_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+      for( nid_t const child_id : topology_.IdsOnLevel( child_level ) ) {
          nid_t const parent_id    = ParentIdOfNode( child_id );
          int const rank_of_child  = topology_.GetRankOfNode( child_id );
          int const rank_of_parent = topology_.GetRankOfNode( parent_id );
@@ -180,7 +180,7 @@ void Averager::AverageInterfaceTags( std::vector<unsigned int> const& levels_wit
       unsigned int send_counter = 0;
 
       //sort into list
-      for( nid_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+      for( nid_t const child_id : topology_.IdsOnLevel( child_level ) ) {
          nid_t const parent_id = ParentIdOfNode( child_id );
 
          // if the parent is NOT multi, the child is neither and we do not have to do anything with the tags
@@ -270,7 +270,7 @@ void Averager::AverageParameters( std::vector<unsigned int> const child_levels_d
       std::vector<nid_t> no_mpi_list;
 
       //sort by mpi necessary or not
-      for( nid_t const child_id : topology_.GlobalIdsOnLevel( child_level ) ) {
+      for( nid_t const child_id : topology_.IdsOnLevel( child_level ) ) {
          nid_t const parent_id    = ParentIdOfNode( child_id );
          int const rank_of_child  = topology_.GetRankOfNode( child_id );
          int const rank_of_parent = topology_.GetRankOfNode( parent_id );

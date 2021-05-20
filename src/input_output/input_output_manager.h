@@ -232,7 +232,7 @@ public:
    void WriteTimestepFile( std::vector<double> const& timesteps_on_finest_level ) const;
    // Functions to write simulation data output
    bool WriteFullOutput( double const timestep, bool const force_output = false );
-   void WriteSingleOutput( unsigned int const output_key, OutputType const output_type = OutputType::Debug ) const;
+   void WriteSingleOutput( double const output_key, OutputType const output_type = OutputType::Debug ) const;
    // Functions for restart
    void WriteRestartFile( double const timestep, bool const force_output = false );
    double RestoreSimulationFromSnapshot();

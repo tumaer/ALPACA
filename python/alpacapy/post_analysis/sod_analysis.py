@@ -227,7 +227,7 @@ class SodAnalysis:
         # Apply additional operations on the data
         ordered_vertex_coordinates = vertex_coordinates[cell_vertices]
         cell_centers = np.mean(ordered_vertex_coordinates, axis=1)
-        longest_axis = np.argmax(np.argmax(cell_centers, axis=0))
+        longest_axis = np.argmax(np.max(cell_centers, axis=0))
         cell_center_longest_dim = cell_centers[:, longest_axis]
         min_cell_coordinates = np.min(ordered_vertex_coordinates, axis=1)
         max_cell_coordinates = np.max(ordered_vertex_coordinates, axis=1)

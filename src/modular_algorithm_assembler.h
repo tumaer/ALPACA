@@ -134,7 +134,7 @@ class ModularAlgorithmAssembler {
    void FinalizeSimulationRestart( double const restart_time );
 
    void Advance();
-   void ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const print_this_step, unsigned int& debug_key ) const;
+   void ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const print_this_step, double& debug_key ) const;
    void LogElapsedTimeSinceInProfileRuns( double const start_time, std::string const message );
 
    void ComputeRightHandSide( std::vector<unsigned int> const levels, unsigned int const stage );

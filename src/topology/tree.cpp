@@ -373,7 +373,7 @@ std::vector<std::reference_wrapper<Node const>> Tree::NodesWithLevelset() const 
  */
 std::vector<std::reference_wrapper<Node const>> Tree::AllNodes() const {
 
-   std::vector<nid_t> node_ids = topology_.LocalNodeIds();
+   std::vector<nid_t> node_ids = topology_.LocalIds();
    std::vector<std::reference_wrapper<Node const>> nodes;
    nodes.reserve( node_ids.size() );
 

@@ -302,15 +302,14 @@ void ModularAlgorithmAssembler::CreateNewSimulation( InitialCondition& initial_c
    std::vector<nid_t> parents_of_coarsable;
    std::vector<nid_t> refinement_list;//This list is only need as stub in this function.
 
-   int const my_rank = communicator_.MyRankId();
    for( unsigned int level = 0; level <= all_levels_.back(); ++level ) {
       if( level > 0 ) {
-         for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level - 1, my_rank ) ) {//We refine the parent to get the level we want to work on
+         for( nid_t const& node_id : topology_.LocalIdsOnLevel( level - 1 ) ) {//We refine the parent to get the level we want to work on
             topology_.RefineNodeWithId( node_id );
          }
          UpdateTopology();
       }
-      for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
+      for( nid_t const& node_id : topology_.LocalIdsOnLevel( level ) ) {
          nid_t parent_id = ParentIdOfNode( node_id );
          if( level == 0 || topology_.IsNodeMultiPhase( parent_id ) ) {//Evaluated left to right, makes it safe on level zero
             // get the materials that initially exists in this node ( this is determined on the finest level to avoid losing structures that are unresolved by this node )
@@ -356,7 +355,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation( InitialCondition& initial_c
       UpdateTopology();
       if( level == all_levels_.back() ) {
          halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
-         for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
+         for( nid_t const& node_id : topology_.LocalIdsOnLevel( level ) ) {
             Node& node = tree_.GetNodeWithId( node_id );
             if( node.HasLevelset() ) {
                InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset ), node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
@@ -364,7 +363,7 @@ void ModularAlgorithmAssembler::CreateNewSimulation( InitialCondition& initial_c
          }
       }
       halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( { level } );
-      for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, my_rank ) ) {
+      for( nid_t const& node_id : topology_.LocalIdsOnLevel( level ) ) {
          InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
       }
       halo_manager_.InterfaceTagHaloUpdateOnLevelList<InterfaceDescriptionBufferType::Reinitialized>( { level } );
@@ -478,9 +477,9 @@ void ModularAlgorithmAssembler::CreateNewSimulation( InitialCondition& initial_c
 void ModularAlgorithmAssembler::Advance() {
 
    // These variables are only for debugging. Allow fine tuned debug output. see below.
-   unsigned int debug_key = 0;
-   bool plot_this_step    = false;
-   bool print_this_step   = false;
+   double debug_key    = 0;
+   bool plot_this_step = false;
+   bool log_this_step  = false;
 
    // These variables are only for profiling
    double function_timer = 0.0;
@@ -512,22 +511,22 @@ void ModularAlgorithmAssembler::Advance() {
 
       time_integrator_.AppendMicroTimestep( ComputeTimestepSize() );
       LogElapsedTimeSinceInProfileRuns( function_timer, "ComputeTimestepSize                " );
-      ProvideDebugInformation( "ComputeTimestepSize - Done ", plot_this_step, print_this_step, debug_key );
+      ProvideDebugInformation( "ComputeTimestepSize - Done ", plot_this_step, log_this_step, debug_key );
 
       for( unsigned int stage = 0; stage < time_integrator_.NumberOfStages(); ++stage ) {
 
          if constexpr( DP::Debug() ) {
-            debug_key = 1000 * timestep + 100 * stage;
+            debug_key = ( 1000.0 * timestep + 100.0 * stage ) / 10000.0;
             // Example how to enable fine grained plotting.
             /*if( time_integrator_.CurrentRunTime() > 0.0 && time_integrator_.CurrentRunTime() < 0.0001 ) {
                 plot_this_step = true;
-                print_this_step = true;
+                log_this_step = true;
             } else {
                 plot_this_step = false;
-                print_this_step = false;
+                log_this_step = false;
             }*/
          }
-         ProvideDebugInformation( "Start of Loop ", false, print_this_step, debug_key );
+         ProvideDebugInformation( "Start of Loop ", false, log_this_step, debug_key );
 
          //Level set evolution: in this block, the level set field is evolved to the next stage. Reinitialized parameters are
          //stored in integrated buffers.
@@ -535,42 +534,42 @@ void ModularAlgorithmAssembler::Advance() {
             SetTimeInProfileRuns( function_timer );
             ComputeLevelsetRightHandSide( nodes_needing_multiphase_treatment, stage );
             LogElapsedTimeSinceInProfileRuns( function_timer, "ComputeLevelsetRightHandSide       " );
-            ProvideDebugInformation( "ComputeLevelsetRightHandSide - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "ComputeLevelsetRightHandSide - Done ", plot_this_step, log_this_step, debug_key );
 
             SetTimeInProfileRuns( function_timer );
             halo_manager_.InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType::LevelsetRightHandSide );
             LogElapsedTimeSinceInProfileRuns( function_timer, "LevelsetHaloUpdate                 " );
-            ProvideDebugInformation( "LevelsetHaloUpdate ( maximum level ) - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "LevelsetHaloUpdate ( maximum level ) - Done ", plot_this_step, log_this_step, debug_key );
 
             SetTimeInProfileRuns( function_timer );
             IntegrateLevelset( nodes_needing_multiphase_treatment, stage );
             LogElapsedTimeSinceInProfileRuns( function_timer, "IntegrateLevelset                  " );
-            ProvideDebugInformation( "IntegrateLevelset - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "IntegrateLevelset - Done ", plot_this_step, log_this_step, debug_key );
 
             bool const is_last_stage = time_integrator_.IsLastStage( stage );
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.UpdateIntegratedBuffer( nodes_needing_multiphase_treatment, is_last_stage );
             LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateIntegratedBuffer                  " );
             std::string&& message = is_last_stage ? "UpdateIntegratedBuffer in MultiphaseManager ( possibly with scale separation ) - Done " : "UpdateIntegratedBuffer in MultiphaseManager - Done ";
-            ProvideDebugInformation( message, plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( message, plot_this_step, log_this_step, debug_key );
          }
 
          // compute rhs on all levels which need to be updated this integer timestep
          SetTimeInProfileRuns( function_timer );
          ComputeRightHandSide( levels_to_update_descending, stage );
          LogElapsedTimeSinceInProfileRuns( function_timer, "ComputeRightHandSide               " );
-         ProvideDebugInformation( "ComputeRightHandSide - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "ComputeRightHandSide - Done ", plot_this_step, log_this_step, debug_key );
 
          //Flux averaging from levels which run this timestep down to the lowest neighbor level or parent
          SetTimeInProfileRuns( function_timer );
          averager_.AverageMaterial( levels_to_update_descending );
          LogElapsedTimeSinceInProfileRuns( function_timer, "AverageMaterial                       " );
-         ProvideDebugInformation( "AverageMaterial - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "AverageMaterial - Done ", plot_this_step, log_this_step, debug_key );
 
          SetTimeInProfileRuns( function_timer );
          halo_manager_.MaterialHaloUpdate( all_levels_, MaterialFieldType::Conservatives );
          LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateHalos ( all )                  " );
-         ProvideDebugInformation( "UpdateHalos( AllLevels ) - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "UpdateHalos( AllLevels ) - Done ", plot_this_step, log_this_step, debug_key );
 
          //Get which levels need to be advanced from here on in this timestep and stage
          levels_to_update_descending = GetLevels( timestep );
@@ -582,21 +581,21 @@ void ModularAlgorithmAssembler::Advance() {
          SetTimeInProfileRuns( function_timer );
          Integrate( levels_to_update_descending, stage );
          LogElapsedTimeSinceInProfileRuns( function_timer, "Integrate                          " );
-         ProvideDebugInformation( "Integration - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "Integration - Done ", plot_this_step, log_this_step, debug_key );
 
          //After fluid evolution is done, integrated values are copied into reinitialized values for the next iteration.
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.PropagateLevelset( nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "PropagateLevelset                  " );
-            ProvideDebugInformation( "PropagateLevelset in MultiphaseManager - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "PropagateLevelset in MultiphaseManager - Done ", plot_this_step, log_this_step, debug_key );
          }
 
          //Averaging of new mean values - project all levels to be on the safe side
          SetTimeInProfileRuns( function_timer );
          averager_.AverageMaterial( levels_with_updated_parents_descending );
          LogElapsedTimeSinceInProfileRuns( function_timer, "AverageMaterial                       " );
-         ProvideDebugInformation( "AverageMaterial - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "AverageMaterial - Done ", plot_this_step, log_this_step, debug_key );
 
          //to maintain conservation
          if( time_integrator_.IsLastStage( stage ) ) {
@@ -604,33 +603,33 @@ void ModularAlgorithmAssembler::Advance() {
             SetTimeInProfileRuns( function_timer );
             JumpFluxAdjustment( levels_to_update_descending );
             LogElapsedTimeSinceInProfileRuns( function_timer, "AdjustJumpFluxes                   " );
-            ProvideDebugInformation( "AdjustJumpFluxes - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "AdjustJumpFluxes - Done ", plot_this_step, log_this_step, debug_key );
          }
 
          //boundary exchange mean values and jumps on finished levels
          SetTimeInProfileRuns( function_timer );
          halo_manager_.MaterialHaloUpdate( levels_to_update_ascending, MaterialFieldType::Conservatives, true );
          LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateHalos ( cut_jumps )            " );
-         ProvideDebugInformation( "UpdateHalos( levels_to_update, cut_jump=true ) - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "UpdateHalos( levels_to_update, cut_jump=true ) - Done ", plot_this_step, log_this_step, debug_key );
 
          if( time_integrator_.IsLastStage( stage ) ) {
             if( exist_multi_nodes_global ) {
                SetTimeInProfileRuns( function_timer );
                SenseVanishedInterface( levels_to_update_descending );
                LogElapsedTimeSinceInProfileRuns( function_timer, "SenseVanishedInterface             " );
-               ProvideDebugInformation( "SenseVanishedInterface - Done ", plot_this_step, print_this_step, debug_key );
+               ProvideDebugInformation( "SenseVanishedInterface - Done ", plot_this_step, log_this_step, debug_key );
             }
 
             SetTimeInProfileRuns( function_timer );
             Remesh( levels_to_update_ascending );
             LogElapsedTimeSinceInProfileRuns( function_timer, "Remesh                             " );
-            ProvideDebugInformation( "Remesh - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "Remesh - Done ", plot_this_step, log_this_step, debug_key );
 
             if( exist_multi_nodes_global ) {// TODO-19 JW and NH: Think of removing this if statement in case of a newly created interface ( phase change... )
                SetTimeInProfileRuns( function_timer );
                SenseApproachingInterface( levels_to_update_ascending );
                LogElapsedTimeSinceInProfileRuns( function_timer, "SenseApproachingInterface          " );
-               ProvideDebugInformation( "SenseApproachingInterface - Done ", plot_this_step, print_this_step, debug_key );
+               ProvideDebugInformation( "SenseApproachingInterface - Done ", plot_this_step, log_this_step, debug_key );
             }
 
             SetTimeInProfileRuns( function_timer );
@@ -639,7 +638,7 @@ void ModularAlgorithmAssembler::Advance() {
 
             nodes_needing_multiphase_treatment = tree_.NodesWithLevelset();
             exist_multi_nodes_global           = MpiUtilities::GloballyReducedBool( !nodes_needing_multiphase_treatment.empty() );
-            ProvideDebugInformation( "LoadBalancing - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "LoadBalancing - Done ", plot_this_step, log_this_step, debug_key );
 
             if constexpr( DP::Profile() ) {
                logger_.LogMessage( "Node count after remeshing:" );
@@ -651,7 +650,7 @@ void ModularAlgorithmAssembler::Advance() {
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.Mix( nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "Mixing                             " );
-            ProvideDebugInformation( "Mixing - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "Mixing - Done ", plot_this_step, log_this_step, debug_key );
 
             if constexpr( ReinitializationConstants::ReinitializeAfterMixing ) {
                bool const is_last_stage = time_integrator_.IsLastStage( stage );
@@ -659,36 +658,36 @@ void ModularAlgorithmAssembler::Advance() {
                multi_phase_manager_.EnforceWellResolvedDistanceFunction( nodes_needing_multiphase_treatment, is_last_stage );
                LogElapsedTimeSinceInProfileRuns( function_timer, "EnforceWellResolvedDistanceFunction                  " );
                std::string&& message = is_last_stage ? "EnforceWellResolvedDistanceFunction in MultiphaseManager ( possibly with scale separation ) - Done " : "EnforceWellResolvedDistanceFunction in MultiphaseManager - Done ";
-               ProvideDebugInformation( message, plot_this_step, print_this_step, debug_key );
+               ProvideDebugInformation( message, plot_this_step, log_this_step, debug_key );
             }
 
             SetTimeInProfileRuns( function_timer );
             UpdateInterfaceTags( levels_with_updated_parents_descending );
             LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateInterfaceTags                " );
-            ProvideDebugInformation( "UpdateInterfaceTags - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "UpdateInterfaceTags - Done ", plot_this_step, log_this_step, debug_key );
 
             SetTimeInProfileRuns( function_timer );
             ObtainPrimeStatesFromConservatives<ConservativeBufferType::RightHandSide>( { all_levels_.back() }, true );
             LogElapsedTimeSinceInProfileRuns( function_timer, "ObtainPrimeStatesFromConservatives " );
-            ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, log_this_step, debug_key );
 
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.Extend( nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "Extend                             " );
-            ProvideDebugInformation( "Extend - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "Extend - Done ", plot_this_step, log_this_step, debug_key );
          }
 
          //SWAP on levels which were integrated this step
          SetTimeInProfileRuns( function_timer );
          SwapBuffers( levels_to_update_descending, stage );
          LogElapsedTimeSinceInProfileRuns( function_timer, "Swap                               " );
-         ProvideDebugInformation( "SwapOnLevel - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "SwapOnLevel - Done ", plot_this_step, log_this_step, debug_key );
 
          // Calculate the prime states based on the integrated conservatives and save them in the prime state buffer.
          SetTimeInProfileRuns( function_timer );
          ObtainPrimeStatesFromConservatives<ConservativeBufferType::Average>( levels_to_update_descending );
          LogElapsedTimeSinceInProfileRuns( function_timer, "ObtainPrimeStatesFromConservatives " );
-         ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, print_this_step, debug_key );
+         ProvideDebugInformation( "ObtainPrimeStatesFromConservatives - Done ", plot_this_step, log_this_step, debug_key );
 
          // Calculate the parameters based on the prime states and save them in the parameter buffer.
          if constexpr( CC::ParameterModelActive() ) {
@@ -699,14 +698,14 @@ void ModularAlgorithmAssembler::Advance() {
             SetTimeInProfileRuns( function_timer );
             UpdateParameters( levels_to_update, exist_multi_nodes_global, nodes_needing_multiphase_treatment );
             LogElapsedTimeSinceInProfileRuns( function_timer, "UpdateParameters " );
-            ProvideDebugInformation( "UpdateParameters - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "UpdateParameters - Done ", plot_this_step, log_this_step, debug_key );
          }
 
          if( exist_multi_nodes_global ) {
             SetTimeInProfileRuns( function_timer );
             multi_phase_manager_.ObtainInterfaceStates( nodes_needing_multiphase_treatment, time_integrator_.IsLastStage( stage ) );
             LogElapsedTimeSinceInProfileRuns( function_timer, "SetInterfaceQuantities             " );
-            ProvideDebugInformation( "SetInterfaceQuantities - Done ", plot_this_step, print_this_step, debug_key );
+            ProvideDebugInformation( "SetInterfaceQuantities - Done ", plot_this_step, log_this_step, debug_key );
             if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
                logger_.LogBufferedMessages();
             }
@@ -740,18 +739,18 @@ void ModularAlgorithmAssembler::Advance() {
  * debug output is written
  * @param debug_string The string which describes the state for which debug information is provided.
  * @param plot_this_step Decision whether an debug output file is written for the current state.
- * @param print_this_step Decision whether information is print to the terminal for the current state.
+ * @param log_this_step Decision whether information is print to the terminal for the current state.
  * @param debug_key An integer to allow increasing numbering of the debug output files.
  */
-void ModularAlgorithmAssembler::ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const print_this_step,
-                                                         unsigned int& debug_key ) const {
+void ModularAlgorithmAssembler::ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const log_this_step,
+                                                         double& debug_key ) const {
    if constexpr( DP::DebugLog() ) {
-      if( print_this_step ) { logger_.LogMessage( debug_string + std::to_string( debug_key ) ); }
+      if( log_this_step ) { logger_.LogMessage( debug_string + std::to_string( debug_key ) ); }
    }
    if constexpr( DP::DebugOutput() ) {
       if( plot_this_step ) { input_output_.WriteSingleOutput( debug_key ); }
    }
-   if constexpr( DP::Debug() ) { debug_key++; }
+   if constexpr( DP::Debug() ) { debug_key += 0.0001; }
 }
 
 /**
@@ -921,7 +920,7 @@ void ModularAlgorithmAssembler::UpdateInterfaceTags( std::vector<unsigned int> c
     * Step 2: For all levels where cut cells were newly set, the narrow-band tags are set based on the cut-cell tags.
     */
    for( unsigned int const level : parent_levels_with_projected_cut_cell_tags ) {
-      for( auto const node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
+      for( auto const node_id : topology_.LocalIdsOnLevel( level ) ) {
          InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() );
       }
    }
@@ -935,7 +934,7 @@ void ModularAlgorithmAssembler::UpdateInterfaceTags( std::vector<unsigned int> c
     * Step 4: Update also integrated interface tags on all levels.
     */
    for( unsigned int const level : all_levels_ ) {
-      for( auto const node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
+      for( auto const node_id : topology_.LocalIdsOnLevel( level ) ) {
          BO::CopySingleBuffer( tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), tree_.GetNodeWithId( node_id ).GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() );
       }
    }
@@ -957,7 +956,7 @@ void ModularAlgorithmAssembler::SenseApproachingInterface( std::vector<unsigned 
    bool interface_block_created = false;
    bool node_refined            = false;
    for( auto const& level : levels_ascending ) {
-      for( nid_t const& node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
+      for( nid_t const& node_id : topology_.LocalIdsOnLevel( level ) ) {
          if( !topology_.IsNodeMultiPhase( node_id ) ) {
             Node& node = tree_.GetNodeWithId( node_id );
             // TODO-19 TP test total cells, but probably halo is enough for standard case ( no phase change in bulk ) --> OPTIMIZE?
@@ -1014,7 +1013,7 @@ void ModularAlgorithmAssembler::SenseVanishedInterface( std::vector<unsigned int
    // this guarantees that the disappearance of the interface propagates down the tree
 
    for( auto const& level : levels_descending ) {
-      for( auto const& node_id : topology_.IdsOnLevelOfRank( level, communicator_.MyRankId() ) ) {
+      for( auto const& node_id : topology_.LocalIdsOnLevel( level ) ) {
          if( topology_.IsNodeMultiPhase( node_id ) ) {
             // a multi-phase non-Lmax node has to have children, therefore no additional check for existence of children necessary
             bool all_children_single = true;
@@ -1067,7 +1066,7 @@ void ModularAlgorithmAssembler::JumpFluxAdjustment( std::vector<unsigned int> co
    /*** Sending Down ***/
    // First the parents' jump buffers are filled form the childrens values.
    for( auto const& level : levels_averaging_down ) {
-      for( auto const& child_id : topology_.GlobalIdsOnLevel( level ) ) {
+      for( auto const& child_id : topology_.IdsOnLevel( level ) ) {
          nid_t const parent_id    = ParentIdOfNode( child_id );
          int const rank_of_child  = topology_.GetRankOfNode( child_id );
          int const rank_of_parent = topology_.GetRankOfNode( parent_id );
@@ -1868,7 +1867,7 @@ void ModularAlgorithmAssembler::DetermineRemeshingNodes( std::vector<unsigned in
     */
    MPI_Datatype const conservatives_struct_ = communicator_.ConservativesDatatype();
    for( auto const& level_of_parent : parent_levels ) {
-      for( auto const& parent_id : topology_.GlobalIdsOnLevel( level_of_parent ) ) {
+      for( auto const& parent_id : topology_.IdsOnLevel( level_of_parent ) ) {
          bool const parent_on_my_rank      = topology_.NodeIsOnRank( parent_id, my_rank );
          std::vector<nid_t> const children = IdsOfChildren( parent_id );
          for( auto const& child_id : children ) {
