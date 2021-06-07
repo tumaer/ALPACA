@@ -4,5 +4,6 @@ module unload intel-mkl
 module unload intel
 module load gcc/9.3.0
 module load intel-mpi/2019-gcc
-module load hdf5/1.10.6-gcc8-impi
+module load libszip
+module load hdf5/1.8.22-gcc8-impi
 module load cmake/3.16.5
