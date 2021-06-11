@@ -188,6 +188,8 @@ enum class Equation : unsigned int {
    MomentumY = FieldDetails::ActiveEquations::FieldIndex( EquationPool::MomentumY ),
    MomentumZ = FieldDetails::ActiveEquations::FieldIndex( EquationPool::MomentumZ ),
    // optional equations
+   Gamma = FieldDetails::ActiveEquations::FieldIndex( EquationPool::Gamma ),
+   Pi    = FieldDetails::ActiveEquations::FieldIndex( EquationPool::Pi ),
    // Example     = FieldDetails::ActiveEquations::FieldIndex( EquationPool::Example ),
 };
 /**
@@ -210,6 +212,8 @@ enum class PrimeState : unsigned int {
    VelocityZ = FieldDetails::ActivePrimeStates::FieldIndex( PrimeStatePool::VelocityZ ),
    // optional prime states
    Temperature = FieldDetails::ActivePrimeStates::FieldIndex( PrimeStatePool::Temperature ),
+   gamma       = FieldDetails::ActivePrimeStates::FieldIndex( PrimeStatePool::gamma ),
+   pi          = FieldDetails::ActivePrimeStates::FieldIndex( PrimeStatePool::pi ),
    // Example     = FieldDetails::ActivePrimeStates::FieldIndex( PrimeStatePool::Example ),
 };
 /**

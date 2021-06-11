@@ -207,6 +207,42 @@ namespace FieldSetup {
       // clang-format on
    }// namespace NavierStokes
 
+   namespace GammaModel {
+      constexpr auto equations = MakeArray(
+            // clang-format off
+            //           conservative           unit                name
+            FieldInfo{ EquationPool::Mass,      UnitType::Density,  "" },
+            FieldInfo{ EquationPool::Energy,    UnitType::Energy,   "" },
+            FieldInfo{ EquationPool::MomentumX, UnitType::Momentum, "" }
+#if DIMENSION != 1
+           ,FieldInfo{ EquationPool::MomentumY, UnitType::Momentum, "" }
+#endif
+#if DIMENSION == 3
+           ,FieldInfo{ EquationPool::MomentumZ, UnitType::Momentum, "" }
+#endif
+           ,FieldInfo{ EquationPool::Gamma,     UnitType::Unitless, "" }
+           ,FieldInfo{ EquationPool::Pi,        UnitType::Pressure, "" }
+            // clang-format on
+      );
+
+      constexpr auto primes = MakeArray(
+            // clang-format off
+            //         prime state                unit                  name
+            FieldInfo{ PrimeStatePool::Density,   UnitType::Density,  "density" },
+            FieldInfo{ PrimeStatePool::Pressure,  UnitType::Pressure, "pressure" },
+            FieldInfo{ PrimeStatePool::VelocityX, UnitType::Velocity, "velocityX" }
+#if DIMENSION != 1
+           ,FieldInfo{ PrimeStatePool::VelocityY, UnitType::Velocity, "velocityY" }
+#endif
+#if DIMENSION == 3
+           ,FieldInfo{ PrimeStatePool::VelocityZ, UnitType::Velocity, "velocityZ" }
+#endif
+           ,FieldInfo{ PrimeStatePool::gamma,     UnitType::Unitless, "gamma" }
+           ,FieldInfo{ PrimeStatePool::pi,        UnitType::Pressure, "pi" }
+            // clang-format on
+      );
+   }// namespace GammaModel
+
    template<EquationSet>
    constexpr auto EquationDefinition();
 
@@ -241,6 +277,16 @@ namespace FieldSetup {
    template<>
    constexpr auto PrimeStateDefinition<EquationSet::NavierStokes>() {
       return NavierStokes::primes;
+   }
+
+   template<>
+   constexpr auto EquationDefinition<EquationSet::GammaModel>() {
+      return GammaModel::equations;
+   }
+
+   template<>
+   constexpr auto PrimeStateDefinition<EquationSet::GammaModel>() {
+      return GammaModel::primes;
    }
 
    template<>

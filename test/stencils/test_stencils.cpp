@@ -180,6 +180,13 @@ SCENARIO( "Reconstruction stencil correctness", "[1rank]" ) {
       TestWenoValuesLeftAndRightOfStepWithMargin<WENO5HM>( 1e-15 );
    }
 
+   GIVEN( "A WENO-5IS reconstruction stencil" ) {
+      constexpr auto weno5is = WENO5IS();
+      TestStencilParameters( weno5is, StencilType::Reconstruction, 6, 2 );
+      TestUnityOnUnitArrayWithMargin<WENO5IS>( 1e-16 );
+      TestWenoValuesLeftAndRightOfStepWithMargin<WENO5HM>( 1e-15 );
+   }
+
    GIVEN( "A WENO-CU6 reconstruction stencil" ) {
       constexpr auto wenocu6 = WENOCU6();
       TestStencilParameters( wenocu6, StencilType::Reconstruction, 6, 2 );

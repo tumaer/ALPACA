@@ -84,6 +84,7 @@
 #include "utilities/string_operations.h"
 #include "communication/mpi_utilities.h"
 #include "multiresolution/multiresolution.h"
+#include "materials/equations_of_state/gamma_model_stiffened_gas.h"
 
 #include "utilities/buffer_operations_material.h"
 #include "utilities/buffer_operations_interface.h"
@@ -1449,7 +1450,8 @@ double ModularAlgorithmAssembler::ComputeTimestepSize() const {
                   if( interface_tags[i][j][k] * material_sign > 0 || std::abs( interface_tags[i][j][k] ) == ITTI( IT::NewCutCell ) ) {
                      //only required when Euler equations are solved
                      if constexpr( CC::InviscidExchangeActive() ) {
-                        double const c = material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( prime_states[PrimeState::Density][i][j][k], prime_states[PrimeState::Pressure][i][j][k] );
+                        double const c = active_equations == EquationSet::GammaModel ? GammaModelStiffenedGas::CalculateSpeedOfSound( prime_states[PrimeState::Density][i][j][k], prime_states[PrimeState::Pressure][i][j][k], prime_states[PrimeState::gamma][i][j][k], prime_states[PrimeState::pi][i][j][k] ) :
+                                                                                       material_manager_.GetMaterial( material ).GetEquationOfState().SpeedOfSound( prime_states[PrimeState::Density][i][j][k], prime_states[PrimeState::Pressure][i][j][k] );
 
                         for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
                            velocity_plus_sound[d] = std::abs( prime_states[MF::AV()[d]][i][j][k] ) + c;

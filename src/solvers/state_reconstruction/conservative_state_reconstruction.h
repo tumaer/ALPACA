@@ -66,123 +66,79 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include "materials/equations_of_state/stiffened_gas.h"
-#include "materials/equations_of_state/generic_stiffened_gas.h"
-#include "utilities/helper_functions.h"
-#include "utilities/string_operations.h"
-#include "utilities/mathematical_functions.h"
-#include <cmath>
+#ifndef CONSERVATIVE_STATE_RECONSTRUCTION_H
+#define CONSERVATIVE_STATE_RECONSTRUCTION_H
+
+#include "solvers/state_reconstruction/state_reconstruction.h"
+#include "prime_states/prime_state_handler.h"
+#include "block_definitions/field_material_definitions.h"
+
+#include "stencils/stencil_utilities.h"
 
 /**
- * @brief Constructs a stiffened gas equation of state with eos parameters given as input.
- * @param dimensional_eos_data Map containing all data for the equation of state.
- * @param unit_handler Instance to provide (non-)dimensionalization of values.
- *
- * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
- *       Furthermore, dimensionalization of each value is done.
+ * @brief Discretization of the spatial reconstruction scheme using conservative states for reconstruction.
  */
-StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
-                                                                                                                                     background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
-   /* Empty besides initializer list*/
-}
+class ConservativeStateReconstruction : public StateReconstruction<ConservativeStateReconstruction> {
 
-/**
- * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| ).
- * @param mass The mass used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
- * @return Pressure according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return GenericStiffenedGas::CalculatePressure<false>( mass, momentum_x, momentum_y, momentum_z, energy, gamma_, background_pressure_ );
-}
+   friend StateReconstruction;
 
-/**
- * @brief Computes enthalpy as ( E + p ) / rho.
- * @param mass The mass used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
- * @return Enthalpy value.
- */
-double StiffenedGas::ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return ( energy + ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy ) ) / mass;
-}
+   /**
+    * @brief Procedure to reconstruct the conservatives/primitive states at cell faces.
+    * @tparam DIR spatial direction the reconstruction has to be performed.
+    * @param block Block of the phase under consideration.
+    * @param eos Underlying equation of state of the phase under consideration used to convert primes and conservatives.
+    * @param roe_eigenvectors_left .
+    * @param roe_eigenvectors_right .
+    * @param cell_size .
+    * @param i .
+    * @param k .
+    * @param j .
+    * @return tuple containing left and right reconstructed primitive and conservative states.
+    */
+   template<Direction DIR, ReconstructionStencils RECON>
+   std::tuple<std::array<double, MF::ANOE()>, std::array<double, MF::ANOE()>, std::array<double, MF::ANOP()>, std::array<double, MF::ANOP()>>
+   SolveStateReconstructionImplementation( Block const& block,
+                                           EquationOfState const& eos,
+                                           double const ( & )[MF::ANOE()][MF::ANOE()],
+                                           double const ( & )[MF::ANOE()][MF::ANOE()],
+                                           double const cell_size,
+                                           unsigned int const i,
+                                           unsigned int const j,
+                                           unsigned int const k ) const {
 
-/**
- * @brief Computes energy according to stiffened gas equation.
- * @param density The density used for the computation.
- * @param velocity_x The velocity in x-direction used for the computation.
- * @param velocity_y The velocity in y-direction used for the computation.
- * @param velocity_z The velocity in z-direction used for the computation.
- * @param pressure The pressure used for the computation.
- * @return Energy according to given inputs.
- */
-double StiffenedGas::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
-   return GenericStiffenedGas::CalculateEnergy( density, velocity_x, velocity_y, velocity_z, pressure, gamma_, background_pressure_ );
-}
+      using ReconstructionStencil                    = typename ReconstructionStencilSetup::Concretize<RECON>::type;
+      constexpr unsigned int x_reconstruction_offset = DIR == Direction::X ? 1 : 0;
+      constexpr unsigned int y_reconstruction_offset = DIR == Direction::Y ? 1 : 0;
+      constexpr unsigned int z_reconstruction_offset = DIR == Direction::Z ? 1 : 0;
+      std::array<double, MF::ANOP()> reconstructed_primes_minus;
+      std::array<double, MF::ANOP()> reconstructed_primes_plus;
 
-/**
- * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
- * @return Gruneisen coefficient .
- */
-double StiffenedGas::GetGruneisen() const {
-   return ( gamma_ - 1.0 );
-}
+      std::array<double, ReconstructionStencil::StencilSize()> reconstruction_array;
+      std::array<double, MF::ANOE()> reconstructed_conservatives_minus;
+      std::array<double, MF::ANOE()> reconstructed_conservatives_plus;
+      for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
+         for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
+            reconstruction_array[m] = block.GetAverageBuffer( MF::ASOE()[n] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
+                                                                             [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
+                                                                             [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )];
+         }// M-Loop
+         reconstructed_conservatives_minus[n] = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( reconstruction_array, cell_size );
+         reconstructed_conservatives_plus[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( reconstruction_array, cell_size );
+      }// N-Loop
+      // To check for invalid cells due to ghost fluid method
+      if( reconstructed_conservatives_minus[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || reconstructed_conservatives_plus[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) return std::make_tuple( reconstructed_conservatives_minus, reconstructed_conservatives_plus, reconstructed_primes_minus, reconstructed_primes_plus );
+      ConservativesToPrimeStates( eos, reconstructed_conservatives_minus, reconstructed_primes_minus );
+      ConservativesToPrimeStates( eos, reconstructed_conservatives_plus, reconstructed_primes_plus );
+      return std::make_tuple( reconstructed_conservatives_minus, reconstructed_conservatives_plus, reconstructed_primes_minus, reconstructed_primes_plus );
+   }
 
-/**
- * @brief Returns Gamma.
- * @return Gamma.
- */
-double StiffenedGas::GetGamma() const {
-   return gamma_;
-}
+public:
+   ConservativeStateReconstruction() : StateReconstruction() {}
+   ~ConservativeStateReconstruction()                                        = default;
+   ConservativeStateReconstruction( ConservativeStateReconstruction const& ) = delete;
+   ConservativeStateReconstruction& operator=( ConservativeStateReconstruction const& ) = delete;
+   ConservativeStateReconstruction( ConservativeStateReconstruction&& )                 = delete;
+   ConservativeStateReconstruction& operator=( ConservativeStateReconstruction&& ) = delete;
+};
 
-/**
- * @brief Returns B.
- * @return B.
- */
-double StiffenedGas::GetB() const {
-   return background_pressure_;
-}
-
-/**
- * @brief Computes psi from inputs as ( p + gamma * B ) / rho.
- * @param pressure The pressure used for the computation.
- * @param one_density The density used for the computation.
- * @return Psi according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputePsi( double const pressure, double const one_density ) const {
-   return ( pressure + gamma_ * background_pressure_ ) * one_density;
-}
-
-/**
- * @brief Computes Speed of Sound from inputs as sqrt( gamma * ( p + B ) ) / rho.
- * @param density The density used for the computation.
- * @param pressure The pressure used for the computation.
- * @return Speed of sound according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputeSpeedOfSound( double const density, double const pressure ) const {
-   return GenericStiffenedGas::CalculateSpeedOfSound<false>( density, pressure, gamma_, background_pressure_ );
-}
-
-/**
- * @brief Provides logging information of the equation of state.
- * @param indent Number of white spaces used at the beginning of each line for the logging information.
- * @param unit_handler Instance to provide dimensionalization of variables.
- * @return string with logging information.
- */
-std::string StiffenedGas::GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const {
-   // string that is returned
-   std::string log_string;
-   // Name of the equation of state
-   log_string += StringOperations::Indent( indent ) + "Type                 : Stiffened gas\n";
-   // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( GetGruneisen(), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
-   return log_string;
-}
+#endif// CONSERVATIVE_STATE_RECONSTRUCTION_H

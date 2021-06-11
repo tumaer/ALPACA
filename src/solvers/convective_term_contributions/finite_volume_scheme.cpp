@@ -68,9 +68,6 @@
 *****************************************************************************************/
 #include "solvers/convective_term_contributions/finite_volume_scheme.h"
 #include "stencils/stencil_utilities.h"
-#include "solvers/state_reconstruction.h"
-
-static_assert( !( active_equations == EquationSet::Isentropic && state_reconstruction_type == StateReconstructionType::RoeCharacteristic ), "RoeCharacteristic reconstruction not implemented for isentropic equations!" );
 
 /**
  * @brief Standard constructor using an already existing MaterialManager and EigenDecomposition object.
@@ -78,7 +75,8 @@ static_assert( !( active_equations == EquationSet::Isentropic && state_reconstru
  * @param eigendecomposition_calculator .
  */
 FiniteVolumeScheme::FiniteVolumeScheme( MaterialManager const& material_manager, EigenDecomposition const& eigendecomposition_calculator ) : ConvectiveTermSolver( material_manager, eigendecomposition_calculator ),
-                                                                                                                                             riemann_solver_( material_manager, eigendecomposition_calculator_ ) {
+                                                                                                                                             riemann_solver_( material_manager, eigendecomposition_calculator_ ),
+                                                                                                                                             state_reconstruction_() {
    /* Empty besides initializer list*/
 }
 
@@ -90,13 +88,18 @@ void FiniteVolumeScheme::UpdateImplementation(
       std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
       double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
       double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
+      double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    double roe_eigenvectors_left[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
    double roe_eigenvectors_right[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()];
    double roe_eigenvalues[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()];
 
-   constexpr bool require_eigendecomposition = ( active_equations == EquationSet::NavierStokes || active_equations == EquationSet::Euler ) && state_reconstruction_type == StateReconstructionType::RoeCharacteristic;
+   double u_hllc_x[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1];
+   double u_hllc_y[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1];
+   double u_hllc_z[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1];
+
+   constexpr bool require_eigendecomposition = ( active_equations == EquationSet::NavierStokes || active_equations == EquationSet::Euler ) && state_reconstruction_type == StateReconstructionType::Characteristic;
 
    if constexpr( require_eigendecomposition ) {
       // Setting the eigenvectors, eigenvalues to zero is necessary for two-phase simulations as not every entry is necessarily set during eigendecomposition
@@ -116,20 +119,40 @@ void FiniteVolumeScheme::UpdateImplementation(
 
       eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::X>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, roe_eigenvalues );
    }
-   ComputeFluxes<Direction::X>( mat_block, fluxes_x, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
+   ComputeFluxes<Direction::X>( mat_block, fluxes_x, u_hllc_x, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
 
    if constexpr( CC::DIM() != Dimension::One ) {
       if constexpr( require_eigendecomposition ) {
          eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::Y>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, roe_eigenvalues );
       }
-      ComputeFluxes<Direction::Y>( mat_block, fluxes_y, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
+      ComputeFluxes<Direction::Y>( mat_block, fluxes_y, u_hllc_y, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
    }
 
    if constexpr( CC::DIM() == Dimension::Three ) {
       if constexpr( require_eigendecomposition ) {
          eigendecomposition_calculator_.ComputeRoeEigendecomposition<Direction::Z>( mat_block, roe_eigenvectors_left, roe_eigenvectors_right, roe_eigenvalues );
       }
-      ComputeFluxes<Direction::Z>( mat_block, fluxes_z, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
+      ComputeFluxes<Direction::Z>( mat_block, fluxes_z, u_hllc_z, roe_eigenvectors_left, roe_eigenvectors_right, cell_size );
+   }
+
+   if constexpr( active_equations == EquationSet::GammaModel ) {
+      // Add source term for non-conservative advections
+      for( unsigned int i = 0; i < CC::ICX(); ++i ) {
+         for( unsigned int j = 0; j < CC::ICY(); ++j ) {
+            for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
+               volume_forces[ETI( Equation::Gamma )][i][j][k] -=
+                     DimensionAwareConsistencyManagedSum( u_hllc_x[i][j + 1][k + 1] - u_hllc_x[i + 1][j + 1][k + 1],
+                                                          u_hllc_y[i + 1][j][k + 1] - u_hllc_y[i + 1][j + 1][k + 1],
+                                                          u_hllc_z[i + 1][j + 1][k] - u_hllc_z[i + 1][j + 1][k + 1] ) *
+                     mat_block.second.GetAverageBuffer( Equation::Gamma )[i + CC::FICX()][j + CC::FICY()][k + CC::FICZ()] / cell_size;
+               volume_forces[ETI( Equation::Pi )][i][j][k] -=
+                     DimensionAwareConsistencyManagedSum( u_hllc_x[i][j + 1][k + 1] - u_hllc_x[i + 1][j + 1][k + 1],
+                                                          u_hllc_y[i + 1][j][k + 1] - u_hllc_y[i + 1][j + 1][k + 1],
+                                                          u_hllc_z[i + 1][j + 1][k] - u_hllc_z[i + 1][j + 1][k + 1] ) *
+                     mat_block.second.GetAverageBuffer( Equation::Pi )[i + CC::FICX()][j + CC::FICY()][k + CC::FICZ()] / cell_size;
+            }//k
+         }   //j
+      }      //i
    }
 }
 
@@ -146,6 +169,7 @@ void FiniteVolumeScheme::UpdateImplementation(
 template<Direction DIR>
 void FiniteVolumeScheme::ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
                                         double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                        double ( &u_hllc )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
                                         double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                                         double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                                         double const cell_size ) const {
@@ -174,20 +198,30 @@ void FiniteVolumeScheme::ComputeFluxes( std::pair<MaterialName const, Block> con
             int const k_index = k - total_to_internal_offset_z;
 
             auto const [reconstructed_conservatives_left, reconstructed_conservatives_right,
-                        reconstructed_primes_left, reconstructed_primes_right] = StateReconstruction<DIR, reconstruction_stencil>( block,
-                                                                                                                                   material_manager_.GetMaterial( material ).GetEquationOfState(),
-                                                                                                                                   Roe_eigenvectors_left[i_index][j_index][k_index],
-                                                                                                                                   Roe_eigenvectors_right[i_index][j_index][k_index],
-                                                                                                                                   cell_size, i, j, k );
+                        reconstructed_primes_left, reconstructed_primes_right] = state_reconstruction_.SolveStateReconstruction<DIR, reconstruction_stencil>( block,
+                                                                                                                                                              material_manager_.GetMaterial( material ).GetEquationOfState(),
+                                                                                                                                                              Roe_eigenvectors_left[i_index][j_index][k_index],
+                                                                                                                                                              Roe_eigenvectors_right[i_index][j_index][k_index],
+                                                                                                                                                              cell_size, i, j, k );
             // To check for invalid cells due to ghost fluid method
-            double const B = active_equations == EquationSet::Isentropic ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().B();
-            if( reconstructed_conservatives_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || reconstructed_conservatives_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
-            if( reconstructed_primes_left[PTI( PrimeState::Pressure )] <= -B || reconstructed_primes_right[PTI( PrimeState::Pressure )] <= -B ) continue;
+            if constexpr( active_equations != EquationSet::GammaModel ) {
+               double const B = active_equations == EquationSet::Isentropic ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().B();
+               if( reconstructed_conservatives_left[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || reconstructed_conservatives_right[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) continue;
+               if( reconstructed_primes_left[PTI( PrimeState::Pressure )] <= -B || reconstructed_primes_right[PTI( PrimeState::Pressure )] <= -B ) continue;
+            }
 
-            auto const face_fluxes = riemann_solver_.SolveRiemannProblem<DIR>( material, reconstructed_conservatives_left, reconstructed_conservatives_right, reconstructed_primes_left, reconstructed_primes_right );
-
-            for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
-               fluxes[n][i_index][j_index][k_index] += face_fluxes[n];
+            if constexpr( active_equations == EquationSet::GammaModel ) {
+               auto const [face_fluxes, u_hllc_single] = riemann_solver_.SolveGammaRiemannProblem<DIR>( material, reconstructed_conservatives_left, reconstructed_conservatives_right, reconstructed_primes_left, reconstructed_primes_right );
+               for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
+                  fluxes[n][i_index][j_index][k_index] += face_fluxes[n];
+               }
+               u_hllc[i_index][j_index][k_index] = u_hllc_single;
+            } else {
+               (void)u_hllc;
+               auto const face_fluxes = riemann_solver_.SolveRiemannProblem<DIR>( material, reconstructed_conservatives_left, reconstructed_conservatives_right, reconstructed_primes_left, reconstructed_primes_right );
+               for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
+                  fluxes[n][i_index][j_index][k_index] += face_fluxes[n];
+               }
             }
          }// k
       }   // j

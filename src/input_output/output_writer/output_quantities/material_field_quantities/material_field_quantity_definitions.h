@@ -90,14 +90,18 @@ enum class MaterialFieldQuantityName {
    Mass,
    Momentum,
    Energy,
+   GammaPrimitive,
+   PiPrimitive,
    // prime states
    Density,
    Temperature,
    Pressure,
    Velocity,
+   GammaConservative,
+   PiConservative,
    // parameters
    ShearViscosity,
-   ThermalConductivity
+   ThermalConductivity,
 };
 
 /**
@@ -203,6 +207,18 @@ inline MaterialFieldQuantityData DataOfMaterialFieldQuantity( MaterialFieldQuant
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }
+      case MaterialFieldQuantityName::GammaConservative: {
+         quantity_data.field_type_          = MaterialFieldType::Conservatives;
+         quantity_data.field_indices_       = { ETI( Equation::Gamma ) };
+         quantity_data.debug_default_value_ = -1.0;
+         return quantity_data;
+      }
+      case MaterialFieldQuantityName::PiConservative: {
+         quantity_data.field_type_          = MaterialFieldType::Conservatives;
+         quantity_data.field_indices_       = { ETI( Equation::Pi ) };
+         quantity_data.debug_default_value_ = -1.0;
+         return quantity_data;
+      }
       // prime states
       case MaterialFieldQuantityName::Density: {
          quantity_data.field_type_          = MaterialFieldType::PrimeStates;
@@ -219,6 +235,18 @@ inline MaterialFieldQuantityData DataOfMaterialFieldQuantity( MaterialFieldQuant
       case MaterialFieldQuantityName::Pressure: {
          quantity_data.field_type_          = MaterialFieldType::PrimeStates;
          quantity_data.field_indices_       = { PTI( PrimeState::Pressure ) };
+         quantity_data.debug_default_value_ = -1.0;
+         return quantity_data;
+      }
+      case MaterialFieldQuantityName::GammaPrimitive: {
+         quantity_data.field_type_          = MaterialFieldType::PrimeStates;
+         quantity_data.field_indices_       = { PTI( PrimeState::gamma ) };
+         quantity_data.debug_default_value_ = -1.0;
+         return quantity_data;
+      }
+      case MaterialFieldQuantityName::PiPrimitive: {
+         quantity_data.field_type_          = MaterialFieldType::PrimeStates;
+         quantity_data.field_indices_       = { PTI( PrimeState::pi ) };
          quantity_data.debug_default_value_ = -1.0;
          return quantity_data;
       }

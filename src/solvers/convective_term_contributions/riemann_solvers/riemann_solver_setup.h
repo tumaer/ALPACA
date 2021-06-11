@@ -76,6 +76,8 @@
 #include "solvers/convective_term_contributions/riemann_solvers/isentropic_hllc_riemann_solver.h"
 #include "solvers/convective_term_contributions/riemann_solvers/hll_riemann_solver.h"
 #include "solvers/convective_term_contributions/riemann_solvers/isentropic_hll_riemann_solver.h"
+#include "solvers/convective_term_contributions/riemann_solvers/gamma_hllc_riemann_solver.h"
+#include "solvers/convective_term_contributions/riemann_solvers/gamma_hllc_lm_riemann_solver.h"
 #include "user_specifications/riemann_solver_settings.h"
 
 /**
@@ -138,6 +140,30 @@ namespace RiemannSolverSetup {
       };
    }// namespace EulerNavierStokes
 
+   namespace GammaModel {
+      /**
+       * @brief Function returning the Gamma Model Riemann solver matching the type in the template argument.
+       * @tparam RiemannSolvers Specification of the RiemannSolver type.
+       */
+      template<FiniteVolumeSettings::RiemannSolvers>
+      struct Concretize;
+
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hllc> {
+         using type = GammaHllcRiemannSolver;
+      };
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<FiniteVolumeSettings::RiemannSolvers::Hllc_LM> {
+         using type = GammaHllcLMRiemannSolver;
+      };
+   }// namespace GammaModel
+
    /**
    * @brief Function returning the Riemann solver matching the type in the template argument accroding to the equation set in the second template parameter.
    * @tparam RiemannSolvers Specification of the RiemannSolver type.
@@ -154,6 +180,14 @@ namespace RiemannSolverSetup {
    template<FiniteVolumeSettings::RiemannSolvers R>
    struct Dispatch<R, EquationSet::Isentropic> {
       using type = typename Isentropic::Concretize<R>::type;
+   };
+
+   /**
+    * @brief See generic implementation.
+    */
+   template<FiniteVolumeSettings::RiemannSolvers R>
+   struct Dispatch<R, EquationSet::GammaModel> {
+      using type = typename GammaModel::Concretize<R>::type;
    };
 
    /**

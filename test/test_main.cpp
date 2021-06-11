@@ -68,7 +68,6 @@
 #define APPROVALS_CATCH_EXISTING_MAIN
 #include <ApprovalTests.hpp>
 #include <mpi.h>
-#include <fenv.h>// Floating-Point raising exceptions.
 #ifdef __APPLE__
 #include <xmmintrin.h>
 #endif
@@ -153,16 +152,6 @@ void EndMpiAndDisplayErrorMessage( std::string const error_message, int const ra
 int main( int argc, char* argv[] ) {
 
    auto const [rank, number_of_ranks] = StartUpMpiAndReportRankAndSize( argc, argv );
-
-   //Triggers signals on floating point errors, i.e. prohibits quiet NaNs and alike
-#ifndef PERFORMANCE
-#ifdef __linux__
-   feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
-#endif
-#ifdef __APPLE__
-   _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
-#endif
-#endif
 
    PrintStartupMessage( rank );
 

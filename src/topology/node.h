@@ -88,7 +88,7 @@
 class Node {
 
    double const node_size_;
-   double const node_x_coordinate_;
+   std::tuple<double const, double const, double const> const node_coordinates_;
    std::unordered_map<MaterialName, Block> phases_;
 
    //type std::int8_t due to definition of enum InterfaceTag. Needs to be changed in case the enum type changes.
@@ -110,7 +110,7 @@ public:
    ~Node()                   = default;
 
    // Functions to return geometry/topology data of the node
-   double GetBlockCoordinateX() const;// NH TODO can we somehow (smart) get rid of this?
+   std::tuple<double const, double const, double const> GetBlockCoordinates() const;
    double GetBlockSize() const;
    double GetCellSize() const;
 

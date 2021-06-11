@@ -379,7 +379,7 @@ void InterfaceStressTensorFluxes::AddAxisymmetricPartToViscousStressTensor( Node
             if( std::abs( interface_tags[indices[0]][indices[1]][indices[2]] ) <= ITTI( IT::NewCutCell ) ) {
                std::array<double, 3> const interface_viscosity = ComputeInterfaceViscosities( volume_fractions[indices[0]][indices[1]][indices[2]] );
 
-               double const radius                        = node.GetBlockCoordinateX() + ( static_cast<double>( i ) + 0.5 ) * cell_size;
+               double const radius                        = std::get<0>( node.GetBlockCoordinates() ) + ( static_cast<double>( i ) + 0.5 ) * cell_size;
                double const volume_viscosity_contribution = interface_viscosity[2] * real_fluid_velocity_x[indices[0]][indices[1]][indices[2]] / radius;
 
                for( unsigned int r = 0; r < DTI( CC::DIM() ); ++r ) {

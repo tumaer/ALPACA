@@ -83,6 +83,8 @@
 using ConvectiveTermSolverConcretization = ConvectiveTermSolverSetup::Concretize<convective_term_solver>::type;
 using LevelsetAdvectorConcretization     = LevelsetAdvectorSetup::Concretize<levelset_advector>::type;
 
+static_assert( !( active_equations == EquationSet::GammaModel && CC::Axisymmetric() ), "Axisymmetric terms are not implemented for Gamma-Model" );
+
 /**
  * @brief The SpaceSolver solves right side of the underlying system of equations (including source terms) using a Riemann solver of choice with an interchangable spatial stencil.
  */

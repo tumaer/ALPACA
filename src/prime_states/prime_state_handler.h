@@ -72,6 +72,8 @@
 #include "block_definitions/block.h"
 #include "block_definitions/field_material_definitions.h"
 #include "materials/material_manager.h"
+#include "user_specifications/equation_settings.h"
+#include "materials/equations_of_state/gamma_model_stiffened_gas.h"
 
 /**
  * @brief This class handles the conversion between conservative and prime state values for full buffers or single cells.
@@ -199,9 +201,30 @@ inline void PrimeStatesToConservatives( EquationOfState const& eos, PrimeStatesC
    if constexpr( MF::IsEquationActive( Equation::MomentumZ ) && MF::IsPrimeStateActive( PrimeState::Density ) && MF::IsPrimeStateActive( PrimeState::VelocityZ ) ) {
       conservatives_container[ETI( Equation::MomentumZ )] = prime_states_container[PTI( PrimeState::VelocityZ )] * prime_states_container[PTI( PrimeState::Density )];
    }
-   // The momentum equations need to be checked inside with ternary due to multi-dimensionality
-   if constexpr( MF::IsEquationActive( Equation::Energy ) && MF::IsPrimeStateActive( PrimeState::Density ) && MF::IsPrimeStateActive( PrimeState::Pressure ) )
-      conservatives_container[ETI( Equation::Energy )] = eos.Energy( prime_states_container[PTI( PrimeState::Density )], MF::IsPrimeStateActive( PrimeState::VelocityX ) ? prime_states_container[PTI( PrimeState::VelocityX )] : 0.0, MF::IsPrimeStateActive( PrimeState::VelocityY ) ? prime_states_container[PTI( PrimeState::VelocityY )] : 0.0, MF::IsPrimeStateActive( PrimeState::VelocityZ ) ? prime_states_container[PTI( PrimeState::VelocityZ )] : 0.0, prime_states_container[PTI( PrimeState::Pressure )] );
+   if constexpr( MF::IsEquationActive( Equation::Gamma ) && MF::IsPrimeStateActive( PrimeState::gamma ) ) {
+      conservatives_container[ETI( Equation::Gamma )] = GammaModelStiffenedGas::CalculateGamma( prime_states_container[PTI( PrimeState::gamma )] );
+   }
+   if constexpr( MF::IsEquationActive( Equation::Pi ) && MF::IsPrimeStateActive( PrimeState::pi ) ) {
+      conservatives_container[ETI( Equation::Pi )] = GammaModelStiffenedGas::CalculatePi( prime_states_container[PTI( PrimeState::gamma )], prime_states_container[PTI( PrimeState::pi )] );
+   }
+   if constexpr( active_equations == EquationSet::GammaModel ) {
+      conservatives_container[ETI( Equation::Energy )] = GammaModelStiffenedGas::CalculateEnergy(
+            prime_states_container[PTI( PrimeState::Density )],
+            MF::IsPrimeStateActive( PrimeState::VelocityX ) ? prime_states_container[PTI( PrimeState::VelocityX )] : 0.0,
+            MF::IsPrimeStateActive( PrimeState::VelocityY ) ? prime_states_container[PTI( PrimeState::VelocityY )] : 0.0,
+            MF::IsPrimeStateActive( PrimeState::VelocityZ ) ? prime_states_container[PTI( PrimeState::VelocityZ )] : 0.0,
+            prime_states_container[PTI( PrimeState::Pressure )],
+            prime_states_container[PTI( PrimeState::gamma )],
+            prime_states_container[PTI( PrimeState::pi )] );
+   } else {
+      // The velocity equations need to be checked inside with ternary due to multi-dimensionality
+      if constexpr( MF::IsEquationActive( Equation::Energy ) && MF::IsPrimeStateActive( PrimeState::Density ) && MF::IsPrimeStateActive( PrimeState::Pressure ) )
+         conservatives_container[ETI( Equation::Energy )] = eos.Energy( prime_states_container[PTI( PrimeState::Density )],
+                                                                        MF::IsPrimeStateActive( PrimeState::VelocityX ) ? prime_states_container[PTI( PrimeState::VelocityX )] : 0.0,
+                                                                        MF::IsPrimeStateActive( PrimeState::VelocityY ) ? prime_states_container[PTI( PrimeState::VelocityY )] : 0.0,
+                                                                        MF::IsPrimeStateActive( PrimeState::VelocityZ ) ? prime_states_container[PTI( PrimeState::VelocityZ )] : 0.0,
+                                                                        prime_states_container[PTI( PrimeState::Pressure )] );
+   }
 }
 
 template<typename ConservativesContainerType, typename PrimeStatesContainerType>
@@ -221,28 +244,39 @@ inline void ConservativesToPrimeStates( EquationOfState const& eos, Conservative
          prime_states_container[PTI( PrimeState::VelocityZ )] = conservatives_container[ETI( Equation::MomentumZ )] * one_density;
       }
    }
-   // The momentum (and energy, in isentropic case) equations need to be checked inside with ternary due to multi-dimensionality
-   if constexpr( MF::IsPrimeStateActive( PrimeState::Pressure ) && MF::IsEquationActive( Equation::Mass ) ) {
-      // clang-format off
-      prime_states_container[PTI( PrimeState::Pressure )] = eos.Pressure(
-                                                               conservatives_container[ETI( Equation::Mass )],
-                                                               MF::IsEquationActive( Equation::MomentumX ) ? conservatives_container[ETI( Equation::MomentumX )] : 0.0,
-                                                               MF::IsEquationActive( Equation::MomentumY ) ? conservatives_container[ETI( Equation::MomentumY )] : 0.0,
-                                                               MF::IsEquationActive( Equation::MomentumZ ) ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0,
-                                                               MF::IsEquationActive( Equation::Energy ) ? conservatives_container[ETI( Equation::Energy )] : 0.0
-                                                            );
-      // clang-format on
+   if constexpr( MF::IsPrimeStateActive( PrimeState::gamma ) && MF::IsEquationActive( Equation::Mass ) ) {
+      prime_states_container[PTI( PrimeState::gamma )] = GammaModelStiffenedGas::CalculatePrimeGamma( conservatives_container[ETI( Equation::Gamma )] );
    }
-   if constexpr( MF::IsPrimeStateActive( PrimeState::Temperature ) && MF::IsEquationActive( Equation::Mass ) && MF::IsEquationActive( Equation::Energy ) ) {
-      // clang-format off
-      prime_states_container[PTI( PrimeState::Temperature )] = eos.Temperature(
-                                                                  conservatives_container[ETI( Equation::Mass )],
-                                                                  MF::IsEquationActive( Equation::MomentumX ) ? conservatives_container[ETI( Equation::MomentumX )] : 0.0,
-                                                                  MF::IsEquationActive( Equation::MomentumY ) ? conservatives_container[ETI( Equation::MomentumY )] : 0.0,
-                                                                  MF::IsEquationActive( Equation::MomentumZ ) ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0,
-                                                                  conservatives_container[ETI( Equation::Energy )]
-                                                               );
-      // clang-format on
+   if constexpr( MF::IsPrimeStateActive( PrimeState::pi ) && MF::IsEquationActive( Equation::Mass ) ) {
+      prime_states_container[PTI( PrimeState::pi )] = GammaModelStiffenedGas::CalculatePrimePi( prime_states_container[PTI( PrimeState::gamma )], conservatives_container[ETI( Equation::Pi )] );
+   }
+   if constexpr( active_equations == EquationSet::GammaModel ) {
+      prime_states_container[PTI( PrimeState::Pressure )] = GammaModelStiffenedGas::CalculatePressure(
+            conservatives_container[ETI( Equation::Mass )],
+            conservatives_container[ETI( Equation::MomentumX )],
+            CC::DIM() != Dimension::One ? conservatives_container[ETI( Equation::MomentumY )] : 0.0,
+            CC::DIM() == Dimension::Three ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0,
+            conservatives_container[ETI( Equation::Energy )],
+            prime_states_container[PTI( PrimeState::gamma )],
+            prime_states_container[PTI( PrimeState::pi )] );
+   } else {
+      // The momentum (and energy, in isentropic case) equations need to be checked inside with ternary due to multi-dimensionality
+      if constexpr( MF::IsPrimeStateActive( PrimeState::Pressure ) && MF::IsEquationActive( Equation::Mass ) ) {
+         prime_states_container[PTI( PrimeState::Pressure )] = eos.Pressure(
+               conservatives_container[ETI( Equation::Mass )],
+               MF::IsEquationActive( Equation::MomentumX ) ? conservatives_container[ETI( Equation::MomentumX )] : 0.0,
+               MF::IsEquationActive( Equation::MomentumY ) ? conservatives_container[ETI( Equation::MomentumY )] : 0.0,
+               MF::IsEquationActive( Equation::MomentumZ ) ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0,
+               MF::IsEquationActive( Equation::Energy ) ? conservatives_container[ETI( Equation::Energy )] : 0.0 );
+      }
+      if constexpr( MF::IsPrimeStateActive( PrimeState::Temperature ) && MF::IsEquationActive( Equation::Mass ) && MF::IsEquationActive( Equation::Energy ) ) {
+         prime_states_container[PTI( PrimeState::Temperature )] = eos.Temperature(
+               conservatives_container[ETI( Equation::Mass )],
+               MF::IsEquationActive( Equation::MomentumX ) ? conservatives_container[ETI( Equation::MomentumX )] : 0.0,
+               MF::IsEquationActive( Equation::MomentumY ) ? conservatives_container[ETI( Equation::MomentumY )] : 0.0,
+               MF::IsEquationActive( Equation::MomentumZ ) ? conservatives_container[ETI( Equation::MomentumZ )] : 0.0,
+               conservatives_container[ETI( Equation::Energy )] );
+      }
    }
 }
 

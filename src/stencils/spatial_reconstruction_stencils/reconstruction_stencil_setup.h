@@ -82,6 +82,7 @@
 #include "weno9.h"
 #include "weno-ao53.h"
 #include "weno5_hm.h"
+#include "weno5_is.h"
 #include "fourth_order_central.h"
 
 /**
@@ -131,6 +132,13 @@ namespace ReconstructionStencilSetup {
    template<>
    struct Concretize<ReconstructionStencils::WENO5> {
       typedef WENO5 type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<ReconstructionStencils::WENO5IS> {
+      typedef WENO5IS type;
    };
    /**
     * @brief See generic implementation.

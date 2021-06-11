@@ -66,123 +66,149 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include "materials/equations_of_state/stiffened_gas.h"
-#include "materials/equations_of_state/generic_stiffened_gas.h"
-#include "utilities/helper_functions.h"
-#include "utilities/string_operations.h"
-#include "utilities/mathematical_functions.h"
-#include <cmath>
+#ifndef STATE_RECONSTRUCTION_SETUP_H
+#define STATE_RECONSTRUCTION_SETUP_H
+
+#include "user_specifications/equation_settings.h"
+#include "user_specifications/state_reconstruction_settings.h"
+#include "solvers/state_reconstruction/conservative_state_reconstruction.h"
+#include "solvers/state_reconstruction/primitive_state_reconstruction.h"
+#include "solvers/state_reconstruction/characteristic_state_reconstruction.h"
+#include "solvers/state_reconstruction/gamma_primitive_state_reconstruction.h"
+#include "solvers/state_reconstruction/gamma_characteristic_state_reconstruction.h"
+
+static_assert( !( active_equations == EquationSet::Isentropic && state_reconstruction_type == StateReconstructionType::Characteristic ), "Characteristic reconstruction not implemented for isentropic equations!" );
 
 /**
- * @brief Constructs a stiffened gas equation of state with eos parameters given as input.
- * @param dimensional_eos_data Map containing all data for the equation of state.
- * @param unit_handler Instance to provide (non-)dimensionalization of values.
- *
- * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
- *       Furthermore, dimensionalization of each value is done.
+ * @brief A namespace to get a StateReconstruction type based on a specified constexpr.
  */
-StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
-                                                                                                                                     background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
-   /* Empty besides initializer list*/
-}
+namespace StateReconstructionSetup {
 
-/**
- * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| ).
- * @param mass The mass used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
- * @return Pressure according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return GenericStiffenedGas::CalculatePressure<false>( mass, momentum_x, momentum_y, momentum_z, energy, gamma_, background_pressure_ );
-}
+   namespace EulerNavierStokes {
+      /**
+       * @brief Function returning the Euler or Navier-Stokes equations state reconstruction matching the type in the template argument.
+       * @tparam StateReconstructionType Specification of the state reconstruction type.
+       */
+      template<StateReconstructionType>
+      struct Concretize;
 
-/**
- * @brief Computes enthalpy as ( E + p ) / rho.
- * @param mass The mass used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
- * @return Enthalpy value.
- */
-double StiffenedGas::ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return ( energy + ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy ) ) / mass;
-}
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Conservative> {
+         using type = ConservativeStateReconstruction;
+      };
 
-/**
- * @brief Computes energy according to stiffened gas equation.
- * @param density The density used for the computation.
- * @param velocity_x The velocity in x-direction used for the computation.
- * @param velocity_y The velocity in y-direction used for the computation.
- * @param velocity_z The velocity in z-direction used for the computation.
- * @param pressure The pressure used for the computation.
- * @return Energy according to given inputs.
- */
-double StiffenedGas::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
-   return GenericStiffenedGas::CalculateEnergy( density, velocity_x, velocity_y, velocity_z, pressure, gamma_, background_pressure_ );
-}
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Primitive> {
+         using type = PrimitiveStateReconstruction;
+      };
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Characteristic> {
+         using type = CharacteristicStateReconstruction;
+      };
+   }// namespace EulerNavierStokes
 
-/**
- * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
- * @return Gruneisen coefficient .
- */
-double StiffenedGas::GetGruneisen() const {
-   return ( gamma_ - 1.0 );
-}
+   namespace Isentropic {
+      /**
+       * @brief Function returning the Isentropic state reconstruction matching the type in the template argument.
+       * @tparam StateReconstructionType Specification of the state reconstruction type.
+       */
+      template<StateReconstructionType>
+      struct Concretize;
 
-/**
- * @brief Returns Gamma.
- * @return Gamma.
- */
-double StiffenedGas::GetGamma() const {
-   return gamma_;
-}
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Conservative> {
+         using type = ConservativeStateReconstruction;
+      };
 
-/**
- * @brief Returns B.
- * @return B.
- */
-double StiffenedGas::GetB() const {
-   return background_pressure_;
-}
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Primitive> {
+         using type = PrimitiveStateReconstruction;
+      };
+   }// namespace Isentropic
 
-/**
- * @brief Computes psi from inputs as ( p + gamma * B ) / rho.
- * @param pressure The pressure used for the computation.
- * @param one_density The density used for the computation.
- * @return Psi according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputePsi( double const pressure, double const one_density ) const {
-   return ( pressure + gamma_ * background_pressure_ ) * one_density;
-}
+   namespace GammaModel {
+      /**
+       * @brief Function returning the Gamma Model state reconstruction matching the type in the template argument.
+       * @tparam StateReconstructionType Specification of the state reconstruction type.
+       */
+      template<StateReconstructionType>
+      struct Concretize;
 
-/**
- * @brief Computes Speed of Sound from inputs as sqrt( gamma * ( p + B ) ) / rho.
- * @param density The density used for the computation.
- * @param pressure The pressure used for the computation.
- * @return Speed of sound according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputeSpeedOfSound( double const density, double const pressure ) const {
-   return GenericStiffenedGas::CalculateSpeedOfSound<false>( density, pressure, gamma_, background_pressure_ );
-}
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Conservative> {
+         using type = ConservativeStateReconstruction;
+      };
 
-/**
- * @brief Provides logging information of the equation of state.
- * @param indent Number of white spaces used at the beginning of each line for the logging information.
- * @param unit_handler Instance to provide dimensionalization of variables.
- * @return string with logging information.
- */
-std::string StiffenedGas::GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const {
-   // string that is returned
-   std::string log_string;
-   // Name of the equation of state
-   log_string += StringOperations::Indent( indent ) + "Type                 : Stiffened gas\n";
-   // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( GetGruneisen(), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
-   return log_string;
-}
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Primitive> {
+         using type = GammaPrimitiveStateReconstruction;
+      };
+
+      /**
+       * @brief See generic implementation.
+       */
+      template<>
+      struct Concretize<StateReconstructionType::Characteristic> {
+         using type = GammaCharacteristicStateReconstruction;
+      };
+   }// namespace GammaModel
+
+   /**
+   * @brief Function returning the state reconstruction type matching the type in the template argument according to the equation set in the second template parameter.
+   * @tparam StateReconstructionType Specification of the state reconstruction type.
+   * @tparam EquationSet Specification of the equation(s) beeing solved.
+   */
+   template<StateReconstructionType S, EquationSet>
+   struct Dispatch {
+      using type = typename EulerNavierStokes::Concretize<S>::type;
+   };
+
+   /**
+    * @brief See generic implementation.
+    */
+   template<StateReconstructionType S>
+   struct Dispatch<S, EquationSet::Isentropic> {
+      using type = typename Isentropic::Concretize<S>::type;
+   };
+
+   /**
+    * @brief See generic implementation.
+    */
+   template<StateReconstructionType S>
+   struct Dispatch<S, EquationSet::GammaModel> {
+      using type = typename GammaModel::Concretize<S>::type;
+   };
+
+   /**
+    * @brief Function returning the state reconstruction type for the (globally) selected equation and the given reconstruction template argument.
+    * @tparam StateReconstructionType Specification of the state reconstruction type.
+    */
+   template<StateReconstructionType S>
+   struct Concretize {
+      using type = typename Dispatch<S, active_equations>::type;
+   };
+
+}// namespace StateReconstructionSetup
+
+#endif// STATE_RECONSTRUCTION_SETUP_H

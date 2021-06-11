@@ -14,7 +14,7 @@ from alpacapy.alpaca.definitions.user_specification_file import UserSpecificatio
 class ReconstructionStencil:
     """ Gives a list of all reconstruction stencils that are allowed. Own class for multiple usage. Add new stencils here. """
     values = ['FirstOrder', 'WENO3', 'WENOF3P', 'FourthOrderCentral', 'WENO5', 'WENO5AER', 'WENO5Z', 'WENOAO53', 'WENO5HM', 'WENO5NU6P',
-              'TENO5', 'WENOCU6', 'WENO7', 'WENO9']
+              'TENO5', 'WENO5IS', 'WENOCU6', 'WENO7', 'WENO9']
 
     def __init__(self):
         pass
@@ -134,6 +134,7 @@ class UserSpecifications(SpecificationsBase):
                                                 ["Isentropic",
                                                  "Euler",
                                                  "NavierStokes",
+                                                 "GammaModel",
                                                  "Custom"]),
             # -----------------------
             # Numerical setup (single)
@@ -154,9 +155,9 @@ class UserSpecifications(SpecificationsBase):
             # -----------------------
             # State reconstruction setting
             # -----------------------
-            "StateReconstructionType": UserSpecificationTag(str, "RoeCharacteristic", UserSpecificationFile.state_reconstruction_settings,
+            "StateReconstructionType": UserSpecificationTag(str, "Characteristic", UserSpecificationFile.state_reconstruction_settings,
                                                             "state_reconstruction_type", "StateReconstructionType::",
-                                                            ["Conservative", "Primitive", "RoeCharacteristic"]),
+                                                            ["Conservative", "Primitive", "Characteristic"]),
             # -----------------------
             # Stencil setup
             # -----------------------
