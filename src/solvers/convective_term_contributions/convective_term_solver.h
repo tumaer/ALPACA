@@ -107,8 +107,9 @@ public:
    void UpdateConvectiveFluxes( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
                                 double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
                                 double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                                double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
-      static_cast<DerivedConvectiveTermSolver const&>( *this ).UpdateImplementation( mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z );
+                                double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                                double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
+      static_cast<DerivedConvectiveTermSolver const&>( *this ).UpdateImplementation( mat_block, cell_size, fluxes_x, fluxes_y, fluxes_z, volume_forces );
    }
 };
 

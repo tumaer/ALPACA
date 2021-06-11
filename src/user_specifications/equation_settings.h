@@ -75,6 +75,7 @@
 enum class EquationSet { Isentropic,
                          Euler,
                          NavierStokes,
+                         GammaModel,
                          Custom };
 constexpr EquationSet active_equations = EquationSet::NavierStokes;
 
@@ -99,6 +100,8 @@ inline std::string SetToString( EquationSet const eq ) {
          return "Euler";
       case EquationSet::NavierStokes:
          return "Navier-Stokes";
+      case EquationSet::GammaModel:
+         return "Gamma-Model";
       case EquationSet::Custom:
          return "Custom";
       default:

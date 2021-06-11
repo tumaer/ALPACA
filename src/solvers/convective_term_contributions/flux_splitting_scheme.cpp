@@ -68,7 +68,9 @@
 *****************************************************************************************/
 #include "solvers/convective_term_contributions/flux_splitting_scheme.h"
 #include "stencils/stencil_utilities.h"
-#include "solvers/state_reconstruction.h"
+#include "solvers/state_reconstruction/state_reconstruction.h"
+
+static_assert( ( active_equations == EquationSet::Euler || active_equations == EquationSet::NavierStokes ) || ( convective_term_solver != ConvectiveTermSolvers::FluxSplitting ), "Flux Splitting schemes are not implemented for equations other than NavierStokes!" );
 
 namespace {
    /**
@@ -123,7 +125,8 @@ void FluxSplittingScheme::UpdateImplementation(
       std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
       double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
       double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const {
+      double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+      double ( & )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
    double advection_contribution[MF::ANOE()][CC::TCX()][CC::TCY()][CC::TCZ()];
 

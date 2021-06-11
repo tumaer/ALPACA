@@ -98,6 +98,14 @@ public:
    RiemannSolver( RiemannSolver&& )                 = delete;
    RiemannSolver& operator=( RiemannSolver&& ) = delete;
 
+   /**
+    * @brief Solves the first-order Riemann problem using left and right state vectors.
+    * @tparam direction.
+    * @param material Container holding the relevant fluid data to compute the update.
+    * @param state_face_left, state_face_right The reconstructed left/right conservative states.
+    * @param prime_state_left, prime_state_right The primitive left/right conservative states.
+    * @return The flux over the cell face as computed by this Riemann solver.
+    */
    template<Direction DIR>
    std::array<double, MF::ANOE()> SolveRiemannProblem( MaterialName const material,
                                                        std::array<double, MF::ANOE()> const& state_face_left,
@@ -105,6 +113,23 @@ public:
                                                        std::array<double, MF::ANOP()> const& prime_state_left,
                                                        std::array<double, MF::ANOP()> const& prime_state_right ) const {
       return static_cast<DerivedRiemannSolver const&>( *this ).template SolveRiemannProblemImplementation<DIR>( material, state_face_left, state_face_right, prime_state_left, prime_state_right );
+   }
+
+   /**
+    * @brief Solves the first-order Riemann problem using left and right state vectors.
+    * @tparam direction.
+    * @param material Container holding the relevant fluid data to compute the update.
+    * @param state_face_left, state_face_right The reconstructed left/right conservative states.
+    * @param prime_state_left, prime_state_right The primitive left/right conservative states.
+    * @return The flux over the cell face as computed by this Riemann solver and the reconstructed velocity u_hllc (required for source terms).
+    */
+   template<Direction DIR>
+   std::tuple<std::array<double, MF::ANOE()>, double> SolveGammaRiemannProblem( MaterialName const material,
+                                                                                std::array<double, MF::ANOE()> const& state_face_left,
+                                                                                std::array<double, MF::ANOE()> const& state_face_right,
+                                                                                std::array<double, MF::ANOP()> const& prime_state_left,
+                                                                                std::array<double, MF::ANOP()> const& prime_state_right ) const {
+      return static_cast<DerivedRiemannSolver const&>( *this ).template SolveGammaRiemannProblemImplementation<DIR>( material, state_face_left, state_face_right, prime_state_left, prime_state_right );
    }
 };
 

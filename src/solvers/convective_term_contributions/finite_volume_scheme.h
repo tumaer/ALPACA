@@ -77,6 +77,7 @@
 #include "materials/material_manager.h"
 #include "user_specifications/compile_time_constants.h"
 #include "solvers/convective_term_contributions/riemann_solvers/riemann_solver_setup.h"
+#include "solvers/state_reconstruction/state_reconstruction_setup.h"
 
 /**
  * @brief Discretization of the convective term solver using a finite-volume procedure.
@@ -85,11 +86,14 @@ class FiniteVolumeScheme : public ConvectiveTermSolver<FiniteVolumeScheme> {
 
    friend ConvectiveTermSolver;
 
-   using RiemannSolverConcretization = RiemannSolverSetup::Concretize<FiniteVolumeSettings::riemann_solver>::type;
+   using RiemannSolverConcretization       = RiemannSolverSetup::Concretize<FiniteVolumeSettings::riemann_solver>::type;
+   using StateReconstructionConcretization = StateReconstructionSetup::Concretize<state_reconstruction_type>::type;
    RiemannSolverConcretization const riemann_solver_;
+   StateReconstructionConcretization const state_reconstruction_;
 
    template<Direction DIR>
    void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &fluxes )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double ( &u_hllc )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
                        double const ( &Roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                        double const ( &Roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
                        double const cell_size ) const;
@@ -97,7 +101,8 @@ class FiniteVolumeScheme : public ConvectiveTermSolver<FiniteVolumeScheme> {
    void UpdateImplementation( std::pair<MaterialName const, Block> const& mat_block, double const cell_size,
                               double ( &fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
                               double ( &fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
+                              double ( &fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                              double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 
 public:
    FiniteVolumeScheme() = delete;

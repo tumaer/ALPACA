@@ -120,6 +120,30 @@ namespace MaterialFieldOutputSettings {
    constexpr std::array<bool, 3> Density = { true, false, false };
    static std::string const DensityName  = "density";
    /**
+    * Indicates whether the primitive gamma should be written to the output or not.
+    * The array marks { 0: standard output, 1: interface output, 2: debug output }
+    */
+   constexpr std::array<bool, 3> GammaPrimitive = { true, false, false };
+   static std::string const GammaPrimitiveName  = "gamma_primitive";
+   /**
+    * Indicates whether the advected Gamma should be written to the output or not.
+    * The array marks { 0: standard output, 1: interface output, 2: debug output }
+    */
+   constexpr std::array<bool, 3> GammaConservative = { false, false, false };
+   static std::string const GammaConservativeName  = "gamma_conservative";
+   /**
+    * Indicates whether the primitive background pressure should be written to the output or not.
+    * The array marks { 0: standard output, 1: interface output, 2: debug output }
+    */
+   constexpr std::array<bool, 3> PiPrimitive = { true, false, false };
+   static std::string const PiPrimitiveName  = "pi_primitive";
+   /**
+    * Indicates whether the advected Pi should be written to the output or not.
+    * The array marks { 0: standard output, 1: interface output, 2: debug output }
+    */
+   constexpr std::array<bool, 3> PiConservative = { false, false, false };
+   static std::string const PiConservativeName  = "pi_conservative";
+   /**
     * Indicates whether the ShearViscosity should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */

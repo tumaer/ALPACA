@@ -79,9 +79,9 @@
       <reconstructionStencil>   WENO9                 WENO5Z                WENO7                 WENO9                 WENO5                 WENO7                 WENO5Z
                                 WENO7                 WENO9                 WENO5                 WENO3                 WENO5Z                WENO3                 WENO9
                                 WENO3                 WENO3                 WENO5Z                WENO7                 WENO3                 WENO5                 WENO3                 </reconstructionStencil>
-      <stateReconstructionType> RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic
-                                RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic
-				RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic     RoeCharacteristic    </stateReconstructionType>
+      <stateReconstructionType> Characteristic     Characteristic     Characteristic     Characteristic     Characteristic     Characteristic     Characteristic
+                                Characteristic     Characteristic     Characteristic     Characteristic     Characteristic     Characteristic     Characteristic
+				Characteristic     Characteristic     Characteristic     Characteristic     Characteristic     Characteristic     Characteristic    </stateReconstructionType>
       <derivativeStencil>       HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
                                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5
                                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 HOUC5                 </derivativeStencil>
@@ -128,7 +128,7 @@
       <riemannSolver>           Hllc                    Hllc                  Hllc                  Hllc                    Hllc_LM                 </riemannSolver>
       <signalSpeed>             Einfeldt                Einfeldt              Einfeldt              Einfeldt                Einfeldt                </signalSpeed>
       <reconstructionStencil>   WENO5                   WENOAO53              WENOAO53              WENO5                   WENO5                   </reconstructionStencil>
-      <stateReconstructionType> RoeCharacteristic       RoeCharacteristic     RoeCharacteristic     RoeCharacteristic       RoeCharacteristic       </stateReconstructionType>
+      <stateReconstructionType> Characteristic       Characteristic     Characteristic     Characteristic       Characteristic       </stateReconstructionType>
       <derivativeStencil>       HOUC5                   HOUC5                 HOUC5                 HOUC5                   HOUC5                   </derivativeStencil>
       <levelsetAdvector>        HjReconstructionStencil ReconstructionStencil ReconstructionStencil HjReconstructionStencil HjReconstructionStencil </levelsetAdvector>
       <levelsetReinitializer>   Weno                    Weno                  Min                   Min                     Weno                    </levelsetReinitializer>
@@ -153,7 +153,7 @@
       <riemannSolver>           Hllc                    </riemannSolver>
       <signalSpeed>             Einfeldt                </signalSpeed>
       <reconstructionStencil>   WENO5                   </reconstructionStencil>
-      <stateReconstructionType> RoeCharacteristic       </stateReconstructionType>
+      <stateReconstructionType> Characteristic       </stateReconstructionType>
       <derivativeStencil>       HOUC5                   </derivativeStencil>
       <levelsetAdvector>        HjReconstructionStencil </levelsetAdvector>
       <levelsetReinitializer>   Weno                    </levelsetReinitializer>

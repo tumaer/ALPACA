@@ -130,6 +130,9 @@ namespace Logging {
       logger.LogMessage( ActiveStatusString( CC::ScaleSeparationActive(), "Scale seperation        : " ) );
       logger.LogMessage( ActiveStatusString( CC::FUSY(), "FP control for symmetry : " ) );
       logger.LogMessage( ActiveStatusString( CC::SolidBoundaryActive(), "Solid boundaries        : " ) );
+      if constexpr( active_equations == EquationSet::GammaModel ) {
+         logger.LogMessage( ActiveStatusString( GammaModelSettings::EosSafeGuarding, "Safe equation of state  : " ) );
+      }
       logger.LogBreakLine();
 
       logger.LogMessage( "Equation set                                  : " + SetToString( active_equations ) );

@@ -451,7 +451,7 @@ void ComputeInterfaceCurvature( Node const& node, double ( &curvature )[CC::TCX(
                double single_cell_curvature = ( first_summand + second_summand );
 
                if( CC::Axisymmetric() ) {
-                  double const radius = node.GetBlockCoordinateX() + ( double( i ) - double( CC::FICX() ) + 0.5 ) * cell_size;
+                  double const radius = std::get<0>( node.GetBlockCoordinates() ) + ( double( i ) - double( CC::FICX() ) + 0.5 ) * cell_size;
                   single_cell_curvature += levelset_x[i][j][k] * ( levelset_x[i][j][k] * levelset_x[i][j][k] + levelset_y[i][j][k] * levelset_y[i][j][k] ) / radius;
                }
 

@@ -3,9 +3,9 @@
 
 enum class StateReconstructionType { Conservative,
                                      Primitive,
-                                     RoeCharacteristic };
+                                     Characteristic };
 
-constexpr StateReconstructionType state_reconstruction_type = StateReconstructionType::RoeCharacteristic;
+constexpr StateReconstructionType state_reconstruction_type = StateReconstructionType::Characteristic;
 
 /**
     * @brief Provides a string representation of the state reconstruction type.
@@ -18,8 +18,8 @@ inline std::string SetToString( StateReconstructionType const reconstruction ) {
          return "Conservative";
       case StateReconstructionType::Primitive:
          return "Primitive";
-      case StateReconstructionType::RoeCharacteristic:
-         return "RoeCharacteristic";
+      case StateReconstructionType::Characteristic:
+         return "Characteristic";
       default:
          return "ERROR: This reconstruction type is not (yet) defined!";
    }

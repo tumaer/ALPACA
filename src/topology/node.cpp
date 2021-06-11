@@ -77,7 +77,9 @@
  * @param initial_interface_tag Uniform initial interface tag of the node.
  */
 Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
-                                                                                                                                                         node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ) {
+                                                                                                                                                         node_coordinates_( std::make_tuple( DomainCoordinatesOfId( id, node_size_ )[0],
+                                                                                                                                                                                             DomainCoordinatesOfId( id, node_size_ )[1],
+                                                                                                                                                                                             DomainCoordinatesOfId( id, node_size_ )[2] ) ) {
    for( MaterialName const& material : materials ) {
       phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
    }
@@ -101,7 +103,9 @@ Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<Ma
  */
 Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
             std::int8_t const ( &initial_interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
-                                                                                                                                                node_x_coordinate_( DomainCoordinatesOfId( id, node_size_ )[0] ),
+                                                                                                                                                node_coordinates_( std::make_tuple( DomainCoordinatesOfId( id, node_size_ )[0],
+                                                                                                                                                                                    DomainCoordinatesOfId( id, node_size_ )[1],
+                                                                                                                                                                                    DomainCoordinatesOfId( id, node_size_ )[2] ) ),
                                                                                                                                                 interface_block_( std::move( interface_block ) ) {
    for( MaterialName const& material : materials ) {
       phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
@@ -118,11 +122,12 @@ Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<Ma
 }
 
 /**
- * @brief Gives the X-coordinate of the coordinate of the node.
- * @return The X-coordinate of the first (most west-south-bottom) cell in the DOMAIN, i.e. not counting Halos.
+ * @brief Gives the coordinates of the node.
+ * @return Gives the X-coordinate of the first (most west-south-bottom), Y-coordinate of the first (most west-south-bottom)
+ * and the Z-coordinate of the first (most west-south-bottom) cell in the DOMAIN, i.e. not counting Halos.
  */
-double Node::GetBlockCoordinateX() const {
-   return node_x_coordinate_;
+std::tuple<double const, double const, double const> Node::GetBlockCoordinates() const {
+   return node_coordinates_;
 }
 
 /**

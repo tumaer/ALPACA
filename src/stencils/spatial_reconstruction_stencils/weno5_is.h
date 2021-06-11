@@ -66,123 +66,98 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include "materials/equations_of_state/stiffened_gas.h"
-#include "materials/equations_of_state/generic_stiffened_gas.h"
-#include "utilities/helper_functions.h"
-#include "utilities/string_operations.h"
-#include "utilities/mathematical_functions.h"
-#include <cmath>
+#ifndef WENO5IS_H
+#define WENO5IS_H
+
+#include "stencils/stencil.h"
 
 /**
- * @brief Constructs a stiffened gas equation of state with eos parameters given as input.
- * @param dimensional_eos_data Map containing all data for the equation of state.
- * @param unit_handler Instance to provide (non-)dimensionalization of values.
- *
- * @note During the constructing a check is done if the required parameter exists. If not an error is thrown.
- *       Furthermore, dimensionalization of each value is done.
+ * @brief Discretization of the SpatialReconstructionStencil class to compute fluxes according to the incremental-stencil WENO \cite Wang2018
  */
-StiffenedGas::StiffenedGas( std::unordered_map<std::string, double> const& dimensional_eos_data, UnitHandler const& unit_handler ) : gamma_( GetCheckedParameter<double>( dimensional_eos_data, "gamma", "StiffenedGas" ) ),
-                                                                                                                                     background_pressure_( unit_handler.NonDimensionalizeValue( GetCheckedParameter<double>( dimensional_eos_data, "backgroundPressure", "StiffenedGas" ), UnitType::Pressure ) ) {
-   /* Empty besides initializer list*/
-}
+class WENO5IS : public Stencil<WENO5IS> {
 
-/**
- * @brief Computes Pressure from inputs as -gamma*B + ( gamma - 1 ) * ( E  - 0.5 * rho * ||v^2|| ).
- * @param mass The mass used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
- * @return Pressure according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputePressure( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return GenericStiffenedGas::CalculatePressure<false>( mass, momentum_x, momentum_y, momentum_z, energy, gamma_, background_pressure_ );
-}
+   friend Stencil;
 
-/**
- * @brief Computes enthalpy as ( E + p ) / rho.
- * @param mass The mass used for the computation.
- * @param momentum_x The momentum in x-direction used for the computation.
- * @param momentum_y The momentum in y-direction used for the computation.
- * @param momentum_z The momentum in z-direction used for the computation.
- * @param energy The energy used for the computation.
- * @return Enthalpy value.
- */
-double StiffenedGas::ComputeEnthalpy( double const mass, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const {
-   return ( energy + ComputePressure( mass, momentum_x, momentum_y, momentum_z, energy ) ) / mass;
-}
+   static constexpr StencilType stencil_type_ = StencilType::Reconstruction;
 
-/**
- * @brief Computes energy according to stiffened gas equation.
- * @param density The density used for the computation.
- * @param velocity_x The velocity in x-direction used for the computation.
- * @param velocity_y The velocity in y-direction used for the computation.
- * @param velocity_z The velocity in z-direction used for the computation.
- * @param pressure The pressure used for the computation.
- * @return Energy according to given inputs.
- */
-double StiffenedGas::ComputeEnergy( double const density, double const velocity_x, double const velocity_y, double const velocity_z, double const pressure ) const {
-   return GenericStiffenedGas::CalculateEnergy( density, velocity_x, velocity_y, velocity_z, pressure, gamma_, background_pressure_ );
-}
+   // Coefficients for WENO5IS scheme
+   static constexpr double d0_ = 15.0 / 32.0;
+   static constexpr double d1_ = 5.0 / 32.0;
+   static constexpr double d2_ = 5.0 / 16.0;
+   static constexpr double d3_ = 1.0 / 16.0;
 
-/**
- * @brief Computes Gruneisen coefficient as ( gamma-1 ) for stiffened-gas equation of state.
- * @return Gruneisen coefficient .
- */
-double StiffenedGas::GetGruneisen() const {
-   return ( gamma_ - 1.0 );
-}
+   static constexpr double c1_ = 13.0 / 12.0;
 
-/**
- * @brief Returns Gamma.
- * @return Gamma.
- */
-double StiffenedGas::GetGamma() const {
-   return gamma_;
-}
+   // Small values to avoid division by 0, but also to adjust dissipation.
+   static constexpr double epsilon_weno5_ = 1.0e-6;
 
-/**
- * @brief Returns B.
- * @return B.
- */
-double StiffenedGas::GetB() const {
-   return background_pressure_;
-}
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
+   static constexpr unsigned int stencil_size_            = 6;
+   static constexpr unsigned int downstream_stencil_size_ = 2;
 
-/**
- * @brief Computes psi from inputs as ( p + gamma * B ) / rho.
- * @param pressure The pressure used for the computation.
- * @param one_density The density used for the computation.
- * @return Psi according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputePsi( double const pressure, double const one_density ) const {
-   return ( pressure + gamma_ * background_pressure_ ) * one_density;
-}
+   /**
+    * @brief Evaluates the stencil according to a WENO5IS scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const evaluation_properties, double const ) const {
+      // Assign values to v_i to make it easier to read
+      double const v1 = array[downstream_stencil_size_ + evaluation_properties[0] - 2 * evaluation_properties[1]];
+      double const v2 = array[downstream_stencil_size_ + evaluation_properties[0] - 1 * evaluation_properties[1]];
+      double const v3 = array[downstream_stencil_size_ + evaluation_properties[0]];
+      double const v4 = array[downstream_stencil_size_ + evaluation_properties[0] + 1 * evaluation_properties[1]];
+      double const v5 = array[downstream_stencil_size_ + evaluation_properties[0] + 2 * evaluation_properties[1]];
 
-/**
- * @brief Computes Speed of Sound from inputs as sqrt( gamma * ( p + B ) ) / rho.
- * @param density The density used for the computation.
- * @param pressure The pressure used for the computation.
- * @return Speed of sound according to stiffened-gas equation of state.
- */
-double StiffenedGas::ComputeSpeedOfSound( double const density, double const pressure ) const {
-   return GenericStiffenedGas::CalculateSpeedOfSound<false>( density, pressure, gamma_, background_pressure_ );
-}
+      // Compute smoothness indicators beta^_i
+      double const tmp1  = v3 - v4;
+      double const beta0 = tmp1 * tmp1;
 
-/**
- * @brief Provides logging information of the equation of state.
- * @param indent Number of white spaces used at the beginning of each line for the logging information.
- * @param unit_handler Instance to provide dimensionalization of variables.
- * @return string with logging information.
- */
-std::string StiffenedGas::GetLogData( unsigned int const indent, UnitHandler const& unit_handler ) const {
-   // string that is returned
-   std::string log_string;
-   // Name of the equation of state
-   log_string += StringOperations::Indent( indent ) + "Type                 : Stiffened gas\n";
-   // Parameters with small indentation
-   log_string += StringOperations::Indent( indent ) + "Gruneisen coefficient: " + StringOperations::ToScientificNotationString( GetGruneisen(), 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Gamma                : " + StringOperations::ToScientificNotationString( gamma_, 9 ) + "\n";
-   log_string += StringOperations::Indent( indent ) + "Background pressure  : " + StringOperations::ToScientificNotationString( unit_handler.DimensionalizeValue( background_pressure_, UnitType::Pressure ), 9 ) + "\n";
-   return log_string;
-}
+      double const tmp2  = v2 - v3;
+      double const beta1 = tmp2 * tmp2;
+
+      double const tmp3   = v2 - 2.0 * v3 + v4;
+      double const tmp4   = v2 - v4;
+      double const beta01 = c1_ * tmp3 * tmp3 + 0.25 * tmp4 * tmp4;
+
+      double const tmp5  = v3 - 2.0 * v4 + v5;
+      double const tmp6  = 3.0 * v3 - 4.0 * v4 + v5;
+      double const beta2 = c1_ * tmp5 * tmp5 + 0.25 * tmp6 * tmp6;
+
+      double const tmp7  = v1 - 2.0 * v2 + v3;
+      double const tmp8  = v1 - 4.0 * v2 + 3.0 * v3;
+      double const beta3 = c1_ * tmp7 * tmp7 + 0.25 * tmp8 * tmp8;
+
+      double const tmp9  = v5 - 4.0 * v4 + 6.0 * v3 - 4.0 * v2 + v1;
+      double const tmp10 = v5 - 2.0 * v4 + 2.0 * v2 - v1;
+      double const tau5  = c1_ * tmp9 * tmp9 + 0.25 * tmp10 * tmp10;
+
+      // Compute weights
+      double const a0        = d0_ * ( 1.0 + ( tau5 / ( beta0 + epsilon_ ) ) * ( tau5 / ( beta01 + epsilon_ ) ) );
+      double const a1        = d1_ * ( 1.0 + ( tau5 / ( beta1 + epsilon_ ) ) * ( tau5 / ( beta01 + epsilon_ ) ) );
+      double const a2        = d2_ * ( 1.0 + tau5 / ( beta2 + epsilon_ ) );
+      double const a3        = d3_ * ( 1.0 + tau5 / ( beta3 + epsilon_ ) );
+      double const one_a_sum = 1.0 / ( a0 + a1 + a2 + a3 );
+
+      double const w0 = a0 * one_a_sum;
+      double const w1 = a1 * one_a_sum;
+      double const w2 = a2 * one_a_sum;
+      double const w3 = a3 * one_a_sum;
+
+      double const u0 = 0.5 * ( v3 + v4 );
+      double const u1 = 0.5 * ( 3.0 * v3 - v2 );
+      double const u2 = 0.125 * ( 3.0 * v3 + 6.0 * v4 - v5 );
+      double const u3 = 0.125 * ( 3.0 * v1 - 10.0 * v2 + 15.0 * v3 );
+
+      // Return weighted average
+      return w0 * u0 + w1 * u1 + w2 * u2 + w3 * u3;
+   }
+
+public:
+   explicit constexpr WENO5IS() = default;
+   ~WENO5IS()                   = default;
+   WENO5IS( WENO5IS const& )    = delete;
+   WENO5IS& operator=( WENO5IS const& ) = delete;
+   WENO5IS( WENO5IS&& )                 = delete;
+   WENO5IS& operator=( WENO5IS&& ) = delete;
+};
+
+#endif// STENCIL_WENO5_IS_H

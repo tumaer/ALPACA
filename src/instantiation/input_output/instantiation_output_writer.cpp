@@ -103,6 +103,79 @@ namespace {
 namespace Instantiation {
 
    /**
+   * @brief Add conservative and primitive state quantities to material output vector.
+   * @param quantity the given MaterialFieldQuantity.
+   * @param quantity_flags quantity output decision flags.
+   * @param quantity_name quantity name.
+   * @param unit_handler Instance for dimensionalization of quantities.
+   * @param material_manager Instance for handling material properties and pairing properties.
+   * @param debug_flag Enable special debug treatment.
+   */
+   void AddStateQuantity( MaterialFieldQuantityName const quantity,
+                          std::array<bool, 3> const quantity_flags,
+                          std::string const quantity_name,
+                          std::vector<std::unique_ptr<OutputQuantity const>>& quantity_vector,
+                          UnitHandler const& unit_handler,
+                          MaterialManager const& material_manager,
+                          bool const debug_flag ) {
+
+      // Obtain data and verify it
+      MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( quantity ) );
+      if( quantity_data.VerifyQuantity() ) {
+         // Add quantities to the vector
+         quantity_vector.emplace_back( std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, quantity_name, quantity_flags, quantity_data ) );
+         // Check if the debug output is activated and add the right-hand side buffer
+         if( debug_flag ) {
+            if( quantity_flags.back() && MaterialFieldOutputSettings::use_all_buffers_in_debug ) {
+               quantity_vector.emplace_back(
+                     std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, quantity_name, std::array<bool, 3>( { false, false, true } ),
+                                                                    quantity_data, ConservativeBufferType::RightHandSide ) );
+            }
+         }
+      }
+   }
+
+   /**
+   * @brief Add interface quantities to material output vector.
+   * @param quantity the given InterfaceQuantity.
+   * @param quantity_flags quantity output decision flags.
+   * @param quantity_name quantity name.
+   * @param unit_handler Instance for dimensionalization of quantities.
+   * @param material_manager Instance for handling material properties and pairing properties.
+   * @param debug_flag Enable special debug treatment.
+   */
+   void AddInterfaceQuantity( InterfaceFieldQuantityName const quantity,
+                              std::array<bool, 3> const quantity_flags,
+                              std::string const quantity_name,
+                              std::vector<std::unique_ptr<OutputQuantity const>>& quantity_vector,
+                              UnitHandler const& unit_handler,
+                              MaterialManager const& material_manager,
+                              bool const debug_flag ) {
+
+      // Obtain data and verify it
+      InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( quantity ) );
+      if( quantity_data.VerifyQuantity() ) {
+         // Add quantity to vector
+         quantity_vector.emplace_back(
+               std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, quantity_name, quantity_flags, quantity_data ) );
+         // Check if the debug output is activated and add the right-hand side and reinitialized buffer
+         if( debug_flag ) {
+            if( quantity_flags.back() && InterfaceFieldOutputSettings::use_all_buffers_in_debug ) {
+               quantity_vector.emplace_back(
+                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, quantity_name, std::array<bool, 3>( { false, false, true } ),
+                                                                     quantity_data, InterfaceDescriptionBufferType::RightHandSide ) );
+               quantity_vector.emplace_back(
+                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, quantity_name, std::array<bool, 3>( { false, false, true } ),
+                                                                     quantity_data, InterfaceDescriptionBufferType::Reinitialized ) );
+               quantity_vector.emplace_back(
+                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, quantity_name, std::array<bool, 3>( { false, false, true } ),
+                                                                     quantity_data, InterfaceDescriptionBufferType::Integrated ) );
+            }
+         }
+      }
+   }
+
+   /**
     * @brief Gives pointers of all material output quantities.
     * @param unit_handler Instance for dimensionalization of quantities.
     * @param material_manager Instance for handling material properties and pairing properties.
@@ -120,106 +193,48 @@ namespace Instantiation {
       /**************************************************************************************************/
       // conservatives
       if( IsAnyActive( MFOS::Mass ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Mass ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::MassName, MFOS::Mass, quantity_data ) );
-            // Check if the debug output is activated and add the right-hand side buffer
-            if( MFOS::Mass.back() && MFOS::use_all_buffers_in_debug ) {
-               output_quantities.emplace_back(
-                     std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::MassName, std::array<bool, 3>( { false, false, true } ),
-                                                                    quantity_data, ConservativeBufferType::RightHandSide ) );
-            }
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Mass, MFOS::Mass, MFOS::MassName, output_quantities, unit_handler, material_manager, true );
       }
       if( IsAnyActive( MFOS::Momentum ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Momentum ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::MomentumName, MFOS::Momentum, quantity_data ) );
-            // Check if the debug output is activated and add the right-hand side buffer
-            if( MFOS::Momentum.back() && MFOS::use_all_buffers_in_debug ) {
-               output_quantities.emplace_back(
-                     std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::MomentumName, std::array<bool, 3>( { false, false, true } ),
-                                                                    quantity_data, ConservativeBufferType::RightHandSide ) );
-            }
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Momentum, MFOS::Momentum, MFOS::MomentumName, output_quantities, unit_handler, material_manager, true );
       }
       if( IsAnyActive( MFOS::Energy ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Energy ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::EnergyName, MFOS::Energy, quantity_data ) );
-            // Check if the debug output is activated and add the right-hand side buffer
-            if( MFOS::Energy.back() && MFOS::use_all_buffers_in_debug ) {
-               output_quantities.emplace_back(
-                     std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::EnergyName, std::array<bool, 3>( { false, false, true } ),
-                                                                    quantity_data, ConservativeBufferType::RightHandSide ) );
-            }
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Energy, MFOS::Energy, MFOS::EnergyName, output_quantities, unit_handler, material_manager, true );
       }
+      if( IsAnyActive( MFOS::GammaConservative ) ) {
+         AddStateQuantity( MaterialFieldQuantityName::GammaConservative, MFOS::GammaConservative, MFOS::GammaConservativeName, output_quantities, unit_handler, material_manager, true );
+      }
+      if( IsAnyActive( MFOS::PiConservative ) ) {
+         AddStateQuantity( MaterialFieldQuantityName::PiConservative, MFOS::PiConservative, MFOS::PiConservativeName, output_quantities, unit_handler, material_manager, true );
+      }
+
       // prime states
       if( IsAnyActive( MFOS::Velocity ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Velocity ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::VelocityName, MFOS::Velocity, quantity_data ) );
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Velocity, MFOS::Velocity, MFOS::VelocityName, output_quantities, unit_handler, material_manager, false );
       }
       if( IsAnyActive( MFOS::Pressure ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Pressure ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::PressureName, MFOS::Pressure, quantity_data ) );
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Pressure, MFOS::Velocity, MFOS::PressureName, output_quantities, unit_handler, material_manager, false );
       }
       if( IsAnyActive( MFOS::Temperature ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Temperature ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::TemperatureName, MFOS::Temperature, quantity_data ) );
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Temperature, MFOS::Temperature, MFOS::TemperatureName, output_quantities, unit_handler, material_manager, false );
       }
       if( IsAnyActive( MFOS::Density ) ) {
-         // Obtain data and verify it
-         MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::Density ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantities to the vector
-            output_quantities.emplace_back(
-                  std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::DensityName, MFOS::Density, quantity_data ) );
-         }
+         AddStateQuantity( MaterialFieldQuantityName::Density, MFOS::Density, MFOS::DensityName, output_quantities, unit_handler, material_manager, false );
       }
+      if( IsAnyActive( MFOS::GammaPrimitive ) ) {
+         AddStateQuantity( MaterialFieldQuantityName::GammaPrimitive, MFOS::GammaPrimitive, MFOS::GammaPrimitiveName, output_quantities, unit_handler, material_manager, false );
+      }
+      if( IsAnyActive( MFOS::PiPrimitive ) ) {
+         AddStateQuantity( MaterialFieldQuantityName::PiPrimitive, MFOS::PiPrimitive, MFOS::PiPrimitiveName, output_quantities, unit_handler, material_manager, false );
+      }
+
       // parameter output ( can only be used if models are used, otherwise the required buffers do not exist)
-      if( CC::ParameterModelActive() ) {
+      if constexpr( CC::ParameterModelActive() ) {
          if( IsAnyActive( MFOS::ShearViscosity ) ) {
-            // Obtain data and verify it
-            MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::ShearViscosity ) );
-            if( quantity_data.VerifyQuantity() ) {
-               // Add quantities to the vector
-               output_quantities.emplace_back(
-                     std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::ShearViscosityName, MFOS::ShearViscosity, quantity_data ) );
-            }
+            AddStateQuantity( MaterialFieldQuantityName::ShearViscosity, MFOS::ShearViscosity, MFOS::ShearViscosityName, output_quantities, unit_handler, material_manager, false );
          }
          if( IsAnyActive( MFOS::ThermalConductivity ) ) {
-            // Obtain data and verify it
-            MaterialFieldQuantityData quantity_data( DataOfMaterialFieldQuantity( MaterialFieldQuantityName::ThermalConductivity ) );
-            if( quantity_data.VerifyQuantity() ) {
-               // Add quantities to the vector
-               output_quantities.emplace_back(
-                     std::make_unique<MaterialFieldQuantity const>( unit_handler, material_manager, MFOS::ThermalConductivityName, MFOS::ThermalConductivity, quantity_data ) );
-            }
+            AddStateQuantity( MaterialFieldQuantityName::ThermalConductivity, MFOS::ThermalConductivity, MFOS::ThermalConductivityName, output_quantities, unit_handler, material_manager, false );
          }
       }
       /**************************************************************************************************/
@@ -276,79 +291,27 @@ namespace Instantiation {
       /**************************************************************************************************/
       // interface descriptions
       if( IsAnyActive( IFOS::Levelset ) ) {
-         // Obtain data and verify it
-         InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName::Levelset ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantity to vector
-            output_quantities.emplace_back(
-                  std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::LevelsetName, IFOS::Levelset, quantity_data ) );
-            // Check if the debug output is activated and add the right-hand side and reinitialized buffer
-            if( IFOS::Levelset.back() && IFOS::use_all_buffers_in_debug ) {
-               output_quantities.emplace_back(
-                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::LevelsetName, std::array<bool, 3>( { false, false, true } ),
-                                                                     quantity_data, InterfaceDescriptionBufferType::RightHandSide ) );
-               output_quantities.emplace_back(
-                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::LevelsetName, std::array<bool, 3>( { false, false, true } ),
-                                                                     quantity_data, InterfaceDescriptionBufferType::Reinitialized ) );
-            }
-         }
+         AddInterfaceQuantity( InterfaceFieldQuantityName::Levelset, IFOS::Levelset, IFOS::LevelsetName, output_quantities, unit_handler, material_manager, true );
       }
       if( IsAnyActive( IFOS::VolumeFraction ) ) {
-         // Obtain data and verify it
-         InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName::VolumeFraction ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantity to vector
-            output_quantities.emplace_back(
-                  std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::VolumeFractionName, IFOS::VolumeFraction, quantity_data ) );
-            // Check if the debug output is activated and add the right-hand side and reinitialized buffer
-            if( IFOS::VolumeFraction.back() && IFOS::use_all_buffers_in_debug ) {
-               output_quantities.emplace_back(
-                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::VolumeFractionName, std::array<bool, 3>( { false, false, true } ),
-                                                                     quantity_data, InterfaceDescriptionBufferType::RightHandSide ) );
-               output_quantities.emplace_back(
-                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::VolumeFractionName, std::array<bool, 3>( { false, false, true } ),
-                                                                     quantity_data, InterfaceDescriptionBufferType::Reinitialized ) );
-            }
-         }
+         AddInterfaceQuantity( InterfaceFieldQuantityName::VolumeFraction, IFOS::VolumeFraction, IFOS::VolumeFractionName, output_quantities, unit_handler, material_manager, true );
       }
+
       // interface state output
       if( IsAnyActive( IFOS::InterfaceVelocity ) ) {
-         // Obtain data and verify it
-         InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName::InterfaceVelocity ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantity to vector
-            output_quantities.emplace_back(
-                  std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::InterfaceVelocityName, IFOS::InterfaceVelocity, quantity_data ) );
-         }
+         AddInterfaceQuantity( InterfaceFieldQuantityName::InterfaceVelocity, IFOS::InterfaceVelocity, IFOS::InterfaceVelocityName, output_quantities, unit_handler, material_manager, false );
       }
       if( IsAnyActive( IFOS::PressurePositive ) ) {
-         // Obtain data and verify it
-         InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName::PressurePositive ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantity to vector
-            output_quantities.emplace_back(
-                  std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::PressurePositiveName, IFOS::PressurePositive, quantity_data ) );
-         }
+         AddInterfaceQuantity( InterfaceFieldQuantityName::PressurePositive, IFOS::PressurePositive, IFOS::PressurePositiveName, output_quantities, unit_handler, material_manager, false );
       }
       if( IsAnyActive( IFOS::PressureNegative ) ) {
-         // Obtain data and verify it
-         InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName::PressureNegative ) );
-         if( quantity_data.VerifyQuantity() ) {
-            // Add quantity to vector
-            output_quantities.emplace_back(
-                  std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::PressureNegativeName, IFOS::PressureNegative, quantity_data ) );
-         }
+         AddInterfaceQuantity( InterfaceFieldQuantityName::PressureNegative, IFOS::PressureNegative, IFOS::PressureNegativeName, output_quantities, unit_handler, material_manager, false );
       }
+
       // interface parameter output ( can only be used if models are used, otherwise the required buffers do not exist)
-      if( CC::InterfaceParameterModelActive() ) {
+      if constexpr( CC::InterfaceParameterModelActive() ) {
          if( IsAnyActive( IFOS::SurfaceTensionCoefficient ) ) {
-            // Obtain data and verify it
-            InterfaceFieldQuantityData quantity_data( DataOfInterfaceFieldQuantity( InterfaceFieldQuantityName::SurfaceTensionCoefficient ) );
-            if( quantity_data.VerifyQuantity() ) {
-               // Add quantity to vector
-               output_quantities.emplace_back(
-                     std::make_unique<InterfaceFieldQuantity const>( unit_handler, material_manager, IFOS::SurfaceTensionCoefficientName, IFOS::SurfaceTensionCoefficient, quantity_data ) );
-            }
+            AddInterfaceQuantity( InterfaceFieldQuantityName::SurfaceTensionCoefficient, IFOS::SurfaceTensionCoefficient, IFOS::SurfaceTensionCoefficientName, output_quantities, unit_handler, material_manager, false );
          }
       }
       /**************************************************************************************************/

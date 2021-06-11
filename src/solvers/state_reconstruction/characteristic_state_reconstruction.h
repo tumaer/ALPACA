@@ -1,4 +1,4 @@
-﻿/*****************************************************************************************
+/*****************************************************************************************
 *                                                                                        *
 * This file is part of ALPACA                                                            *
 *                                                                                        *
@@ -66,64 +66,53 @@
 * Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#ifndef STATE_RECONTRUCTION_H
-#define STATE_RECONTRUCTION_H
+#ifndef CHARACTERISTIC_STATE_RECONSTRUCTION_H
+#define CHARACTERISTIC_STATE_RECONSTRUCTION_H
 
-#include "user_specifications/state_reconstruction_settings.h"
+#include "solvers/state_reconstruction/state_reconstruction.h"
 #include "prime_states/prime_state_handler.h"
+#include "block_definitions/field_material_definitions.h"
 
-namespace {
-   /**
-    * @brief Helper function to create the index sequence used to enforce symmetry while summing up conservative equation contributions in characteristic decomposition.
-    * @tparam RemainingIndices Zero-based index sequence representing the non-momentum equations. Are transformed into real equation indices.
-    * @return The created index sequence.
-    */
-   template<std::size_t... NonMomentumIndices>
-   constexpr std::array<std::array<unsigned int, MF::ANOE()>, DTI( CC::DIM() )> MakeConservativeEquationSummationSequence( std::index_sequence<NonMomentumIndices...> const ) {
-#if DIMENSION == 1
-      return { { { ETI( Equation::MomentumX ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
-#elif DIMENSION == 2
-      return { { { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
-                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
-#else
-      return { { { ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
-                 { ETI( Equation::MomentumZ ), ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... },
-                 { ETI( Equation::MomentumX ), ETI( Equation::MomentumY ), ETI( Equation::MomentumZ ), ETI( MF::NthNonMomentumEquation( NonMomentumIndices ) )... } } };
-#endif
-   }
-}// namespace
+#include "stencils/stencil_utilities.h"
 
 /**
- * @brief Procedure to reconstruct the conservatives/primitive states at cell faces.
- * @tparam DIR spatial direction the reconstruction has to be performed.
- * @param block Block of the phase under consideration.
- * @param eos Underlying equation of state of the phase under consideration used to convert primes and conservatives.
- * @param roe_eigenvectors_left .
- * @param roe_eigenvectors_right .
- * @param cell_size .
- * @param i .
- * @param k .
- * @param j .
- * @return tuple containing left and right reconstructed primitive and conservative states.
+ * @brief Discretization of the spatial reconstruction scheme using characteristic states (obtained by a characteristic decomposition using Roe eigenvectors) for reconstruction.
  */
-template<Direction DIR, ReconstructionStencils RECON>
-inline std::tuple<std::array<double, MF::ANOE()>, std::array<double, MF::ANOE()>, std::array<double, MF::ANOP()>, std::array<double, MF::ANOP()>> StateReconstruction( Block const& block,
-                                                                                                                                                                       EquationOfState const& eos,
-                                                                                                                                                                       double const ( &Roe_eigenvectors_left )[MF::ANOE()][MF::ANOE()],
-                                                                                                                                                                       double const ( &Roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()],
-                                                                                                                                                                       double const cell_size,
-                                                                                                                                                                       unsigned int const i,
-                                                                                                                                                                       unsigned int const j,
-                                                                                                                                                                       unsigned int const k ) noexcept {
+class CharacteristicStateReconstruction : public StateReconstruction<CharacteristicStateReconstruction> {
 
-   using ReconstructionStencil                    = typename ReconstructionStencilSetup::Concretize<RECON>::type;
-   constexpr unsigned int x_reconstruction_offset = DIR == Direction::X ? 1 : 0;
-   constexpr unsigned int y_reconstruction_offset = DIR == Direction::Y ? 1 : 0;
-   constexpr unsigned int z_reconstruction_offset = DIR == Direction::Z ? 1 : 0;
-   std::array<double, MF::ANOP()> reconstructed_primes_minus;
-   std::array<double, MF::ANOP()> reconstructed_primes_plus;
+   friend StateReconstruction;
 
-   if constexpr( state_reconstruction_type == StateReconstructionType::RoeCharacteristic ) {
+   /**
+    * @brief Procedure to reconstruct the conservatives/primitive states at cell faces.
+    * @tparam DIR spatial direction the reconstruction has to be performed.
+    * @param block Block of the phase under consideration.
+    * @param eos Underlying equation of state of the phase under consideration used to convert primes and conservatives.
+    * @param roe_eigenvectors_left .
+    * @param roe_eigenvectors_right .
+    * @param cell_size .
+    * @param i .
+    * @param k .
+    * @param j .
+    * @return tuple containing left and right reconstructed primitive and conservative states.
+    */
+   template<Direction DIR, ReconstructionStencils RECON>
+   std::tuple<std::array<double, MF::ANOE()>, std::array<double, MF::ANOE()>, std::array<double, MF::ANOP()>, std::array<double, MF::ANOP()>>
+   SolveStateReconstructionImplementation( Block const& block,
+                                           EquationOfState const& eos,
+                                           double const ( &Roe_eigenvectors_left )[MF::ANOE()][MF::ANOE()],
+                                           double const ( &Roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()],
+                                           double const cell_size,
+                                           unsigned int const i,
+                                           unsigned int const j,
+                                           unsigned int const k ) const {
+
+      using ReconstructionStencil                    = typename ReconstructionStencilSetup::Concretize<RECON>::type;
+      constexpr unsigned int x_reconstruction_offset = DIR == Direction::X ? 1 : 0;
+      constexpr unsigned int y_reconstruction_offset = DIR == Direction::Y ? 1 : 0;
+      constexpr unsigned int z_reconstruction_offset = DIR == Direction::Z ? 1 : 0;
+      std::array<double, MF::ANOP()> reconstructed_primes_minus;
+      std::array<double, MF::ANOP()> reconstructed_primes_plus;
+
       constexpr auto conservative_equation_summation_sequence_ = MakeConservativeEquationSummationSequence( std::make_index_sequence<MF::ANOE() - DTI( CC::DIM() )>{} );
       std::array<double, ReconstructionStencil::StencilSize()> u_characteristic;
       std::array<double, MF::ANOE()> characteristic_average_plus;
@@ -156,48 +145,13 @@ inline std::tuple<std::array<double, MF::ANOE()>, std::array<double, MF::ANOE()>
       return std::make_tuple( reconstructed_conservatives_minus, reconstructed_conservatives_plus, reconstructed_primes_minus, reconstructed_primes_plus );
    }
 
-   if constexpr( state_reconstruction_type == StateReconstructionType::Conservative ) {
-      std::array<double, ReconstructionStencil::StencilSize()> reconstruction_array;
-      std::array<double, MF::ANOE()> reconstructed_conservatives_minus;
-      std::array<double, MF::ANOE()> reconstructed_conservatives_plus;
-      for( unsigned int n = 0; n < MF::ANOE(); ++n ) {
-         for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
-            reconstruction_array[m] = block.GetAverageBuffer( MF::ASOE()[n] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
-                                                                             [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
-                                                                             [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )];
-         }// M-Loop
+public:
+   CharacteristicStateReconstruction() : StateReconstruction() {}
+   ~CharacteristicStateReconstruction()                                          = default;
+   CharacteristicStateReconstruction( CharacteristicStateReconstruction const& ) = delete;
+   CharacteristicStateReconstruction& operator=( CharacteristicStateReconstruction const& ) = delete;
+   CharacteristicStateReconstruction( CharacteristicStateReconstruction&& )                 = delete;
+   CharacteristicStateReconstruction& operator=( CharacteristicStateReconstruction&& ) = delete;
+};
 
-         reconstructed_conservatives_minus[n] = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( reconstruction_array, cell_size );
-         reconstructed_conservatives_plus[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( reconstruction_array, cell_size );
-      }// N-Loop
-
-      // To check for invalid cells due to ghost fluid method
-      if( reconstructed_conservatives_minus[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() || reconstructed_conservatives_plus[ETI( Equation::Mass )] <= std::numeric_limits<double>::epsilon() ) return std::make_tuple( reconstructed_conservatives_minus, reconstructed_conservatives_plus, reconstructed_primes_minus, reconstructed_primes_plus );
-
-      ConservativesToPrimeStates( eos, reconstructed_conservatives_minus, reconstructed_primes_minus );
-      ConservativesToPrimeStates( eos, reconstructed_conservatives_plus, reconstructed_primes_plus );
-      return std::make_tuple( reconstructed_conservatives_minus, reconstructed_conservatives_plus, reconstructed_primes_minus, reconstructed_primes_plus );
-   }
-
-   if constexpr( state_reconstruction_type == StateReconstructionType::Primitive ) {
-      std::array<double, ReconstructionStencil::StencilSize()> reconstruction_array;
-      std::array<double, MF::ANOE()> reconstructed_conservatives_minus;
-      std::array<double, MF::ANOE()> reconstructed_conservatives_plus;
-      for( unsigned int n = 0; n < MF::ANOP(); ++n ) {
-         for( unsigned int m = 0; m < ReconstructionStencil::StencilSize(); ++m ) {
-            reconstruction_array[m] = block.GetPrimeStateBuffer( MF::ASOP()[n] )[i + x_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
-                                                                                [j + y_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )]
-                                                                                [k + z_reconstruction_offset * ( m - ReconstructionStencil::DownstreamStencilSize() )];
-         }// M-Loop
-
-         reconstructed_primes_minus[n] = SU::Reconstruction<ReconstructionStencil, SP::UpwindLeft>( reconstruction_array, cell_size );
-         reconstructed_primes_plus[n]  = SU::Reconstruction<ReconstructionStencil, SP::UpwindRight>( reconstruction_array, cell_size );
-      }// N-Loop
-
-      PrimeStatesToConservatives( eos, reconstructed_primes_minus, reconstructed_conservatives_minus );
-      PrimeStatesToConservatives( eos, reconstructed_primes_plus, reconstructed_conservatives_plus );
-      return std::make_tuple( reconstructed_conservatives_minus, reconstructed_conservatives_plus, reconstructed_primes_minus, reconstructed_primes_plus );
-   }
-}
-
-#endif// STATE_RECONTRUCTION_H
+#endif// CHARACTERISTIC_STATE_RECONSTRUCTION_H

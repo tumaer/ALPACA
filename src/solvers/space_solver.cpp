@@ -149,11 +149,11 @@ void SpaceSolver::UpdateFluxes( Node& node ) const {
 
       // Determine cell face fluxes unsing a Riemann solver
       if constexpr( CC::InviscidExchangeActive() ) {
-         convective_term_solver_.UpdateConvectiveFluxes( phase, cell_size, face_fluxes_x, face_fluxes_y, face_fluxes_z );
+         convective_term_solver_.UpdateConvectiveFluxes( phase, cell_size, face_fluxes_x, face_fluxes_y, face_fluxes_z, volume_forces );
       }
 
       // Determine source terms
-      source_term_solver_.Sources( phase, cell_size, node.GetBlockCoordinateX(), face_fluxes_x, face_fluxes_y, face_fluxes_z, volume_forces );
+      source_term_solver_.Sources( phase, cell_size, std::get<0>( node.GetBlockCoordinates() ), face_fluxes_x, face_fluxes_y, face_fluxes_z, volume_forces );
 
       if( node.HasLevelset() ) {
          interface_term_solver_.WeightFaceFluxes( node, phase.first, face_fluxes_x, face_fluxes_y, face_fluxes_z );

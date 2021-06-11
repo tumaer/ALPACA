@@ -78,7 +78,9 @@ enum class EquationPool {
    MomentumX,
    MomentumY,
    MomentumZ,
-   Energy,// Example
+   Energy,
+   Gamma,
+   Pi,// Example
 };
 
 /**
@@ -90,7 +92,9 @@ enum class PrimeStatePool {
    VelocityX,
    VelocityY,
    VelocityZ,
-   Temperature,// Example
+   Temperature,
+   gamma,
+   pi// Example
 };
 /**
 * @brief Unique Identifier for all possible interface quantities in arbitrary order.
