@@ -746,7 +746,11 @@ void ModularAlgorithmAssembler::Advance() {
 void ModularAlgorithmAssembler::ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const log_this_step,
                                                          double& debug_key ) const {
    if constexpr( DP::DebugLog() ) {
-      if( log_this_step ) { logger_.LogMessage( debug_string + std::to_string( debug_key ) ); }
+      if( log_this_step ) {
+         MPI_Barrier( MPI_COMM_WORLD );// In debuging we want to make sure all ranks have reached this point.
+         logger_.LogMessage( debug_string + std::to_string( debug_key ) );
+         logger_.Flush();
+      }
    }
    if constexpr( DP::DebugOutput() ) {
       if( plot_this_step ) { input_output_.WriteSingleOutput( debug_key ); }
