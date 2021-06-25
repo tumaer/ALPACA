@@ -86,7 +86,7 @@ TopologyNode::TopologyNode( int const rank ) : current_rank_( rank ), target_ran
  * @param materials The materials to be present in the node.
  * @param rank Rank holding the node to be created.
  */
-TopologyNode::TopologyNode( std::vector<MaterialName> const materials, int const rank ) : current_rank_( rank ), target_rank_( TNC::unassigned_rank ), is_leaf_( true ), materials_( materials ) {}
+TopologyNode::TopologyNode( std::vector<MaterialName> const& materials, int const rank ) : current_rank_( rank ), target_rank_( TNC::unassigned_rank ), is_leaf_( true ), materials_( ContainerOperations::SortedCopy( materials ) ) {}
 
 /**
  * @brief Adds the given material to the node.
