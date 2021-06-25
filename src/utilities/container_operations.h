@@ -142,6 +142,18 @@ namespace ContainerOperations {
       }
    }
 
+   /**
+    * @brief Gives a sorted copy of the input container.
+    * @tparam Container A container allowing sorting via iterators.
+    * @param unsorted The initial container to be sorted.
+    */
+   template<typename Container>
+   Container SortedCopy( Container const& unsorted ) {
+      Container copy( std::cbegin( unsorted ), std::cend( unsorted ) );
+      std::sort( std::begin( copy ), std::end( copy ) );
+      return copy;
+   }
+
 }// namespace ContainerOperations
 
 #endif//CONTAINER_OPERATIONS_H

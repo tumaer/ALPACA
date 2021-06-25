@@ -90,7 +90,7 @@ class TopologyNode {
 
 public:
    explicit TopologyNode( int const rank = TopologyNodeConstants::unassigned_rank );
-   explicit TopologyNode( std::vector<MaterialName> const material, int const rank = TopologyNodeConstants::unassigned_rank );
+   explicit TopologyNode( std::vector<MaterialName> const& material, int const rank = TopologyNodeConstants::unassigned_rank );
    ~TopologyNode()                     = default;
    TopologyNode( TopologyNode const& ) = delete;
    TopologyNode& operator=( TopologyNode const& ) = delete;
