@@ -123,7 +123,7 @@ namespace MaterialFieldOutputSettings {
     * Indicates whether the primitive gamma should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
-   constexpr std::array<bool, 3> GammaPrimitive = { true, false, false };
+   constexpr std::array<bool, 3> GammaPrimitive = { false, false, false };
    static std::string const GammaPrimitiveName  = "gamma_primitive";
    /**
     * Indicates whether the advected Gamma should be written to the output or not.
@@ -135,7 +135,7 @@ namespace MaterialFieldOutputSettings {
     * Indicates whether the primitive background pressure should be written to the output or not.
     * The array marks { 0: standard output, 1: interface output, 2: debug output }
     */
-   constexpr std::array<bool, 3> PiPrimitive = { true, false, false };
+   constexpr std::array<bool, 3> PiPrimitive = { false, false, false };
    static std::string const PiPrimitiveName  = "pi_primitive";
    /**
     * Indicates whether the advected Pi should be written to the output or not.

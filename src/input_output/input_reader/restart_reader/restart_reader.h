@@ -105,7 +105,7 @@ public:
    TEST_VIRTUAL SnapshotTimesType ReadSnapshotTimesType() const;
    unsigned int ReadSnapshotIntervalsToKeep() const;
    unsigned int ReadSnapshotInterval() const;
-   std::vector<double> ReadSnapshotTimeStamps() const;
+   TEST_VIRTUAL std::vector<double> ReadSnapshotTimeStamps() const;
 };
 
 #endif// RESTART_READER_H
