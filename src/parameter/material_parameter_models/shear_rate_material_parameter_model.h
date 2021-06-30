@@ -87,15 +87,9 @@ class ShearRateMaterialParameterModel : public MaterialParameterModel {
    friend DerivedShearRateMaterialParameterModel;
 
    /**
-<<<<<<< Updated upstream
     * @brief Executes the actual parameter calculation on the complete block.
     * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return).
     * @param cell_size Cell_size of the given block.
-=======
-    * @brief Executes the actual parameter calculation on the complete block
-    * @param block Block on which the parameter calculation should be carried out (parameter on block as indirect return)
-    * @param cell_size Cell_size of the given block
->>>>>>> Stashed changes
     */
    void DoUpdateParameter( Block& block, double const cell_size ) const override {
 

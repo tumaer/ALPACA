@@ -1,0 +1,145 @@
+<!-- A simple setup but with all types of boundary condtions -->
+<configuration>
+   <domain>
+      <nodeSize> 1 </nodeSize>
+      <nodeRatio>
+         <x> 1 </x>
+         <y> 1 </y>
+         <z> 1 </z>
+      </nodeRatio>
+      <boundaryConditions>
+         <material>
+            <west> Zerogradient  </west>
+            <east> Wall </east>
+            <south> Periodic </south>
+            <north> Periodic </north>
+            <top> Symmetry </top>
+            <bottom> FixedValue </bottom>
+               <valuesBottom>
+                  <density> 1.0 </density>
+                  <pressure> 1.0 </pressure>
+                  <velocityX> 0.0 </velocityX>
+                  <velocityY> 0.0 </velocityY>
+                  <velocityZ> 0.0 </velocityZ>
+               </valuesBottom>
+         </material>
+         <levelSet>
+            <west> Symmetry </west>
+            <east> Symmetry </east>
+            <south> Periodic </south>
+            <north> Periodic </north>
+            <bottom> ZeroGradient </bottom>
+            <top> ZeroGradient </top>
+         </levelSet>
+      </boundaryConditions>
+      <initialConditions>
+         <material1>
+            density   := 1.0;
+            velocityX := 0.0;
+            velocityY := 0.0;
+            velocityZ := 0.0;
+            pressure  := 1.0;
+         </material1>
+         <material2>
+            density   := 0.125;
+             velocityX := 0.0;
+             velocityY := 0.0;
+             velocityZ := 0.0;
+            pressure  := 1.0;
+         </material2>
+         <levelSet1>
+            phi := 0.5 - y;
+         </levelSet1>
+      </initialConditions>
+   </domain>
+
+   <materials>
+      <numberOfMaterials> 2 </numberOfMaterials>
+      <material1>
+         <equationOfState>
+            <type> StiffenedGas </type>
+            <gamma> 1.4 </gamma>
+            <backgroundPressure> 0.0 </backgroundPressure>
+         </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity> 0.0 </thermalConductivity>
+            <shearViscosity> 0.0 </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material1>
+      <material2>
+         <equationOfState>
+            <type> WaterLikeFluid </type>
+            <gamma> 4.4 </gamma>
+            <A> 1.0 </A>
+            <B> 1.0 </B>
+            <rho0> 1.0 </rho0>
+         </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity> 0.0 </thermalConductivity>
+            <shearViscosity> 0.0 </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material2>
+   </materials>
+
+   <materialPairings>
+    <material1_2>
+      <surfaceTensionCoefficient> 0.0 </surfaceTensionCoefficient>
+    </material1_2>
+   </materialPairings>
+
+   <sourceTerms>
+      <gravity>
+         <x> 0 </x>
+         <y> 0 </y>
+         <z> 0 </z>
+      </gravity>
+   </sourceTerms>
+
+   <multiResolution>
+      <maximumLevel> 0 </maximumLevel>
+      <refinementCriterion>
+         <epsilonReference> 0.01 </epsilonReference>
+         <levelOfEpsilonReference> 1 </levelOfEpsilonReference>
+      </refinementCriterion>
+   </multiResolution>
+
+   <timeControl>
+      <startTime> 0.0 </startTime>
+      <endTime> 0.0 </endTime>
+      <CFLNumber> 0.6 </CFLNumber>
+   </timeControl>
+
+   <dimensionalization>
+      <lengthReference> 1.0 </lengthReference>
+      <velocityReference> 1.0 </velocityReference>
+      <densityReference> 1.0 </densityReference>
+      <temperatureReference> 1.0 </temperatureReference>
+   </dimensionalization>
+
+   <restart>
+      <restore>
+         <mode> off </mode>
+      </restore>
+      <snapshots>
+         <type> Stamps </type>
+         <stamps>
+            <ts1> 0.0 </ts1>
+         </stamps>
+      </snapshots>
+   </restart>
+
+   <output>
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <standardOutput>
+         <type> Interval </type>
+         <interval> 0.000001 </interval>
+      </standardOutput>
+      <interfaceOutput>
+         <type> Off </type>
+      </interfaceOutput>
+   </output>
+</configuration>

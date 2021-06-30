@@ -102,8 +102,8 @@ public:
    TEST_VIRTUAL double ReadNodeSizeOnLevelZero() const;
    TEST_VIRTUAL unsigned int ReadNumberOfNodes( Direction const direction ) const;
    TEST_VIRTUAL unsigned int ReadMaximumLevel() const;
-   double ReadEpsilonReference() const;
-   unsigned int ReadEpsilonLevelReference() const;
+   TEST_VIRTUAL double ReadEpsilonReference() const;
+   TEST_VIRTUAL unsigned int ReadEpsilonLevelReference() const;
 };
 
 #endif// MULTI_RESOLUTION_READER_H

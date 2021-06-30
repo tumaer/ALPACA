@@ -1,0 +1,107 @@
+<!-- A simple setup but with all types of boundary condtions -->
+<configuration>
+   <domain>
+      <nodeSize> 1 </nodeSize>
+      <nodeRatio>
+         <x> 1 </x>
+         <y> 1 </y>
+         <z> 2 </z>
+      </nodeRatio>
+      <boundaryConditions>
+         <material>
+            <west>   Symmetry </west>
+            <east>   Symmetry </east>
+            <south>  Symmetry </south>
+            <north>  Symmetry </north>
+            <top>    Symmetry </top>
+            <bottom> Symmetry </bottom>
+         </material>
+         <levelSet>
+            <west> Symmetry </west>
+            <east> Symmetry </east>
+            <south> Symmetry </south>
+            <north> Symmetry </north>
+            <bottom> Symmetry </bottom>
+            <top> Symmetry </top>
+         </levelSet>
+      </boundaryConditions>
+      <initialConditions>
+         <material1>
+            density   := z &lt; 0.5 ? 1.0 : 2.0;
+            velocityX := 0.0;
+            velocityY := 0.0;
+            velocityZ := 0.0;
+            pressure  := z &lt; 0.5 ? 1.0 : 2.0;
+         </material1>
+      </initialConditions>
+   </domain>
+
+   <materials>
+      <numberOfMaterials> 1 </numberOfMaterials>
+      <material1>
+         <equationOfState>
+            <type> StiffenedGas </type>
+            <gamma> 1.4 </gamma>
+            <backgroundPressure> 0.0 </backgroundPressure>
+         </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity> 0.0 </thermalConductivity>
+            <shearViscosity> 0.0 </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material1>
+   </materials>
+
+   <sourceTerms>
+      <gravity>
+         <x> 0 </x>
+         <y> 0 </y>
+         <z> 0 </z>
+      </gravity>
+   </sourceTerms>
+
+   <multiResolution>
+      <maximumLevel> 2 </maximumLevel>
+      <refinementCriterion>
+         <epsilonReference> 0.01 </epsilonReference>
+         <levelOfEpsilonReference> 1 </levelOfEpsilonReference>
+      </refinementCriterion>
+   </multiResolution>
+
+   <timeControl>
+      <startTime> 0.0 </startTime>
+      <endTime> 0.0 </endTime>
+      <CFLNumber> 0.6 </CFLNumber>
+   </timeControl>
+
+   <dimensionalization>
+      <lengthReference> 1.0 </lengthReference>
+      <velocityReference> 1.0 </velocityReference>
+      <densityReference> 1.0 </densityReference>
+      <temperatureReference> 1.0 </temperatureReference>
+   </dimensionalization>
+
+   <restart>
+      <restore>
+         <mode> off </mode>
+      </restore>
+      <snapshots>
+         <type> Stamps </type>
+         <stamps>
+            <ts1> 0.0 </ts1>
+         </stamps>
+      </snapshots>
+   </restart>
+
+   <output>
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <standardOutput>
+         <type> Interval </type>
+         <interval> 0.000001 </interval>
+      </standardOutput>
+      <interfaceOutput>
+         <type> Off </type>
+      </interfaceOutput>
+   </output>
+</configuration>
