@@ -1,2 +1,2 @@
         Runtime,                     Inputfile,                                                                                                                                                           Executable
-1.104921818181818e+03,     FullImplosion,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+6.859065e+01,     shock_bubble_input_output,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw

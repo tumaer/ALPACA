@@ -11,11 +11,11 @@
          Custom     :      4     8     10
       -->
       <environment> CLUSTER </environment>
-      <compile> 1 </compile>
+      <compile> True </compile>
       <dimensions>
-         <one>   1 </one>
-         <two>   1 </two>
-         <three> 1 </three>
+         <one>   True </one>
+         <two>   True </two>
+         <three> True </three>
       </dimensions>
    </general>
 

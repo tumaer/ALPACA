@@ -1,5 +1,5 @@
      RelativeError,                     Inputfile,                                                                                                                                   Executable
-    2.08487882e-02,               OscillatingDrop, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
-    2.72767575e-02,  ShearDropDeformation_lambda1, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
-    9.54961412e-02, ShearDropDeformation_lambda01, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
-    4.51742028e-03,      CouetteFlowTwoInterfaces, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+0.0208487882,               OscillatingDrop, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+0.0272767575,  ShearDropDeformation_lambda1, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+1.63E-02, ShearDropDeformation_lambda01, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+0.00451742028,      CouetteFlowTwoInterfaces, ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
