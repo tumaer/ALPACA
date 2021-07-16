@@ -1,4 +1,4 @@
-        Runtime,  NumberOfRanks,     Inputfile,                                                                                                                                       Executable
-   247.41466667,              1,     GaussPuls,     ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
-    26.88076667,             12,     GaussPuls,     ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
-    16.01056667,             28,     GaussPuls,     ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+        Runtime,  NumberOfRanks,             Inputfile,                                                                                                                                                          Executable
+1.5522663636363635e+02,1,     GaussPuls,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+1.8500436363636364e+01,12,     GaussPuls,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+1.2210027272727274e+01,28,     GaussPuls,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw

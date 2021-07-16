@@ -808,7 +808,11 @@ class Testcase:
                 for case_ids, case_data in self.__result_data[dim - 1].itercases():
                     # Increment counter at the correct dictionary position
                     table_dict_cases[dim - 1][case_data["TestcaseStatus"]] += 1
-                    table_dict_runtimes[dim - 1][case_data["RuntimeStatus"]] += 1
+                    # We do not log 1D test in the summary table. File output stays untouched.
+                    if dim == 1:
+                        table_dict_runtimes[0]["N/A"] += 1
+                    else:
+                        table_dict_runtimes[dim - 1][case_data["RuntimeStatus"]] += 1
                     # Get whether the folders can be deleted and executables must be kept.
                     if case_data["TestcaseStatus"] in [str(status) for status in ResultStatus.passed_data_results()]:
                         result_folders_to_delete[dim - 1].append(case_data["ResultFolder"])
@@ -843,15 +847,16 @@ class Testcase:
                 self.logger.write_table(summary_table, color_table)
                 self.logger.blank_line()
 
-            # Compute the statistical information for the runtimes
+            # The case data holds the status as string only
+            no_data_results_strings = [result_status.value["Name"] for result_status in ResultStatus.no_data_results()]
             relevant_runtimes = [np.array([case_data["RuntimeToRef"] for _, case_data in self.__result_data[dim - 1].itercases()
-                                           if case_data["RuntimeStatus"] not in ResultStatus.no_data_results()]) for dim in [1, 2, 3]]
-            min_runtimes = [np.min(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
-            max_runtimes = [np.max(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
-            mean_runtimes = [np.mean(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
-            std_runtimes = [np.std(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 else "N/A" for dim in [1, 2, 3]]
+                                           if case_data["RuntimeStatus"] not in no_data_results_strings]) for dim in [1, 2, 3]]
+            min_runtimes = [np.min(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 and dim != 1 else "N/A" for dim in [1, 2, 3]]
+            max_runtimes = [np.max(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 and dim != 1 else "N/A" for dim in [1, 2, 3]]
+            mean_runtimes = [np.mean(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 and dim != 1 else "N/A" for dim in [1, 2, 3]]
+            std_runtimes = [np.std(relevant_runtimes[dim - 1]) if relevant_runtimes[dim - 1].size != 0 and dim != 1 else "N/A" for dim in [1, 2, 3]]
 
-            # Create a nd log the statistical table
+            # Create and log the statistical table
             summary_table = [["", "|", "  1D  ", "  2D  ", " 3D  "]]
             summary_table.append([])
             color_table = [["", "", "", "", ""]]

@@ -114,10 +114,10 @@
     </sourceTerms>
 
     <multiResolution>
-        <maximumLevel> 4 </maximumLevel>
+        <maximumLevel> 3 </maximumLevel>
         <refinementCriterion>
             <epsilonReference> 0.025 </epsilonReference>
-            <levelOfEpsilonReference> 4 </levelOfEpsilonReference>
+            <levelOfEpsilonReference> 3 </levelOfEpsilonReference>
         </refinementCriterion>
     </multiResolution>
 

@@ -12,11 +12,11 @@
       -->
       <environment> AER </environment>
       <numberOfRanks> 1 2 3 </numberOfRanks> <!--- Add for each dimension if Custom Environment -->
-      <compile> 1 </compile>
+      <compile> True </compile>
       <dimensions>
-         <one>   1 </one>
-         <two>   1 </two>
-         <three> 0 </three>
+         <one>   True </one>
+         <two>   True </two>
+         <three> False </three>
       </dimensions>
    </general>
 

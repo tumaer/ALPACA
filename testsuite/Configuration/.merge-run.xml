@@ -11,11 +11,11 @@
          Custom     :      4     8     10
       -->
       <environment> CLUSTER </environment>
-      <compile> 1 </compile> <!-- Do NOT deactivate the compile option for merge run -->
+      <compile> True </compile> <!-- Do NOT deactivate the compile option for merge run -->
       <dimensions>
-         <one>   1 </one>
-         <two>   1 </two>
-         <three> 1 </three>
+         <one>   True </one>
+         <two>   True </two>
+         <three> True </three>
       </dimensions>
    </general>
 
@@ -47,7 +47,7 @@
          <skipNoReferenceCases> True </skipNoReferenceCases>
       </physics>
       <inputOutput>
-         <active> False </active>
+         <active> True </active>
          <skipNoReferenceCases> True </skipNoReferenceCases>
       </inputOutput>
    </testCases>

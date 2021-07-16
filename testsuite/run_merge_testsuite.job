@@ -14,7 +14,7 @@
 
 # Notification
 #SBATCH --mail-type=end
-##SBATCH --mail-user=<your-email>@<your-host.domain>
+#SBATCH --mail-user=<your-email>@<your-host.domain>
 
 # Where to run the simulation
 #SBATCH --clusters=cm2_tiny

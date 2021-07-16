@@ -136,7 +136,7 @@ class TagBase:
             if not co.check_type(new_value, self.__value_type.type):
                 raise TypeError("The provided value does not coincide with the type '" + str(self.__value_type) + "' of specification.")
             if self.__allowed_values is not None and new_value not in self.__allowed_values:
-                raise ValueError("The given value is not allowed fof specification. Allowed variables are:\n" + str(self.__allowed_values))
+                raise ValueError("The given value is not allowed for specification. Allowed variables are:\n" + str(self.__allowed_values))
             self.__value = self.__value_type.type(new_value)
 
     @property
