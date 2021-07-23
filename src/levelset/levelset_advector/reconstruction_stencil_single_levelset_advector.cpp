@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,111 +63,80 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "reconstruction_stencil_single_levelset_advector.h"
 
 #include "enums/interface_tag_definition.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
 #include "enums/interface_tag_definition.h"
-#include "mathematical_functions.h"
-#include "stencils/differentiation_utilities.h"
+#include "utilities/mathematical_functions.h"
+#include "stencils/stencil_utilities.h"
 
 /**
- * Calculates the right-hand side to solve the level-set advection equation.
- * The advection equation corresponds to equation 12 in \cite Hu2006
- * Note: the implemented version differs from \cite Fedkiw2000 since the stencil average is
- * perfomed only once on the gradient instead of twice on the levelset values.
+ * @brief Calculates the right-hand side to solve the level-set advection equation.
+ *        The advection equation corresponds to equation 12 in \cite Hu2006
+ * @note The implemented version differs from \cite Fedkiw2000 since the stencil average is
+ *       performed only once on the gradient instead of twice on the levelset values.
  * @param node See base class.
- * @param stage See base class.
  */
-void ReconstructionStencilSingleLevelsetAdvector::AdvectImplementation(Node& node, unsigned int const stage) const {
+void ReconstructionStencilSingleLevelsetAdvector::AdvectImplementation( Node& node ) const {
 
-   using ReconstructionStencilConcretization = ReconstructionStencilSetup::Concretize<reconstruction_stencil>::type;
+   using ReconstructionStencil = ReconstructionStencilSetup::Concretize<levelset_reconstruction_stencil>::type;
 
-#ifndef PERFORMANCE
-   (void) stage; // Avoid compiler warning
-#endif
+   InterfaceBlock& interface_block = node.GetInterfaceBlock();
+   double const cell_size          = node.GetCellSize();
+   double const one_cell_size      = 1.0 / cell_size;
 
-   LevelsetBlock& levelset_block = node.GetLevelsetBlock();
-   double const cell_size = node.GetCellSize();
-   double const one_cell_size = 1.0 / cell_size;
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()]    = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+   double const( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()]               = interface_block.GetBaseBuffer( InterfaceDescription::Levelset );
+   double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetReinitializedBuffer( InterfaceDescription::Levelset );
+   double( &levelset_rhs )[CC::TCX()][CC::TCY()][CC::TCZ()]                 = interface_block.GetRightHandSideBuffer( InterfaceDescription::Levelset );
 
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const (&phi)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhi();
-   double const (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiReinitialized();
-   double (&phi_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiRightHandSide();
+   double const( &interface_velocity )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceStateBuffer( InterfaceState::Velocity );
 
-   double const (&interface_velocity)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetInterfaceQuantityBuffer(InterfaceQuantity::Velocity);
-
-   std::vector<double> interpolation_array;
-   interpolation_array.reserve(ReconstructionStencilConcretization::StencilSize());
-
-   std::array<double, DTI(CC::DIM())> interface_velocity_projection;
-   std::array<double, DTI(CC::DIM())> phi_derivative;
-   for(unsigned int d = 0; d < DTI(CC::DIM()); ++d) {
+   std::array<double, DTI( CC::DIM() )> interface_velocity_projection;
+   std::array<double, DTI( CC::DIM() )> levelset_derivative;
+   for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
       interface_velocity_projection[d] = 0.0;
-      phi_derivative[d] = 0.0;
+      levelset_derivative[d]           = 0.0;
    }
-   std::array<double, DTI(CC::DIM())> increments;
+   std::array<double, DTI( CC::DIM() )> increments;
 
-   for(unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k) {
-      for(unsigned int j = CC::FICY(); j <= CC::LICY(); ++j) {
-         for(unsigned int i = CC::FICX(); i <= CC::LICX(); ++i) {
+   for( unsigned int k = CC::FICZ(); k <= CC::LICZ(); ++k ) {
+      for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
+         for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
             /***
              * In order to calculate the right-hand side for the level-set advection in the 2nd RK stage we need reasonable level-set values
              * in the whole extension band. Thus, it is necessary to calculate level-set advection rhs values for the extension band.
              */
-            if(std::abs(interface_tags[i][j][k]) <= ITTI(IT::ExtensionBand)) {
+            if( std::abs( interface_tags[i][j][k] ) <= ITTI( IT::ExtensionBand ) ) {
 
                // Calculate normal to determine x-,y- and z-component of interface_velocity
-               std::array<double, 3> const normal = GetNormal(phi_reinitialized, i, j, k);
+               std::array<double, 3> const normal = GetNormal( levelset_reinitialized, i, j, k );
 
-               interpolation_array.clear(); // can possibly go away
                double const u_interface = interface_velocity[i][j][k] * one_cell_size;
 
                interface_velocity_projection[0] = u_interface * normal[0];
+               levelset_derivative[0]           = SU::DerivativeWithUpwinding<ReconstructionStencil, Direction::X>( levelset, i, j, k, interface_velocity_projection[0], 1.0 );
+               increments[0]                    = -interface_velocity_projection[0] * levelset_derivative[0];
 
-               for(unsigned int ii = i - (ReconstructionStencilConcretization::DownstreamStencilSize() + 1); ii <= i + ReconstructionStencilConcretization::DownstreamStencilSize(); ii++) {
-                  interpolation_array.push_back(phi[ii+1][j][k] - phi[ii][j][k]);
-               }
-
-               phi_derivative[0] = DifferentiationUtilities::ApplyStencilUpwind<ReconstructionStencilConcretization, double>(interpolation_array, interface_velocity_projection[0], cell_size);
-
-               increments[0] = -interface_velocity_projection[0] * phi_derivative[0];
-               interpolation_array.clear();
-
-               if constexpr(CC::DIM() != Dimension::One) {
+               if constexpr( CC::DIM() != Dimension::One ) {
                   interface_velocity_projection[1] = u_interface * normal[1];
-
-                  for(unsigned int jj = j - (ReconstructionStencilConcretization::DownstreamStencilSize() + 1); jj <= j + ReconstructionStencilConcretization::DownstreamStencilSize(); jj++) {
-                     interpolation_array.push_back(phi[i][jj+1][k] - phi[i][jj][k]);
-                  }
-
-                  phi_derivative[1] = DifferentiationUtilities::ApplyStencilUpwind<ReconstructionStencilConcretization, double>(interpolation_array, interface_velocity_projection[1], cell_size);
-
-                  increments[1] = -interface_velocity_projection[1] * phi_derivative[1];
-                  interpolation_array.clear();
+                  levelset_derivative[1]           = SU::DerivativeWithUpwinding<ReconstructionStencil, Direction::Y>( levelset, i, j, k, interface_velocity_projection[1], 1.0 );
+                  increments[1]                    = -interface_velocity_projection[1] * levelset_derivative[1];
                }
 
-               if constexpr(CC::DIM() == Dimension::Three) {
+               if constexpr( CC::DIM() == Dimension::Three ) {
                   interface_velocity_projection[2] = u_interface * normal[2];
-
-                  for(unsigned int kk = k - (ReconstructionStencilConcretization::DownstreamStencilSize() + 1); kk <= k + ReconstructionStencilConcretization::DownstreamStencilSize(); kk++) {
-                     interpolation_array.push_back(phi[i][j][kk+1] - phi[i][j][kk]);
-                  }
-
-                  phi_derivative[2] = DifferentiationUtilities::ApplyStencilUpwind<ReconstructionStencilConcretization, double>(interpolation_array, interface_velocity_projection[2], cell_size);
-
-                  increments[2] = -interface_velocity_projection[2] * phi_derivative[2];
-                  interpolation_array.clear();
+                  levelset_derivative[2]           = SU::DerivativeWithUpwinding<ReconstructionStencil, Direction::Z>( levelset, i, j, k, interface_velocity_projection[2], 1.0 );
+                  increments[2]                    = -interface_velocity_projection[2] * levelset_derivative[2];
                }
 
-               phi_rhs[i][j][k] = ConsistencyManagedSum(increments);
+               levelset_rhs[i][j][k] = ConsistencyManagedSum( increments );
             }
-         } //i
-      } //j
-   } //k
-
+         }//i
+      }   //j
+   }      //k
 }

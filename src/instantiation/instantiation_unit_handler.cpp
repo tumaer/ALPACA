@@ -1,0 +1,100 @@
+/*****************************************************************************************
+*                                                                                        *
+* This file is part of ALPACA                                                            *
+*                                                                                        *
+******************************************************************************************
+*                                                                                        *
+*  \\                                                                                    *
+*  l '>                                                                                  *
+*  | |                                                                                   *
+*  | |                                                                                   *
+*  | alpaca~                                                                             *
+*  ||    ||                                                                              *
+*  ''    ''                                                                              *
+*                                                                                        *
+* ALPACA is a MPI-parallelized C++ code framework to simulate compressible multiphase    *
+* flow physics. It allows for advanced high-resolution sharp-interface modeling          *
+* empowered with efficient multiresolution compression. The modular code structure       *
+* offers a broad flexibility to select among many most-recent numerical methods covering *
+* WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-  *
+* Kutta time integration schemes, level set methods and many more.                       *
+*                                                                                        *
+* This code is developed by the 'Nanoshock group' at the Chair of Aerodynamics and       *
+* Fluid Mechanics, Technical University of Munich.                                       *
+*                                                                                        *
+******************************************************************************************
+*                                                                                        *
+* LICENSE                                                                                *
+*                                                                                        *
+* ALPACA - Adaptive Level-set PArallel Code Alpaca                                       *
+* Copyright (C) 2020 Nikolaus A. Adams and contributors (see AUTHORS list)               *
+*                                                                                        *
+* This program is free software: you can redistribute it and/or modify it under          *
+* the terms of the GNU General Public License as published by the Free Software          *
+* Foundation version 3.                                                                  *
+*                                                                                        *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY        *
+* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A        *
+* PARTICULAR PURPOSE. See the GNU General Public License for more details.               *
+*                                                                                        *
+* You should have received a copy of the GNU General Public License along with           *
+* this program (gpl-3.0.txt).  If not, see <https://www.gnu.org/licenses/gpl-3.0.html>   *
+*                                                                                        *
+******************************************************************************************
+*                                                                                        *
+* THIRD-PARTY tools                                                                      *
+*                                                                                        *
+* Please note, several third-party tools are used by ALPACA. These tools are not shipped *
+* with ALPACA but available as git submodule (directing to their own repositories).      *
+* All used third-party tools are released under open-source licences, see their own      *
+* license agreement in 3rdParty/ for further details.                                    *
+*                                                                                        *
+* 1. tiny_xml           : See LICENSE_TINY_XML.txt for more information.                 *
+* 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
+* 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
+* 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
+*                                                                                        *
+******************************************************************************************
+*                                                                                        *
+* CONTACT                                                                                *
+*                                                                                        *
+* nanoshock@aer.mw.tum.de                                                                *
+*                                                                                        *
+******************************************************************************************
+*                                                                                        *
+* Munich, February 10th, 2021                                                            *
+*                                                                                        *
+*****************************************************************************************/
+#include "instantiation/instantiation_unit_handler.h"
+#include "input_output/input_reader.h"
+
+namespace Instantiation {
+
+   /**
+    * @brief Instantiates the complete unit handler class with the given input reader.
+    * @param input_reader Reader that provides access to the full data of the input file.
+    * @return The fully instantiated UnitHandler class.
+    */
+   UnitHandler InstantiateUnitHandler( InputReader const& input_reader ) {
+
+      // read data
+      double const reference_density     = input_reader.GetDimensionalizationReader().ReadReferenceDensity();
+      double const reference_velocity    = input_reader.GetDimensionalizationReader().ReadReferenceVelocity();
+      double const reference_length      = input_reader.GetDimensionalizationReader().ReadReferenceLength();
+      double const reference_temperature = input_reader.GetDimensionalizationReader().ReadReferenceTemperature();
+
+      // Log data
+      LogWriter& logger = LogWriter::Instance();
+      logger.LogMessage( " " );
+      logger.LogMessage( "Dimensionalization parameter:" );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Density reference    : " + StringOperations::ToScientificNotationString( reference_density, 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Velocity reference   : " + StringOperations::ToScientificNotationString( reference_velocity, 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Length reference     : " + StringOperations::ToScientificNotationString( reference_length, 9 ) );
+      logger.LogMessage( StringOperations::Indent( 2 ) + "Temperature reference: " + StringOperations::ToScientificNotationString( reference_temperature, 9 ) );
+      logger.LogMessage( " " );
+
+      // Initialize the unit handler
+      return UnitHandler( reference_density, reference_velocity, reference_length, reference_temperature );
+   }
+}// namespace Instantiation

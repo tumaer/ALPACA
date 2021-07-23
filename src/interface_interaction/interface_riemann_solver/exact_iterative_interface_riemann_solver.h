@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef EXACT_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
@@ -71,30 +72,28 @@
 #include "iterative_interface_riemann_solver.h"
 
 /**
- * @brief      Class for exact iterative interface riemann solver. Computes the exact solution of a Riemann problem.
+ * @brief Class for exact iterative interface riemann solver. Computes the exact solution of a Riemann problem.
  */
 class ExactIterativeInterfaceRiemannSolver : public IterativeInterfaceRiemannSolver<ExactIterativeInterfaceRiemannSolver> {
 
    friend IterativeInterfaceRiemannSolver;
 
    std::array<double, 2> ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-      double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
+                                                                    double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
 
 public:
    ExactIterativeInterfaceRiemannSolver() = delete;
    /**
-    * @brief      Default constructor.
+    * @brief Default constructor.
     *
     * @param[in]  material_manager  The material manager.
     */
    ExactIterativeInterfaceRiemannSolver( MaterialManager const& material_manager ) : IterativeInterfaceRiemannSolver<ExactIterativeInterfaceRiemannSolver>( material_manager ) {}
-   ~ExactIterativeInterfaceRiemannSolver() = default;
+   ~ExactIterativeInterfaceRiemannSolver()                                             = default;
    ExactIterativeInterfaceRiemannSolver( ExactIterativeInterfaceRiemannSolver const& ) = delete;
    ExactIterativeInterfaceRiemannSolver operator=( ExactIterativeInterfaceRiemannSolver const& ) = delete;
-   ExactIterativeInterfaceRiemannSolver( ExactIterativeInterfaceRiemannSolver&& ) = delete;
+   ExactIterativeInterfaceRiemannSolver( ExactIterativeInterfaceRiemannSolver&& )                = delete;
    ExactIterativeInterfaceRiemannSolver& operator=( ExactIterativeInterfaceRiemannSolver&& ) = delete;
 };
 
-
-
-#endif //EXACT_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
+#endif//EXACT_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H

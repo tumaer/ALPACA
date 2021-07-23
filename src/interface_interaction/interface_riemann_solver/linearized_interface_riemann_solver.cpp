@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "linearized_interface_riemann_solver.h"
@@ -72,9 +73,8 @@
  * @brief Constructor for the LinearizedInterfaceRiemannSolver.
  * @param material_manager See base class.
  */
-LinearizedInterfaceRiemannSolver::LinearizedInterfaceRiemannSolver( const MaterialManager& material_manager ) :
-   InterfaceRiemannSolver( material_manager ) {
-  // Empty besides call of base class constructor.
+LinearizedInterfaceRiemannSolver::LinearizedInterfaceRiemannSolver( MaterialManager const& material_manager ) : InterfaceRiemannSolver( material_manager ) {
+   // Empty besides call of base class constructor.
 }
 
 /**
@@ -91,28 +91,30 @@ LinearizedInterfaceRiemannSolver::LinearizedInterfaceRiemannSolver( const Materi
  * @return An array that contains following information in the given order: interface_velocity, interface_pressure_positive, interface_pressure_negative.
  */
 std::array<double, 3> LinearizedInterfaceRiemannSolver::SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
-   double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
-   double const delta_p ) const {
+                                                                                                    double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
+                                                                                                    double const delta_p ) const {
+   double const c_left         = material_manager_.GetMaterial( material_left ).GetEquationOfState().SpeedOfSound( rho_left, p_left );
+   double const impedance_left = rho_left * c_left;
 
-  double const c_left  = material_manager_.GetSpeedOfSound( material_left, rho_left, p_left );
-  double const impedance_left = rho_left * c_left;
+   double const c_right         = material_manager_.GetMaterial( material_right ).GetEquationOfState().SpeedOfSound( rho_right, p_right );
+   double const impedance_right = rho_right * c_right;
 
-  double const c_right  = material_manager_.GetSpeedOfSound( material_right, rho_right, p_right );
-  double const impedance_right = rho_right * c_right;
+   double const inverse_impedance_sum = 1.0 / std::max( ( impedance_left + impedance_right ), std::numeric_limits<double>::epsilon() );
 
-  double const inverse_impedance_sum = 1.0 / std::max( ( impedance_left + impedance_right ), std::numeric_limits<double>::epsilon() );
+   double const interface_velocity = ( impedance_left * velocity_normal_left +
+                                       impedance_right * velocity_normal_right +
+                                       p_left - p_right - delta_p ) *
+                                     inverse_impedance_sum;
 
-  double const interface_velocity = ( impedance_left *  velocity_normal_left  +
-     impedance_right * velocity_normal_right +
-     p_left - p_right - delta_p ) * inverse_impedance_sum;
+   double const interface_pressure_positive = ( impedance_left * p_right +
+                                                impedance_right * ( p_left - delta_p ) +
+                                                impedance_left * impedance_right * ( velocity_normal_left - velocity_normal_right ) ) *
+                                              inverse_impedance_sum;
 
-  double const interface_pressure_positive = ( impedance_left  *  p_right           +
-     impedance_right * ( p_left - delta_p ) +
-     impedance_left  *  impedance_right   * ( velocity_normal_left - velocity_normal_right ) ) * inverse_impedance_sum;
+   double const interface_pressure_negative = ( impedance_left * ( p_right + delta_p ) +
+                                                impedance_right * p_left +
+                                                impedance_left * impedance_right * ( velocity_normal_left - velocity_normal_right ) ) *
+                                              inverse_impedance_sum;
 
-  double const interface_pressure_negative = ( impedance_left  * ( p_right + delta_p ) +
-     impedance_right *  p_left             +
-     impedance_left  *  impedance_right    * ( velocity_normal_left - velocity_normal_right ) ) * inverse_impedance_sum;
-
-  return {interface_velocity, interface_pressure_positive, interface_pressure_negative};
+   return { interface_velocity, interface_pressure_positive, interface_pressure_negative };
 }

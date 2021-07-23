@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,35 +63,35 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef HLLC_INTERFACE_RIEMANN_SOLVER_H
 #define HLLC_INTERFACE_RIEMANN_SOLVER_H
 
-
 #include "interface_riemann_solver.h"
 
 /**
- * @brief Solves a Riemann problem using a generalized HLLC approach according to \cite Hu2008. NOT USABLE TOGETHER WITH WATERLIKE EOS
+ * @brief Solves a Riemann problem using a generalized HLLC approach according to \cite Hu2008.
+ * @note NOT USABLE TOGETHER WITH WATERLIKE EOS.
+ * @note NOT USABLE FOR SURFACE TENSION COMPUTATIONS.
  */
 class HllcInterfaceRiemannSolver : public InterfaceRiemannSolver<HllcInterfaceRiemannSolver> {
 
    friend InterfaceRiemannSolver;
 
-   std::array<double, 3> SolveInterfaceRiemannProblemImplementation( double const rho_left,  double const p_left,  double const velocity_normal_left,  MaterialName const material_left,
-      double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
-      double const delta_p ) const;
+   std::array<double, 3> SolveInterfaceRiemannProblemImplementation( double const rho_left, double const p_left, double const velocity_normal_left, MaterialName const material_left,
+                                                                     double const rho_right, double const p_right, double const velocity_normal_right, MaterialName const material_right,
+                                                                     double const delta_p ) const;
 
 public:
    explicit HllcInterfaceRiemannSolver() = delete;
    HllcInterfaceRiemannSolver( MaterialManager const& material_manager );
-   ~HllcInterfaceRiemannSolver() = default;
+   ~HllcInterfaceRiemannSolver()                                   = default;
    HllcInterfaceRiemannSolver( HllcInterfaceRiemannSolver const& ) = delete;
    HllcInterfaceRiemannSolver& operator=( HllcInterfaceRiemannSolver const& ) = delete;
-   HllcInterfaceRiemannSolver( HllcInterfaceRiemannSolver&& ) = delete;
+   HllcInterfaceRiemannSolver( HllcInterfaceRiemannSolver&& )                 = delete;
    HllcInterfaceRiemannSolver& operator=( HllcInterfaceRiemannSolver&& ) = delete;
 };
 
-
-#endif //HLLC_INTERFACE_RIEMANN_SOLVER_H
+#endif//HLLC_INTERFACE_RIEMANN_SOLVER_H

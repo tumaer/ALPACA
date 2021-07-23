@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef SCALE_SEPARATOR_SETUP_H
@@ -71,7 +72,6 @@
 #include "user_specifications/numerical_setup.h"
 #include "two_phase_scale_separator.h"
 
-
 /**
  * @brief A namespace to get a ScaleSeparator type based on a specified constexpr.
  */
@@ -79,7 +79,7 @@ namespace ScaleSeparatorSetup {
 
    /**
     * @brief Function returning the typedef of a ScaleSeparator based on a constexpr template.
-    * 
+    *
     * @tparam ScaleSeparators The constexpr template parameter to specify the exact ScaleSeparator type.
     */
    template<ScaleSeparators>
@@ -93,6 +93,6 @@ namespace ScaleSeparatorSetup {
       typedef TwoPhaseScaleSeparator type;
    };
 
-}
+}// namespace ScaleSeparatorSetup
 
-#endif // SCALE_SEPARATOR_SETUP_H
+#endif// SCALE_SEPARATOR_SETUP_H

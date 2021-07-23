@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef CUT_CELL_MIXER_SETUP_H
@@ -70,7 +71,7 @@
 
 #include "user_specifications/numerical_setup.h"
 #include "aperture_cut_cell_mixer.h"
-
+#include "lauer_cut_cell_mixer.h"
 
 /**
  * @brief A namespace to get a CutCellMixer type based on a specified constexpr.
@@ -79,7 +80,7 @@ namespace CutCellMixerSetup {
 
    /**
     * @brief Function returning the typedef of a CutCellMixer based on a constexpr template.
-    * 
+    *
     * @tparam CutCellMixers The constexpr template parameter to specify the exact CutCellMixer type.
     */
    template<CutCellMixers>
@@ -92,7 +93,14 @@ namespace CutCellMixerSetup {
    struct Concretize<CutCellMixers::ApertureBased> {
       typedef ApertureCutCellMixer type;
    };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<CutCellMixers::Lauer> {
+      typedef LauerCutCellMixer type;
+   };
 
-}
+}// namespace CutCellMixerSetup
 
-#endif // CUT_CELL_MIXER_SETUP_H
+#endif// CUT_CELL_MIXER_SETUP_H

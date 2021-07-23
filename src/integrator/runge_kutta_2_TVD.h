@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef RUNGE_KUTTA_2_TVD_H
@@ -82,32 +83,33 @@ class RungeKutta2TVD : public TimeIntegrator<RungeKutta2TVD> {
 
    static constexpr unsigned int number_of_stages_ = 2;
 
-   static constexpr std::array<double, number_of_stages_> timestep_multiplier_jump_conservatives_ = { 0.5, // first stage
-                                                                                                      0.5  // second stage
-                                                                                                    };
-                                                                           
-   static constexpr std::array<double, number_of_stages_> timestep_multiplier_conservatives_      = { 1.0, // first stage
-                                                                                                      0.5  // second stage 
-                                                                                                    };
+   static constexpr std::array<double, number_of_stages_> timestep_multiplier_jump_conservatives_ = {
+         0.5,// first stage
+         0.5 // second stage
+   };
 
-   static constexpr std::array<std::array<double, 2>, number_of_stages_ - 1> buffer_multiplier_       = {{
-                                                                                                       {0.5, 0.5 }  // second stage
-                                                                                                      }};
+   static constexpr std::array<double, number_of_stages_> timestep_multiplier_conservatives_ = {
+         1.0,// first stage
+         0.5 // second stage
+   };
+
+   static constexpr std::array<std::array<double, 2>, number_of_stages_ - 1> buffer_multiplier_ = { {
+         { 0.5, 0.5 }// second stage
+   } };
 
 public:
-   RungeKutta2TVD() = delete;
-   ~RungeKutta2TVD() = default;
+   RungeKutta2TVD()                        = delete;
+   ~RungeKutta2TVD()                       = default;
    RungeKutta2TVD( RungeKutta2TVD const& ) = delete;
    RungeKutta2TVD& operator=( RungeKutta2TVD const& ) = delete;
-   RungeKutta2TVD( RungeKutta2TVD&& ) = delete;
+   RungeKutta2TVD( RungeKutta2TVD&& )                 = delete;
    RungeKutta2TVD& operator=( RungeKutta2TVD&& ) = delete;
 
    /**
      * @brief Constructor.
      * @param start_time Time when the simulation should start.
      */
-   explicit RungeKutta2TVD( const double start_time = 0.0 ) : TimeIntegrator(start_time) {}
-
+   explicit RungeKutta2TVD( double const start_time = 0.0 ) : TimeIntegrator( start_time ) {}
 };
 
-#endif // RUNGE_KUTTA_2_TVD_H
+#endif// RUNGE_KUTTA_2_TVD_H

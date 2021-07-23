@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,67 +63,70 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef MATERIAL_MANAGER_H
 #define MATERIAL_MANAGER_H
 
 #include <memory>
-#include <tuple>
-#include <unordered_map>
+#include <vector>
 
+#include "materials/material_type_definitions.h"
+#include "materials/material_definitions.h"
 #include "materials/material.h"
-#include "materials/material_names.h"
-#include "mathematical_functions.h"
+#include "materials/material_pairing.h"
+#include "unit_handler.h"
 
 /**
- * @brief The MaterialManager class provides access to all materials present in the current simulation and forwards the appropriate object to the caller.
- *        It thus acts as a proxy to obtain non-conservative values.
+ * @brief The MaterialManager class provides access to all materials and material pairings present in the current simulation and forwards the appropriate
+ *        object to the caller. The MaterialManager does not change any data. It provides the functionality to map material names and indices to the correct
+ *        material or pairing class.
  */
 class MaterialManager {
-#ifndef PERFORMANCE
-   // Sadly, the compiler is not willing to optimize the Hash Map as hard as raw loops (Because of possible exceptions).
-   std::unordered_map<MaterialName, std::unique_ptr<const Material>> materials_;
-#else
-   // So we create our own (very poor) "map" with Black Jack and H...
-  std::vector<MaterialName> material_names_;
-  std::vector<std::unique_ptr<const Material>> equations_of_state_;
-#endif
+   // Vector with all materials
+   std::vector<std::tuple<MaterialType, Material>> const materials_;
+   // Vector with all material pairings
+   std::vector<MaterialPairing> const material_pairings_;
 
-   std::vector<double> surface_tension_coefficients_;
+   // offset vector to provide proper mapping from material names to its material pairings
+   std::vector<int> const pairing_offset_;
 
-   void AddMaterial( std::tuple<MaterialName, MaterialName, std::unordered_map<std::string, double>> const data );
-   Material const& GetEquationOfState( MaterialName const material ) const;
+   // local function to map a pairing of two materials to  corresponding vector index of the material pairings
+   unsigned int MapPairingToIndex( MaterialName const first_material, MaterialName const second_material ) const;
+   // factory function to generate the pairing offset vector (allows constness of it)
+   std::vector<int> GenerateMaterialPairingOffset( std::size_t const number_of_materials ) const;
 
 public:
-
    MaterialManager() = delete;
-   explicit MaterialManager( std::vector<std::tuple<MaterialName, MaterialName, std::unordered_map<std::string, double>>> const material_data, std::vector<double> surface_tension_coefficients );
-   ~MaterialManager() = default;
+   explicit MaterialManager( std::vector<std::tuple<MaterialType, Material>> materials,
+                             std::vector<MaterialPairing> material_pairings );
+   ~MaterialManager()                        = default;
    MaterialManager( MaterialManager const& ) = delete;
    MaterialManager& operator=( MaterialManager const& ) = delete;
-   MaterialManager( MaterialManager&& ) = delete;
+   MaterialManager( MaterialManager&& )                 = delete;
    MaterialManager& operator=( MaterialManager&& ) = delete;
 
-   double GetPressure   ( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const;
-   double GetEnthalpy   ( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const;
-   double GetEnergy     ( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const pressure ) const;
-   double GetTemperature( MaterialName const material, double const density, double const momentum_x, double const momentum_y, double const momentum_z, double const energy ) const;
+   // Get the number of all materials contained in the simulation
+   std::size_t GetNumberOfMaterials() const;
 
-   double GetGruneisen( MaterialName const material ) const;
-   double GetGruneisen( MaterialName const material, double const density ) const;
-   double GetPsi      ( MaterialName const material, double const pressure, double const one_density ) const;
-   double GetSpeedOfSound( MaterialName const material, double const density, double const pressure ) const;
+   // Get all materials used in the simulation
+   std::vector<MaterialName> GetMaterialNames() const;
 
-   double GetGamma( MaterialName const material ) const;
-   double GetB( MaterialName const material ) const;
+   // provides a material for a given index
+   Material const& GetMaterial( std::size_t const index ) const;
 
-   std::vector<double> GetViscosity( MaterialName const material ) const;
-   double GetSurfaceTensionCoefficient( MaterialName const first_material, MaterialName const second_material ) const;
+   // provides a material for a given identifier
+   Material const& GetMaterial( MaterialName const material ) const;
 
-   double GetThermalConductivity( MaterialName const material ) const;
-   double GetSpecificHeat( MaterialName const material ) const;
+   // provides the material type for a given identifier
+   MaterialType GetMaterialType( MaterialName const material ) const;
+
+   // provides the pairing of two material identifier
+   MaterialPairing const& GetMaterialPairing( MaterialName const first_material, MaterialName const second_material ) const;
+
+   // checks whether the given material is a solid boundary
+   bool IsSolidBoundary( MaterialName const material ) const;
 };
 
-#endif // MATERIAL_MANAGER_H
+#endif// MATERIAL_MANAGER_H

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,125 +63,198 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include "topology/topology_manager.h"
 #include "communication/communication_manager.h"
 #include "communication/mpi_utilities.h"
 
 namespace ExpectedSingleJumpHaloLists {
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> level_zero_externals = {
-      { 0x1400000, BoundaryLocation::West }, { 0x1400000, BoundaryLocation::South }, { 0x1400000, BoundaryLocation::North },
-      { 0x1400000, BoundaryLocation::Top }, { 0x1400000, BoundaryLocation::Bottom }, { 0x1400001, BoundaryLocation::East },
-      { 0x1400001, BoundaryLocation::South }, { 0x1400001, BoundaryLocation::North }, { 0x1400001, BoundaryLocation::Top },
-      { 0x1400001, BoundaryLocation::Bottom }
-   };
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> maximum_level_externals = {
-      { 0xA000008, BoundaryLocation::South }, { 0xA000008, BoundaryLocation::Bottom }, { 0xA000009, BoundaryLocation::East }, { 0xA000009, BoundaryLocation::South },
-      { 0xA000009, BoundaryLocation::Bottom }, { 0xA00000A, BoundaryLocation::North }, { 0xA00000A, BoundaryLocation::Bottom }, { 0xA00000B, BoundaryLocation::East },
-      { 0xA00000B, BoundaryLocation::North }, { 0xA00000B, BoundaryLocation::Bottom }, { 0xA00000C, BoundaryLocation::South }, { 0xA00000C, BoundaryLocation::Top },
-      { 0xA00000D, BoundaryLocation::East }, { 0xA00000D, BoundaryLocation::South }, { 0xA00000D, BoundaryLocation::Top }, { 0xA00000E, BoundaryLocation::North },
-      { 0xA00000E, BoundaryLocation::Top }, { 0xA00000F, BoundaryLocation::East }, { 0xA00000F, BoundaryLocation::North }, { 0xA00000F, BoundaryLocation::Top }
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation>> level_zero_externals = {
+         { 0x1400000, BoundaryLocation::West },
+         { 0x1400000, BoundaryLocation::South },
+         { 0x1400000, BoundaryLocation::North },
+         { 0x1400000, BoundaryLocation::Top },
+         { 0x1400000, BoundaryLocation::Bottom },
+         { 0x1400001, BoundaryLocation::East },
+         { 0x1400001, BoundaryLocation::South },
+         { 0x1400001, BoundaryLocation::North },
+         { 0x1400001, BoundaryLocation::Top },
+         { 0x1400001, BoundaryLocation::Bottom } };
+   std::vector<std::tuple<nid_t, BoundaryLocation>> maximum_level_externals = {
+         { 0xA000008, BoundaryLocation::South },
+         { 0xA000008, BoundaryLocation::Bottom },
+         { 0xA000009, BoundaryLocation::East },
+         { 0xA000009, BoundaryLocation::South },
+         { 0xA000009, BoundaryLocation::Bottom },
+         { 0xA00000A, BoundaryLocation::North },
+         { 0xA00000A, BoundaryLocation::Bottom },
+         { 0xA00000B, BoundaryLocation::East },
+         { 0xA00000B, BoundaryLocation::North },
+         { 0xA00000B, BoundaryLocation::Bottom },
+         { 0xA00000C, BoundaryLocation::South },
+         { 0xA00000C, BoundaryLocation::Top },
+         { 0xA00000D, BoundaryLocation::East },
+         { 0xA00000D, BoundaryLocation::South },
+         { 0xA00000D, BoundaryLocation::Top },
+         { 0xA00000E, BoundaryLocation::North },
+         { 0xA00000E, BoundaryLocation::Top },
+         { 0xA00000F, BoundaryLocation::East },
+         { 0xA00000F, BoundaryLocation::North },
+         { 0xA00000F, BoundaryLocation::Top } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation>> maximum_level_externals_rank_one_of_three = {
-      { 0xA000008, BoundaryLocation::South }, { 0xA000008, BoundaryLocation::Bottom }, { 0xA00000A, BoundaryLocation::North },
-      { 0xA00000A, BoundaryLocation::Bottom }, { 0xA00000E, BoundaryLocation::North }, { 0xA00000E, BoundaryLocation::Top }
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation>> maximum_level_externals_rank_one_of_three = {
+         { 0xA00000B, BoundaryLocation::East },
+         { 0xA00000B, BoundaryLocation::North },
+         { 0xA00000B, BoundaryLocation::Bottom },
+         { 0xA00000E, BoundaryLocation::North },
+         { 0xA00000E, BoundaryLocation::Top },
+         { 0xA00000F, BoundaryLocation::East },
+         { 0xA00000F, BoundaryLocation::North },
+         { 0xA00000F, BoundaryLocation::Top } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> level_zero_internals = {
-      { 0x1400000, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal }, { 0x1400001, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> level_zero_internals = {
+         { 0x1400000, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0x1400001, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
    };
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals = {
-      { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000008, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000008, BoundaryLocation::NorthEast, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000008, BoundaryLocation::TopNorth, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::EastNorthTop, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000009, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA000009, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000009, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA000009, BoundaryLocation::NorthWest, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000009, BoundaryLocation::TopWest, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA000009, BoundaryLocation::TopNorth, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000009, BoundaryLocation::WestNorthTop, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000A, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000A, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000A, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::EastSouthTop, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000B, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000B, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000B, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000B, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000B, BoundaryLocation::TopWest, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000B, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000B, BoundaryLocation::WestSouthTop, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000C, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000C, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000C, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000C, BoundaryLocation::NorthEast, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000C, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000C, BoundaryLocation::BottomNorth, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000C, BoundaryLocation::EastNorthBottom, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000D, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000D, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000D, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000D, BoundaryLocation::NorthWest, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000D, BoundaryLocation::BottomWest, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000D, BoundaryLocation::BottomNorth, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000D, BoundaryLocation::WestNorthBottom, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000E, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000E, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000E, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000F, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000F, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000F, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000F, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000F, BoundaryLocation::BottomWest, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000F, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000F, BoundaryLocation::WestSouthBottom, InternalBoundaryType::NoJumpBoundaryLocal }
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals = {
+         { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::NorthEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::TopNorth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::EastNorthTop, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::NorthWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::TopWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::TopNorth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA000009, BoundaryLocation::WestNorthTop, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::EastSouthTop, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::TopWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::WestSouthTop, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::NorthEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::BottomNorth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::EastNorthBottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::NorthWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::BottomWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::BottomNorth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000D, BoundaryLocation::WestNorthBottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::BottomWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::WestSouthBottom, InternalBoundaryType::NoJumpBoundaryLocal } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_rank_one_of_three = {
-      { 0xA000008, BoundaryLocation::North, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA000008, BoundaryLocation::TopNorth, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000A, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal }, { 0xA00000E, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryLocal },
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_rank_one_of_three = {
+         { 0xA00000B, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000B, BoundaryLocation::TopWest, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryLocal },
+         { 0xA00000F, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryLocal } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_mpi_rank_one_of_three = {
-      { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA000008, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA000008, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA000008, BoundaryLocation::Top, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA000008, BoundaryLocation::NorthEast, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA000008, BoundaryLocation::NorthEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA000008, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA000008, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA000008, BoundaryLocation::EastNorthTop, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA000008, BoundaryLocation::EastNorthTop, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000A, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000A, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000A, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000A, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000A, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000A, BoundaryLocation::TopEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000A, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000A, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000A, BoundaryLocation::EastSouthTop, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000A, BoundaryLocation::EastSouthTop, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000E, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000E, BoundaryLocation::East, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000E, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000E, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000E, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000E, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000E, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000E, BoundaryLocation::BottomEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
-      { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiSend }, { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiRecv }
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_internals_mpi_rank_one_of_three = {
+         { 0xA00000B, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000B, BoundaryLocation::West, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000B, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000B, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000B, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000B, BoundaryLocation::TopSouth, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000B, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000B, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000B, BoundaryLocation::WestSouthTop, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000B, BoundaryLocation::WestSouthTop, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000E, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000E, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000E, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000E, BoundaryLocation::Bottom, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000E, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000E, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000E, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000E, BoundaryLocation::SouthEast, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000E, BoundaryLocation::EastSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000F, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000F, BoundaryLocation::South, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000F, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000F, BoundaryLocation::BottomSouth, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000F, BoundaryLocation::BottomWest, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000F, BoundaryLocation::BottomWest, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000F, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000F, BoundaryLocation::SouthWest, InternalBoundaryType::NoJumpBoundaryMpiRecv },
+         { 0xA00000F, BoundaryLocation::WestSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiSend },
+         { 0xA00000F, BoundaryLocation::WestSouthBottom, InternalBoundaryType::NoJumpBoundaryMpiRecv } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps = {
-      { 0xA000008, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal }, { 0xA000008, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal }, { 0xA000008, BoundaryLocation::WestNorthTop, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal }, { 0xA00000A, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal }, { 0xA00000A, BoundaryLocation::WestSouthTop, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000C, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal }, { 0xA00000C, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000C, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal }, { 0xA00000C, BoundaryLocation::WestNorthBottom, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal }, { 0xA00000E, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal }, { 0xA00000E, BoundaryLocation::WestSouthBottom, InternalBoundaryType::JumpBoundaryLocal }
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps = {
+         { 0xA000008, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA000008, BoundaryLocation::WestNorthTop, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000A, BoundaryLocation::WestSouthTop, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000C, BoundaryLocation::WestNorthBottom, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::WestSouthBottom, InternalBoundaryType::JumpBoundaryLocal } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_mpi_rank_one_of_three = {
-      { 167772172, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryMpiSend },
-      { 167772172, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryMpiSend },
-      { 167772172, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryMpiSend },
-      { 167772172, BoundaryLocation::WestNorthBottom, InternalBoundaryType::JumpBoundaryMpiSend }
-   };
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_mpi_rank_one_of_three = {
+         { 0xA000008, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA000008, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA000008, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA000008, BoundaryLocation::WestNorthTop, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000A, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000A, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000A, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000A, BoundaryLocation::WestSouthTop, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000C, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000C, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000C, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryMpiSend },
+         { 0xA00000C, BoundaryLocation::WestNorthBottom, InternalBoundaryType::JumpBoundaryMpiSend } };
 
-   std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_rank_one_of_three = {
-      { 0xA000008, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::NorthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA000008, BoundaryLocation::WestNorthTop, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::TopWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000A, BoundaryLocation::WestSouthTop, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
-      { 0xA00000E, BoundaryLocation::WestSouthBottom, InternalBoundaryType::JumpBoundaryLocal }
-   };
-}
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> maximum_level_jumps_rank_one_of_three = {
+         { 0xA00000E, BoundaryLocation::West, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::BottomWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::SouthWest, InternalBoundaryType::JumpBoundaryLocal },
+         { 0xA00000E, BoundaryLocation::WestSouthBottom, InternalBoundaryType::JumpBoundaryLocal } };
+}// namespace ExpectedSingleJumpHaloLists
 
 namespace {
    template<typename T>
@@ -190,13 +264,13 @@ namespace {
       std::sort( std::begin( b ), std::end( b ) );
       REQUIRE( a == b );
    }
-}
+}// namespace
 
 SCENARIO( "Communication chache is properly (in-)validated", "[1rank],[2rank]" ) {
    GIVEN( "The simplest two level communication manager" ) {
       constexpr unsigned int maximum_level = 1;
-      TopologyManager topology = TopologyManager();
-      CommunicationManager communication = CommunicationManager( topology, maximum_level );
+      TopologyManager topology             = TopologyManager();
+      CommunicationManager communication   = CommunicationManager( topology, maximum_level );
       WHEN( "No further action is taken" ) {
          THEN( "The boundary-relation cache is invalid on all level" ) {
             REQUIRE_FALSE( communication.AreBoundariesValid( 0 ) );
@@ -233,22 +307,22 @@ SCENARIO( "Communication chache is properly (in-)validated", "[1rank],[2rank]" )
 
 SCENARIO( "The neighborhood relations are correct", "[1rank]" ) {
 
-   constexpr MaterialName material = MaterialName::StiffenedGas;
+   constexpr MaterialName material = MaterialName::MaterialOne;
 
    GIVEN( "A topology with two nodes in x-direction, one refined node (single jump boundary) and an empty tree" ) {
-      constexpr unsigned int level_zero = 0;
+      constexpr unsigned int level_zero    = 0;
       constexpr unsigned int maximum_level = 1;
-      TopologyManager simplest_jump_topo = TopologyManager( maximum_level, 2 );
-      simplest_jump_topo.AddFluidToNode( 0x1400001, material );
+      TopologyManager simplest_jump_topo   = TopologyManager( { 2, 1, 1 }, maximum_level, 0 );
+      simplest_jump_topo.AddMaterialToNode( 0x1400001, material );
       simplest_jump_topo.RefineNodeWithId( 0x1400001 );
       simplest_jump_topo.UpdateTopology();
       for( auto const& id : simplest_jump_topo.LocalLeafIds() ) {
-         simplest_jump_topo.AddFluidToNode( id, material );
+         simplest_jump_topo.AddMaterialToNode( id, material );
       }
       simplest_jump_topo.UpdateTopology();
       WHEN( "Setting up the communication manager and generating the neighbor relations" ) {
          CommunicationManager communication = CommunicationManager( simplest_jump_topo, maximum_level );
-         communication.GenerateNeighborRelationForHaloUpdate( 0 );
+         communication.GenerateNeighborRelationForHaloUpdate( level_zero );
          communication.GenerateNeighborRelationForHaloUpdate( maximum_level );
          THEN( "The external boundaries on are correct" ) {
             RequireVectorEquality( communication.ExternalBoundaries( level_zero ), ExpectedSingleJumpHaloLists::level_zero_externals );
@@ -263,7 +337,7 @@ SCENARIO( "The neighborhood relations are correct", "[1rank]" ) {
          }
       }
       WHEN( "We pretend to have a three-rank topology" ) {
-         simplest_jump_topo.GetLoadBalancedTopology( 3 );
+         simplest_jump_topo.PrepareLoadBalancedTopology( 3 );
          simplest_jump_topo.UpdateTopology();
          CommunicationManager communication = CommunicationManager( simplest_jump_topo, maximum_level );
          communication.GenerateNeighborRelationForHaloUpdate( level_zero );
@@ -273,11 +347,11 @@ SCENARIO( "The neighborhood relations are correct", "[1rank]" ) {
             RequireVectorEquality( communication.ExternalBoundaries( maximum_level ), ExpectedSingleJumpHaloLists::maximum_level_externals_rank_one_of_three );
          }
          THEN( "The internal no-jumps are correctly sorted into MPI and non-MPI" ) {
-           REQUIRE( communication.InternalBoundariesMpi( level_zero).size() == 0 );
-           RequireVectorEquality( communication.InternalBoundaries( level_zero ), ExpectedSingleJumpHaloLists::level_zero_internals );
+            REQUIRE( communication.InternalBoundariesMpi( level_zero ).size() == 0 );
+            RequireVectorEquality( communication.InternalBoundaries( level_zero ), ExpectedSingleJumpHaloLists::level_zero_internals );
 
-           RequireVectorEquality( communication.InternalBoundariesMpi( maximum_level ), ExpectedSingleJumpHaloLists::maximum_level_internals_mpi_rank_one_of_three );
-           RequireVectorEquality( communication.InternalBoundaries( maximum_level ), ExpectedSingleJumpHaloLists::maximum_level_internals_rank_one_of_three );
+            RequireVectorEquality( communication.InternalBoundariesMpi( maximum_level ), ExpectedSingleJumpHaloLists::maximum_level_internals_mpi_rank_one_of_three );
+            RequireVectorEquality( communication.InternalBoundaries( maximum_level ), ExpectedSingleJumpHaloLists::maximum_level_internals_rank_one_of_three );
          }
          THEN( "The internal jumps are correctly sorted into MPI and non-MPI" ) {
             RequireVectorEquality( communication.InternalBoundariesJump( maximum_level ), ExpectedSingleJumpHaloLists::maximum_level_jumps_rank_one_of_three );
@@ -289,14 +363,12 @@ SCENARIO( "The neighborhood relations are correct", "[1rank]" ) {
 
 SCENARIO( "Testing send and receive functions in multi-core settings", "[2rank]" ) {
 
-   REQUIRE( MpiUtilities::NumberOfRanks() == 2 );
-
    GIVEN( "A(ny) topology, a(ny) tree and a communication manager" ) {
       constexpr unsigned int maximum_level = 0;
-      TopologyManager topology = TopologyManager( maximum_level );
-      CommunicationManager communicator = CommunicationManager( topology,maximum_level );
+      TopologyManager topology             = TopologyManager( { 1, 1, 1 }, maximum_level, 0 );
+      CommunicationManager communicator    = CommunicationManager( topology, maximum_level );
       WHEN( "We send and receive some arbitrary data according to the communicator function descriptions" ) {
-         int const my_rank = MpiUtilities::MyRankId();
+         int const my_rank      = MpiUtilities::MyRankId();
          constexpr double value = 42.0;
          std::vector<double> const data_to_send( 2, value );
          std::vector<double> received_data( 2, -1.0 );

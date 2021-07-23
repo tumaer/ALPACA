@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef COMMUNICATION_MANAGER_H
@@ -77,15 +78,6 @@
 #include "internal_boundary_types.h"
 
 /**
- * @brief Container of the interface tag array. In order to store it in std::vectors. Used for more efficient MPI communication.
- */
-struct InterfaceTagBundle {
-   std::int8_t interface_tags_[CC::TCX()][CC::TCY()][CC::TCZ()];
-};
-// Check Memory Layout at compile time for safe MPI sending (Ensures Compiler did not pad the struct)
-static_assert( sizeof( InterfaceTagBundle ) == CC::TCX() * CC::TCY() * CC::TCZ() * sizeof( std::int8_t ), "InterfaceTagBundle is not contiguous in Memory" );
-
-/**
  * @brief The CommunicationManager class provides the functionality for communicating data between nodes and ranks. Furthermore, it holds the neighbor relations
  *        between nodes and external relations for external node boundaries.
  */
@@ -96,51 +88,68 @@ class CommunicationManager : public CommunicationTypes {
    int const mpi_tag_ub_;
    std::vector<unsigned int> partner_tag_map_;
 
+   /**
+    * Schlachtplan:
+    * Make Topology -> unordered_map
+    * When remeshing -> go through topology and give two vectors of From-To node pairs and the ranks of each:
+    *    The first list (send_list) has the local node as from
+    *    The second list (receive_list) has the local node as to
+    * Sort lists first by sender than by receiver (or vice versa)
+    * Go through lists and start counting tags (as currently done) for each rank combination. Save the resulting To-From-Tag tuple.
+    * Look-up when needed.
+    */
+
    //Cache for Halo Update Pattern
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_mpi_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_mpi_;
-   std::vector<std::vector<std::tuple<std::uint64_t, BoundaryLocation>>> external_boundaries_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_mpi_;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> internal_multi_boundaries_;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> internal_multi_boundaries_mpi_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>>> internal_boundaries_jump_mpi_;
+   std::vector<std::vector<std::tuple<nid_t, BoundaryLocation>>> external_boundaries_;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> external_multi_boundaries_;
 
    // Vector holding flags dor each level that the lists have been created successfully
    std::vector<bool> boundaries_valid_;
 
    // Three values for three dimensions, even if only one dimension is simulated
-   std::vector<std::array<unsigned int, 3>> jump_send_count_; // [0]: Plane, [1]: Stick, [2]: cube
+   std::vector<std::array<unsigned int, 3>> jump_send_count_;// [0]: Plane, [1]: Stick, [2]: cube
 
    // Function that gives all neighbor-location and external-location relations for a given global node
-   void NeighborsOfNode( const std::uint64_t global_id, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<std::uint64_t, BoundaryLocation>>& external_boundaries );
+   void NeighborsOfNode( nid_t const global_id, std::vector<std::tuple<nid_t, BoundaryLocation>>& nodes_internal_boundaries, std::vector<std::tuple<nid_t, BoundaryLocation>>& external_boundaries );
 
 public:
    CommunicationManager() = delete;
    explicit CommunicationManager( TopologyManager& topology, unsigned int const maximum_level );
-   ~CommunicationManager() = default;
+   ~CommunicationManager()                             = default;
    CommunicationManager( CommunicationManager const& ) = delete;
    CommunicationManager& operator=( CommunicationManager const& ) = delete;
-   CommunicationManager( CommunicationManager&& ) = delete;
+   CommunicationManager( CommunicationManager&& )                 = delete;
    CommunicationManager& operator=( CommunicationManager&& ) = delete;
 
    // Function to fill the lists holding the relation to neighbor nodes and external boundaries
-   void GenerateNeighborRelationForHaloUpdate( const unsigned int level );
+   void GenerateNeighborRelationForHaloUpdate( unsigned int const level );
 
    // return functions for the relation lists
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJumpMpi( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJump( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesMpi( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundaries( unsigned level ) const;
-   std::vector<std::tuple<uint64_t, BoundaryLocation>> const& ExternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJumpMpi( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesJump( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundariesMpi( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundariesMpi() const;
+   std::vector<std::tuple<nid_t, BoundaryLocation, InternalBoundaryType>> const& InternalMultiBoundaries() const;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> const& ExternalBoundaries( unsigned level ) const;
+   std::vector<std::tuple<nid_t, BoundaryLocation>> const& ExternalMultiBoundaries() const;
 
    // Functions to get the status of the list creations and to empty the flags to regenerate the lists
    bool AreBoundariesValid( unsigned level ) const;
    void InvalidateCache();
 
    // Returns the counter for jump boundaries for the different exchange types
-   unsigned JumpSendCount( unsigned int const level, unsigned int const exchange_type );
+   unsigned int JumpSendCount( unsigned int const level, ExchangeType const type );
 
    // Send and receive function to buffer data between nodes and ranks
    int Send( void const* buffer, int const count, MPI_Datatype const datatype, int const destination_rank, std::vector<MPI_Request>& requests );
-   int Recv( void *buf, int count, MPI_Datatype datatype, int source, std::vector<MPI_Request>& requests );
+   int Recv( void* buf, int count, MPI_Datatype datatype, int source, std::vector<MPI_Request>& requests );
 
    // Helping functions to provide current rank and partner tags (MyRankId as member variable to avoid multiple calls of Mpi library)
    int TagForRank( unsigned int const partner );

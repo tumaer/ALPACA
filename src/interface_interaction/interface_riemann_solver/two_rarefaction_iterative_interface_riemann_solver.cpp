@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "two_rarefaction_iterative_interface_riemann_solver.h"
@@ -82,14 +83,9 @@
  *
  * @return     The shock/rarefaction relation and its derivative.
  */
-std::array<double, 2> TwoRarefactionIterativeInterfaceRiemannSolver::ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-   double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
-#ifndef PERFORMANCE
-  (void) p; // Avoid compiler warning
-  (void) pressure_function; // Avoid compiler warning
-  (void) A; // Avoid compiler warning
-  (void) B; // Avoid compiler warning
-#endif
-  return {RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
-          RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ) };
+std::array<double, 2> TwoRarefactionIterativeInterfaceRiemannSolver::ObtainFunctionAndDerivativeImplementation( double const initial_root, double const,
+                                                                                                                double const, double const one_pressure_function, double const pressure_constant, double const, double const, double const C, double const D ) const {
+
+   return { RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
+            RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ) };
 }

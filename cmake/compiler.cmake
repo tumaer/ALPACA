@@ -1,14 +1,3 @@
-if( ALPACA_ENV STREQUAL "LRZ" )
-    MESSAGE( STATUS "Compile on LRZ" )
-    set( CMAKE_CXX_COMPILER "mpiCC" )
-elseif( ALPACA_ENV STREQUAL "AER" )
-    MESSAGE( STATUS "Compile on AER machine" )
-    set(CMAKE_CXX_COMPILER "/global/mpich-3.1/bin/mpic++" )
-else( ALPACA_ENV STREQUAL "LRZ" )
-    MESSAGE( STATUS "Compile with user default compilers" )
-    set( CMAKE_CXX_COMPILER "mpicxx" )
-endif( ALPACA_ENV STREQUAL "LRZ" )
-
 # Use gold linker, if it is installed and not disabled
 option( USEGOLD "Gold Linker" ON )
 if(UNIX AND NOT APPLE AND USEGOLD)

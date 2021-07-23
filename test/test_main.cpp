@@ -53,7 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
-*                                                                                        *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 ******************************************************************************************
 *                                                                                        *
 * CONTACT                                                                                *
@@ -62,18 +62,22 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
-
+#define APPROVALS_CATCH_EXISTING_MAIN
+#include <ApprovalTests.hpp>
 #include <mpi.h>
-#include <fenv.h> // Floating-Point raising exceptions.
+#ifdef __APPLE__
+#include <xmmintrin.h>
+#endif
 #include <tuple>
 #include <vector>
 #include <regex>
 #include <algorithm>
+
+using namespace ApprovalTests;
+auto directoryDisposer = Approvals::useApprovalsSubdirectory( "approval_tests" );
 
 std::pair<int, int> StartUpMpiAndReportRankAndSize( int argc, char* argv[] ) {
    MPI_Init( &argc, &argv );
@@ -90,17 +94,17 @@ std::pair<int, int> StartUpMpiAndReportRankAndSize( int argc, char* argv[] ) {
  */
 void PrintStartupMessage( int const rank ) {
    if( rank == 0 ) {
-      std::cout << "\n" <<
-                   "                                  \\\\\n" <<
-                   "                                  l '>\n" <<
-                   "                                  | |\n" <<
-                   "                                  | |\n" <<
-                   "                                  |   Paco~\n" <<
-                   "                                  ||    || \n" <<
-                   "                                  ''    '' \n" <<
-                   "                                     \n" <<
-                   "          THE AGE OF BUGS HAS GONE - THE AGE OF UNIT-TESTS HAS COME\n" <<
-                   "\n";
+      std::cout << "\n"
+                << "                                  \\\\\n"
+                << "                                  l '>\n"
+                << "                                  | |\n"
+                << "                                  | |\n"
+                << "                                  |   Paco~\n"
+                << "                                  ||    || \n"
+                << "                                  ''    '' \n"
+                << "                                     \n"
+                << "          THE AGE OF BUGS HAS GONE - THE AGE OF UNIT-TESTS HAS COME\n"
+                << "\n";
    }
 }
 
@@ -113,9 +117,8 @@ void PrintStartupMessage( int const rank ) {
 std::pair<bool, std::string> ProvidedTagsAreValid( int argc, char* argv[], int const number_of_ranks ) {
    std::vector<std::string> arguments( argv + 1, argv + argc );
    arguments.erase( std::remove_if( std::begin( arguments ), std::end( arguments ),
-                                    []( std::string const& s ) { return !std::regex_search( s, std::regex( "\\[.*\\]" ) ); }
-                                  ),
-                                  std::end( arguments ) );
+                                    []( std::string const& s ) { return !std::regex_search( s, std::regex( "\\[.*\\]" ) ); } ),
+                    std::end( arguments ) );
    if( arguments.size() == 0 ) {
       return std::make_pair( false, "Paco needs a tag argument to run the correct suite of tests" );
    }
@@ -123,7 +126,7 @@ std::pair<bool, std::string> ProvidedTagsAreValid( int argc, char* argv[], int c
       return std::make_pair( false, "Paco needs exactly one tag argument to run the correct suite of tests" );
    }
 
-   if( arguments.front() == "[1rank]" && number_of_ranks != 1 ) {
+   if( ( arguments.front() == "[1rank]" or arguments.front() == "[.slow1rank]" ) && number_of_ranks != 1 ) {
       return std::make_pair( false, "Single-core suite can only be run with one MPI-rank" );
    }
 
@@ -149,9 +152,6 @@ void EndMpiAndDisplayErrorMessage( std::string const error_message, int const ra
 int main( int argc, char* argv[] ) {
 
    auto const [rank, number_of_ranks] = StartUpMpiAndReportRankAndSize( argc, argv );
-
-   //Triggers signals on floating point errors, i.e. prohibits quiet NaNs and alike
-   feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 
    PrintStartupMessage( rank );
 

@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
 *                                                                                        *
 * This file is part of ALPACA                                                            *
@@ -53,6 +54,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,21 +64,72 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "topology_manager.h"
 
 #include <algorithm>
+#include <tuple>
 #include <utility>
 #include <mpi.h>
 #include <stdexcept>
 #include <string>
 #include <numeric>
 #include <functional>
+#include <vector>
 
 #include "communication/mpi_utilities.h"
 #include "topology/id_information.h"
+#include "topology/node_id_type.h"
+#include "topology/space_filling_curve_order.h"
+#include "utilities/string_operations.h"
+#include "utilities/container_operations.h"
+
+namespace {
+   /**
+    * @brief Gives a count of elements that should be on each respective rank to obtained a balanced load.
+    * @param number_of_elements The amount of elements to distribute accross the ranks.
+    * @param number_of_ranks The amount of ranks to distribute the elements onto.
+    * @return Vector of size number_of_ranks. Each entry gives the amount of elements the respective rank should hold in a well-balanced scenario.
+    */
+   std::vector<std::size_t> ElementsPerRank( std::size_t const number_of_elements, int const number_of_ranks ) {
+      // Cast is save. Negative ranks indicate something is broken already anyways.
+      std::size_t rank_count = static_cast<std::size_t>( number_of_ranks );
+      std::size_t remainder  = number_of_elements % rank_count;
+      std::vector<std::size_t> elements_per_rank( rank_count );
+      for( std::size_t i = 0; i < rank_count; ++i ) {
+         std::size_t fraction = 0;
+         fraction += number_of_elements / rank_count;
+         if( i < remainder ) {
+            fraction++;
+         }
+         elements_per_rank[i] = fraction;
+      }
+      return elements_per_rank;
+   }
+
+   /**
+    * @brief Checks if the given node is a multiphase node.
+    * @param node Topology node that is to be checked for the multiphase condition.
+    * @return True if node is multiphase and false otherwise.
+    */
+   bool IsMultiPhase( TopologyNode const& node ) {
+      return node.NumberOfMaterials() > 1;
+   }
+
+   /**
+    * @brief Creates a vector with elements from max_value in descending order until zero included.
+    * @param max_value The highest value present in the resulting vector.
+    * @return The vector with descending elements.
+    */
+   std::vector<unsigned int> ElementsDescendingFrom( unsigned int const max_value ) {
+      std::vector<unsigned int> v( max_value + 1 );
+      std::generate( std::begin( v ), std::end( v ), [value = max_value]() mutable { return value--; } );
+      return v;
+   }
+
+}// namespace
 
 /**
  * @brief Default constructor. Creates the local and global Id list on level zero. Default arguments allow testability.
@@ -84,18 +137,15 @@
  * @param level_zero_nodes_x, level_zero_nodes_y, level_zero_nodes_z Number of blocks on level zero in the x/y/z-axis extension.
  * @param active_periodic_locations Side of the domain on which periodic boundaries are activated.
  */
-TopologyManager::TopologyManager( unsigned int const maximum_level, unsigned int const level_zero_nodes_x, unsigned int const level_zero_nodes_y,
-                                  unsigned int const level_zero_nodes_z, unsigned int const active_periodic_locations ) :
-   maximum_level_( maximum_level ),
-   active_periodic_locations_( active_periodic_locations ),
-   level_zero_nodes_xyz_{ level_zero_nodes_x, level_zero_nodes_y, level_zero_nodes_z },
-   forest_{},
-   coarsenings_since_load_balance_{0},
-   refinements_since_load_balance_{0}
-{
-   std::uint64_t id = IdSeed();
+TopologyManager::TopologyManager( std::array<unsigned int, 3> const level_zero_blocks, unsigned int const maximum_level, unsigned int const active_periodic_locations ) : maximum_level_( maximum_level ),
+                                                                                                                                                                          active_periodic_locations_( active_periodic_locations ),
+                                                                                                                                                                          number_of_nodes_on_level_zero_( level_zero_blocks ),
+                                                                                                                                                                          forest_{},
+                                                                                                                                                                          coarsenings_since_load_balance_{ 0 },
+                                                                                                                                                                          refinements_since_load_balance_{ 0 } {
+   nid_t id = IdSeed();
 
-   std::vector<std::uint64_t> initialization_list;
+   std::vector<nid_t> initialization_list;
 
    /*
     * The Nodes are created in a spatial fashion traversing through X, Y and finally Z.
@@ -103,52 +153,25 @@ TopologyManager::TopologyManager( unsigned int const maximum_level, unsigned int
     * Therefore some non-straightforward index magic needs to be applied
     * Initialization happens only on Level 0
     */
-   for(unsigned int i = 0; i < level_zero_nodes_xyz_[2]; ++i) {
-      for(unsigned int j = 0; j < level_zero_nodes_xyz_[1]; ++j) {
-         for(unsigned int k = 0; k < level_zero_nodes_xyz_[0]; ++k) {
-            forest_.emplace_back(id, 0);
-            initialization_list.push_back(id);
-            id = EastNeighborOfNodeWithId(initialization_list.back()); //find eastern neighbor of the just created Node
+   for( unsigned int i = 0; i < number_of_nodes_on_level_zero_[2]; ++i ) {
+      for( unsigned int j = 0; j < number_of_nodes_on_level_zero_[1]; ++j ) {
+         for( unsigned int k = 0; k < number_of_nodes_on_level_zero_[0]; ++k ) {
+            forest_.emplace( id, 0 );
+            initialization_list.push_back( id );
+            id = EastNeighborOfNodeWithId( initialization_list.back() );//find eastern neighbor of the just created Node
          }
-         // Index magic to create the correct node once the (outer) loop counters are resetted
-         id = NorthNeighborOfNodeWithId( initialization_list[ level_zero_nodes_xyz_[0] * ( j + level_zero_nodes_xyz_[1] * i )] );
+         // Index magic to create the correct node once the ( outer ) loop counters are resetted
+         id = NorthNeighborOfNodeWithId( initialization_list[number_of_nodes_on_level_zero_[0] * ( j + number_of_nodes_on_level_zero_[1] * i )] );
       }
-      id = TopNeighborOfNodeWithId( initialization_list[( level_zero_nodes_xyz_[1] * level_zero_nodes_xyz_[0] * i)]);
+      id = TopNeighborOfNodeWithId( initialization_list[( number_of_nodes_on_level_zero_[1] * number_of_nodes_on_level_zero_[0] * i )] );
    }
 
-   //Topology Tree Node creation
-   forest_.shrink_to_fit();
-
-   int const number_of_ranks = MpiUtilities::NumberOfRanks();
-
-   // Now we distribute the global nodes accordingly:
-   unsigned int number_of_nodes = forest_.size();
-   int remainder = number_of_nodes % number_of_ranks;
-   int fraction = 0;
-
-   std::vector<int> rank_map;
-
-   for(int i = 0; i < number_of_ranks; ++i) {
-      fraction = 0;
-      fraction += number_of_nodes / number_of_ranks;
-      if(i < remainder) {
-         fraction++;
-      }
-      rank_map.push_back(fraction);
-   }
-
-   //Topology Tree Rank setup
-   int sum = 0;
-   for(int i = 0; i < number_of_ranks; i++) {
-      for(int j = 0; j < rank_map[i]; j++) {
-         forest_[sum].SetCurrentRankOfLeaf(forest_[sum].Id(), i);
-         sum++;
-      }
-   }
+   // Assign correct ranks to nodes
+   PrepareLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
 }
 
 /**
- * @brief Updates the topology based on the recorded refinements, coarsening, weights and fluid changes.
+ * @brief Updates the topology based on the recorded refinements, coarsening, weights and material changes.
  * @return True if Communication_managers cache needs to be invalidated.
  * @note The coarsening list is specially guarded, it needs to be flushed before it is considered here.
  */
@@ -156,18 +179,22 @@ bool TopologyManager::UpdateTopology() {
 
    // Flag that specifies whether the communication manager should update its neighbor relations
    bool invalidate_communication_manager_cache = false;
-   int const number_of_ranks = MpiUtilities::NumberOfRanks();
+   int const number_of_ranks                   = MpiUtilities::NumberOfRanks();
 
    //Tree update
    //refine
-   std::vector<std::uint64_t> global_refine_list;
+   std::vector<nid_t> global_refine_list;
    MpiUtilities::LocalToGlobalData( local_refine_list_, MPI_LONG_LONG_INT, number_of_ranks, global_refine_list );
 
-   for(auto const& refine_id : global_refine_list) {
-      forest_[PositionOfNodeInZeroTopology(refine_id)].Refine(refine_id);
+   for( auto const& refine_id : global_refine_list ) {
+      TopologyNode& parent = forest_.at( refine_id );
+      parent.MakeParent();
+      for( auto child_id : IdsOfChildren( refine_id ) ) {
+         forest_.emplace( std::piecewise_construct, std::make_tuple( child_id ), std::make_tuple( parent.Rank() ) );
+      }
    }
    // Invalididate cache if any node has been refined
-   if(global_refine_list.size() > 0) {
+   if( global_refine_list.size() > 0 ) {
       invalidate_communication_manager_cache = true;
    }
 
@@ -175,62 +202,43 @@ bool TopologyManager::UpdateTopology() {
 
    refinements_since_load_balance_ += global_refine_list.size();
 
-   //UPDATE FLUIDS OF NODES
-   std::tuple<std::vector<std::uint64_t>, std::vector<MaterialName>> global_fluids_list;
-   MpiUtilities::LocalToGlobalData(std::get<0>( local_added_fluids_list_), MPI_LONG_LONG_INT,  number_of_ranks, std::get<0>(global_fluids_list) );
-   MpiUtilities::LocalToGlobalData(std::get<1>( local_added_fluids_list_), MPI_UNSIGNED_SHORT, number_of_ranks, std::get<1>(global_fluids_list) );
+   //UPDATE MATERIALS OF NODES
+   std::tuple<std::vector<nid_t>, std::vector<MaterialName>> global_materials_list;
+   MpiUtilities::LocalToGlobalData( std::get<0>( local_added_materials_list_ ), MPI_LONG_LONG_INT, number_of_ranks, std::get<0>( global_materials_list ) );
+   MpiUtilities::LocalToGlobalData( std::get<1>( local_added_materials_list_ ), MPI_UNSIGNED_SHORT, number_of_ranks, std::get<1>( global_materials_list ) );
 
 #ifndef PERFORMANCE
-   if(std::get<0>(global_fluids_list).size() != std::get<1>(global_fluids_list).size()) {
-      throw std::logic_error("Thou shall not create material-add-lists of unequal length");
+   if( std::get<0>( global_materials_list ).size() != std::get<1>( global_materials_list ).size() ) {
+      throw std::logic_error( "Unequally sized material-add-lists encountered" );
    }
 #endif
 
-   for(unsigned int i = 0; i < std::get<0>(global_fluids_list).size(); ++i) {
-      int const position = PositionOfNodeInZeroTopology(std::get<0>(global_fluids_list)[i]);
-
-      if(position >= 0 && position < static_cast<int>(forest_.size())) {
-         // Forest size cannot exceed 128x128x128 = 10^6, fits in int (10^9 positive values), cast is safe.
-         forest_[position].AddFluid(std::get<0>(global_fluids_list)[i], std::get<1>(global_fluids_list)[i]);
-      }
-#ifndef PERFORMANCE
-      else {
-         throw std::logic_error("TopologyManager::UpdateIdsList root tree does not exist!");
-      }
-#endif
+   for( unsigned int i = 0; i < std::get<0>( global_materials_list ).size(); ++i ) {
+      forest_.at( std::get<0>( global_materials_list )[i] ).AddMaterial( std::get<1>( global_materials_list )[i] );
    }
 
-   std::get<0>(local_added_fluids_list_).clear();
-   std::get<1>(local_added_fluids_list_).clear();
+   std::get<0>( local_added_materials_list_ ).clear();
+   std::get<1>( local_added_materials_list_ ).clear();
 
    // We reuse the global list
-   std::get<0>(global_fluids_list).clear();
-   std::get<1>(global_fluids_list).clear();
+   std::get<0>( global_materials_list ).clear();
+   std::get<1>( global_materials_list ).clear();
 
-   MpiUtilities::LocalToGlobalData( std::get<0>( local_removed_fluids_list_), MPI_LONG_LONG_INT,  number_of_ranks, std::get<0>(global_fluids_list) );
-   MpiUtilities::LocalToGlobalData( std::get<1>( local_removed_fluids_list_), MPI_UNSIGNED_SHORT, number_of_ranks, std::get<1>(global_fluids_list) );
+   MpiUtilities::LocalToGlobalData( std::get<0>( local_removed_materials_list_ ), MPI_LONG_LONG_INT, number_of_ranks, std::get<0>( global_materials_list ) );
+   MpiUtilities::LocalToGlobalData( std::get<1>( local_removed_materials_list_ ), MPI_UNSIGNED_SHORT, number_of_ranks, std::get<1>( global_materials_list ) );
 
 #ifndef PERFORMANCE
-   if(std::get<0>(global_fluids_list).size() != std::get<1>(global_fluids_list).size()) {
-      throw std::logic_error("Created list of unequal length");
+   if( std::get<0>( global_materials_list ).size() != std::get<1>( global_materials_list ).size() ) {
+      throw std::logic_error( "Created list of unequal length" );
    }
 #endif
 
-   for(unsigned int i = 0; i < std::get<0>(global_fluids_list).size(); ++i) {
-      int const position = PositionOfNodeInZeroTopology(std::get<0>(global_fluids_list)[i]);
-      // Forest size cannot exceed 128x128x128 = 10^6, fits in int (10^9 positive values), cast is safe.
-      if(position >= 0 && position < static_cast<int>(forest_.size())) {
-         forest_[position].RemoveFluid(std::get<0>(global_fluids_list)[i], std::get<1>(global_fluids_list)[i]);
-      }
-#ifndef PERFORMANCE
-      else {
-         throw std::logic_error("TopologyManager::UpdateIdsList root tree does not exist!");
-      }
-#endif
+   for( unsigned int i = 0; i < std::get<0>( global_materials_list ).size(); ++i ) {
+      forest_.at( std::get<0>( global_materials_list )[i] ).RemoveMaterial( std::get<1>( global_materials_list )[i] );
    }
 
-   std::get<0>(local_removed_fluids_list_).clear();
-   std::get<1>(local_removed_fluids_list_).clear();
+   std::get<0>( local_removed_materials_list_ ).clear();
+   std::get<1>( local_removed_materials_list_ ).clear();
 
    return invalidate_communication_manager_cache;
 }
@@ -240,16 +248,18 @@ bool TopologyManager::UpdateTopology() {
  * @param id The id of the leaf that is to be refined.
  * @note The actual refinement happens in a bundled fashion in another function. $No checks for leaves are performed caller is responsible$
  */
-void TopologyManager::RefineNodeWithId(std::uint64_t const id) {
-   local_refine_list_.push_back(id);
+void TopologyManager::RefineNodeWithId( nid_t const id ) {
+   local_refine_list_.push_back( id );
 }
 
 /**
  * @brief Adds the parent whose children may be coarsened to the coarsening list. The actual data deletion is than bundled using this list.
  * @param parent_id The id of the node that is to be made a leaf.
  */
-void TopologyManager::CoarseNodeWithId(std::uint64_t const parent_id) {
-   forest_[PositionOfNodeInZeroTopology(parent_id)].Coarse(parent_id);
+void TopologyManager::CoarseNodeWithId( nid_t const parent_id ) {
+   auto const child_ids( IdsOfChildren( parent_id ) );
+   std::for_each( std::cbegin( child_ids ), std::cend( child_ids ), [&forest = forest_]( auto const child_id ) { forest.erase( child_id ); } );
+   forest_.at( parent_id ).MakeLeaf();
    coarsenings_since_load_balance_++;
 }
 
@@ -257,57 +267,45 @@ void TopologyManager::CoarseNodeWithId(std::uint64_t const parent_id) {
  * @brief Determines the rank which holds the node of given id.
  * @param id The unique id of the node.
  * @return Rank id for the requested node.
+ * @note This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
-int TopologyManager::GetRankOfNode(std::uint64_t const id) const {
-   return forest_[PositionOfNodeInZeroTopology(id)].GetRank(id);
+int TopologyManager::GetRankOfNode( nid_t const id ) const {
+   return forest_.at( id ).Rank();
 }
 
 /**
  * @brief Gives a list which indicates which node should go from which mpi rank onto which mpi rank.
  * @param number_of_ranks The number of ranks available to distribute the load onto.
- * @return A vector of all nodes and their current as well as their future mpi rank.
+ * @return A vector of all nodes and their current as well as their target mpi rank.
  */
-std::vector<std::tuple<std::uint64_t const, int const, int const>> TopologyManager::GetLoadBalancedTopology(int const number_of_ranks) {
-
-   AssignTargetRankToLeaves(number_of_ranks);
-   AssignBalancedLoad();
-   std::vector<std::tuple<std::uint64_t const, int const, int const>> ids_current_future_rank_map;
-
-   ListNodeToBalance(ids_current_future_rank_map);
-
-   return ids_current_future_rank_map;
+std::vector<std::tuple<nid_t const, int const, int const>> TopologyManager::PrepareLoadBalancedTopology( int const number_of_ranks ) {
+   AssignTargetRankToLeaves( number_of_ranks );
+   AssignTargetRankToParents();
+   auto nodes_to_balance = NodesToBalance();
+   SetCurrentRanksAccordingToTargetRanks();
+   return nodes_to_balance;
 }
 
 /**
  * @brief Indicates whether a node exists in the global Tree, does not make implications about local tree
  * @param id id of the node one is looking for
  * @return true if node exists, false otherwise
+ * @note This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
-bool TopologyManager::NodeExists(std::uint64_t const id) const {
-
-   int position_in_zero_topology = PositionOfNodeInZeroTopology(id);
-   // Forest size cannot exceed 128x128x128 = 10^6, fits in int (10^9 positive values), cast is safe.
-   if(position_in_zero_topology >= 0 && position_in_zero_topology < (static_cast<int>(forest_.size())) ) {
-      return forest_[position_in_zero_topology].NodeExists(id);
-   } else {
-      return false;
-   }
+bool TopologyManager::NodeExists( nid_t const id ) const {
+   return forest_.contains( id );
 }
 
 /**
  * @brief Gives the current maximum level of any global node.
- *        Can be less than the user set maximum level (if no interesting physics are present, or at initialization).
+ *        Can be less than the user set maximum level ( if no interesting physics are present, or at initialization ).
  * @return Globally Maximal Present Level.
  */
 unsigned int TopologyManager::GetCurrentMaximumLevel() const {
-
-   std::vector<unsigned int> tree_depths;
-   tree_depths.reserve(forest_.size());
-   for(const TopologyNode& tree : forest_) {
-      tree_depths.emplace_back(tree.GetDepth());
-   }
-
-   return *std::max_element(tree_depths.begin(),tree_depths.end()) -1; //Tree Depth starts with 1 by definition, vs levels starts at 0.
+   auto const it = std::max_element( std::cbegin( forest_ ),
+                                     std::cend( forest_ ),
+                                     []( auto const& id_node_a, auto const& id_node_b ) { return std::get<0>( id_node_a ) < std::get<0>( id_node_b ); } );
+   return LevelOfNode( std::get<0>( *it ) );
 }
 
 /**
@@ -316,16 +314,16 @@ unsigned int TopologyManager::GetCurrentMaximumLevel() const {
  * @param id Unique id of node whose descendants are searched for.
  * @return All ids of globally existing descendants.
  */
-std::vector<std::uint64_t> TopologyManager::DescendantIdsOfNode(std::uint64_t const id) const {
+std::vector<nid_t> TopologyManager::DescendantIdsOfNode( nid_t const id ) const {
 
-   std::vector<std::uint64_t> descendants;
-   std::vector<std::uint64_t> append_list;
+   std::vector<nid_t> descendants;
+   std::vector<nid_t> append_list;
 
-   for(auto const& child_id : IdsOfChildren(id)) {
-      if(NodeExists(child_id)) {
-         append_list = DescendantIdsOfNode(child_id);
-         descendants.insert(descendants.end(),append_list.begin(), append_list.end());
-         descendants.push_back(child_id);
+   for( auto const& child_id : IdsOfChildren( id ) ) {
+      if( NodeExists( child_id ) ) {
+         append_list = DescendantIdsOfNode( child_id );
+         descendants.insert( descendants.end(), append_list.begin(), append_list.end() );
+         descendants.push_back( child_id );
       }
    }
 
@@ -337,16 +335,17 @@ std::vector<std::uint64_t> TopologyManager::DescendantIdsOfNode(std::uint64_t co
  * @param id Unique id of the node to be checked for self-ownership.
  * @param rank The rank on which existence is to be checked.
  * @return true if node is on the same rank as invoker, false otherwise.
+ * @note This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
-bool TopologyManager::NodeIsOnRank(std::uint64_t const id, int const rank) const {
+bool TopologyManager::NodeIsOnRank( nid_t const id, int const rank ) const {
 
 #ifndef PERFORMANCE
-   if(!NodeExists(id)) {
-      throw std::logic_error("Node Ownership cannot be checked - Node does not exist");
+   if( !NodeExists( id ) ) {
+      throw std::logic_error( "Node Ownership cannot be checked - Node does not exist" );
    }
 #endif
 
-   return GetRankOfNode(id) == rank;
+   return forest_.at( id ).IsOnRank( rank );
 }
 
 /**
@@ -354,15 +353,8 @@ bool TopologyManager::NodeIsOnRank(std::uint64_t const id, int const rank) const
  * @param id Unique id of the node to be checked.
  * @return true if node is a leaf, false otherwise.
  */
-bool TopologyManager::NodeIsLeaf(std::uint64_t const id) const {
-
-#ifndef PERFORMANCE
-   if(!NodeExists(id)) {
-      throw std::logic_error("Node Leaf status cannot be checked - Node does not exist");
-   }
-#endif
-
-   return forest_[PositionOfNodeInZeroTopology(id)].NodeIsLeaf(id);
+bool TopologyManager::NodeIsLeaf( nid_t const id ) const {
+   return forest_.at( id ).IsLeaf();
 }
 
 /**
@@ -372,38 +364,76 @@ bool TopologyManager::NodeIsLeaf(std::uint64_t const id) const {
  * @param location Location of interest.
  * @return True if the Face is a Jump, false otherwise.
  */
-bool TopologyManager::FaceIsJump(std::uint64_t const id, BoundaryLocation const location) const{
+bool TopologyManager::FaceIsJump( nid_t const id, BoundaryLocation const location ) const {
 
-   if(IsExternalTopologyBoundary(location, id)) {
+   if( IsExternalTopologyBoundary( location, id ) ) {
       return false;
    }
 
    // If the neighbor does not exist and it is not an external BC we have a jump
-   return !NodeExists(GetTopologyNeighborId(id, location));
+   return !NodeExists( GetTopologyNeighborId( id, location ) );
 }
 
 /**
  * @brief Gives a list of all leaves on this MPI rank
  * @return Local leaf ids.
  */
-std::vector<std::uint64_t> TopologyManager::LocalLeafIds() const {
-   std::vector<std::uint64_t> local_leaves;
-   int const rank_id = MpiUtilities::MyRankId();
-   for(TopologyNode const& node : forest_) {
-      node.LocalLeaves(local_leaves, rank_id);
-   }
+std::vector<nid_t> TopologyManager::LocalLeafIds() const {
+   std::vector<nid_t> local_leaves;
+   local_leaves.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( local_leaves ),
+         [rank_id = MpiUtilities::MyRankId()]( auto const& in ) { return std::get<1>( in ).IsLeaf() && std::get<1>( in ).IsOnRank( rank_id ); },
+         []( auto const& in ) { return std::get<0>( in ); } );
    return local_leaves;
+}
+
+std::vector<nid_t> TopologyManager::LocalInterfaceLeafIds() const {
+   std::vector<nid_t> local_interface_leaves;
+   local_interface_leaves.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.( LocalLeafIds() );
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( local_interface_leaves ),
+         [rank_id = MpiUtilities::MyRankId()]( auto const& in ) {
+            auto const& node = std::get<1>( in );
+            return IsMultiPhase( node ) && node.IsLeaf() && node.IsOnRank( rank_id );
+         },
+         []( auto const& in ) { return std::get<0>( in ); } );
+   return local_interface_leaves;
+}
+
+/**
+ * @brief Gives a list of all nodes on this MPI rank
+ * @return Local node ids.
+ */
+std::vector<nid_t> TopologyManager::LocalIds() const {
+   std::vector<nid_t> local_nodes;
+   local_nodes.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( local_nodes ),
+         [rank = MpiUtilities::MyRankId()]( auto const& in ) { return std::get<1>( in ).IsOnRank( rank ); },
+         []( auto const& in ) { return std::get<0>( in ); } );
+   return local_nodes;
 }
 
 /**
  * @brief Gives a list of ids of all globally present leaves.
  * @return Leaf Ids.
  */
-std::vector<std::uint64_t> TopologyManager::LeafIds() const {
-   std::vector<std::uint64_t> leaves;
-   for(TopologyNode const& node : forest_) {
-      node.GetLeafIds(leaves);
-   }
+std::vector<nid_t> TopologyManager::LeafIds() const {
+   std::vector<nid_t> leaves;
+   leaves.reserve( forest_.size() );
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( leaves ),
+         []( auto const& in ) { return std::get<1>( in ).IsLeaf(); },
+         []( auto const& in ) { return std::get<0>( in ); } );
    return leaves;
 }
 
@@ -412,13 +442,18 @@ std::vector<std::uint64_t> TopologyManager::LeafIds() const {
  * @param level The level of interest.
  * @return The list of leaf ids.
  */
-std::vector<std::uint64_t> TopologyManager::LocalLeafIdsOnLevel(unsigned int const level) const {
-   std::vector<std::uint64_t> leaves;
-   int const rank_id = MpiUtilities::MyRankId();
-   for(TopologyNode const& node : forest_) {
-      node.LocalLeavesOnLevel(leaves, rank_id, level);
-   }
-   return leaves;
+std::vector<nid_t> TopologyManager::LocalLeafIdsOnLevel( unsigned int const level ) const {
+   std::vector<nid_t> local_leaves;
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( local_leaves ),
+         [level, rank = MpiUtilities::MyRankId()]( auto const& id_node ) {
+            auto const& [id, node] = id_node;
+            return LevelOfNode( id ) == level && node.IsLeaf() && node.IsOnRank( rank );
+         },
+         []( auto const& in ) { return std::get<0>( in ); } );
+   return local_leaves;
 }
 
 /**
@@ -426,183 +461,18 @@ std::vector<std::uint64_t> TopologyManager::LocalLeafIdsOnLevel(unsigned int con
  * @param level The level of interest.
  * @return The list of leaf ids.
  */
-std::vector<std::uint64_t> TopologyManager::LeafIdsOnLevel(unsigned int const level) const {
-   std::vector<std::uint64_t> leaves;
-   for(TopologyNode const& node : forest_) {
-      node.GetLeafIdsOnLevel(leaves, level);
-   }
+std::vector<nid_t> TopologyManager::LeafIdsOnLevel( unsigned int const level ) const {
+   std::vector<nid_t> leaves;
+   leaves.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( leaves ),
+         [level]( auto const& id_node ) {
+            auto const& [id, node] = id_node;
+            return LevelOfNode( id ) == level && node.IsLeaf(); },
+         []( auto const& in ) { return std::get<0>( in ); } );
    return leaves;
-}
-
-/**
- * @brief Assigns the target rank (rank on which the node SHOULD reside) to all leaf nodes.
- *        Uses either a linear or Hilbert Traversal to determine the target rank.
- * @param number_of_ranks The number of ranks available to distribute the load onto.
- */
-void TopologyManager::AssignTargetRankToLeaves( int const number_of_ranks) {
-
-   std::vector<std::vector<std::tuple<unsigned int, int>>> ids_current_future_rank_map; //[level][(weight,rank)]
-   ids_current_future_rank_map.reserve(number_of_ranks);
-
-   std::vector<unsigned int> weight_list(WeightsOnLevels());
-
-   for(unsigned int level=0; level <= maximum_level_; level++) {
-      int const weight_per_rank = weight_list[level] / number_of_ranks; //Here normal ints due to MPI Standard. (for ranks and number of ranks)
-      int const remainder       = weight_list[level] % number_of_ranks;
-      ids_current_future_rank_map.push_back(std::vector<std::tuple<unsigned int, int>>());
-      for(int rank = 0; rank < number_of_ranks; rank++) {
-         if(rank < remainder) {
-            ids_current_future_rank_map[level].push_back(std::make_tuple(weight_per_rank+1, rank));
-         } else {
-            ids_current_future_rank_map[level].push_back(std::make_tuple(weight_per_rank , rank));
-         }
-      }
-      std::reverse(ids_current_future_rank_map[level].begin(), ids_current_future_rank_map[level].end());
-   }
-
-#ifndef HILBERT
-   for(TopologyNode& node : forest_) {
-      node.SetTargetRankForLeaf(ids_current_future_rank_map);
-   }
-#else
-
-   // We traverse the domain in a Hilbert curve traversal, as we have shadow levels, however, some considerations on the forest_ have to be
-   // done so the curve is correct.
-
-   bool x_inverse = false; //Inverse: reverse traversal when going back.
-   bool y_inverse = false;
-   for( unsigned int i = 0; i < level_zero_nodes_xyz_[2]; ++i ) {
-      if( !y_inverse ) {
-         for( unsigned int j = 0; j < level_zero_nodes_xyz_[1]; ++j ) {
-            if(!x_inverse){
-               for( unsigned int k = 0; k < level_zero_nodes_xyz_[0]; ++k ) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * level_zero_nodes_xyz_[1] * level_zero_nodes_xyz_[0] + j * level_zero_nodes_xyz_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::z_x_y );
-               }
-            } else {
-               for( int k = level_zero_nodes_xyz_[0] - 1; k >=0 ; --k) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * level_zero_nodes_xyz_[1] * level_zero_nodes_xyz_[0] + j * level_zero_nodes_xyz_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::_z_xy );
-               }
-            }
-            x_inverse = !x_inverse;
-         }
-      } else {
-         for( int j = level_zero_nodes_xyz_[1] - 1; j >= 0; --j ) {
-            if( !x_inverse ) {
-               for( unsigned int k = 0; k < level_zero_nodes_xyz_[0]; ++k ) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * level_zero_nodes_xyz_[1] * level_zero_nodes_xyz_[0] + j * level_zero_nodes_xyz_[0] + k;
-                  forest_[z].SetTargetRankForLeaf( ids_current_future_rank_map, HilbertPosition::z_x_y );
-                 }
-            } else {
-               for(int k = level_zero_nodes_xyz_[0] - 1; k >=0 ; --k) {
-                  //Implicit type conversions, but do no harm
-                  int z = i * level_zero_nodes_xyz_[1] * level_zero_nodes_xyz_[0] + j * level_zero_nodes_xyz_[0] + k;
-                  forest_[z].SetTargetRankForLeaf(ids_current_future_rank_map, HilbertPosition::_z_xy);
-               }
-            }
-            x_inverse = !x_inverse;
-         }
-      }
-      y_inverse = !y_inverse;
-   }
-#endif
-
-#ifndef PERFORMANCE
-   // Sanity Check.
-   for(unsigned int i = 0; i <= maximum_level_; i++) {
-      if(std::get<0>(ids_current_future_rank_map[i].back()) != 0) {
-         throw std::logic_error("TopologyManager::AssignTargetRankToLeaves Some miscalculations in the distribution of leaves per rank");
-      }
-   }
-#endif
-}
-
-/**
- * @brief Gives the position of the zero level ancestor node identified by the given id in the forest.
- * @param id The id of the node whose ancestor's position is to be determined
- * @return The index of the ancestor node in the zero topology. -1 If no such node could be found.
- */
-int TopologyManager::PositionOfNodeInZeroTopology(std::uint64_t const id) const {
-
-   std::uint64_t level_zero_id = id;
-   while(LevelOfNode(level_zero_id) != 0) {
-      level_zero_id = ParentIdOfNode(level_zero_id);
-   }
-
-   auto node_iterator = std::find_if(forest_.begin(),forest_.end(),[&level_zero_id](const TopologyNode& node){return node.Id() == level_zero_id;});
-
-   if(node_iterator == forest_.end()) {
-      return -1;
-   }  else {
-      return std::distance(forest_.begin(),node_iterator);
-   }
-}
-
-/**
- * @brief Calculates a balanced distribution of nodes among the MPI ranks and assigns the determined rank to the nodes.
- *        Does not directly shift nodes among ranks! "Prepares for sending Load".
- */
-void TopologyManager::AssignBalancedLoad() {
-   for(TopologyNode& node : forest_) {
-      node.BalanceTargetRanks();
-   }
-}
-
-/**
- * @brief Gives a list of all nodes, that need to be balanced, i.e. shifted to another MPI rank.
- * @param ids_current_future_rank_map Indirect return parameter.
- * @note Lists the ranks to be balanced as tuple of their id, their current rank and the rank they are supposed to be shifted to
- */
-void TopologyManager::ListNodeToBalance(std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map) {
-   for(TopologyNode& node : forest_) {
-      node.ListUnbalancedNodes(ids_current_future_rank_map);
-   }
-}
-
-/**
- * @brief Gives some statistics about the distribution of leaves on the ranks.
- * @param number_of_ranks The number of ranks for which distribution is to be documented.
- * @return Formatted string of the leaf-rank distribution.
- */
-std::string TopologyManager::LeafRankDistribution(int const number_of_ranks) {
-
-   std::string leaf_rank_distribution;
-
-   std::vector<std::vector<int>> leaves_per_level_per_rank( maximum_level_ + 1, std::vector<int>(number_of_ranks,0) );
-   for( unsigned int level = 0; level < maximum_level_ + 1; level++ ) {
-      std::vector<std::uint64_t> leaves = LeafIdsOnLevel(level);
-      for(std::uint64_t id : leaves) {
-         int const rank = GetRankOfNode(id);
-         leaves_per_level_per_rank[level][rank]++;
-      }
-   }
-
-   leaf_rank_distribution.append("+++ leave rank distribution +++ ");
-   for( unsigned int level = 0; level < maximum_level_ + 1; level++ ) {
-      leaf_rank_distribution.append("Level: " + std::to_string(level));
-      for(int rank = 0; rank < number_of_ranks; rank++) {
-         leaf_rank_distribution.append("Rank: " + std::to_string(rank) + " --> " + std::to_string(leaves_per_level_per_rank[level][rank]) + " | ");
-      }
-      leaf_rank_distribution.append(" - ");
-   }
-
-   return leaf_rank_distribution;
-}
-
-/**
- * @brief Gives a list with the combined computation load (weight) on all levels.
- * @return List of summed weights on each level.
- */
-std::vector<unsigned int> TopologyManager::WeightsOnLevels() const {
-   std::vector<unsigned int> weights_on_level( maximum_level_ + 1 ); //If max level is = 2 we need 3 elements "0, 1, 2".
-   for(const TopologyNode& node : forest_){
-      node.ChildWeight(weights_on_level);
-   }
-   return weights_on_level;
 }
 
 /**
@@ -610,38 +480,163 @@ std::vector<unsigned int> TopologyManager::WeightsOnLevels() const {
  * @param level Level of interest.
  * @return Ids of Nodes on level.
  */
-std::vector<std::uint64_t> TopologyManager::GlobalIdsOnLevel(unsigned int const level) const {
-   std::vector<std::uint64_t> ids;
-   for(const TopologyNode& node : forest_) {
-      node.IdsOnLevel(level,ids);
-   }
+std::vector<nid_t> TopologyManager::IdsOnLevel( unsigned int const level ) const {
+   std::vector<nid_t> ids;
+   ids.reserve( forest_.size() / ( ( maximum_level_ - level ) + 2 ) );//The idea is that most ids are on the finest level
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( ids ),
+         [level]( auto const& in ) { return LevelOfNode( std::get<0>( in ) ) == level; },
+         []( auto const& in ) { return std::get<0>( in ); } );
    return ids;
 }
 
 /**
- * @brief Gives out the ids of only locally existent nodes on the specifed level for a given rank
+ * @brief Gives the ids of locally existent nodes on the specifed level for a given rank.
  * @param level Level of interest.
- * @param rank_id The rank for which the node ids should be given
  * @return Ids of local Nodes on level.
  */
-std::vector<std::uint64_t> TopologyManager::IdsOnLevelOfRank(unsigned int const level, int const rank_id) const {
-   std::vector<std::uint64_t> ids;
-   for(const TopologyNode& node : forest_) {
-      node.LocalIdsOnLevel(level, ids, rank_id);
-   }
+std::vector<nid_t> TopologyManager::LocalIdsOnLevel( unsigned int const level ) const {
+   std::vector<nid_t> ids;
+   ids.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( ids ),
+         [level, rank = MpiUtilities::MyRankId()]( auto const& id_node ) {
+            auto const& [id, node] = id_node;
+            return LevelOfNode( id ) == level && node.IsOnRank( rank );
+         },
+         []( auto const& in ) { return std::get<0>( in ); } );
    return ids;
+}
+
+/**
+ * @brief Assigns the target rank to leaves ( rank on which the leaf SHOULD reside ) such that
+ *        leaves are distributed among all ranks equally.
+ * @param leaves The list of leaves that are to be assigned with a target rank.
+ * @param number_of_ranks The number of ranks available to distribute the load onto.
+ */
+void TopologyManager::AssignTargetRanksToLeavesInList( std::vector<nid_t> const& leaves, int const number_of_ranks ) {
+   auto const elements_per_rank = ElementsPerRank( leaves.size(), number_of_ranks );
+   std::size_t start            = 0;
+   for( int rank_id = 0; rank_id < number_of_ranks; ++rank_id ) {
+      for( std::size_t i = start; i < start + elements_per_rank[rank_id]; ++i ) {
+         forest_.at( leaves[i] ).AssignTargetRank( rank_id );
+      }
+      start += elements_per_rank[rank_id];
+   }
+}
+
+/**
+ * @brief Assigns the target rank ( rank on which the node SHOULD reside ) based on a space-filling curve to all leaf nodes.
+ * @param number_of_ranks The number of ranks available to distribute the load onto.
+ */
+void TopologyManager::AssignTargetRankToLeaves( int const number_of_ranks ) {
+
+   for( unsigned int level = 0; level <= maximum_level_; ++level ) {
+      std::vector<nid_t> leaves = LeafIdsOnLevel( level );
+      // On maximum levels all multies are levelset nodes on coarser levels no levelset exists
+      auto start_multi = std::partition( std::begin( leaves ), std::end( leaves ), [&forest = forest_]( nid_t const node_id ) { return !IsMultiPhase( forest.at( node_id ) ); } );
+      std::vector<nid_t> multiphase_leaves( start_multi, std::end( leaves ) );
+      leaves.erase( start_multi, std::end( leaves ) );
+      OrderNodeIdsBySpaceFillingCurve( leaves );
+      OrderNodeIdsBySpaceFillingCurve( multiphase_leaves );
+      AssignTargetRanksToLeavesInList( leaves, number_of_ranks );
+      AssignTargetRanksToLeavesInList( multiphase_leaves, number_of_ranks );
+   }
+}
+
+/**
+ * @brief Takes the most frequent rank among children nodes and assigns it as the target rank of their parent.
+ * This is done on parents of all levels.
+ */
+void TopologyManager::AssignTargetRankToParents() {
+   std::vector<unsigned int> const descending_levels = ElementsDescendingFrom( maximum_level_ );
+   for( auto const level : descending_levels ) {
+      for( auto& [id, node] : forest_ ) {
+         if( !node.IsLeaf() && LevelOfNode( id ) == level ) {
+            std::unordered_map<int, std::size_t> child_rank_counter;
+            child_rank_counter.reserve( CC::NOC() );
+            for( auto const cid : IdsOfChildren( id ) ) {
+               child_rank_counter[forest_.at( cid ).TargetRank()]++;
+            }
+            node.AssignTargetRank( std::get<0>( *std::max_element(
+                  std::cbegin( child_rank_counter ),
+                  std::cend( child_rank_counter ),
+                  []( auto const& a, auto const& b ) { return std::get<1>( a ) < std::get<1>( b ); } ) ) );
+         }
+      }
+   }
+}
+/**
+ * @brief Iterates through the topology and sets the current to match the target rank.
+ */
+void TopologyManager::SetCurrentRanksAccordingToTargetRanks() {
+   std::for_each( std::begin( forest_ ), std::end( forest_ ), []( auto& in ) { std::get<1>( in ).SetCurrentRankAccordingToTargetRank(); } );
+}
+
+/**
+ * @brief Gives a list of all nodes, that need to be balanced, i.e. shifted to another MPI rank.
+ * @return List of all nodes to be transferred to another rank.
+ * @note Lists the ranks to be balanced as tuple of their id, their current rank and the rank they are supposed to be shifted to
+ */
+std::vector<std::tuple<nid_t const, int const, int const>> TopologyManager::NodesToBalance() {
+   std::vector<std::tuple<nid_t const, int const, int const>> ids_current_target_rank_map;
+   ids_current_target_rank_map.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( ids_current_target_rank_map ),
+         []( auto const& in ) { return !std::get<1>( in ).IsBalanced(); },
+         []( auto const& in ) {
+            auto const& [id, node] = in;
+            return std::make_tuple( id, node.Rank(), node.TargetRank() );
+         } );
+   return ids_current_target_rank_map;
+}
+
+/**
+ * @brief Gives some statistics about the distribution of leaves on the ranks.
+ * @param number_of_ranks The number of ranks for which distribution is to be documented.
+ * @return Formatted string of the leaf-rank distribution.
+ */
+std::string TopologyManager::LeafRankDistribution( int const number_of_ranks ) {
+
+   std::string leaf_rank_distribution;
+   leaf_rank_distribution.reserve( 31 + maximum_level_ * ( 10 + number_of_ranks * 20 ) );
+
+   std::vector<std::vector<int>> leaves_per_level_per_rank( maximum_level_ + 1, std::vector<int>( number_of_ranks, 0 ) );
+   for( unsigned int level = 0; level < maximum_level_ + 1; level++ ) {
+      std::vector<nid_t> leaves = LeafIdsOnLevel( level );
+      for( nid_t id : leaves ) {
+         int const rank = GetRankOfNode( id );
+         leaves_per_level_per_rank[level][rank]++;
+      }
+   }
+
+   leaf_rank_distribution.append( "+++ leave rank distribution +++ " );
+   for( unsigned int level = 0; level < maximum_level_ + 1; level++ ) {
+      leaf_rank_distribution.append( "Level: " + std::to_string( level ) + " " );
+      for( int rank = 0; rank < number_of_ranks; rank++ ) {
+         leaf_rank_distribution.append( "Rank: " + std::to_string( rank ) + " --> " + std::to_string( leaves_per_level_per_rank[level][rank] ) + " | " );
+      }
+      leaf_rank_distribution.append( " - " );
+   }
+
+   return leaf_rank_distribution;
 }
 
 /**
  * @brief Gives whether the node with the given id is a multi-phase node, i.e. contains more than one material.
  * @param id Id of the node in question.
  * @return True if the node is multi-phase, false if it is single-phase.
- * 
- * @note This is different to the call function node.HasLevelset(). Only on the finest level both are equivalent. Multiphase nodes can also exist on coarser 
- *       levels, whereas levelset containing nodes cannot. 
+ * @note This is function differs from querying presence of a levelset. Here also nodes on levels other than maximum may return true.
+ *       This function favors feature-envy implementations. It should not be used and rather be a private function.
  */
-bool TopologyManager::IsNodeMultiPhase(std::uint64_t const id) const {
-   return forest_[PositionOfNodeInZeroTopology(id)].GetFluids(id).size() > 1;
+bool TopologyManager::IsNodeMultiPhase( nid_t const id ) const {
+   return IsMultiPhase( forest_.at( id ) );
 }
 
 /**
@@ -649,9 +644,9 @@ bool TopologyManager::IsNodeMultiPhase(std::uint64_t const id) const {
  * @param id Id of the node the material should be added to.
  * @param material The material to be added to the node.
  */
-void TopologyManager::AddFluidToNode(std::uint64_t const id, MaterialName const material) {
-   std::get<0>(local_added_fluids_list_).push_back(id);
-   std::get<1>(local_added_fluids_list_).push_back(material);
+void TopologyManager::AddMaterialToNode( nid_t const id, MaterialName const material ) {
+   std::get<0>( local_added_materials_list_ ).push_back( id );
+   std::get<1>( local_added_materials_list_ ).push_back( material );
 }
 
 /**
@@ -659,9 +654,9 @@ void TopologyManager::AddFluidToNode(std::uint64_t const id, MaterialName const 
  * @param id Id of the node the material should be removed from.
  * @param material The material to be removed from the node.
  */
-void TopologyManager::RemoveFluidFromNode(std::uint64_t const id, MaterialName const material) {
-   std::get<0>(local_removed_fluids_list_).push_back(id);
-   std::get<1>(local_removed_fluids_list_).push_back(material);
+void TopologyManager::RemoveMaterialFromNode( nid_t const id, MaterialName const material ) {
+   std::get<0>( local_removed_materials_list_ ).push_back( id );
+   std::get<1>( local_removed_materials_list_ ).push_back( material );
 }
 
 /**
@@ -669,17 +664,17 @@ void TopologyManager::RemoveFluidFromNode(std::uint64_t const id, MaterialName c
  * @param id Id of the node in question.
  * @return Vector of the materials in the node.
  */
-std::vector<MaterialName> TopologyManager::GetFluidsOfNode(std::uint64_t const id) const {
-   return forest_[PositionOfNodeInZeroTopology(id)].GetFluids(id);
+std::vector<MaterialName> TopologyManager::GetMaterialsOfNode( nid_t const id ) const {
+   return forest_.at( id ).Materials();
 }
 
 /**
- * @brief Gives the fluid in a single phase node.
+ * @brief Gives the material in a single phase node.
  * @param id Node id.
- * @return The fluid.
+ * @return The material.
  */
-MaterialName TopologyManager::SingleFluidOfNode(std::uint64_t const id) const {
-   return forest_[PositionOfNodeInZeroTopology(id)].GetSingleFluid(id);
+MaterialName TopologyManager::SingleMaterialOfNode( nid_t const id ) const {
+   return forest_.at( id ).SingleMaterial();
 }
 
 /**
@@ -688,25 +683,21 @@ MaterialName TopologyManager::SingleFluidOfNode(std::uint64_t const id) const {
  * @param material Material in question.
  * @return True if the material is present in the node, false otherwise.
  */
-bool TopologyManager::NodeContainsFluid(std::uint64_t const node_id, MaterialName const material) const {
-   auto materials = GetFluidsOfNode(node_id);
-   auto block_iterator = std::find(materials.begin(),materials.end(),material);
-   if(block_iterator == materials.end()) {
-      return false;
-   } else {
-      return true;
-   }
+bool TopologyManager::NodeContainsMaterial( nid_t const node_id, MaterialName const material ) const {
+   auto materials      = GetMaterialsOfNode( node_id );
+   auto block_iterator = std::find( materials.begin(), materials.end(), material );
+   return block_iterator == materials.end() ? false : true;
 }
 
 /**
  * @brief Indicates - based on the number of mesh changes since last load balancing - whether or not load balancing should be executed.
  * @return Indicator for load balancing.
  */
-bool TopologyManager::IsLoadBalancingNecessary(){
+bool TopologyManager::IsLoadBalancingNecessary() {
    // Check whether load balancing is required based on CC chosen value
    if( coarsenings_since_load_balance_ >= CC::TCULB() || refinements_since_load_balance_ >= CC::TCULB() ) {
-      coarsenings_since_load_balance_= 0;
-      refinements_since_load_balance_= 0;
+      coarsenings_since_load_balance_ = 0;
+      refinements_since_load_balance_ = 0;
       return true;
    } else {
       return false;
@@ -714,27 +705,53 @@ bool TopologyManager::IsLoadBalancingNecessary(){
 }
 
 /**
- * @brief returns the number of global nodes and leaves in a std::pair
- * @return std::pair<#Nodes, #Leaves> 
+ * @brief Gives the number of global nodes and leaves in a std::pair
+ * @return std::pair<#Nodes, #Leaves>
  */
 std::pair<unsigned int, unsigned int> TopologyManager::NodeAndLeafCount() const {
-   std::pair<unsigned int,unsigned int> node_leaf_count = std::make_pair<unsigned int, unsigned int>(0,0);
-   for(const TopologyNode& node : forest_) {
-      node.NodeLeafCount(node_leaf_count);
-   }
-   return node_leaf_count;
+   unsigned int const node_count = forest_.size();
+   unsigned int const leaf_count = std::count_if( std::cbegin( forest_ ), std::cend( forest_ ), []( auto const& in ) { return std::get<1>( in ).IsLeaf(); } );
+   return { node_count, leaf_count };
+}
+
+/**
+ * @brief Gives the number of leaves which contain an interface.
+ * @return number of interface containing leaves.
+ */
+unsigned int TopologyManager::InterfaceLeafCount() const {
+   return std::count_if( std::cbegin( forest_ ), std::cend( forest_ ), []( auto const& in ) { return std::get<1>( in ).IsLeaf() && IsMultiPhase( std::get<1>( in ) ); } );
 }
 
 /**
  * @brief Gives a list of pairs. An entry at index i corresponds to the MPI rank_id i. It lists the node and leaf count on this rank
+ * @param number_of_ranks The number of ranks present in the tree.
  * @return Vector of std::pair<#Nodes, #Leaves> of size total number of ranks.
  */
-std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndLeavesPerRank() const {
-   std::vector<std::pair<unsigned int, unsigned int>> nodes_and_leaves_per_rank;
-   for(const TopologyNode& node : forest_) {
-      node.RankWiseNodeLeafCount(nodes_and_leaves_per_rank);
+std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndLeavesPerRank( int const number_of_ranks ) const {
+   std::vector<std::pair<unsigned int, unsigned int>> nodes_and_leaves_per_rank( number_of_ranks, { 0, 0 } );
+   for( auto const& [id, node] : forest_ ) {
+      auto& [node_count, leaf_count] = nodes_and_leaves_per_rank.at( node.Rank() );
+      node_count++;
+      if( node.IsLeaf() ) {
+         leaf_count++;
+      }
    }
    return nodes_and_leaves_per_rank;
+}
+
+/**
+ * @brief Gives the number of leaves which contain an interface for each rank.
+ * @param number_of_ranks The number of ranks present in the tree.
+ * @return Vector of interface leaf counts. Postion refelects rank id.
+ */
+std::vector<unsigned int> TopologyManager::InterfaceLeavesPerRank( int const number_of_ranks ) const {
+   std::vector<unsigned int> interface_leaves_per_rank( number_of_ranks, 0 );
+   for( auto const& [id, node] : forest_ ) {
+      if( node.IsLeaf() && IsMultiPhase( node ) ) {
+         interface_leaves_per_rank.at( node.Rank() ) += 1;
+      }
+   }
+   return interface_leaves_per_rank;
 }
 
 /**
@@ -742,22 +759,23 @@ std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndLeav
  * @return std::pair<#Nodes, #Blocks>
  */
 std::pair<unsigned int, unsigned int> TopologyManager::NodeAndBlockCount() const {
-   std::pair<unsigned int,unsigned int> node_block_count = std::make_pair<unsigned int, unsigned int>(0,0);
-   for(const TopologyNode& node : forest_) {
-      node.NodeBlockCount(node_block_count);
-   }
-   return node_block_count;
+   unsigned int const node_count  = forest_.size();
+   unsigned int const block_count = std::accumulate( std::cbegin( forest_ ), std::cend( forest_ ), 0, []( auto sum, auto const& in ) { return sum += std::get<1>( in ).NumberOfMaterials(); } );
+   return { node_count, block_count };
 }
 
 /**
  * @brief Gives a list of pairs. An entry at index i corresponds to the MPI rank_id i. It lists the node and block count on this rank
  * std::pair<#Nodes, #Blocks>.
+ * @param number_of_ranks The number of ranks present in the tree.
  * @return Vector of std::pair<#Nodes, #Blocks> of size total number of ranks.
  */
-std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndBlocksPerRank() const {
-   std::vector<std::pair<unsigned int, unsigned int>> nodes_and_blocks_per_rank;
-   for(const TopologyNode& node : forest_) {
-      node.RankWiseNodeBlockCount(nodes_and_blocks_per_rank);
+std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndBlocksPerRank( int const number_of_ranks ) const {
+   std::vector<std::pair<unsigned int, unsigned int>> nodes_and_blocks_per_rank( number_of_ranks, { 0, 0 } );
+   for( auto const& [id, node] : forest_ ) {
+      auto& [node_count, block_count] = nodes_and_blocks_per_rank.at( node.Rank() );
+      node_count++;
+      block_count += node.NumberOfMaterials();
    }
    return nodes_and_blocks_per_rank;
 }
@@ -767,11 +785,7 @@ std::vector<std::pair<unsigned int, unsigned int>> TopologyManager::NodesAndBloc
  * @return Number of Multiphase nodes
  */
 unsigned int TopologyManager::MultiPhaseNodeCount() const {
-   unsigned int count = 0;
-   for( TopologyNode const& node : forest_ ) {
-      count += node.MultiPhaseNodeCount();
-   }
-   return count;
+   return std::count_if( std::cbegin( forest_ ), std::cend( forest_ ), []( auto const& in ) { return IsMultiPhase( std::get<1>( in ) ); } );
 }
 
 /**
@@ -782,127 +796,117 @@ unsigned int TopologyManager::MultiPhaseNodeCount() const {
  * @param materials The material identifiers for all phases. The length equals the accumulation of all entries in number_of_phases.
  * @return A list identifying the nodes that are handled by the current rank by means of their indices in the input list ids.
  */
-std::vector<unsigned int> TopologyManager::RestoreTopology( std::vector<std::uint64_t> ids, std::vector<unsigned short> number_of_phases,
-                                                            std::vector<unsigned short> materials ) {
-   std::array<std::vector<unsigned int>, CC::AMNL()> indices_on_level;
-   for(unsigned int index = 0; index < ids.size(); ++index) {
-      indices_on_level[LevelOfNode(ids[index])].push_back(index);
+std::vector<unsigned int> TopologyManager::RestoreTopology( std::vector<nid_t> ids, std::vector<unsigned short> number_of_phases,
+                                                            std::vector<MaterialName> materials ) {
+
+   forest_.clear();
+   constexpr int initial_rank = 0;//We first assign all nodes to rank 0, then we balance. This gives consistency between ranks.
+   for( std::size_t i = 0, material_counter = 0; i < ids.size(); ++i ) {
+      std::vector<MaterialName> const materials_in_node( std::cbegin( materials ) + material_counter, std::cbegin( materials ) + material_counter + number_of_phases.at( i ) );
+      material_counter += number_of_phases.at( i );
+      forest_.emplace( std::piecewise_construct, std::forward_as_tuple( ids.at( i ) ), std::forward_as_tuple( materials_in_node, initial_rank ) );
    }
 
-   // sanity check on level 0 (no PERFORMANCE macro required here since only used during restart of simulations)
-   if(indices_on_level[0].size() != forest_.size()) {
-      throw std::runtime_error("Level-zero topology of input and restart file do not match! (size)");
-   }
-   for(auto const index_node : indices_on_level[0]) {
-      if(PositionOfNodeInZeroTopology(ids[index_node]) == -1) {
-         throw std::runtime_error("Level-zero topology of input and restart file do not match! (topology)");
+   for( auto& [id, node] : forest_ ) {
+      nid_t const first_child_id = IdsOfChildren( id ).front();
+      if( forest_.contains( first_child_id ) ) {
+         node.MakeParent();
       }
    }
 
-   // build up the topology tree
-   for(unsigned int level = 0; level < CC::AMNL(); ++level) {
-      for(auto const index_node : indices_on_level[level]) {
-         std::uint64_t const id = ids[index_node];
-         TopologyNode& root = forest_[PositionOfNodeInZeroTopology(id)];
-         // check whether the parent has to be refined
-         if(!root.NodeExists(id)) {
-            root.Refine(ParentIdOfNode(id)); // safe to call on level 0 because the nodes always exist
-         }
-         // assign the node's materials
-         unsigned int offset_material = std::accumulate(number_of_phases.begin(), number_of_phases.begin()+index_node, 0);
-         for(unsigned int index_material = offset_material; index_material < offset_material + number_of_phases[index_node]; ++index_material) {
-            root.AddFluid(id, static_cast<MaterialName>(materials[index_material]));
-         }
-      }
-   }
-
-   // load balance topology
-   GetLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
+   PrepareLoadBalancedTopology( MpiUtilities::NumberOfRanks() );
 
    // return the indices in the input list of the nodes that ended up on this rank
-   std::vector<unsigned int> local_indices;
-   int const rank_id = MpiUtilities::MyRankId();
-   for(unsigned int index = 0; index < ids.size(); ++index) {
-      if(GetRankOfNode(ids[index]) == rank_id) {
-         local_indices.push_back(index);
-      }
-   }
-   return local_indices;
+   std::vector<nid_t> local_indices;
+   local_indices.reserve( ( forest_.size() / MpiUtilities::NumberOfRanks() ) + 1 );//+1 acts as integer-ceil.
+   int const my_rank = MpiUtilities::MyRankId();
+   ContainerOperations::transform_if(
+         std::cbegin( forest_ ),
+         std::cend( forest_ ),
+         std::back_inserter( local_indices ),
+         [my_rank]( auto const& in ) { return std::get<1>( in ).Rank() == my_rank; },
+         []( auto const& in ) { return std::get<0>( in ); } );
+
+   std::vector<unsigned int> indices_of_local_nodes( local_indices.size() );
+   std::transform( std::cbegin( local_indices ),
+                   std::cend( local_indices ),
+                   std::begin( indices_of_local_nodes ),
+                   [&ids]( auto const id ) {
+                      return std::distance( std::cbegin( ids ),
+                                            std::find( std::cbegin( ids ),
+                                                       std::cend( ids ),
+                                                       id ) );
+                   } );
+   return indices_of_local_nodes;
 }
 
 /**
  * @brief Returns a list of all neighboring leaf ids of a node in a given direction.
  * @param node_id Id of the node in question.
  * @param direction Direction in which to check for neighbors.
- * @return List of tuple of node ids of neighboring leaves and their tree level difference compared to node_id 
+ * @return List of tuple of node ids of neighboring leaves and their tree level difference compared to node_id
  */
-std::vector<std::uint64_t> TopologyManager::GetNeighboringLeaves(std::uint64_t const node_id, BoundaryLocation const direction)const {
+std::vector<nid_t> TopologyManager::GetNeighboringLeaves( nid_t const node_id, BoundaryLocation const direction ) const {
 
-   std::vector<std::uint64_t> id_list;
-   if( !IsExternalBoundary( direction, node_id, level_zero_nodes_xyz_) ) {
-      std::uint64_t neighbor_id = GetNeighborId( node_id, direction );
-      if( NodeExists( neighbor_id ) ){
-         //find set of lowest level neighbors (leaves)
-         std::function<bool( std::uint64_t const )> sibling_function;
+   std::vector<nid_t> id_list;
+   if( !IsExternalBoundary( direction, node_id, number_of_nodes_on_level_zero_ ) ) {
+      nid_t neighbor_id = GetNeighborId( node_id, direction );
+      if( NodeExists( neighbor_id ) ) {
+         //find set of lowest level neighbors ( leaves )
+         std::function<bool( nid_t const )> sibling_function;
          switch( direction ) {
             case BoundaryLocation::West: {
                sibling_function = EastInSiblingPack;
-            }
-            break;
+            } break;
             case BoundaryLocation::East: {
                sibling_function = WestInSiblingPack;
-            }
-            break;
+            } break;
             case BoundaryLocation::North: {
                sibling_function = SouthInSiblingPack;
-            }
-            break;
+            } break;
             case BoundaryLocation::South: {
                sibling_function = NorthInSiblingPack;
-            }
-            break;
+            } break;
             case BoundaryLocation::Bottom: {
                sibling_function = TopInSiblingPack;
-            }
-            break;
+            } break;
 #ifndef PERFORMANCE
             case BoundaryLocation::Top: {
                sibling_function = BottomInSiblingPack;
-            }
-            break;
+            } break;
             default:
-               throw std::invalid_argument("Got invalid direction for TopologyManager::GetNeighborLeavesAndLevelDifference()");
-#else 
+               throw std::invalid_argument( "Got invalid direction for TopologyManager::GetNeighborLeavesAndLevelDifference()" );
+#else
             default: /* BoundaryLocation::Top */ {
                sibling_function = BottomInSiblingPack;
             }
 #endif
          }
-         std::vector<std::uint64_t> open_neighbor_ids;
+         std::vector<nid_t> open_neighbor_ids;
          open_neighbor_ids.push_back( neighbor_id );
-         while( open_neighbor_ids.size() > 0 ){
-            std::uint64_t open_id = open_neighbor_ids.back();
+         while( open_neighbor_ids.size() > 0 ) {
+            nid_t open_id = open_neighbor_ids.back();
             open_neighbor_ids.pop_back();
             if( NodeIsLeaf( open_id ) ) {
                //open_id is leaf node -> add to list
                id_list.push_back( open_id );
-            }else{
+            } else {
                //open_id has children -> get the relevant ones
-               std::vector<std::uint64_t> const open_children_ids = IdsOfChildren( open_id );
-               for( std::uint64_t open_children_id : open_children_ids ){
+               std::vector<nid_t> const open_children_ids = IdsOfChildren( open_id );
+               for( nid_t open_children_id : open_children_ids ) {
                   if( sibling_function( open_children_id ) ) {
-                   open_neighbor_ids.push_back( open_children_id );
+                     open_neighbor_ids.push_back( open_children_id );
                   }
                }
             }
          }
-      }else{
-          //neighbor has lower resolution
-          while(!NodeExists(neighbor_id) && neighbor_id > 2){
-              neighbor_id = ParentIdOfNode(neighbor_id);
-          }
-          //should not need test, since node is not supposed to be boundary
-          if(neighbor_id > 2) id_list.push_back(neighbor_id);
+      } else {
+         //neighbor has lower resolution
+         while( !NodeExists( neighbor_id ) && neighbor_id > 2 ) {
+            neighbor_id = ParentIdOfNode( neighbor_id );
+         }
+         //should not need test, since node is not supposed to be boundary
+         if( neighbor_id > 2 ) id_list.push_back( neighbor_id );
       }
    }
    return id_list;
@@ -913,11 +917,88 @@ std::vector<std::uint64_t> TopologyManager::GetNeighboringLeaves(std::uint64_t c
  * @brief Gives a rank specific offset, i. e. a count of how many leafs are on lower (by rank id) rank.
  *        (e.g., three ranks with three leaves each. Offset rank 0 = 0, Offset rank 1 = 3, Offset rank 2 = 6)
  * @param rank The rank for which the offset is to be obtained.
+ * @param number_of_ranks The total number of ranks for this distribution.
  * @return The offset.
  */
-long long unsigned int TopologyManager::LeafOffsetOfRank( int const rank ) const {
-   std::vector<std::pair<unsigned int, unsigned int>>&& rank_node_map = NodesAndLeavesPerRank();
-   auto const cend = rank_node_map.size() > std::size_t( rank ) ? rank_node_map.cbegin() + rank : rank_node_map.cend();
-   return std::accumulate( rank_node_map.cbegin(), cend, 0ll,
-                           []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ){ return a + b.second; } );
+unsigned long long int TopologyManager::LeafOffsetOfRank( int const rank, int const number_of_ranks ) const {
+   std::vector<std::pair<unsigned int, unsigned int>>&& rank_node_map = NodesAndLeavesPerRank( number_of_ranks );
+   auto const final_iterator                                          = rank_node_map.size() > std::size_t( rank ) ? std::cbegin( rank_node_map ) + rank : std::cend( rank_node_map );
+   return std::accumulate( std::cbegin( rank_node_map ), final_iterator, 0ll,
+                           []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ) { return a + b.second; } );
+}
+
+/**
+ * @brief Gives a rank specific offset, i. e. a count of how many interface leafs are on lower ( by rank id ) rank.
+ * @param rank The rank for which the offset is to be obtained.
+ * @param number_of_ranks The total number of ranks for this distribution.
+ * @return The offset.
+ */
+unsigned long long int TopologyManager::InterfaceLeafOffsetOfRank( int const rank, int const number_of_ranks ) const {
+   std::vector<unsigned int> rank_node_map = InterfaceLeavesPerRank( number_of_ranks );
+   auto const final_iterator               = rank_node_map.size() > std::size_t( rank ) ? std::cbegin( rank_node_map ) + rank : std::cend( rank_node_map );
+   return std::accumulate( std::cbegin( rank_node_map ), final_iterator, 0ll );
+}
+
+/**
+ * @brief Gives a rank specific offset, i. e. a count of how many nodes are on lower ( by rank id ) rank.
+ * @param rank The rank for which the offset is to be obtained.
+ * @param number_of_ranks The total number of ranks for this distribution.
+ * @return The offset.
+ */
+unsigned long long int TopologyManager::NodeOffsetOfRank( int const rank, int const number_of_ranks ) const {
+   std::vector<std::pair<unsigned int, unsigned int>> const rank_node_map = NodesAndLeavesPerRank( number_of_ranks );
+   auto const final_iterator                                              = rank_node_map.size() > std::size_t( rank ) ? std::cbegin( rank_node_map ) + rank : std::cend( rank_node_map );
+   return std::accumulate( std::cbegin( rank_node_map ), final_iterator, 0ll,
+                           []( unsigned long long int const sum, std::pair<unsigned int, unsigned int> const& b ) { return sum + b.first; } );
+}
+
+/**
+ * @brief Gives a rank specific offset, i. e. a count of how many nodes and block are on lower ( by rank id ) rank.
+ * @param rank The rank for which the offset is to be obtained.
+ * @param number_of_ranks The total number of ranks for this distribution.
+ * @return The offset.
+ */
+std::pair<unsigned long long int, unsigned long long int> TopologyManager::NodeAndBlockOffsetOfRank( int const rank, int const number_of_ranks ) const {
+   std::vector<std::pair<unsigned int, unsigned int>> const rank_node_block_map = NodesAndBlocksPerRank( number_of_ranks );
+   auto const final_iterator                                                    = rank_node_block_map.size() > std::size_t( rank ) ? rank_node_block_map.cbegin() + rank : rank_node_block_map.cend();
+   return std::make_pair( std::accumulate( rank_node_block_map.cbegin(), final_iterator, 0u,
+                                           []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ) { return a + b.first; } ),
+                          std::accumulate( rank_node_block_map.cbegin(), final_iterator, 0u,
+                                           []( unsigned int const& a, std::pair<unsigned int, unsigned int> const& b ) { return a + b.second; } ) );
+}
+
+/**
+    * @brief Determines whether a location ( including edges and corners ) of a block is at the edge of the computational domain.
+    * @param location The  direction of the edge under consideration.
+    * @param id The id of the node under investigation.
+    * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
+    * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations ( e. g. NOT Top in 1D ).
+    */
+bool TopologyManager::IsExternalTopologyBoundary( BoundaryLocation const location, nid_t const id ) const {
+   return PeriodicIsExternalBoundary( location, id, number_of_nodes_on_level_zero_, active_periodic_locations_ );
+}
+
+/**
+    * @brief Gives the maximum level
+    * @return Maximum level
+    */
+unsigned int TopologyManager::GetMaximumLevel() const {
+   return maximum_level_;
+}
+/**
+    * @brief Gives the number of nodes on level zero
+    * @return Number of nodes
+    */
+std::array<unsigned int, 3> TopologyManager::GetNumberOfNodesOnLevelZero() const {
+   return number_of_nodes_on_level_zero_;
+}
+
+/**
+   * @brief Gives the id of a neighbor at the provided direction.
+   * @param id The id of the node whose neighbor is to be found.
+   * @param location Direction in which the neighbor is located.
+   * @return Id of the neighbor.
+   */
+nid_t TopologyManager::GetTopologyNeighborId( nid_t const id, BoundaryLocation const location ) const {
+   return GetPeriodicNeighborId( id, location, number_of_nodes_on_level_zero_, active_periodic_locations_ );
 }

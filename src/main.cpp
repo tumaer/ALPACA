@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,23 +63,21 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include <mpi.h>
-#include <fenv.h> // Floating-Point raising exceptions.
-
-#include "log_writer.h"
 #include "input_output/input_output_manager.h"
-#include "simulation_setup.h"
-#include "materials/material_manager.h"
-#include "topology/topology_manager.h"
-#include "topology/tree.h"
-#include "communication/communication_manager.h"
-#include "modular_algorithm_assembler.h"
-#include "multiresolution/multiresolution.h"
-#include "halo_manager.h"
-#include "boundary_condition/external_halo_manager.h"
+#include <mpi.h>
+#include <filesystem>
+#include <fenv.h>// Floating-Point raising exceptions.
+#ifdef __APPLE__
+#include <xmmintrin.h>
+#endif
+
+#include "instantiation/input_output/instantiation_input_reader.h"
+#include "instantiation/input_output/instantiation_log_writer.h"
+#include "communication/mpi_utilities.h"
+#include "simulation_runner.h"
 
 /**
  * @brief Starting function of ALPACA, called from the operating system.
@@ -92,49 +91,28 @@ int main( int argc, char* argv[] ) {
 
    MPI_Init( &argc, &argv );
    //Triggers signals on floating point errors, i.e. prohibits quiet NaNs and alike
+#ifdef __linux__
    feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
+#endif
+#ifdef __APPLE__
+   _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
+#endif
 
-   //NH Seperate Scope for MPI.
+   //NH separate scope for MPI.
    {
-      LogWriter& logger = LogWriter::Instance();
-
-      // determine the name of the input file (default: inputfile.xml)
-      std::string const input_file( argc > 1 ? argv[1] : "inputfile.xml" );
+      LogWriter& logger = Instantiation::InstantiateLogWriter( MpiUtilities::MasterRank() );
 
       // determine the name of the executable and write it to the logger
-      std::string const  executable_name( argv[0] );
+      std::string const executable_name( argv[0] );
       logger.LogMessage( "Using executable: " + executable_name );
-
-      const SimulationSetup setup( input_file );
-
-
-      MaterialManager material_manager( setup.FluidDataForMaterialManager(), setup.GetSurfaceTensionCoefficients() );
-
-      TopologyManager topology_manager( setup.GetMaximumLevel(), setup.GetLevelZeroBlocksX(), setup.GetLevelZeroBlocksY(), setup.GetLevelZeroBlocksZ(),
-                                        setup.GetActivePeriodicLocations());
-
-      Tree flower( topology_manager, setup.GetMaximumLevel(), setup.LevelZeroBlockSize() );
-
-      ExternalHaloManager external_boundary_manager( setup );
-      CommunicationManager communication_manager( topology_manager, setup.GetMaximumLevel() );
-
-      InputOutputManager input_output( setup, topology_manager, flower );
-      InternalHaloManager internal_boundary_manager( flower,topology_manager, communication_manager, setup.NumberOfFluids() );
-      HaloManager halo_manager( flower, external_boundary_manager, internal_boundary_manager, communication_manager, setup.GetMaximumLevel() );
-
-
-      Multiresolution multiresolution = InstantiateMultiresolution( setup.GetMaximumLevel(), setup.GetUserReferenceLevel(), setup.GetUserReferenceEpsilon() );
-
-      logger.FlushWelcomeMessage();
       logger.Flush();
 
-      ModularAlgorithmAssembler mr_based_algorithm = ModularAlgorithmAssembler( flower, topology_manager, halo_manager, communication_manager,
-                                                                                multiresolution, material_manager, setup, input_output );
+      // determine the name of the input file (default: inputfile.xml)
+      std::filesystem::path const input_file( argc > 1 ? argv[1] : "inputfile.xml" );
+      // Instance to provide interface to the input file/data
+      InputReader const input_reader( Instantiation::InstantiateInputReader( input_file ) );
 
-      mr_based_algorithm.Initialization();
-
-      mr_based_algorithm.ComputeLoop();
-
+      Simulation::Run( input_reader );
       logger.Flush();
    }
 

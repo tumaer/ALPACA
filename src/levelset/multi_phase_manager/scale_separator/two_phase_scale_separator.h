@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,30 +63,28 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TWO_PHASE_SCALE_SEPARATOR_H
 #define TWO_PHASE_SCALE_SEPARATOR_H
 
-
 #include "scale_separator.h"
 
+/**
+ * @brief Class providing the functionality to identify and handle scale separation for levelset fields for two different phases.
+ */
 class TwoPhaseScaleSeparator : public ScaleSeparator<TwoPhaseScaleSeparator> {
 
    friend ScaleSeparator;
 
 private:
-
-   void SeparateScalesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
+   void SeparateScalesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceBlockBufferType const buffer_type ) const;
 
 public:
-
    TwoPhaseScaleSeparator() = delete;
    explicit TwoPhaseScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager );
    ~TwoPhaseScaleSeparator() = default;
-
 };
 
-
-#endif //TWO_PHASE_SCALE_SEPARATOR_H
+#endif//TWO_PHASE_SCALE_SEPARATOR_H

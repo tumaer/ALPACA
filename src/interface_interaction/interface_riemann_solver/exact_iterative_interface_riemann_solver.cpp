@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,13 +63,13 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "exact_iterative_interface_riemann_solver.h"
 
 /**
- * @brief      Calculates the shock/rarefaction relation and its derivative. See \cite Toro2009 .
+ * @brief      Calculates the shock/rarefaction relation and its derivative. See \cite Toro2009.
  *
  * @param[in]  initial_root           The interface pressure of the current iteration.
  * @param[in]  p                      The left/right pressure defining the interface Riemann problem.
@@ -83,13 +84,13 @@
  * @return     The shock/rarefaction relation and its derivative.
  */
 std::array<double, 2> ExactIterativeInterfaceRiemannSolver::ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-   double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
+                                                                                                       double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const {
 
    if( initial_root > p ) {
-      return {ShockRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B ),
-              ShockRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B )};
+      return { ShockRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B ),
+               ShockRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), pressure_function, A, B ) };
    } else {
-      return {RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
-              RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D )};
+      return { RarefactionRelations::Function( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ),
+               RarefactionRelations::Derivative( IterationUtilities::MaterialPressureFunction( initial_root, pressure_constant ), one_pressure_function, C, D ) };
    }
 }

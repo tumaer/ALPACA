@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TIME_INTEGRATOR_SETUP_H
@@ -80,7 +81,7 @@ namespace TimeIntegratorSetup {
 
    /**
     * @brief Function returning the typedef of a TimeIntegrator based on a constexpr template.
-    * 
+    *
     * @tparam TimeIntegrators The constexpr template parameter to specify the exact TimeIntegrator type.
     */
    template<TimeIntegrators>
@@ -101,6 +102,6 @@ namespace TimeIntegratorSetup {
       typedef RungeKutta3TVD type;
    };
 
-}
+}// namespace TimeIntegratorSetup
 
-#endif // TIME_INTEGRATOR_SETUP_H
+#endif// TIME_INTEGRATOR_SETUP_H

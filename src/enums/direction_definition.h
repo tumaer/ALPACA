@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef DIRECTION_DEFINITION_H
@@ -72,16 +73,18 @@
 
 /**
  * @brief Identifier for spatial direction, i.e. x, y and z.
- * 
- * @note Do NOT change the indices of the enum entries (used for mapping in arrays)
+ *
+ * @note Do NOT change the indices of the enum entries (used for mapping in arrays).
  */
-enum class Direction : unsigned int { X = 0, Y = 1, Z = 2 };
+enum class Direction : unsigned int { X = 0,
+                                      Y = 1,
+                                      Z = 2 };
 
 /**
- * @brief Converts a direction identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Direction to Index"
+ * @brief Converts a direction identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Direction To Index".
  * @param d The direction identifier.
  * @return Index to be used in Arrays.
  */
 constexpr std::underlying_type<Direction>::type DTI( Direction const d ) { return static_cast<typename std::underlying_type<Direction>::type>( d ); }
 
-#endif // DIRECTION_DEFINITION_H
+#endif// DIRECTION_DEFINITION_H

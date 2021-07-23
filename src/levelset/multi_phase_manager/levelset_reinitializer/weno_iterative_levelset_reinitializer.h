@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,14 +63,13 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef WENO_ITERATIVE_LEVELSET_REINITIALIZER_H
 #define WENO_ITERATIVE_LEVELSET_REINITIALIZER_H
 
 #include "iterative_levelset_reinitializer_base.h"
-
 
 /**
  * @brief Provides functionality to reinitialize a level-set field with a reconstruction stencil.
@@ -78,26 +78,17 @@ class WenoIterativeLevelsetReinitializer : public IterativeLevelsetReinitializer
 
    friend IterativeLevelsetReinitializerBase;
 
-private:
-
-   /**
-    * @brief Constexpr bool to decide whether also cut cells are reinitialized.
-    */
-   static constexpr bool reinitialize_cut_cells_ = true;
-
 protected:
-
-   double ReinitializeSingleNodeImplementation(Node& node) const;
+   double ReinitializeSingleNodeImplementation( Node& node, InterfaceDescriptionBufferType const levelset_type, bool const is_last_stage ) const;
 
 public:
    WenoIterativeLevelsetReinitializer() = delete;
    explicit WenoIterativeLevelsetReinitializer( HaloManager& halo_manager );
-   ~WenoIterativeLevelsetReinitializer() = default;
+   ~WenoIterativeLevelsetReinitializer()                                           = default;
    WenoIterativeLevelsetReinitializer( WenoIterativeLevelsetReinitializer const& ) = delete;
    WenoIterativeLevelsetReinitializer& operator=( WenoIterativeLevelsetReinitializer const& ) = delete;
-   WenoIterativeLevelsetReinitializer( WenoIterativeLevelsetReinitializer&& ) = delete;
+   WenoIterativeLevelsetReinitializer( WenoIterativeLevelsetReinitializer&& )                 = delete;
    WenoIterativeLevelsetReinitializer& operator=( WenoIterativeLevelsetReinitializer&& ) = delete;
 };
 
-
-#endif //WENO_ITERATIVE_LEVELSET_REINITIALIZER_H
+#endif//WENO_ITERATIVE_LEVELSET_REINITIALIZER_H

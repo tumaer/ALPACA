@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INTERFACE_EXTENDER_SETUP_H
@@ -71,14 +72,14 @@
 #include "user_specifications/numerical_setup.h"
 #include "two_phase_interface_extender.h"
 
-
 /**
  * @brief A namespace to get a InterfaceExtender type based on a specified constexpr.
  */
 namespace InterfaceExtenderSetup {
 
    /**
-    * @brief Function returning the typedef of a InterfaceExtender based on a constexpr template.
+    * @brief Function returning the typedef of a InterfaceExtender based on a constexpr template. For each InterfaceFieldType an extension exists.
+    *
     * @tparam InterfaceExtenders The constexpr template parameter to specify the exact InterfaceExtender type.
     */
    template<InterfaceExtenders>
@@ -89,9 +90,10 @@ namespace InterfaceExtenderSetup {
     */
    template<>
    struct Concretize<InterfaceExtenders::TwoPhase> {
-      typedef TwoPhaseInterfaceExtender type;
+      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::States> type_states;
+      typedef TwoPhaseInterfaceExtender<InterfaceFieldType::Parameters> type_parameters;
    };
 
-}
+}// namespace InterfaceExtenderSetup
 
-#endif // INTERFACE_EXTENDER_SETUP_H
+#endif// INTERFACE_EXTENDER_SETUP_H

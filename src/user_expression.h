@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef USER_EXPRESSION_H
@@ -70,28 +71,47 @@
 
 #include <string>
 #include <vector>
+#include <random>
 
 #include <exprtk.hpp>
+#include "utilities/random_number_generator.h"
 
+template<typename T>
+struct random_number_expression : public exprtk::ifunction<T> {
+
+   RandomNumberGenerator& generator_;
+
+public:
+   random_number_expression() : exprtk::ifunction<T>( 0 ), generator_( RandomNumberGenerator::Instance() ) {}
+   virtual ~random_number_expression() {}
+
+   inline T operator()() {
+      return generator_.GiveRandomNumber();
+   }
+};
 
 /**
  * @brief The UserExpression class represents a user defined mathematical expression with several input and output variables.
  *        It wraps the basic functionality of the powerful expression toolkit (http://www.partow.net/programming/exprtk/index.html).
  */
 class UserExpression {
+   random_number_expression<double> random_number_expression_;
    exprtk::symbol_table<double> symbol_table_;
    exprtk::expression<double> expression_;
 
 public:
    UserExpression() = delete;
-   explicit UserExpression( const std::string expression_string, const std::vector<std::tuple<std::string,double&>> variables_in, const std::vector<std::string> variables_out );
-   ~UserExpression() = default;
+   explicit UserExpression( std::string const& expression,
+                            std::vector<std::string> const& variables_out,
+                            std::vector<std::string> const& function_variables_names,
+                            std::vector<double>& function_variables_values );
+   ~UserExpression()                       = default;
    UserExpression( UserExpression const& ) = delete;
    UserExpression& operator=( UserExpression const& ) = delete;
-   UserExpression( UserExpression&& ) = delete;
+   UserExpression( UserExpression&& )                 = delete;
    UserExpression& operator=( UserExpression&& ) = delete;
 
-   double GetValue( const std::string variable ) const;
+   double GetValue( std::string const variable ) const;
 };
 
-#endif // USER_EXPRESSION_H
+#endif// USER_EXPRESSION_H

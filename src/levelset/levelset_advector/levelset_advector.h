@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef LEVELSET_ADVECTOR_H
 #define LEVELSET_ADVECTOR_H
-
 
 #include "topology/node.h"
 #include "user_specifications/numerical_setup.h"
@@ -84,22 +84,20 @@ class LevelsetAdvector {
 
 public:
    //Private constructor only
-   ~LevelsetAdvector() = default;
-   LevelsetAdvector() = default;
+   ~LevelsetAdvector()                         = default;
+   LevelsetAdvector()                          = default;
    LevelsetAdvector( LevelsetAdvector const& ) = delete;
    LevelsetAdvector& operator=( LevelsetAdvector const& ) = delete;
-   LevelsetAdvector( LevelsetAdvector&& ) = delete;
+   LevelsetAdvector( LevelsetAdvector&& )                 = delete;
    LevelsetAdvector& operator=( LevelsetAdvector&& ) = delete;
 
    /**
     * @brief Calculates the right-hand side to solve the level-set advection equation.
     * @param node The node for which the level-set field is propagated in time.
-    * @param stage The current stage of the Runge-Kutta method.
     */
-   void Advect(Node& node, unsigned int const stage = 0) const {
-      static_cast<DerivedLevelsetAdvector const&>(*this).AdvectImplementation(node, stage);
+   void Advect( Node& node ) const {
+      static_cast<DerivedLevelsetAdvector const&>( *this ).AdvectImplementation( node );
    }
 };
 
-
-#endif //LEVELSET_ADVECTOR_H
+#endif//LEVELSET_ADVECTOR_H

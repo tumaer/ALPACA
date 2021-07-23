@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef NUMEROUS_PHASE_MANAGER_H
@@ -77,22 +78,23 @@ class NumerousPhaseManager : public MultiPhaseManager<NumerousPhaseManager> {
 
    friend MultiPhaseManager;
 
-   void MixImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, const bool is_last_stage = false) const;
-   void ExtendImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void PropagateLevelsetImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void ObtainInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, const bool reset_interface_states = false) const;
-   void InitializeVolumeFractionBufferImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
+   void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void UpdateIntegratedBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const;
+   void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const;
 
 public:
    NumerousPhaseManager() = delete;
    explicit NumerousPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager );
-   ~NumerousPhaseManager() = default;
+   ~NumerousPhaseManager()                             = default;
    NumerousPhaseManager( NumerousPhaseManager const& ) = delete;
    NumerousPhaseManager& operator=( NumerousPhaseManager const& ) = delete;
-   NumerousPhaseManager( NumerousPhaseManager&& ) = delete;
+   NumerousPhaseManager( NumerousPhaseManager&& )                 = delete;
    NumerousPhaseManager& operator=( NumerousPhaseManager&& ) = delete;
 };
 
-
-#endif //NUMEROUS_PHASE_MANAGER_H
+#endif//NUMEROUS_PHASE_MANAGER_H

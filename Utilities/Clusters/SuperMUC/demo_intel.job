@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Initial working directory
+#SBATCH -D <InitialDir>
+
+# Job name
+#SBATCH -J <JobName>
+
+# Output and error files
+#SBATCH -o %j-%x.out
+#SBATCH -e %j-%x.err
+
+# Notification
+#SBATCH --mail-type=end
+#SBATCH --mail-user=<your-email>@<your-host.domain>
+
+# Where to run the simulation
+#SBATCH --partition=<partition>
+
+# Request ressources
+#SBATCH --nodes=<#Nodes>
+#SBATCH --tasks-per-node=48
+#SBATCH --time=<HH:MM:SS>
+
+# Billing information
+#SBATCH --account=<account>
+
+# Setup execution environment
+#SBATCH --export=NONE
+#SBATCH --get-user-env
+
+module load slurm_setup
+module load hdf5/1.8.20-intel-impi-frt-threadsafe
+
+ulimit -s unlimited
+export I_MPI_EXTRA_FILESYSTEM=on
+
+mpiexec ./ALPACA ./<your-inputfile>.xml

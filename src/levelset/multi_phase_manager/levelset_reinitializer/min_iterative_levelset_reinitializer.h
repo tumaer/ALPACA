@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef MIN_ITERATIVE_LEVELSET_REINITIALIZER_H
 #define MIN_ITERATIVE_LEVELSET_REINITIALIZER_H
-
 
 #include "iterative_levelset_reinitializer_base.h"
 
@@ -84,18 +84,16 @@ class MinIterativeLevelsetReinitializer : public IterativeLevelsetReinitializerB
    static constexpr bool subcell_fix_active_ = false;
 
 protected:
-
-   double ReinitializeSingleNodeImplementation(Node& node) const;
+   double ReinitializeSingleNodeImplementation( Node& node, InterfaceDescriptionBufferType const levelset_type, bool const ) const;
 
 public:
    MinIterativeLevelsetReinitializer() = delete;
    explicit MinIterativeLevelsetReinitializer( HaloManager& halo_manager );
-   ~MinIterativeLevelsetReinitializer() = default;
+   ~MinIterativeLevelsetReinitializer()                                          = default;
    MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer const& ) = delete;
    MinIterativeLevelsetReinitializer& operator=( MinIterativeLevelsetReinitializer const& ) = delete;
-   MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer&& ) = delete;
+   MinIterativeLevelsetReinitializer( MinIterativeLevelsetReinitializer&& )                 = delete;
    MinIterativeLevelsetReinitializer& operator=( MinIterativeLevelsetReinitializer&& ) = delete;
 };
 
-
-#endif //MIN_ITERATIVE_LEVELSET_REINITIALIZER_H
+#endif//MIN_ITERATIVE_LEVELSET_REINITIALIZER_H

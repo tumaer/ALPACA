@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,27 +63,28 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef ID_PERIODIC_INFORMATION_H
 #define ID_PERIODIC_INFORMATION_H
 
-#include <cstdint> //64bit ensured ints
 #include <array>
+#include "topology/node_id_type.h"
 #include "boundary_condition/boundary_specifications.h"
 
 /**
  * @brief Unique Identifier for the location of the periodic boundaries. Designed to use as bitmask for finding if the x, y or z axis are periodic.
  */
 enum PeriodicBoundariesLocations : unsigned int {
-   EastWest = 1<<0, NorthSouth = 1<<1, TopBottom = 1<<2
+   EastWest   = 1 << 0,
+   NorthSouth = 1 << 1,
+   TopBottom  = 1 << 2
 };
 
-std::uint64_t GetPeriodicNeighborId( std::uint64_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const level_zero_blocks_xyz,
-                                     unsigned int const active_periodic_locations );
-
-bool PeriodicIsExternalBoundary( BoundaryLocation const location, std::uint64_t const id, std::array<unsigned int, 3> const level_zero_blocks_xyz,
+nid_t GetPeriodicNeighborId( nid_t const id, BoundaryLocation const location, std::array<unsigned int, 3> const level_zero_blocks_xyz,
+                             unsigned int const active_periodic_locations );
+bool PeriodicIsExternalBoundary( BoundaryLocation const location, nid_t const id, std::array<unsigned int, 3> const level_zero_blocks_xyz,
                                  unsigned int const active_periodic_locations );
 
-#endif // ID_PERIODIC_INFORMATION_H
+#endif// ID_PERIODIC_INFORMATION_H

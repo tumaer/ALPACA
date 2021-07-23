@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,10 +63,13 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "user_expression.h"
+
+#include <string>
+#include <vector>
 
 /**
  * @brief Creates a new UserExpression object from an expression and several input and output variables.
@@ -73,9 +77,18 @@
  * @param variables_in The input variable names and references to their values.
  * @param variables_out The out variable names.
  */
-UserExpression::UserExpression( const std::string expression_string, const std::vector<std::tuple<std::string,double&>> variables_in, const std::vector<std::string> variables_out ) {
-   for( auto& var : variables_in ) {
-      symbol_table_.add_variable( std::get<0>(var), std::get<1>(var) );
+UserExpression::UserExpression( std::string const& expression_string,
+                                std::vector<std::string> const& variables_out,
+                                std::vector<std::string> const& function_variables_names,
+                                std::vector<double>& function_variables_values ) : random_number_expression_() {
+   symbol_table_.add_function( "rand", random_number_expression_ );
+
+   if( function_variables_names.size() != function_variables_values.size() ) {
+      throw std::logic_error( "Error in expression. The function variable names and values must be of same size" );
+   }
+
+   for( unsigned int var = 0; var < function_variables_names.size(); ++var ) {
+      symbol_table_.add_variable( function_variables_names[var], std::ref( function_variables_values[var] ) );
    }
 
    for( auto& var : variables_out ) {
@@ -89,8 +102,8 @@ UserExpression::UserExpression( const std::string expression_string, const std::
    exprtk::parser<double> parser;
    // there might be variables in the expression that are not registered (e.g. z velocity in 2D cases) and should be resolved automatically
    parser.enable_unknown_symbol_resolver();
-   if( !parser.compile( expression_string, expression_ ) ) {
-      throw std::logic_error( "Error in expression: "  + parser.error() + " Expression: " + expression_string );
+   if( !parser.compile( std::string( expression_string ), expression_ ) ) {
+      throw std::logic_error( "Error in expression: " + parser.error() + " Expression: " + expression_string );
    }
 }
 
@@ -99,7 +112,7 @@ UserExpression::UserExpression( const std::string expression_string, const std::
  * @param variable The name of the variable whose value should be returned.
  * @return The value of the specified variable.
  */
-double UserExpression::GetValue( const std::string variable ) const {
+double UserExpression::GetValue( std::string const variable ) const {
    expression_.value();
    return symbol_table_.get_variable( variable )->value();
 }

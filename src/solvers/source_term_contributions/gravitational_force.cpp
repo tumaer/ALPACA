@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,21 +63,19 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "gravitational_force.h"
 
-#include "index_transformations.h"
-#include "mathematical_functions.h"
+#include "utilities/index_transformations.h"
+#include "utilities/mathematical_functions.h"
 
 /**
  * @brief The default constructor of the class.
  * @param gravity The vector containing the components of the gravitational force.
  */
-GravitationalForce::GravitationalForce( std::array<double, 3> const gravity ) :
-   gravity_(gravity)
-{
+GravitationalForce::GravitationalForce( std::array<double, 3> const gravity ) : gravity_( gravity ) {
    // Empty besides initializer list
 }
 
@@ -85,29 +84,28 @@ GravitationalForce::GravitationalForce( std::array<double, 3> const gravity ) :
  * @param block Block of the considered phase.
  * @param gravity_forces Reference to array of volume forces increments to be filled here (indirect return parameter).
  */
-void GravitationalForce::ComputeForces( Block const& block, double (&gravity_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
+void GravitationalForce::ComputeForces( Block const& block, double ( &gravity_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const {
 
-   Conservatives const& conservatives = block.GetAverageBuffer();
-   const double (&density)[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
+   Conservatives const& conservatives                        = block.GetAverageBuffer();
+   double const( &density )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
 
    for( unsigned int i = 0; i < CC::ICX(); ++i ) {
       for( unsigned int j = 0; j < CC::ICY(); ++j ) {
          for( unsigned int k = 0; k < CC::ICZ(); ++k ) {
 
-            std::array<unsigned int, 3> const indices = { BIT::I2TX(i), BIT::I2TY(j), BIT::I2TZ(k) };
+            std::array<unsigned int, 3> const indices = { BIT::I2TX( i ), BIT::I2TY( j ), BIT::I2TZ( k ) };
 
             // Add up to volume forces
-            gravity_forces[ETI(Equation::Mass)][i][j][k] += 0.0;
-            gravity_forces[ETI(Equation::Energy) ][i][j][k] += DimensionAwareConsistencyManagedSum( gravity_[0] * conservatives[Equation::MomentumX][indices[0]][indices[1]][indices[2]]
-                                                       , CC::DIM() != Dimension::One   ? gravity_[1] * conservatives[Equation::MomentumY][indices[0]][indices[1]][indices[2]] : 0.0
-                                                       , CC::DIM() == Dimension::Three ? gravity_[2] * conservatives[Equation::MomentumZ][indices[0]][indices[1]][indices[2]] : 0.0 );
-
-            gravity_forces[ETI(Equation::MomentumX)][i][j][k] += gravity_[0] * density[indices[0]][indices[1]][indices[2]];
-            if( CC::DIM() != Dimension::One ) {
-               gravity_forces[ETI(Equation::MomentumY)][i][j][k] += gravity_[1] * density[indices[0]][indices[1]][indices[2]];
+            gravity_forces[ETI( Equation::Mass )][i][j][k] += 0.0;
+            if constexpr( MF::IsEquationActive( Equation::Energy ) ) {
+               gravity_forces[ETI( Equation::Energy )][i][j][k] += DimensionAwareConsistencyManagedSum( gravity_[0] * conservatives[Equation::MomentumX][indices[0]][indices[1]][indices[2]], CC::DIM() != Dimension::One ? gravity_[1] * conservatives[Equation::MomentumY][indices[0]][indices[1]][indices[2]] : 0.0, CC::DIM() == Dimension::Three ? gravity_[2] * conservatives[Equation::MomentumZ][indices[0]][indices[1]][indices[2]] : 0.0 );
             }
-            if( CC::DIM() == Dimension::Three ) {
-               gravity_forces[ETI(Equation::MomentumZ)][i][j][k] += gravity_[2] * density[indices[0]][indices[1]][indices[2]];
+            gravity_forces[ETI( Equation::MomentumX )][i][j][k] += gravity_[0] * density[indices[0]][indices[1]][indices[2]];
+            if constexpr( MF::IsEquationActive( Equation::MomentumY ) ) {
+               gravity_forces[ETI( Equation::MomentumY )][i][j][k] += gravity_[1] * density[indices[0]][indices[1]][indices[2]];
+            }
+            if constexpr( MF::IsEquationActive( Equation::MomentumZ ) ) {
+               gravity_forces[ETI( Equation::MomentumZ )][i][j][k] += gravity_[2] * density[indices[0]][indices[1]][indices[2]];
             }
          }
       }

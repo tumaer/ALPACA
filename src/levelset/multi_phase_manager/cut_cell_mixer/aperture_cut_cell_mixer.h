@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef APERTURE_CUT_CELL_MIXER_H
 #define APERTURE_CUT_CELL_MIXER_H
-
 
 #include "two_phase_cut_cell_mixer.h"
 
@@ -78,17 +78,16 @@ class ApertureCutCellMixer : public TwoPhaseCutCellMixer<ApertureCutCellMixer> {
 
    friend TwoPhaseCutCellMixer;
 
-   void CalculateMixingContributionsImplementation(Node const& node, const MaterialName material, std::vector<std::pair<std::vector<std::array<unsigned int,6>>, std::vector<std::array<double,2>>>>& mixing_contributions) const;
+   void CalculateMixingContributionsImplementation( Node const& node, MaterialName const material, std::vector<std::pair<std::vector<std::array<unsigned int, 6>>, std::vector<std::array<double, 2>>>>& mixing_contributions ) const;
 
 public:
    ApertureCutCellMixer() = delete;
-   explicit ApertureCutCellMixer( HaloManager& halo_manager );
-   ~ApertureCutCellMixer() = default;
+   explicit ApertureCutCellMixer( HaloManager& halo_manager, MaterialManager const& material_manager );
+   ~ApertureCutCellMixer()                             = default;
    ApertureCutCellMixer( ApertureCutCellMixer const& ) = delete;
    ApertureCutCellMixer& operator=( ApertureCutCellMixer const& ) = delete;
-   ApertureCutCellMixer( ApertureCutCellMixer&& ) = delete;
+   ApertureCutCellMixer( ApertureCutCellMixer&& )                 = delete;
    ApertureCutCellMixer& operator=( ApertureCutCellMixer&& ) = delete;
 };
 
-
-#endif //APERTURE_CUT_CELL_MIXER_H
+#endif//APERTURE_CUT_CELL_MIXER_H

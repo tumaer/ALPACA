@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,14 +63,14 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef HEAT_FLUXES_H
 #define HEAT_FLUXES_H
 
 #include "materials/material_manager.h"
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * @brief This class calculates the heat fluxes and adds them to a buffer.
@@ -82,17 +83,17 @@ private:
 public:
    HeatFluxes() = delete;
    explicit HeatFluxes( MaterialManager const& material_manager );
-   ~HeatFluxes() = default;
+   ~HeatFluxes()                   = default;
    HeatFluxes( HeatFluxes const& ) = delete;
-   HeatFluxes( HeatFluxes&& ) = delete;
+   HeatFluxes( HeatFluxes&& )      = delete;
    HeatFluxes& operator=( HeatFluxes const& ) = delete;
    HeatFluxes& operator=( HeatFluxes&& ) = delete;
 
    void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-      double (&heat_fluxes_x)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&heat_fluxes_y)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&heat_fluxes_z)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double const cell_size ) const;
+                       double ( &heat_fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double ( &heat_fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double ( &heat_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                       double const cell_size ) const;
 };
 
-#endif //HEAT_FLUXES_H
+#endif//HEAT_FLUXES_H

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,18 +63,18 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #include "topology/tree.h"
 #include "topology/topology_manager.h"
 
 SCENARIO( "Retriving nodes from a tree with a different number of nodes on two levels", "[1rank]" ) {
    GIVEN( "A topology, a geometric size and a maximum level" ) {
-      TopologyManager const topology = TopologyManager();
-      constexpr double geometric_size = 1.0;
+      TopologyManager const topology       = TopologyManager();
+      constexpr double geometric_size      = 1.0;
       constexpr unsigned int maximum_level = 1;
       WHEN( "An empty tree is created with these inputs" ) {
          Tree const tree = Tree( topology, geometric_size, maximum_level );
@@ -84,7 +85,7 @@ SCENARIO( "Retriving nodes from a tree with a different number of nodes on two l
       }
       WHEN( "When the tree holds one parent node" ) {
          Tree tree = Tree( topology, geometric_size, maximum_level );
-         tree.CreateNode( 0x1400000, { MaterialName::StiffenedGas } );
+         tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
          THEN( "The number of nodes on level zero should contain one element and on level 1 zero elements" ) {
             REQUIRE( tree.NodesOnLevel( 0 ).size() == 1 );
             REQUIRE( tree.NodesOnLevel( 1 ).size() == 0 );
@@ -92,9 +93,9 @@ SCENARIO( "Retriving nodes from a tree with a different number of nodes on two l
       }
       WHEN( "When the tree holds one parent node and two child nodes" ) {
          Tree tree = Tree( topology, geometric_size, maximum_level );
-         tree.CreateNode( 0x1400000, { MaterialName::StiffenedGas } );
-         tree.CreateNode( 0xA000000, { MaterialName::StiffenedGas } );
-         tree.CreateNode( 0xA000001, { MaterialName::StiffenedGas } );
+         tree.CreateNode( 0x1400000, { MaterialName::MaterialOne } );
+         tree.CreateNode( 0xA000000, { MaterialName::MaterialOne } );
+         tree.CreateNode( 0xA000001, { MaterialName::MaterialOne } );
          THEN( "The number of nodes on level zero should contain one element and on level 1 two elements" ) {
             REQUIRE( tree.NodesOnLevel( 0 ).size() == 1 );
             REQUIRE( tree.NodesOnLevel( 1 ).size() == 2 );

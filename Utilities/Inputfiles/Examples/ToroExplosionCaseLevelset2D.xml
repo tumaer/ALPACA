@@ -4,23 +4,23 @@
      Section 17.1 - Multidimensional test problems -->
 <configuration>
     <domain>
-        <blockSize> 1  </blockSize>
+        <nodeSize> 1  </nodeSize>
 
-        <blockRatio>
+        <nodeRatio>
             <x> 2 </x>
             <y> 2 </y>
             <z> 1 </z>
-        </blockRatio>
+        </nodeRatio>
 
         <boundaryConditions>
-            <fluid>
+            <material>
                 <west>   ZeroGradient </west>
                 <east>   ZeroGradient </east>
                 <south>  Zerogradient </south>
                 <north>  ZeroGradient </north>
                 <bottom> ZeroGradient </bottom>
                 <top>    ZeroGradient </top>
-            </fluid>
+            </material>
 
             <levelSet>
                 <west>   ZeroGradient </west>
@@ -33,60 +33,61 @@
         </boundaryConditions>
 
         <initialConditions>
-            <fluid1>
-                DENSITY := 1.0;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
-            </fluid1>
-            <fluid2>
-                DENSITY := 0.125;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 0.1;
-            </fluid2>
+            <material1>
+                density := 1.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1.0;
+            </material1>
+            <material2>
+                density := 0.125;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 0.1;
+            </material2>
             <levelSet1>
                 phi := 0.4-sqrt(pow(x-1,2)+pow(y-1,2));
             </levelSet1>
         </initialConditions>
     </domain>
 
-    <fluids>
-        <numberOfFluids>              2   </numberOfFluids>
-        <fluid1>
-            <type>StiffenedGas</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      0.0   </rho0>
-            <specificGasConstant>       0.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid1>
+    <materials>
+      <numberOfMaterials> 2   </numberOfMaterials>
+      <material1>
+         <equationOfState>
+            <type> StiffenedGas </type>
+            <gamma>               1.4   </gamma>
+            <backgroundPressure>  0.0   </backgroundPressure>
+	      </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity> 0.0 </thermalConductivity>
+            <shearViscosity> 0.0 </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material1>
+      <material2>
+         <equationOfState>
+            <type> StiffenedGas </type>
+            <gamma>               1.4   </gamma>
+            <backgroundPressure>  0.0   </backgroundPressure>
+	      </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity> 0.0 </thermalConductivity>
+            <shearViscosity> 0.0 </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material2>
+    </materials>
 
-        <fluid2>
-            <type>StiffenedGas</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      0.0   </rho0>
-            <specificGasConstant>       0.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid2>
-
-        <surfaceTensionCoefficients> 0.0 </surfaceTensionCoefficients>
-    </fluids>
+   <materialPairings>
+      <material1_2>
+         <surfaceTensionCoefficient> 0.0 </surfaceTensionCoefficient>
+	   </material1_2>
+   </materialPairings>
 
     <sourceTerms>
        <gravity>
@@ -105,37 +106,46 @@
         </refinementCriterion>
     </multiResolution>
 
-    <calculation>
-        <timeControl>
-            <startTime> 0.0 </startTime>
-            <endTime>   0.2 </endTime>
-        </timeControl>
+   <timeControl>
+      <startTime> 0.0  </startTime>
+      <endTime>   0.2  </endTime>
+      <CFLNumber> 0.5 </CFLNumber>
+   </timeControl>
 
-        <CFLNumber> 0.5 </CFLNumber>
+   <dimensionalization>
+      <lengthReference>       1.0  </lengthReference>
+      <velocityReference>     1.0  </velocityReference>
+      <densityReference>      1.0  </densityReference>
+      <temperatureReference>  1.0  </temperatureReference>
+   </dimensionalization>
 
-        <referenceParameter>
-            <lengthReference>         1  </lengthReference>
-            <velocityReference>       1  </velocityReference>
-            <densityReference>        1  </densityReference>
-            <temperatureReference>    1  </temperatureReference>
-        </referenceParameter>
-    </calculation>
+   <restart>
+      <restore>
+         <mode> Off </mode> <!-- Off, Soft OR Forced -->
+         <fileName> inputfile/restart/restart_***.h5 </fileName>
+      </restore>
+      <snapshots>
+         <type> Interval </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep> 
+      </snapshots>
+   </restart>
 
-    <restart>
-        <restoreMode>      0 </restoreMode>
-    	<restoreFileName>  ... </restoreFileName>
-        <snapshotInterval> 3600 </snapshotInterval>
-        <snapshotsToKeep>  2 </snapshotsToKeep>
-        <snapshotTimestamps>
-            <!-- <ts1> 0.1 </ts1> -->
-            <!-- <ts2> 0.2 </ts2> -->
-        </snapshotTimestamps>
-    </restart>
-
-    <output>
-        <outputFileType>XDMF</outputFileType>
-        <outputTimesType>Interval</outputTimesType>
-        <outputPeriod>  0.05 </outputPeriod>
-        <timeNamingFactor>1.e0</timeNamingFactor>
-    </output>
+   <output>
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <standardOutput> <!-- for general or debug output -->
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  0.05 </interval>
+	      <stamps>
+            <ts1> 0.0004 </ts1>
+         </stamps>
+      </standardOutput>
+      <interfaceOutput> 
+         <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  20.0 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+         </stamps>
+      </interfaceOutput>
+   </output>
 </configuration>

@@ -10,3 +10,9 @@
 [submodule "3rdParty/FakeIt"]
 	path = 3rdParty/FakeIt
 	url = https://github.com/HEM-RnD/FakeIt.git
+[submodule "3rdParty/pybind11"]
+	path = 3rdParty/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "3rdParty/ApprovalTests.cpp"]
+	path = 3rdParty/ApprovalTests.cpp
+	url = https://github.com/approvals/ApprovalTests.cpp.git

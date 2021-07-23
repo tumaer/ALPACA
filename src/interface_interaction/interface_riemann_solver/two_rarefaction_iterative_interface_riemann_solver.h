@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TWO_RAREFACTION_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
@@ -71,15 +72,15 @@
 #include "iterative_interface_riemann_solver.h"
 
 /**
- * @brief      Class for two rarefaction iterative interface riemann solver. Provides functionality to compute the solution of a Riemann problem.
- * assuming a two rarefaction solution.
+ * @brief Class for two rarefaction iterative interface riemann solver. Provides functionality to compute the solution of a Riemann problem
+ *        assuming a two rarefaction solution.
  */
 class TwoRarefactionIterativeInterfaceRiemannSolver : public IterativeInterfaceRiemannSolver<TwoRarefactionIterativeInterfaceRiemannSolver> {
 
    friend IterativeInterfaceRiemannSolver;
 
    std::array<double, 2> ObtainFunctionAndDerivativeImplementation( double const initial_root, double const p,
-      double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
+                                                                    double const pressure_function, double const one_pressure_function, double const pressure_constant, double const A, double const B, double const C, double const D ) const;
 
 public:
    TwoRarefactionIterativeInterfaceRiemannSolver() = delete;
@@ -88,16 +89,13 @@ public:
     *
     * @param[in]  material_manager  The material manager.
     */
-   explicit TwoRarefactionIterativeInterfaceRiemannSolver( MaterialManager const& material_manager ) :
-      IterativeInterfaceRiemannSolver<TwoRarefactionIterativeInterfaceRiemannSolver>(material_manager)
-   { /* Empty besides initialliser list */}
-   ~TwoRarefactionIterativeInterfaceRiemannSolver() = default;
+   explicit TwoRarefactionIterativeInterfaceRiemannSolver( MaterialManager const& material_manager ) : IterativeInterfaceRiemannSolver<TwoRarefactionIterativeInterfaceRiemannSolver>( material_manager ) { /* Empty besides initialliser list */
+   }
+   ~TwoRarefactionIterativeInterfaceRiemannSolver()                                                      = default;
    TwoRarefactionIterativeInterfaceRiemannSolver( TwoRarefactionIterativeInterfaceRiemannSolver const& ) = delete;
    TwoRarefactionIterativeInterfaceRiemannSolver& operator=( TwoRarefactionIterativeInterfaceRiemannSolver const& ) = delete;
-   TwoRarefactionIterativeInterfaceRiemannSolver( TwoRarefactionIterativeInterfaceRiemannSolver&& ) = delete;
+   TwoRarefactionIterativeInterfaceRiemannSolver( TwoRarefactionIterativeInterfaceRiemannSolver&& )                 = delete;
    TwoRarefactionIterativeInterfaceRiemannSolver& operator=( TwoRarefactionIterativeInterfaceRiemannSolver&& ) = delete;
 };
 
-
-
-#endif //TWO_RAREFACTION_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H
+#endif//TWO_RAREFACTION_ITERATIVE_INTERFACE_RIEMANN_SOLVER_H

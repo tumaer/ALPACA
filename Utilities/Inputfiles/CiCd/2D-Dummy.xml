@@ -2,18 +2,18 @@
 <configuration>
     <domain>
         <!-- size of a single block on level 0 -->
-        <blockSize> 5.0  </blockSize>
+        <nodeSize> 5.0  </nodeSize>
 
-        <!-- number of blocks per dimension-->
-        <blockRatio>
+        <!-- number of nodes per dimension-->
+        <nodeRatio>
             <x> 1 </x>
             <y> 1 </y>
             <z> 1 </z>
-        </blockRatio>
+        </nodeRatio>
 
         <boundaryConditions>
-            <fluid>
-                <!--types of fluid boundary conditions:
+            <material>
+                <!--types of material boundary conditions:
                 zeroGradient,
                 symmetry,
                 Wall
@@ -24,7 +24,7 @@
                 <north>wall</north>
                 <bottom>symmetry</bottom>
                 <top>symmetry</top>
-            </fluid>
+            </material>
 
             <!-- TO BE IMPLEMENTED -->
             <levelSet>
@@ -43,22 +43,22 @@
         </boundaryConditions>
 
         <initialConditions>
-            <fluid1>
-                DENSITY : = 0.001;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1000.0;
-            </fluid1>
+            <material1>
+                density : = 0.001;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1000.0;
+            </material1>
 
             <!-- TO BE IMPLEMENTED -->
-            <fluid2>
-                DENSITY := 1.0;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1000.0;
-            </fluid2>
+            <material2>
+                density := 1.0;
+                velocityX := 0.0;
+                velocityY := 0.0;
+                velocityZ := 0.0;
+                pressure := 1000.0;
+            </material2>
 
             <levelSet1>
                 phi := -0.5 + sqrt( (x-2.5)*(x-2.5)+(y-2.5)*(y-2.5) );
@@ -69,43 +69,46 @@
 
     <!-- Fluids -->
     <!--Material Types: StiffenedGas, IdealGas, Waterlike (Tait)-->
-    <fluids>
-        <numberOfFluids>              2   </numberOfFluids>
-        <fluid1>
-            <type>WaterlikeFluid</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         1000.0   </A>
-            <B>                         100.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      0.001   </rho0>
-            <specificGasConstant>       0.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          4.0e-03   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-        </viscosity>
-        </fluid1>
+    <materials>
+        <numberOfMaterials>              2   </numberOfMaterials>
+        <material1>
+            <equationOfState>
+                <type>WaterlikeFluid</type>
+                <gamma> 1.4   </gamma>
+                <A>     1000.0   </A>
+                <B>     100.0   </B>
+                <rho0>  0.001   </rho0>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity>       0.0   </specificHeatCapacity>
+                <thermalConductivity>       0.0   </thermalConductivity>
+                <shearViscosity>          4.0e-03   </shearViscosity>
+                <bulkViscosity>           0.0   </bulkViscosity>
+            </properties>
+        </material1>
 
         <!-- TO BE IMPLEMENTED -->
-        <fluid2>
-            <type>StiffenedGasSafe</type>
-            <gamma>                     7.15   </gamma>
-            <A>                         1015.0   </A>
-            <B>                         1.0e04   </B>
-            <C>                         0.0   </C>
-            <rho0>                      1.0   </rho0>
-            <specificGasConstant>       0.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.25   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid2>
-        <!-- END - TO BE IMPLEMENTED -->
+        <material2>
+            <equationOfState>
+                <type> StiffenedGasSafe </type>
+                <gamma>               7.15   </gamma>
+                <backgroundPressure>  1.0e4   </backgroundPressure>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity>       0.0   </specificHeatCapacity>
+                <thermalConductivity>       0.0   </thermalConductivity>
+                <shearViscosity>          0.25   </shearViscosity>
+                <bulkViscosity>           0.0   </bulkViscosity>
+            </properties>
+        </material2>
 
-        <surfaceTensionCoefficients> 7.5 </surfaceTensionCoefficients>
+    </materials>
 
-    </fluids>
+    <materialPairings>
+        <material1_2>
+            <surfaceTensionCoefficient> 7.5 </surfaceTensionCoefficient>
+        </material1_2>
+    </materialPairings>
 
     <sourceTerms>
         <gravity>
@@ -115,65 +118,47 @@
         </gravity>
     </sourceTerms>
 
-   <multiResolution>
-       <maximumLevel> 0 </maximumLevel>
+    <multiResolution>
+        <maximumLevel> 0 </maximumLevel>
 
-       <refinementCriterion>
-           <epsilonReference>    0.01 </epsilonReference>
-           <!-- user_level_of_epsilon_ref: allowed values [0-12] -->
-           <levelOfEpsilonReference> 1  </levelOfEpsilonReference>
-       </refinementCriterion>
-   </multiResolution>
+        <refinementCriterion>
+            <epsilonReference>    0.01 </epsilonReference>
+            <!-- user_level_of_epsilon_ref: allowed values [0-12] -->
+            <levelOfEpsilonReference> 1  </levelOfEpsilonReference>
+        </refinementCriterion>
+    </multiResolution>
 
-    <calculation>
-        <timeControl>
-            <startTime>            0.0           </startTime>
-            <endTime>              1.0e-6           </endTime>
-        </timeControl>
-
+    <timeControl>
+        <startTime>            0.0           </startTime>
+        <endTime>              1.0e-6           </endTime>
         <CFLNumber> 0.9 </CFLNumber>
+    </timeControl>
 
-        <referenceParameter>
-            <lengthReference>       1  </lengthReference>
-            <velocityReference>     1  </velocityReference>
-            <densityReference>      1  </densityReference>
-            <temperatureReference>  1  </temperatureReference>
-        </referenceParameter>
-    </calculation>
+
+    <dimensionalization>
+        <lengthReference>       1  </lengthReference>
+        <velocityReference>     1  </velocityReference>
+        <densityReference>      1  </densityReference>
+        <temperatureReference>  1  </temperatureReference>
+    </dimensionalization>
 
     <restart>
-        <restoreMode>      0 </restoreMode> <!-- 0: disabled, 1: restore if file exists, 2: force restore -->
-        <restoreFileName>  .. </restoreFileName>
-        <snapshotInterval> 3600 </snapshotInterval> <!-- in wall seconds, use 0 to disable interval-based snapshots -->
-        <snapshotsToKeep>  2 </snapshotsToKeep> <!-- timestamp-based snapshots are always kept -->
-        <snapshotTimestamps>
-            <!-- <ts1> 0.1 </ts1> -->
-            <!-- <ts2> 0.2 </ts2> -->
-        </snapshotTimestamps>
+        <restore>
+            <mode> Off </mode> <!-- Off, Soft OR Forced -->
+            <fileName> inputfile/restart/restart_***.h5 </fileName>
+        </restore>
+        <snapshots>
+            <type> Off </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+        </snapshots>
     </restart>
 
-   <output>
-       <!-- TO BE IMPLEMENTED -->
-       <enableOutput>         1               </enableOutput>
-       <!-- END - TO BE IMPLEMENTED -->
-       <outputFileType>XDMF</outputFileType> <!--XDMF-->
-       <outputTimesType>Interval</outputTimesType> <!--Interval OR Timestamps-->
-       <outputPeriod>         1.00            </outputPeriod>
-       <numberOfTimestamps>   12              </numberOfTimestamps>
-       <timestamps>
-           <ts1> 0.0004 </ts1>
-           <ts2> 0.0006 </ts2>
-           <ts3> 0.0008 </ts3>
-           <ts4> 0.0010 </ts4>
-           <ts5> 0.0012 </ts5>
-           <ts6> 0.0014 </ts6>
-           <ts7> 0.0016 </ts7>
-           <ts8> 0.0018 </ts8>
-           <ts9> 0.05   </ts9>
-           <ts10>0.15    </ts10>
-           <ts11>0.2    </ts11>
-           <ts12>0.4    </ts12>
-       </timestamps>
-       <timeNamingFactor>1.e4</timeNamingFactor>
-   </output>
+    <output>
+        <timeNamingFactor> 1.e4 </timeNamingFactor>
+        <standardOutput> <!-- for general or debug output -->
+            <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+        </standardOutput>
+        <interfaceOutput>
+            <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+        </interfaceOutput>
+    </output>
 </configuration>

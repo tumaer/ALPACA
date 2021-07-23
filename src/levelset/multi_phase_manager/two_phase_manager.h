@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,15 +63,15 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TWO_PHASE_MANAGER_H
 #define TWO_PHASE_MANAGER_H
 
-
 #include "multi_phase_manager.h"
 #include "buffer_handler.h"
+#include "interface_tags/interface_tag_functions.h"
 
 /**
  * @brief The TwoPhaseManager provides functionality to perform two-phase flow simulation by a single-level set method.
@@ -80,26 +81,46 @@ class TwoPhaseManager : public MultiPhaseManager<TwoPhaseManager> {
    friend MultiPhaseManager;
 
 private:
+   template<InterfaceDescriptionBufferType T>
+   void SetVolumeFractionBuffer( Node& node ) const;
 
-   void SetVolumeFractionBuffer(Node& node) const;
-   void UpdateInterfaceTagsOnFinestLevel(std::vector<std::reference_wrapper<Node>> const& nodes) const;
+   void MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage = false ) const;
+   void ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void UpdateIntegratedBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const;
+   void PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const;
+   void ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const reset_interface_states = false ) const;
 
-   void MixImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, const bool is_last_stage = false) const;
-   void ExtendImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void ExtendInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
-   void PropagateLevelsetImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const;
-   void InitializeVolumeFractionBufferImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const;
-   void ObtainInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, const bool reset_interface_states = false) const;
+   /**
+    * @brief Sets the interface tags on the finest level. Implementation for the reinitialized buffer.
+    * @param nodes_containing_level_set The nodes on the finest level, which have a level-set block.
+    * @tparam IDB The interface buffer type for the interface tag update.
+    */
+   template<InterfaceDescriptionBufferType IDB>
+   void UpdateInterfaceTagsOnFinestLevel( std::vector<std::reference_wrapper<Node>> const& nodes_containing_level_set ) const {
+
+      for( Node& node : nodes_containing_level_set ) {
+         InterfaceTagFunctions::SetInternalCutCellTagsFromLevelset( node.GetInterfaceBlock().GetInterfaceDescriptionBuffer<IDB>()[InterfaceDescription::Levelset], node.GetInterfaceTags<IDB>() );
+      }
+
+      halo_manager_.InterfaceTagHaloUpdateOnLmax<IDB>();
+
+      for( Node& node : nodes_containing_level_set ) {
+         InterfaceTagFunctions::SetTotalInterfaceTagsFromCutCells( node.GetInterfaceTags<IDB>() );
+      }
+      halo_manager_.InterfaceTagHaloUpdateOnLmax<IDB>();
+   }
 
 public:
    TwoPhaseManager() = delete;
-   explicit TwoPhaseManager( SimulationSetup const& setup, MaterialManager const& material_manager, HaloManager& halo_manager );
-   ~TwoPhaseManager() = default;
+   explicit TwoPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager );
+   ~TwoPhaseManager()                        = default;
    TwoPhaseManager( TwoPhaseManager const& ) = delete;
    TwoPhaseManager& operator=( TwoPhaseManager const& ) = delete;
-   TwoPhaseManager( TwoPhaseManager&& ) = delete;
+   TwoPhaseManager( TwoPhaseManager&& )                 = delete;
    TwoPhaseManager& operator=( TwoPhaseManager&& ) = delete;
 };
 
-#endif //TWO_PHASE_MANAGER_H
+#endif//TWO_PHASE_MANAGER_H

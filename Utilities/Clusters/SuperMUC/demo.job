@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Initial working directory:
+# Initial working directory
 #SBATCH -D <InitialDir>
 
 # Job name
@@ -28,11 +28,17 @@
 # Setup execution environment
 #SBATCH --export=NONE
 #SBATCH --get-user-env
+
 module load slurm_setup
+module unload mkl
+module unload mpi.intel
+module unload intel
+module load gcc/9
+module load mpi.intel/2020_gcc
+module load cmake
 module load hdf5/1.8.20-intel-impi-frt-threadsafe
 
-## Commenting in the following line may help with stalling I/O
-## export I_MPI_EXTRA_FILESYSTEM=on
+ulimit -s unlimited
+export I_MPI_EXTRA_FILESYSTEM=on
 
-## In case of RAM shortage try using mpiexec's -rr option (not supported by all MPI Libraries)
-mpiexec -n $SLURM_NTASKS ./ALPACA ./<your-inputfile>.xml
+mpiexec ./ALPACA ./<your-inputfile>.xml

@@ -5,228 +5,289 @@
      Section 4.2 Shock-tube problem of Sod.
      -->
 <configuration>
-    <domain>
-        <!-- Size of a single multi-resolution block on the coarsest level, i.e. level 0. -->
-        <blockSize> 1  </blockSize>
+   <domain>
+      <!-- Size of a single multi-resolution node on the coarsest level, i.e. level 0. -->
+      <nodeSize> 1 </nodeSize>
 
-        <!-- Number of blocks per dimension on the coarsest level.
-             Multiplying blockRatio_x/y/z * blocksize gives the domain size in x/y/z-direction.
-             Multiplying blockRatio_x/y/z * internal_cells_per_block_and_dimension (adjustable in code: compile_time_constants.h)
-             gives the number of cells in x/y/z-direction on the coarsest level. Refinement of the coarse mesh is possible
-             by using a multi-resolution scheme. It can be adjusted in the multiResolution section of this inputfile. -->
-        <blockRatio>
-            <x> 1 </x>
-            <y> 1 </y>
-            <z> 1 </z>
-        </blockRatio>
+      <!-- Number of nodes per dimension on the coarsest level.
+           Multiplying nodeRatio_x/y/z * nodeSize gives the domain size in x/y/z-direction.
+           Multiplying nodeRatio_x/y/z * internal_cells_per_node_and_dimension (adjustable in code: compile_time_constants.h)
+           gives the number of cells in x/y/z-direction on the coarsest level. Refinement of the coarse mesh is possible
+           by using a multi-resolution scheme. It can be adjusted in the multiResolution section of this inputfile. -->
+      <nodeRatio>
+         <x> 1 </x>
+         <y> 1 </y>
+         <z> 1 </z>
+      </nodeRatio>
 
-        <!-- Boundary conditions have to be specified for all six faces of the cuboid domain. They have to be specified
-             for the fluid as well as the levelset. The faces are denoted according to their geographic orientation:
-                 East -> positive x direction
-                 West -> negative x direction
-                 North -> positive y direction
-                 South -> negative y direction
-                 Top -> positive z direction
-                 Bottom -> negative z direction -->
-        <boundaryConditions>
-            <!-- Fluid boundary conditions. -->
-            <fluid>
-                <!-- Types of fluid boundary conditions:
-                         zeroGradient,
-                         symmetry,
-                         wall,
-                         fixedValue. -->
-                <west>ZeroGradient</west>
-                <east>ZeroGradient</east>
-                <!-- In case a fixedValue boundary condition is used, a xml node specifying the
-                     fixed prime states has to be added (see example below). -->
-                <valuesEast>
-                    <density>1.0</density>
-                    <velocityX>0.0</velocityX>
-                    <velocityY>0.0</velocityY>
-                    <velocityZ>0.0</velocityZ>
-                    <pressure>1.0</pressure>
-                </valuesEast>
-                <south>ZeroGradient</south>
-                <north>ZeroGradient</north>
-                <valuesNorth>
-                    <density>1.0</density>
-                    <velocityX>0.0</velocityX>
-                    <velocityY>0.0</velocityY>
-                    <velocityZ>0.0</velocityZ>
-                    <pressure>1.0</pressure>
-                </valuesNorth>
-                <bottom>symmetry</bottom>
-                <top>symmetry</top>
-            </fluid>
+      <!-- Boundary conditions have to be specified for all six faces of the cuboid domain (in 3D). They have to be specified
+           for the material as well as the levelset. The faces are denoted according to their geographic orientation:
+               East -> positive x direction
+               West -> negative x direction
+               North -> positive y direction
+               South -> negative y direction
+               Top -> positive z direction
+               Bottom -> negative z direction -->
+      <boundaryConditions>
+         <material>
+            <!-- Types of material boundary conditions:
+                     zeroGradient,
+                     symmetry,
+                     wall,
+                     fixedValue. -->
+            <west> ZeroGradient </west>
+            <east> ZeroGradient </east>
+            <!-- In case a fixedValue boundary condition is used, a xml node specifying the
+                 fixed prime states has to be added (see example below). -->
+            <valuesEast>
+               <density> 1.0 </density>
+               <velocityX> 0.0 </velocityX>
+               <velocityY> 0.0 </velocityY>
+               <velocityZ> 0.0 </velocityZ>
+               <pressure> 1.0 </pressure>
+            </valuesEast>
+            <south> ZeroGradient </south>
+            <north> ZeroGradient </north>
+            <valuesNorth>
+               <density> 1.0 </density>
+               <velocityX> 0.0 </velocityX>
+               <velocityY> 0.0 </velocityY>
+               <velocityZ> 0.0 </velocityZ>
+               <pressure> 1.0 </pressure>
+            </valuesNorth>
+            <bottom> symmetry </bottom>
+            <top> symmetry </top>
+         </material>
 
-            <!-- Levelset boundary conditions. -->
-            <levelSet>
-                <!-- Types of level-set boundary conditions:
-                         zeroGradient,
-                         symmetry. -->
-                <west>   symmetry </west>
-                <east>   symmetry </east>
-                <south>  symmetry </south>
-                <north>  symmetry </north>
-                <bottom> symmetry </bottom>
-                <top>    symmetry </top>
-            </levelSet>
-        </boundaryConditions>
+         <!-- Levelset boundary conditions. -->
+         <levelSet>
+            <!--types of level-set boundary conditions:
+               zeroGradient,
+               symmetry -->
+            <west>   symmetry </west>
+            <east>   symmetry </east>
+            <south>  symmetry </south>
+            <north>  symmetry </north>
+            <bottom> symmetry </bottom>
+            <top>    symmetry </top>
+         </levelSet>
+      </boundaryConditions>
 
-        <!-- The initial state of each fluid and the levelset have to be defined. It is possible to use conditional expressions as given below. -->
-        <initialConditions>
-            <fluid1>
+      <!-- The initial state of each material and the levelset have to be defined. It is possible to use conditional expressions as given below. -->
+      <initialConditions>
+         <material1>
             if (x &lt; 0.5)
             {
-                DENSITY : = 1.0;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
+            density : = 1.0;
+            velocityX := 0.0;
+            velocityY := 0.0;
+            velocityZ := 0.0;
+            pressure := 1.0;
             }
-                else
+            else
             {
-                DENSITY := 0.125;
-                VELOCITY_X := 0.0;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 0.1;
+            density := 0.125;
+            velocityX := 0.0;
+            velocityY := 0.0;
+            velocityZ := 0.0;
+            pressure := 0.1;
             }
-            </fluid1>
+         </material1>
 
-            <fluid2>
-                DENSITY := 1.0;
-                VELOCITY_X := 0.75;
-                VELOCITY_Y := 0.0;
-                VELOCITY_Z := 0.0;
-                PRESSURE := 1.0;
-            </fluid2>
+         <material2>
+            density := 1.0;
+            velocityX := 0.75;
+            velocityY := 0.0;
+            velocityZ := 0.0;
+            pressure := 1.0;
+         </material2>
 
-            <levelSet1>
-                phi := 1.0;
-            </levelSet1>
-        </initialConditions>
-    </domain>
+         <!-- Xml node defining the levelset input. Possible types are: functional, STL, parametric. For each type, a set of parameters must be specified.  -->
+         <levelSet1>
+            <type> functional </type>
+            <input> phi := 1.0; </input>
+            <boundingBox>
+               <xMin> 0.0 </xMin>
+               <xMax> 1.0 </xMax>
+               <yMin> 0.0 </yMin>
+               <yMax> 1.0 </yMax>
+               <zMin> 0.0 </zMin>
+               <zMax> 1.0 </zMax>
+            </boundingBox>
+         </levelSet1>
+      </initialConditions>
+   </domain>
 
-    <!-- Xml nodes defining the equation of state and its parameters for each fluid. -->
-    <!-- Explanation:
-         type: Choose the equation of state that has to be applied.
-               Possible choices are: StiffenedGas or WaterlikeFluid (Tait), NobleAbelStiffenedGas, StiffenedGasComplete.
-         gamma: Heat capacity ratio.
-         B: Reference pressure used in stiffened equations of state.
-         A: Parameter for the Waterlike equation of state.
-         rho_0: Parameter for the Waterlike equation of state.
-         C: Thermal energy factor for StiffenedGasComplete.
-         The remaining parameters are self explaining.
-         -->
-    <fluids>
-        <!-- The number of fluids in the simulation. Note: Currently, 2 is the maximum. -->
-        <numberOfFluids>              1   </numberOfFluids>
-        <fluid1>
-            <type>StiffenedGas</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      1.2   </rho0>
-            <specificGasConstant>       1.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid1>
+   <!-- Xml nodes defining the equation of state and its properties for each material. -->
+   <!-- Explanation:
+        type: Choose the equation of state that has to be applied.
+              Possible choices are: StiffenedGas or WaterlikeFluid (Tait), NobleAbelStiffenedGas, StiffenedGasComplete.
+              For each equation of state a set of parameter must be specified.
+        -->
+   <materials>
+      <!-- The number of materials in the simulation. Note: Currently, 2 is the maximum. -->
+      <numberOfMaterials>  2  </numberOfMaterials>
+      <material1>
+         <!-- available options are: Fluid, SolidBoundary -->
+	 <type> Fluid </type>
+	 <equationOfState>
+            <type> StiffenedGas </type>
+            <gamma>               1.4   </gamma>
+            <backgroundPressure>  0.0   </backgroundPressure>
+	 </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity>
+               <fixedValue> 0.0 </fixedValue>
+               <model>
+                  <name> Constant </name>
+                  <parameter>
+                     <lambdaConstant> 10.0 </lambdaConstant>
+                  </parameter>
+               </model>
+            </thermalConductivity>
+            <shearViscosity>
+               <fixedValue> 0.0 </fixedValue>
+               <model>
+                  <name> PowerLaw </name>
+                  <parameter>
+                     <consistencyFactor> 1.0 </consistencyFactor>
+                     <powerLawExponent> 0.0 </powerLawExponent>
+                  </parameter>
+               </model>
+            </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material1>
 
-        <fluid2>
-            <type>StiffenedGas</type>
-            <gamma>                     1.4   </gamma>
-            <A>                         0.0   </A>
-            <B>                         0.0   </B>
-            <C>                         0.0   </C>
-            <rho0>                      1.2   </rho0>
-            <specificGasConstant>       1.0   </specificGasConstant>
-            <thermalConductivity>       0.0   </thermalConductivity>
-            <viscosity>
-                <dynamicShear>          0.0   </dynamicShear>
-                <dynamicBulk>           0.0   </dynamicBulk>
-            </viscosity>
-        </fluid2>
+      <material2>
+	 <!-- available options are: Fluid, SolidBoundary -->
+	 <type> Fluid </type>
+         <equationOfState>
+            <type> WaterlikeFluid </type>
+            <gamma>               1.4   </gamma>
+            <A> 1.0 </A>
+            <B> 1.0 </B>
+            <rho0>  1.0   </rho0>
+	 </equationOfState>
+         <properties>
+            <specificHeatCapacity> 0.0 </specificHeatCapacity>
+            <thermalConductivity>
+               <fixedValue> 0.0 </fixedValue>
+               <model>
+                  <name> Constant </name>
+                  <parameter>
+                     <lambdaConstant> 0.0 </lambdaConstant>
+                  </parameter>
+               </model>
+            </thermalConductivity>
+            <shearViscosity>
+               <fixedValue> 0.0 </fixedValue>
+               <model>
+                  <name> PowerLaw </name>
+                  <parameter>
+                     <consistencyFactor> 1.0 </consistencyFactor>
+                     <powerLawExponent> 0.0 </powerLawExponent>
+                  </parameter>
+               </model>
+            </shearViscosity>
+            <bulkViscosity> 0.0 </bulkViscosity>
+         </properties>
+      </material2>
+   </materials>
 
-        <surfaceTensionCoefficients> 0.0 </surfaceTensionCoefficients>
-    </fluids>
+   <materialPairings>
+      <material1_2>
+         <surfaceTensionCoefficient>
+            <fixedValue> 0.0 </fixedValue>
+            <model>
+               <name> Constant </name>
+               <parameter>
+                  <sigmaConstant> 0.0 </sigmaConstant>
+               </parameter>
+            </model>
+         </surfaceTensionCoefficient>
+      </material1_2>
+   </materialPairings>
 
-    <!-- Define a volume force, due to gravity in this case, in x/y/z direction.  -->
-    <sourceTerms>
-        <gravity>
-            <x> 0 </x>
-            <y> 0 </y>
-            <z> 0 </z>
-        </gravity>
-    </sourceTerms>
+   <!-- Define a volume force, due to gravity in this case, in x/y/z direction.  -->
+   <sourceTerms>
+      <gravity>
+         <x> 0 </x>
+         <y> 0 </y>
+         <z> 0 </z>
+      </gravity>
+   </sourceTerms>
 
-    <!-- Employ a multi-resolution scheme as described in the paper cited at the top of this file. -->
-    <multiResolution>
-        <!-- Number of possible refinements. Uniform meshes are obtained for maximumLevel = 0 or 1 -->
-        <maximumLevel> 2 </maximumLevel>
+   <!-- Employ a multi-resolution scheme as described in the paper cited at the top of this file. -->
+   <multiResolution>
+      <!-- Number of possible refinements. Uniform meshes are obtained for maximumLevel = 0 or 1 -->
+      <maximumLevel> 2 </maximumLevel>
 
-        <refinementCriterion>
-            <!-- The reference error on the given reference level for the wavelet-based refinement decisions. -->
-            <epsilonReference>    0.01 </epsilonReference>
-            <!-- The level on which the stated epsilon value should be enforced.
-                 Note: allowed values are 0-13. -->
-            <levelOfEpsilonReference> 1  </levelOfEpsilonReference>
-        </refinementCriterion>
-    </multiResolution>
+      <refinementCriterion>
+         <!-- The reference error on the given reference level for the wavelet-based refinement decisions. -->
+         <epsilonReference> 0.01 </epsilonReference>
+         <!-- The level on which the stated epsilon value should be enforced.
+              Note: allowed values are 0-13. -->
+         <levelOfEpsilonReference> 1  </levelOfEpsilonReference>
+      </refinementCriterion>
+   </multiResolution>
 
-    <calculation>
-        <!-- Block where the start and end time of the simulation are defined. -->
-        <timeControl>
-            <startTime>            0.0           </startTime>
-            <endTime>              0.2           </endTime>
-        </timeControl>
-        <!-- The Courant–Friedrichs–Lewy number -->
-        <CFLNumber> 0.6 </CFLNumber>
-        <!-- ALPACA internally calculates with nondimensionalized values. Reference values used for
-             nondimensionalization have to be specified to length scales, velocity, density and temperature. -->
-        <referenceParameter>
-            <lengthReference>       1  </lengthReference>
-            <velocityReference>     1  </velocityReference>
-            <densityReference>      1  </densityReference>
-            <temperatureReference>  1  </temperatureReference>
-        </referenceParameter>
-    </calculation>
+   <!-- Block where the start, end time and Courant–Friedrichs–Lewy number of the simulation are defined. -->
+   <timeControl>
+      <startTime> 0.0  </startTime>
+      <endTime>   0.2  </endTime>
+      <CFLNumber> 0.6 </CFLNumber>
+   </timeControl>
 
-    <!-- This xml node specifies whether a simulation should be restarted or not, and all relevant parameters that
-         have to be specified. -->
-    <restart>
-        <!-- restoreMode explanation - 0: disabled, 1: restore if file exists, 2: force restore -->
-        <restoreMode>      0 </restoreMode>
-        <!-- The path to the .h5 file that has to be used to restore the simulation. Only used if restore is active -->
-        <restoreFileName>  inputfile/restart/restart_***.h5 </restoreFileName>
-        <!-- in wall seconds, use 0 to disable interval-based snapshots -->
-        <snapshotInterval> 3600 </snapshotInterval>
-        <!-- timestamp-based snapshots are always kept -->
-        <snapshotsToKeep>  2 </snapshotsToKeep>
-        <!-- If snapshots should also be written at specific times, below xml node can be used. -->
-        <snapshotTimestamps>
+   <!-- ALPACA internally calculates with nondimensionalized values. Reference values used for
+        nondimensionalization have to be specified to length scales, velocity, density and temperature. -->
+   <dimensionalization>
+      <lengthReference>       1.0  </lengthReference>
+      <velocityReference>     1.0  </velocityReference>
+      <densityReference>      1.0  </densityReference>
+      <temperatureReference>  1.0  </temperatureReference>
+   </dimensionalization>
+
+   <!-- This xml node specifies whether a simulation should be restarted or not, and all relevant parameters that
+            have to be specified. -->
+   <restart>
+      <!-- xml node to restore the simulation from a snapshot  -->
+      <restore>
+         <!-- Mode: Off, Soft (if file exists) OR Forced -->
+         <mode> Off </mode>
+         <!-- The path to the .h5 file that has to be used to restore the simulation. Only used if restore is active -->
+         <fileName> inputfile/restart/restart_***.h5 </fileName>
+      </restore>
+      <!-- xml node to specify details about the snapshots writing-->
+      <snapshots>
+         <!-- Type how the snapshots are written: Off, Stamps, Interval OR IntervalStamps -->
+         <type> Stamps </type>
+         <!-- in wall seconds. Only used if type Interval or IntervalStamps is active. -->
+         <interval> 3600 </interval>
+         <!-- Number of interval snapshots that are kept. Timestamp-based snapshots are always kept -->
+         <intervalsToKeep> 2 </intervalsToKeep>
+         <!-- Time stamps for specific snapshots. Only used if type Stamps or IntervalStamps is active. -->
+         <stamps> <!-- always kept -->
             <!-- <ts1> 0.1 </ts1> -->
             <!-- <ts2> 0.2 </ts2> -->
-        </snapshotTimestamps>
-    </restart>
+         </stamps>
+      </snapshots>
+   </restart>
 
-    <!-- Below xml node is used to specify output related settings. -->
-    <output>
-        <!-- TO BE IMPLEMENTED -->
-        <enableOutput>         1               </enableOutput>
-        <!-- END - TO BE IMPLEMENTED -->
-        <outputFileType>XDMF</outputFileType> <!--XDMF-->
-        <!-- Specify whether output should be written with a fixed interval (Interval) or at specific timestamps (Timestamps). -->
-        <outputTimesType>Timestamps</outputTimesType>
-        <!-- The period with which output is written in case interval output is active. Neglected otherwise. -->
-        <outputPeriod> 0.05 </outputPeriod>
-        <!-- If output at timestamps is active, the timestamps can be specified below. Neglected otherwise. -->
-        <timestamps>
+   <!-- Below xml node is used to specify output related settings. The output is always written in Xdmf/Hdf5 format. -->
+   <output>
+      <!-- Factor to manipulate the naming of the output files. TimeInName = physical time * timeNamingFactor-->
+      <timeNamingFactor> 1.e0 </timeNamingFactor>
+      <!-- Output settings used for the general output of the full domain (also in Debug mode (adjustable in code: debug_profile_settings.h)) -->
+      <standardOutput>
+         <!-- Specify whether output should be written with a fixed interval (Interval), specific timestamps (Timestamps) or both (IntervalStamps).
+              To disable aoutput use Off. -->
+         <type> Interval </type>
+         <!-- The interval with which output is written in case interval output is active. Neglected otherwise. -->
+         <interval>  1e-6 </interval>
+         <!-- If output at timestamps is active, the timestamps can be specified below. Neglected otherwise. -->
+	      <stamps>
             <ts1> 0.0004 </ts1>
             <ts2> 0.0006 </ts2>
             <ts3> 0.0008 </ts3>
@@ -239,7 +300,17 @@
             <ts10>0.15    </ts10>
             <ts11>0.2    </ts11>
             <ts12>0.4    </ts12>
-        </timestamps>
-        <timeNamingFactor> 1.e0 </timeNamingFactor>
-    </output>
+         </stamps>
+      </standardOutput>
+      <!-- Output settings used for the output of only interface nodes. Details about specifications, see above in standardOutput. -->
+      <interfaceOutput>
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e-6 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+            <ts2>  0.0006 </ts2>
+         </stamps>
+      </interfaceOutput>
+   </output>
+
 </configuration>

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef GEOMETRY_CALCULATOR_MARCHING_CUBES_H
@@ -72,13 +73,12 @@
 
 /**
  * @brief The GeometryCalculatorMarchingCubes class calculates volume fractions and cell face apertures based on the marching-cube
- * algorithm as presented in \cite Lauer2012.
+ *        algorithm as presented in \cite Lauer2012.
  * @note This class is derived and inherits from the abstract class GeometryCalculator.
  */
 class GeometryCalculatorMarchingCubes : public GeometryCalculator<GeometryCalculatorMarchingCubes> {
 
 private:
-
    /**
     * Bool that indicates whether geometric quantities are calculated cell based. The defaults setting is false, and geometric calculations
     * are performed sub-cell based. I.e., A 3-D cell is split into 8 sub cells.
@@ -86,20 +86,19 @@ private:
    static constexpr bool cell_based_geometry_calculations_ = false;
 
 public:
-   explicit GeometryCalculatorMarchingCubes() = default;
-   ~GeometryCalculatorMarchingCubes() = default;
+   explicit GeometryCalculatorMarchingCubes()                                = default;
+   ~GeometryCalculatorMarchingCubes()                                        = default;
    GeometryCalculatorMarchingCubes( GeometryCalculatorMarchingCubes const& ) = delete;
    GeometryCalculatorMarchingCubes& operator=( GeometryCalculatorMarchingCubes const& ) = delete;
-   GeometryCalculatorMarchingCubes( GeometryCalculatorMarchingCubes&& ) = delete;
-   GeometryCalculatorMarchingCubes& operator= ( GeometryCalculatorMarchingCubes&& ) = delete;
+   GeometryCalculatorMarchingCubes( GeometryCalculatorMarchingCubes&& )                 = delete;
+   GeometryCalculatorMarchingCubes& operator=( GeometryCalculatorMarchingCubes&& ) = delete;
 
-   std::array<double, 6> ComputeCellFaceApertureImplementation(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1) const;
+   std::array<double, 6> ComputeCellFaceApertureImplementation( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                                unsigned int const i, unsigned int const j, unsigned int const k, std::int8_t const material_sign = 1 ) const;
 
-   double ComputeVolumeFractionImplementation(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      unsigned int const i, unsigned int const j, unsigned int const k,
-      std::int8_t const material_sign = 1) const;
+   double ComputeVolumeFractionImplementation( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                               unsigned int const i, unsigned int const j, unsigned int const k,
+                                               std::int8_t const material_sign = 1 ) const;
 };
 
-
-#endif //GEOMETRY_CALCULATOR_MARCHING_CUBES_H
+#endif//GEOMETRY_CALCULATOR_MARCHING_CUBES_H

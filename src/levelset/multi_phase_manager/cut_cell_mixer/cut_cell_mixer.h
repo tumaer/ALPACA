@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,59 +63,55 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef CUT_CELL_MIXER_H
 #define CUT_CELL_MIXER_H
 
-
 #include "halo_manager.h"
 #include "user_specifications/numerical_setup.h"
 #include "levelset/geometry/geometry_calculator_setup.h"
-
+#include "materials/material_manager.h"
 
 using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geometry_calculator>::type;
 
 /**
- * @brief The CutCellMixer class mixes small cut-cells with its neighbours.
+ * @brief The CutCellMixer class mixes small cut-cells with its neighbors.
  * @tparam DerivedCutCellMixer Typename as template parameter due to CRTP.
  */
 template<typename DerivedCutCellMixer>
 class CutCellMixer {
 
-
 protected:
    const GeometryCalculatorConcretization geometry_calculator_;
    HaloManager& halo_manager_;
+   MaterialManager const& material_manager_;
 
    /**
     * @brief Default constructor of the CutCellMixer class.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit CutCellMixer( HaloManager& halo_manager ) :
-      geometry_calculator_(),
-      halo_manager_( halo_manager )
-   {
+   explicit CutCellMixer( HaloManager& halo_manager, MaterialManager const& material_manager ) : geometry_calculator_(),
+                                                                                                 halo_manager_( halo_manager ),
+                                                                                                 material_manager_( material_manager ) {
       // Empty Constructor, besides initializer list.
    }
 
 public:
-   explicit CutCellMixer() = default;
-   ~CutCellMixer() = default;
+   explicit CutCellMixer()             = default;
+   ~CutCellMixer()                     = default;
    CutCellMixer( CutCellMixer const& ) = delete;
    CutCellMixer& operator=( CutCellMixer const& ) = delete;
-   CutCellMixer( CutCellMixer&& ) = delete;
+   CutCellMixer( CutCellMixer&& )                 = delete;
    CutCellMixer& operator=( CutCellMixer&& ) = delete;
    /**
     * @brief Provides functionality for a cut-cell mixing procedure.
     * @param node The node for which mixing has to be performed.
-    * @param stage The current stage of the Runge-Kutta method.
     */
-   void Mix(Node& node, unsigned int const stage) const {
-      static_cast<DerivedCutCellMixer const&>(*this).MixImplementation(node, stage);
+   void Mix( Node& node ) const {
+      static_cast<DerivedCutCellMixer const&>( *this ).MixImplementation( node );
    }
 };
 
-
-#endif //CUT_CELL_MIXER_H
+#endif//CUT_CELL_MIXER_H

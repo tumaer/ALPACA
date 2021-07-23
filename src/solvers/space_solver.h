@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,14 +63,14 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef SPACE_SOLVER_H
 #define SPACE_SOLVER_H
 
 #include "user_specifications/numerical_setup.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "topology/node.h"
 #include "materials/material_manager.h"
 #include "source_term_solver.h"
@@ -77,34 +78,38 @@
 #include "interface_interaction/interface_term_solver.h"
 
 #include "levelset/levelset_advector/levelset_advector_setup.h"
-#include "riemann_solver_setup.h"
+#include "solvers/convective_term_contributions/convective_term_solver_setup.h"
 
-using RiemannSolverConcretization = RiemannSolverSetup::Concretize<riemann_solver>::type;
-using LevelsetAdvectorConcretization = LevelsetAdvectorSetup::Concretize<levelset_advector>::type;
+using ConvectiveTermSolverConcretization = ConvectiveTermSolverSetup::Concretize<convective_term_solver>::type;
+using LevelsetAdvectorConcretization     = LevelsetAdvectorSetup::Concretize<levelset_advector>::type;
+
+static_assert( !( active_equations == EquationSet::GammaModel && CC::Axisymmetric() ), "Axisymmetric terms are not implemented for Gamma-Model" );
 
 /**
- * @brief The SpaceSolver solves right side of the underlying system of equations (including source terms) using a Riemann solver of choice with an interchangable stencil.
+ * @brief The SpaceSolver solves right side of the underlying system of equations (including source terms) using a Riemann solver of choice with an interchangable spatial stencil.
  */
 class SpaceSolver {
 
    EigenDecomposition const eigendecomposition_calculator_;
-   RiemannSolverConcretization const riemann_solver_;
+   ConvectiveTermSolverConcretization const convective_term_solver_;
    SourceTermSolver const source_term_solver_;
    InterfaceTermSolver const interface_term_solver_;
+   MaterialManager const& material_manager_;
    LevelsetAdvectorConcretization const levelset_advector_;
 
 public:
    SpaceSolver() = delete;
-   explicit SpaceSolver( const MaterialManager& material_manager, std::array<double, 3> gravity);
-   ~SpaceSolver() = default;
+   explicit SpaceSolver( MaterialManager const& material_manager, std::array<double, 3> gravity );
+   ~SpaceSolver()                    = default;
    SpaceSolver( SpaceSolver const& ) = delete;
    SpaceSolver& operator=( SpaceSolver const& ) = delete;
-   SpaceSolver( SpaceSolver&& ) = delete;
+   SpaceSolver( SpaceSolver&& )                 = delete;
    SpaceSolver& operator=( SpaceSolver&& ) = delete;
 
    void UpdateFluxes( Node& node ) const;
-   void ComputeMaxEigenvaluesForPhase( std::pair<const MaterialName, Block> const& mat_block, double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const;
-   void SetFluxFunctionGlobalEigenvalues( double (&eigenvalues)[DTI(CC::DIM())][FF::ANOE()] ) const;
+   void UpdateLevelsetFluxes( Node& node ) const;
+   void ComputeMaxEigenvaluesForPhase( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
+   void SetFluxFunctionGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
 };
 
-#endif // SPACE_SOLVER_H
+#endif// SPACE_SOLVER_H

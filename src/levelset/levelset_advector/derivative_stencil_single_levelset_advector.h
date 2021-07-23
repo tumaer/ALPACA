@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
 #define DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
-
 
 #include "levelset_advector.h"
 
@@ -78,16 +78,15 @@ class DerivativeStencilSingleLevelsetAdvector : public LevelsetAdvector<Derivati
 
    friend LevelsetAdvector;
 
-   void AdvectImplementation(Node& node, unsigned int const stage = 0) const;
+   void AdvectImplementation( Node& node ) const;
 
 public:
-   explicit DerivativeStencilSingleLevelsetAdvector() = default;
-   ~DerivativeStencilSingleLevelsetAdvector() = default;
+   explicit DerivativeStencilSingleLevelsetAdvector()                                        = default;
+   ~DerivativeStencilSingleLevelsetAdvector()                                                = default;
    DerivativeStencilSingleLevelsetAdvector( DerivativeStencilSingleLevelsetAdvector const& ) = delete;
    DerivativeStencilSingleLevelsetAdvector& operator=( DerivativeStencilSingleLevelsetAdvector const& ) = delete;
-   DerivativeStencilSingleLevelsetAdvector( DerivativeStencilSingleLevelsetAdvector&& ) = delete;
+   DerivativeStencilSingleLevelsetAdvector( DerivativeStencilSingleLevelsetAdvector&& )                 = delete;
    DerivativeStencilSingleLevelsetAdvector& operator=( DerivativeStencilSingleLevelsetAdvector&& ) = delete;
 };
 
-
-#endif //DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
+#endif//DERIVATIVE_STENCIL_SINGLE_LEVELSET_ADVECTOR_H

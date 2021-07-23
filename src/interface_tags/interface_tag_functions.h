@@ -53,6 +53,8 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,20 +64,21 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INTERFACE_TAG_FUNCTIONS_H
 #define INTERFACE_TAG_FUNCTIONS_H
 
-
 #include "user_specifications/compile_time_constants.h"
 
-namespace InterfaceTagFunctions{
-void InitializeInternalInterfaceTags(std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-void SetInternalCutCellTagsFromLevelset(double const (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()], std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-void SetTotalInterfaceTagsFromCutCells(std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-bool TotalInterfaceTagsAreUniform(std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()]);
-}
+namespace InterfaceTagFunctions {
 
-#endif //INTERFACE_TAG_FUNCTIONS_H
+   void InitializeInternalInterfaceTags( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   void SetInternalCutCellTagsFromLevelset( double const ( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()], std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   void SetTotalInterfaceTagsFromCutCells( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+   bool TotalInterfaceTagsAreUniform( std::int8_t const ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] );
+
+}// namespace InterfaceTagFunctions
+
+#endif//INTERFACE_TAG_FUNCTIONS_H

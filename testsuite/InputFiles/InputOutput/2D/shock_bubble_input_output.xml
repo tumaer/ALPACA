@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <domain>
+        <nodeSize> 0.05  </nodeSize>
+
+        <nodeRatio>
+            <x> 32 </x>
+            <y> 32 </y>
+            <z> 1 </z>
+        </nodeRatio>
+
+        <boundaryConditions>
+            <material>
+                <west>   fixedValue </west>
+                <valuesWest>
+                    <density>1.0</density>
+                    <velocityX>1.0</velocityX>
+                    <velocityY>0.0</velocityY>
+                    <velocityZ>0.0</velocityZ>
+                    <pressure>1.0</pressure>
+                </valuesWest>
+                <east>   zeroGradient </east>
+                <south>  Symmetry </south>
+                <north>  Wall </north>
+                <bottom> zeroGradient </bottom>
+                <top>    zeroGradient </top>
+            </material>
+
+            <levelSet>
+                <west>   symmetry </west>
+                <east>   zeroGradient </east>
+                <south>  Symmetry </south>
+                <north>  Symmetry </north>
+                <bottom> zeroGradient </bottom>
+                <top>    zeroGradient </top>
+            </levelSet>
+        </boundaryConditions>
+
+        <initialConditions>
+            <material1>
+               if (x &lt; 0.05)
+               {
+                   density : = 4.0;
+                   velocityX := 200.0;
+                   velocityY := 0.0;
+                   velocityZ := 0.0;
+                   pressure := 5e5;
+               }
+                   else
+               {
+                   density := 1.0;
+                   velocityX := 0.0;
+                   velocityY := 0.0;
+                   velocityZ := 0.0;
+                   pressure := 1e5;
+               }
+            </material1>
+            <material2>
+               density := 1000.0;
+               velocityX := 0.0;
+               velocityY := 0.0;
+               velocityZ := 0.0;
+               pressure := 2e5;
+            </material2>
+
+            <levelSet1>
+               phi := -0.01 + sqrt((x-0.15)*(x-0.15)+(y-0.0)*(y-0.0));
+            </levelSet1>
+        </initialConditions>
+    </domain>
+
+    <materials>
+        <numberOfMaterials> 2 </numberOfMaterials>
+        <material1>
+            <equationOfState>
+               <type> StiffenedGasSafe </type>
+               <gamma>               1.4   </gamma>
+               <backgroundPressure>  0.0   </backgroundPressure>
+	         </equationOfState>
+            <properties>
+               <specificHeatCapacity> 0.0 </specificHeatCapacity>
+               <thermalConductivity> 0.0 </thermalConductivity>
+               <shearViscosity> 2e-5 </shearViscosity>
+               <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material1>
+        <material2>
+            <equationOfState>
+                <type> StiffenedGasSafe </type>
+                <gamma>               6.12  </gamma>
+                <backgroundPressure>  0.0   </backgroundPressure>
+            </equationOfState>
+            <properties>
+                <specificHeatCapacity> 0.0 </specificHeatCapacity>
+                <thermalConductivity> 0.0 </thermalConductivity>
+                <shearViscosity> 1.0e-3 </shearViscosity>
+                <bulkViscosity> 0.0 </bulkViscosity>
+            </properties>
+        </material2>
+    </materials>
+
+    <materialPairings>
+        <material1_2>
+           <surfaceTensionCoefficient> 250.0 </surfaceTensionCoefficient>
+	    </material1_2>
+	</materialPairings>
+
+    <sourceTerms>
+        <gravity>
+            <x> 0.0 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </gravity>
+    </sourceTerms>
+
+    <multiResolution>
+        <maximumLevel> 6 </maximumLevel>
+        <refinementCriterion>
+            <epsilonReference> 0.025 </epsilonReference>
+            <levelOfEpsilonReference> 4 </levelOfEpsilonReference>
+        </refinementCriterion>
+    </multiResolution>
+
+   <timeControl>
+       <startTime> 0.0 </startTime>
+       <endTime>   1e-8 </endTime>
+       <CFLNumber> 0.5 </CFLNumber>
+   </timeControl>
+
+   <dimensionalization>
+       <lengthReference>         1  </lengthReference>
+       <velocityReference>       1  </velocityReference>
+       <densityReference>        1  </densityReference>
+       <temperatureReference>    1  </temperatureReference>
+   </dimensionalization>
+
+   <restart>
+      <restore>
+         <mode> Off </mode> <!-- Off, Soft OR Forced -->
+         <fileName> shock_bubble_input_ouput/restart/restart_***.h5 </fileName>
+      </restore>
+      <snapshots>
+         <type> Off </type> <!-- Off, Stamps, Interval OR Stamps Interval -->
+         <interval> 3600 </interval> <!-- in wall seconds -->
+         <intervalsToKeep> 2 </intervalsToKeep>
+      </snapshots>
+   </restart>
+
+   <output>
+      <timeNamingFactor> 1.e3 </timeNamingFactor>
+      <standardOutput> <!-- for general or debug output -->
+         <type> Interval </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e-8 </interval>
+	      <stamps>
+            <ts1> 0.0004 </ts1>
+         </stamps>
+      </standardOutput>
+      <interfaceOutput>
+         <type> Off </type> <!--Off, Interval, Stamps OR IntervalStamps-->
+         <interval>  1e3 </interval>
+	      <stamps>
+            <ts1>  0.0004 </ts1>
+         </stamps>
+      </interfaceOutput>
+   </output>
+</configuration>

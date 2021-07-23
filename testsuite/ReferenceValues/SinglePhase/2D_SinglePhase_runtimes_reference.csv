@@ -1,0 +1,9 @@
+        Runtime,                     Inputfile,                                                                                                                                                           Executable
+4.775417272727272e+00,     RayleighTaylorInstability,      ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_GlobalLaxFriedrichs_Hllc_Einfeldt_Characteristic_WENOAO53_HOUC5_ReconstructionStencil_Min_TwoRarefaction_Fedkiw
+2.903005454545455e+00,     RayleighTaylorInstability,                          ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+4.119254545454545e+00,     RayleighTaylorInstability,          ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_LocalLaxFriedrichs_Hllc_Einfeldt_Characteristic_WENOAO53_HOUC5_ReconstructionStencil_Weno_Linearized_Fedkiw
+3.5562581818181824e+00,     RayleighTaylorInstability,                                  ALPACA_2D_16_4_NavierStokes_RK3_FiniteVolume_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Min_Hllc_Fedkiw
+7.205286363636365e+00,                 ToroImplosion,      ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_GlobalLaxFriedrichs_Hllc_Einfeldt_Characteristic_WENOAO53_HOUC5_ReconstructionStencil_Min_TwoRarefaction_Fedkiw
+4.71148909090909e+00,                 ToroImplosion,                          ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+7.067225454545454e+00,                 ToroImplosion,          ALPACA_2D_16_4_NavierStokes_RK3_FluxSplitting_LocalLaxFriedrichs_Hllc_Einfeldt_Characteristic_WENOAO53_HOUC5_ReconstructionStencil_Weno_Linearized_Fedkiw
+5.042193636363636e+00,                 ToroImplosion,                                  ALPACA_2D_16_4_NavierStokes_RK3_FiniteVolume_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Min_Hllc_Fedkiw

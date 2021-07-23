@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,57 +63,58 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef MATERIAL_SIGN_CAPSULE_H
 #define MATERIAL_SIGN_CAPSULE_H
 
-#include "materials/material_names.h"
+#include "materials/material_definitions.h"
 
 /**
- * @brief Work-around class to reduce cyclic dependncies and still query the material sign where needed.
- * It is the user's responsibility to call functions only after inialization.
+ * @brief Work-around class to reduce cyclic dependencies and still query the material sign where needed.
+ *        It is the user's responsibility to call functions only after initialization (currently done in the constructor of the material manager
+ *        class that holds all information for the two materials).
  */
 class MaterialSignCapsule {
 
 private:
-   static MaterialName positive_fluid_;
-   static MaterialName negative_fluid_;
+   static MaterialName positive_material_;
+   static MaterialName negative_material_;
 
 public:
-   MaterialSignCapsule() = delete;
-   ~MaterialSignCapsule() = default;
+   MaterialSignCapsule()                             = delete;
+   ~MaterialSignCapsule()                            = default;
    MaterialSignCapsule( MaterialSignCapsule const& ) = delete;
    MaterialSignCapsule& operator=( MaterialSignCapsule const& ) = delete;
-   MaterialSignCapsule( MaterialSignCapsule&& ) = delete;
+   MaterialSignCapsule( MaterialSignCapsule&& )                 = delete;
    MaterialSignCapsule& operator=( MaterialSignCapsule&& ) = delete;
 
-   MaterialSignCapsule(MaterialName const positive_material, MaterialName const negative_material) {
-      positive_fluid_ = positive_material;
-      negative_fluid_ = negative_material;
+   MaterialSignCapsule( MaterialName const positive_material, MaterialName const negative_material ) {
+      positive_material_ = positive_material;
+      negative_material_ = negative_material;
    }
 
    /**
-    * @brief Static function to get the positive fluid material identifier in a single-level-set simulation.
-    *        $Always FLUID ONE in inputfile. This function can be uninitialized if called too early! Must not be called as long as no object is available.$
-    * @return Positive fluid material identifier .
+    * @brief Static function to get the positive material material identifier in a single-level-set simulation.
+    *        $Always MATERIAL ONE in inputfile. This function can be uninitialized if called too early! Must not be called as long as no object is available.$
+    * @return Positive material material identifier .
     */
-   static inline MaterialName PositiveFluidMaterial() {return positive_fluid_;}
+   static inline MaterialName PositiveMaterial() { return positive_material_; }
 
    /**
-    * @brief Static function to get the negative fluid material identifier in a single-level-set simulation.
-    *        $Always FLUID TWO in inputfile. This function can be uninitialized if called too early! Must not be called as long as no object is available.$
-    * @return Negative fluid material identifier.
+    * @brief Static function to get the negative material material identifier in a single-level-set simulation.
+    *        $Always MATERIAL TWO in inputfile. This function can be uninitialized if called too early! Must not be called as long as no object is available.$
+    * @return Negative material material identifier.
     */
-   static inline MaterialName NegativeFluidMaterial() {return negative_fluid_;}
+   static inline MaterialName NegativeMaterial() { return negative_material_; }
 
    /**
     * @brief Gives the sign of the given material used in the signed levelset and signed interface tag description.
     * @param material Material of interest.
     * @return return Sign of the material.
     */
-   static inline std::int8_t SignOfMaterial(const MaterialName material) {return material == PositiveFluidMaterial() ? 1 : -1;}
+   static inline std::int8_t SignOfMaterial( MaterialName const material ) { return material == PositiveMaterial() ? 1 : -1; }
 };
 
-#endif // MATERIAL_SIGN_CAPSULE_H
+#endif// MATERIAL_SIGN_CAPSULE_H

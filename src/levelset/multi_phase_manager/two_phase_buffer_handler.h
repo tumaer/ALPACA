@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,18 +63,14 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TWO_PHASE_BUFFER_HANDLER_H
 #define TWO_PHASE_BUFFER_HANDLER_H
 
-
 #include "buffer_handler.h"
-#include "prime_states/prime_state_handler_setup.h"
-
-
-using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
+#include "prime_states/prime_state_handler.h"
 
 /**
  * @brief The TwoPhaseBufferHandler class is a specification of the BufferHandler for two phase simulations.
@@ -82,23 +79,23 @@ class TwoPhaseBufferHandler : public BufferHandler<TwoPhaseBufferHandler> {
 
    friend BufferHandler;
 
-   PrimeStateHandlerConcretization const prime_state_handler_;
+   PrimeStateHandler const prime_state_handler_;
 
 private:
-   void TransformToConservativesImplementation(Node& node) const;
-   void TransformToVolumeAveragedConservativesImplementation(Node& node) const;
-   void AdaptConservativesToWellResolvedDistanceFunctionImplementation(Node& node) const;
-   void CalculatePrimesFromIntegratedConservativesImplementation(Node& node) const;
-   void CalculateConservativesFromExtendedPrimesImplementation(Node& node) const;
+   void TransformToConservativesImplementation( Node& node ) const;
+   void TransformToVolumeAveragedConservativesImplementation( Node& node ) const;
+   void AdaptConservativesToWellResolvedDistanceFunctionImplementation( Node& node ) const;
+   void CalculatePrimesFromIntegratedConservativesImplementation( Node& node ) const;
+   void CalculateConservativesFromExtendedPrimesImplementation( Node& node ) const;
 
 public:
    TwoPhaseBufferHandler() = delete;
-   explicit TwoPhaseBufferHandler(const MaterialManager& material_manager);
-   ~TwoPhaseBufferHandler() = default;
+   explicit TwoPhaseBufferHandler( MaterialManager const& material_manager );
+   ~TwoPhaseBufferHandler()                              = default;
    TwoPhaseBufferHandler( TwoPhaseBufferHandler const& ) = delete;
    TwoPhaseBufferHandler& operator=( TwoPhaseBufferHandler const& ) = delete;
-   TwoPhaseBufferHandler( TwoPhaseBufferHandler&& ) = delete;
+   TwoPhaseBufferHandler( TwoPhaseBufferHandler&& )                 = delete;
    TwoPhaseBufferHandler& operator=( TwoPhaseBufferHandler&& ) = delete;
 };
 
-#endif //TWO_PHASE_BUFFER_HANDLER_H
+#endif//TWO_PHASE_BUFFER_HANDLER_H

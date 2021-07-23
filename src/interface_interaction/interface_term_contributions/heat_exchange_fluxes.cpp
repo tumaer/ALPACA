@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,25 +63,24 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "heat_exchange_fluxes.h"
 
 #include "levelset/multi_phase_manager/material_sign_capsule.h"
 #include "enums/interface_tag_definition.h"
-#include "mathematical_functions.h"
-#include "index_transformations.h"
-#include "stencils/differentiation_utilities.h"
+#include "utilities/mathematical_functions.h"
+#include "utilities/index_transformations.h"
+#include "stencils/stencil_utilities.h"
 
 /**
  * @brief The default constructor.
- * @param thermal_conductivity_positive The thermal conductivity of the positive fluid.
- * @param thermal_conductivity_negative The thermal conductivity of the negative fluid.
+ * @param thermal_conductivity_positive The thermal conductivity of the positive material.
+ * @param thermal_conductivity_negative The thermal conductivity of the negative material.
  */
-HeatExchangeFluxes::HeatExchangeFluxes( double const thermal_conductivity_positive, double const thermal_conductivity_negative ) :
-   thermal_conductivity_positive_( thermal_conductivity_positive ),
-   thermal_conductivity_negative_( thermal_conductivity_negative ) {
+HeatExchangeFluxes::HeatExchangeFluxes( double const thermal_conductivity_positive, double const thermal_conductivity_negative ) : thermal_conductivity_positive_( thermal_conductivity_positive ),
+                                                                                                                                   thermal_conductivity_negative_( thermal_conductivity_negative ) {
    // Empty besides initializer list
 }
 
@@ -89,22 +89,19 @@ HeatExchangeFluxes::HeatExchangeFluxes( double const thermal_conductivity_positi
  * @param node The node for which the fluxes are calculated.
  * @param delta_aperture_field The field containing aperture differences.
  */
-void HeatExchangeFluxes::ComputeInterfaceFluxes( Node& node
-                                                 , double const (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const {
+void HeatExchangeFluxes::ComputeInterfaceFluxes( Node& node, double const ( &delta_aperture_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const {
 
-
-
-   double const cell_size = node.GetCellSize();
+   double const cell_size     = node.GetCellSize();
    double const one_cell_size = 1.0 / cell_size;
 
-   std::int8_t const (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-   double const (&volume_fraction)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetVolumeFraction();
+   std::int8_t const( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+   double const( &volume_fraction )[CC::TCX()][CC::TCY()][CC::TCZ()]     = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::VolumeFraction );
 
-   double real_fluid_temperature[CC::TCX()][CC::TCY()][CC::TCZ()];
-   ComputeRealFluidTemperature( node, real_fluid_temperature );
+   double real_material_temperature[CC::TCX()][CC::TCY()][CC::TCZ()];
+   ComputeRealMaterialTemperature( node, real_material_temperature );
 
-   double (&positive_energy_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveFluidMaterial() ).GetRightHandSideBuffer( Equation::Energy );
-   double (&negative_energy_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeFluidMaterial() ).GetRightHandSideBuffer( Equation::Energy );
+   double( &positive_energy_rhs )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetRightHandSideBuffer( Equation::Energy );
+   double( &negative_energy_rhs )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetRightHandSideBuffer( Equation::Energy );
 
    for( unsigned int i = CC::FICX(); i <= CC::LICX(); ++i ) {
       for( unsigned int j = CC::FICY(); j <= CC::LICY(); ++j ) {
@@ -113,46 +110,44 @@ void HeatExchangeFluxes::ComputeInterfaceFluxes( Node& node
 
                //compute harmonic average of heat transfer coefficient
                double const thermal_conductivity_interface = ( thermal_conductivity_positive_ * thermal_conductivity_negative_ ) /
-                  ( volume_fraction[i][j][k] * thermal_conductivity_negative_ + ( 1.0 - volume_fraction[i][j][k] ) * thermal_conductivity_positive_ + epsilon_ );
+                                                             ( volume_fraction[i][j][k] * thermal_conductivity_negative_ + ( 1.0 - volume_fraction[i][j][k] ) * thermal_conductivity_positive_ + epsilon_ );
 
-               std::array<double, 3> temperature_gradient = DifferentiationUtilities::ComputeGradient<DerivativeStencilSetup::Concretize<temperature_gradient_derivative_stencil_cell_center>::type, double>( real_fluid_temperature, i, j, k, cell_size );
+               std::array<double, 3> temperature_gradient = SU::GradientVector<DerivativeStencilSetup::Concretize<heat_fluxes_derivative_stencil_cell_center>::type>( real_material_temperature, i, j, k, cell_size );
                for( unsigned int d = 0; d < DTI( CC::DIM() ); ++d ) {
-                  temperature_gradient[d] *= delta_aperture_field[BIT::T2IX(i)][BIT::T2IY(j)][BIT::T2IZ(k)][d];
+                  temperature_gradient[d] *= delta_aperture_field[BIT::T2IX( i )][BIT::T2IY( j )][BIT::T2IZ( k )][d];
                }
 
-               double const interface_heat_flux = - thermal_conductivity_interface * ConsistencyManagedSum( temperature_gradient );
+               double const interface_heat_flux = -thermal_conductivity_interface * ConsistencyManagedSum( temperature_gradient );
 
                //store in exchange buffers - only influence on energy field
                positive_energy_rhs[i][j][k] += interface_heat_flux * one_cell_size;
                negative_energy_rhs[i][j][k] -= interface_heat_flux * one_cell_size;
 
-            } //if cut cell
-         } //k
-      } //j
-   } //i
-
+            }//if cut cell
+         }   //k
+      }      //j
+   }         //i
 }
 
 /**
- * @brief Computes the real fluid temperature.
- * @param node The node for which the real fluid temperature is calculated.
- * @param real_fluid_temperature The real fluid temperature field as indirect return parameter.
+ * @brief Computes the real material temperature.
+ * @param node The node for which the real material temperature is calculated.
+ * @param real_material_temperature The real material temperature field as indirect return parameter.
  */
-void HeatExchangeFluxes::ComputeRealFluidTemperature( Node const& node
-                                                      , double (&real_fluid_temperature)[CC::TCX()][CC::TCY()][CC::TCZ()]) const {
+void HeatExchangeFluxes::ComputeRealMaterialTemperature( Node const& node, double ( &real_material_temperature )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
 
-   double const (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetPhiReinitialized();
+   double const( &levelset_reinitialized )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetReinitializedBuffer( InterfaceDescription::Levelset );
 
-   double const (&temperature_positive)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveFluidMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
-   double const (&temperature_negative)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeFluidMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
+   double const( &temperature_positive )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::PositiveMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
+   double const( &temperature_negative )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetPhaseByMaterial( MaterialSignCapsule::NegativeMaterial() ).GetPrimeStateBuffer( PrimeState::Temperature );
 
    for( unsigned int i = 0; i < CC::TCX(); ++i ) {
       for( unsigned int j = 0; j < CC::TCY(); ++j ) {
          for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-            if( phi_reinitialized[i][j][k] > 0.0 ) {
-               real_fluid_temperature[i][j][k] = temperature_positive[i][j][k];
+            if( levelset_reinitialized[i][j][k] > 0.0 ) {
+               real_material_temperature[i][j][k] = temperature_positive[i][j][k];
             } else {
-               real_fluid_temperature[i][j][k] = temperature_negative[i][j][k];
+               real_material_temperature[i][j][k] = temperature_negative[i][j][k];
             }
          }
       }

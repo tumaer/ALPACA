@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,14 +63,14 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef ZERO_GRADIENT_BOUNDARY_CONDITION_H
 #define ZERO_GRADIENT_BOUNDARY_CONDITION_H
 
 #include "boundary_constants.h"
-#include "fluid_boundary_condition.h"
+#include "material_boundary_condition.h"
 #include "levelset_boundary_condition.h"
 #include "user_specifications/compile_time_constants.h"
 
@@ -77,16 +78,16 @@
  * @brief The ZeroGradientBoundaryCondition class implements a zero gradient (extending) external boundary condition of the domain.
  */
 template<BoundaryLocation LOC>
-class ZeroGradientBoundaryCondition : public FluidBoundaryCondition, public LevelsetBoundaryCondition {
+class ZeroGradientBoundaryCondition : public MaterialBoundaryCondition, public LevelsetBoundaryCondition {
 
    /**
     * @brief Updates the halo cells from the internal cells according to the zero-gradient condition.
     * @param host_buffer Reference of the buffer that is to be updated.
     */
    template<class T>
-   inline void UpdateZeroGradient( T (&host_buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
+   inline void UpdateZeroGradient( T ( &host_buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const {
       auto start_indices = BoundaryConstants<LOC>::HaloStartIndices();
-      auto end_indices = BoundaryConstants<LOC>::HaloEndIndices();
+      auto end_indices   = BoundaryConstants<LOC>::HaloEndIndices();
 
       for( unsigned int i = start_indices[0]; i < end_indices[0]; ++i ) {
          for( unsigned int j = start_indices[1]; j < end_indices[1]; ++j ) {
@@ -98,35 +99,35 @@ class ZeroGradientBoundaryCondition : public FluidBoundaryCondition, public Leve
    }
 
 public:
-   ZeroGradientBoundaryCondition() = default;
-   ~ZeroGradientBoundaryCondition() = default;
+   ZeroGradientBoundaryCondition()                                       = default;
+   ~ZeroGradientBoundaryCondition()                                      = default;
    ZeroGradientBoundaryCondition( ZeroGradientBoundaryCondition const& ) = delete;
    ZeroGradientBoundaryCondition& operator=( ZeroGradientBoundaryCondition const& ) = delete;
-   ZeroGradientBoundaryCondition( ZeroGradientBoundaryCondition&& ) = delete;
+   ZeroGradientBoundaryCondition( ZeroGradientBoundaryCondition&& )                 = delete;
    ZeroGradientBoundaryCondition&& operator=( ZeroGradientBoundaryCondition&& ) = delete;
 
    /**
     * @brief See base class. Imposes a zero-gradient condition at the boundary.
     */
-   void UpdateFluidExternal( Node& node, FluidFieldType const field_type ) const override {
-      unsigned int const number_of_fields = FF::ANOF( field_type );
+   void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type ) const override {
+      unsigned int const number_of_fields = MF::ANOF( field_type );
       for( auto& host_mat_block : node.GetPhases() ) {
          for( unsigned int field_index = 0; field_index < number_of_fields; ++field_index ) {
-            double (&cells)[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
+            double( &cells )[CC::TCX()][CC::TCY()][CC::TCZ()] = host_mat_block.second.GetFieldBuffer( field_type, field_index );
             UpdateZeroGradient( cells );
-          }
+         }
       }
    }
 
    /**
     * @brief See base class. Adjusted to zero-gradient condition.
     */
-   void UpdateLevelsetExternal(Node& node, LevelsetBlockBufferType const buffer_type) const override {
+   void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type ) const override {
       /*  NH TODO this if construct should be avoided, therefore different neighbor relations
-       *  in CommunicationManger needed for levelset vs. Fluid/Tag Halo updates.
+       *  in CommunicationManger needed for levelset vs. Material/Tag Halo updates.
        */
       if( node.HasLevelset() ) {
-         double (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetLevelsetBlock().GetBuffer( buffer_type );
+         double( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceBlock().GetBuffer( buffer_type );
          UpdateZeroGradient( buffer );
       }
    }
@@ -134,8 +135,7 @@ public:
    /**
     * @brief See base class. Adjusted to zero-gradient condition.
     */
-   void UpdateInterfaceTagExternal( Node& node ) const override {
-      std::int8_t (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
+   void UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const override {
       UpdateZeroGradient( interface_tags );
    }
 
@@ -148,4 +148,4 @@ public:
    }
 };
 
-#endif // ZERO_GRADIENT_BOUNDARY_CONDITION_H
+#endif// ZERO_GRADIENT_BOUNDARY_CONDITION_H

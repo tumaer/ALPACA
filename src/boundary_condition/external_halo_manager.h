@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,51 +63,43 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef EXTERNAL_HALO_MANAGER_H
 #define EXTERNAL_HALO_MANAGER_H
 
 #include <array>
-#include "simulation_setup.h"
+#include <memory>
 #include "boundary_condition/boundary_specifications.h"
-#include "boundary_condition/fluid_boundary_condition.h"
+#include "boundary_condition/material_boundary_condition.h"
 #include "boundary_condition/levelset_boundary_condition.h"
 #include "topology/node.h"
 
 /**
- * @brief Container of the external boundaries conditions for fluid and levelsets
+ * @brief Container of the external boundaries conditions for materials and interfaces. Furthermore, provides functionality to update halo cells
+ *        of external boundaries of a single node, based on the provided boundary conditions.
  */
 class ExternalHaloManager {
 
 private:
-   // Arrays holding the boundary conditions for all six natural sides. Always done also for reduced dimensions
-   std::array<std::unique_ptr<FluidBoundaryCondition const>, 6> const fluid_boundary_conditions_;
+   // arrays with full initialized boundary condition on each location (east, west, north, south, top bottom). If not present it is a nullptr.
+   std::array<std::unique_ptr<MaterialBoundaryCondition const>, 6> const material_boundary_conditions_;
    std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> const levelset_boundary_conditions_;
-
-   // Factory functions
-   std::array<std::unique_ptr<FluidBoundaryCondition const>, 6> InitializeFluidBoundaryCondition( SimulationSetup const& setup );
-   template<BoundaryLocation LOC>
-   std::unique_ptr<FluidBoundaryCondition const> CreateFluidBoundary( FluidBoundaryType const fluid_type, SimulationSetup const& setup );
-
-   std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> InitializeLevelsetBoundaryCondition( SimulationSetup const& setup );
-   template<BoundaryLocation LOC>
-   std::unique_ptr<LevelsetBoundaryCondition const> CreateLevelsetBoundary( LevelSetBoundaryType const levelset_type );
 
 public:
    ExternalHaloManager() = delete;
-   explicit ExternalHaloManager( SimulationSetup const& setup );
-   ~ExternalHaloManager() = default;
+   explicit ExternalHaloManager( std::array<std::unique_ptr<MaterialBoundaryCondition const>, 6> material_boundary_conditions,
+                                 std::array<std::unique_ptr<LevelsetBoundaryCondition const>, 6> levelset_boundary_conditions );
+   ~ExternalHaloManager()                            = default;
    ExternalHaloManager( ExternalHaloManager const& ) = delete;
    ExternalHaloManager& operator=( ExternalHaloManager const& ) = delete;
-   ExternalHaloManager( ExternalHaloManager&& ) = delete;
+   ExternalHaloManager( ExternalHaloManager&& )                 = delete;
    ExternalHaloManager& operator=( ExternalHaloManager&& ) = delete;
 
-   // Functions performing the halo update on different buffer
-   void UpdateLevelsetExternal( Node& node, LevelsetBlockBufferType const buffer_type, BoundaryLocation const loc ) const;
-   void UpdateInterfaceTagExternal( Node& node, BoundaryLocation const loc ) const;
-   void UpdateFluidExternal( Node& node, FluidFieldType const field_type, BoundaryLocation const loc ) const;
+   void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type, BoundaryLocation const loc ) const;
+   void UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], BoundaryLocation const loc ) const;
+   void UpdateMaterialExternal( Node& node, MaterialFieldType const field_type, BoundaryLocation const loc ) const;
 };
 
 #endif /* EXTERNAL_HALO_MANAGER_H */

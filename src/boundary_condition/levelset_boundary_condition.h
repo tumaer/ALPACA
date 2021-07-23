@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,13 +63,13 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef LEVELSET_BOUNDARY_CONDITION_H
 #define LEVELSET_BOUNDARY_CONDITION_H
 
-#include "levelset_block.h"
+#include "block_definitions/interface_block.h"
 #include "topology/node.h"
 
 /**
@@ -79,25 +80,25 @@
 class LevelsetBoundaryCondition {
 
 public:
-   LevelsetBoundaryCondition() = default;
-   virtual ~LevelsetBoundaryCondition() = default;
+   LevelsetBoundaryCondition()                                   = default;
+   virtual ~LevelsetBoundaryCondition()                          = default;
    LevelsetBoundaryCondition( LevelsetBoundaryCondition const& ) = delete;
    LevelsetBoundaryCondition& operator=( LevelsetBoundaryCondition const& ) = delete;
-   LevelsetBoundaryCondition( LevelsetBoundaryCondition&& ) = delete;
+   LevelsetBoundaryCondition( LevelsetBoundaryCondition&& )                 = delete;
    LevelsetBoundaryCondition& operator=( LevelsetBoundaryCondition&& ) = delete;
 
    /**
     * @brief Performs all levelset halo updates in external boundaries.
-    * @param node Node on which the halo update is done
-    * @param buffer_type Identifier of the buffer type of the levelset block to be updated
+    * @param node Node on which the halo update is done.
+    * @param buffer_type Identifier of the buffer type of the levelset block to be updated.
     */
-   virtual void UpdateLevelsetExternal( Node& node, LevelsetBlockBufferType const buffer_type ) const = 0;
+   virtual void UpdateLevelsetExternal( Node& node, InterfaceBlockBufferType const buffer_type ) const = 0;
 
    /**
     * @brief Performs all interface tag halo updates in external boundaries.
-    * @param node Node on which the halo update is done
+    * @param interface_tags buffer for which the halo update is done (indirect return).
     */
-   virtual void UpdateInterfaceTagExternal( Node& node ) const = 0;
+   virtual void UpdateInterfaceTagExternal( std::int8_t ( &interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()] ) const = 0;
 };
 
-#endif // LEVELSET_BOUNDARY_CONDITION_H
+#endif// LEVELSET_BOUNDARY_CONDITION_H

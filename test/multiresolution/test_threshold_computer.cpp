@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,24 +63,24 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include "multiresolution/threshold_computer.h"
 #include "enums/dimension_definition.h"
 
 SCENARIO( "Multiresolution thresholds are correctly computed", "[1rank]" ) {
 
    GIVEN( "1D setup and a convergence order of zero" ) {
-      constexpr Dimension dim = Dimension::One;
+      constexpr Dimension dim                  = Dimension::One;
       constexpr unsigned int convergence_order = 0;
       WHEN( "The maximum level is equal the reference level" ) {
-         constexpr unsigned int maximum_level = 6;
+         constexpr unsigned int maximum_level   = 6;
          constexpr unsigned int reference_level = maximum_level;
          THEN( "The thresholds follows the equation eps_ref * 2 ^ ( lmax - l ) " ) {
-            constexpr double user_epsilon_ref = 1.0;
-            constexpr double thresholder_epsilon_ref = 1.0; // Thresholder computed epsilon_ref (derived from user value)
+            constexpr double user_epsilon_ref                     = 1.0;
+            constexpr double thresholder_epsilon_ref              = 1.0;// Thresholder computed epsilon_ref (derived from user value)
             ThresholdComputer<dim, convergence_order> thresholder = ThresholdComputer<dim, convergence_order>( maximum_level, reference_level, user_epsilon_ref );
             REQUIRE( thresholder.ThresholdOnLevel( 0 ) == Approx( std::pow( 2.0, -6.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 1 ) == Approx( std::pow( 2.0, -5.0 ) * thresholder_epsilon_ref ) );
@@ -87,18 +88,18 @@ SCENARIO( "Multiresolution thresholds are correctly computed", "[1rank]" ) {
             REQUIRE( thresholder.ThresholdOnLevel( 3 ) == Approx( std::pow( 2.0, -3.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 4 ) == Approx( std::pow( 2.0, -2.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 5 ) == Approx( std::pow( 2.0, -1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0,  0.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0,  1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0,  2.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0,  3.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0, 0.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 1.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 2.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 3.0 ) * thresholder_epsilon_ref ) );
          }
       }
       WHEN( "The maximum level is larger than the reference level" ) {
-         constexpr unsigned int maximum_level = 6;
+         constexpr unsigned int maximum_level   = 6;
          constexpr unsigned int reference_level = 4;
          THEN( "The thresholds follows the equation eps_ref * 2 ^ - ( lmax - lref )  * 2 ^ - ( lmax - l ) " ) {
-            constexpr double user_epsilon_ref = 0.5;
-            constexpr double thresholder_epsilon_ref = 0.125; // Thresholder computed epsilon_ref (derived from user value)
+            constexpr double user_epsilon_ref                     = 0.5;
+            constexpr double thresholder_epsilon_ref              = 0.125;// Thresholder computed epsilon_ref (derived from user value)
             ThresholdComputer<dim, convergence_order> thresholder = ThresholdComputer<dim, convergence_order>( maximum_level, reference_level, user_epsilon_ref );
             // 0.125 should be the internal used epsilon_ref != provided epsilon_ref
             REQUIRE( thresholder.ThresholdOnLevel( 0 ) == Approx( std::pow( 2.0, -6.0 ) * thresholder_epsilon_ref ) );
@@ -107,18 +108,18 @@ SCENARIO( "Multiresolution thresholds are correctly computed", "[1rank]" ) {
             REQUIRE( thresholder.ThresholdOnLevel( 3 ) == Approx( std::pow( 2.0, -3.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 4 ) == Approx( std::pow( 2.0, -2.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 5 ) == Approx( std::pow( 2.0, -1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0,  0.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0,  1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0,  2.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0,  3.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0, 0.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 1.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 2.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 3.0 ) * thresholder_epsilon_ref ) );
          }
       }
       WHEN( "The maximum level is smaller than the reference level" ) {
-         constexpr unsigned int maximum_level = 6;
+         constexpr unsigned int maximum_level   = 6;
          constexpr unsigned int reference_level = 8;
          THEN( "The thresholds follows the equation eps_ref * 2 ^ - ( lmax - lref )  * 2 ^ - ( lmax - l ) " ) {
-            constexpr double user_epsilon_ref = 1.0;
-            constexpr double thresholder_epsilon_ref = 4.0; // Thresholder computed epsilon_ref (derived from user value)
+            constexpr double user_epsilon_ref                     = 1.0;
+            constexpr double thresholder_epsilon_ref              = 4.0;// Thresholder computed epsilon_ref (derived from user value)
             ThresholdComputer<dim, convergence_order> thresholder = ThresholdComputer<dim, convergence_order>( maximum_level, reference_level, user_epsilon_ref );
             // 4.0 should be the internal used epsilon_ref != provided epsilon_ref
             REQUIRE( thresholder.ThresholdOnLevel( 0 ) == Approx( std::pow( 2.0, -6.0 ) * thresholder_epsilon_ref ) );
@@ -127,23 +128,23 @@ SCENARIO( "Multiresolution thresholds are correctly computed", "[1rank]" ) {
             REQUIRE( thresholder.ThresholdOnLevel( 3 ) == Approx( std::pow( 2.0, -3.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 4 ) == Approx( std::pow( 2.0, -2.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 5 ) == Approx( std::pow( 2.0, -1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0,  0.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0,  1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0,  2.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0,  3.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0, 0.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 1.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 2.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 3.0 ) * thresholder_epsilon_ref ) );
          }
       }
    }
 
    GIVEN( "The maximum level is two larger than the reference level" ) {
       constexpr unsigned int reference_level = 5;
-      constexpr unsigned int maximum_level = reference_level + 2;
+      constexpr unsigned int maximum_level   = reference_level + 2;
       WHEN( "The convergence order is two and the dimension is two" ) {
          constexpr unsigned int convergence_order = 2;
-         constexpr Dimension dim = Dimension::Two;
+         constexpr Dimension dim                  = Dimension::Two;
          THEN( "The thresholds follows the equation eps_ref * 2 ^ - 3 * ( lmax - lref )  * 2 ^ - 2 * ( lmax - l ) " ) {
-            constexpr double user_epsilon_ref = 1.0;
-            constexpr double thresholder_epsilon_ref = 0.015625; // Thresholder computed epsilon_ref (derived from user value)
+            constexpr double user_epsilon_ref                     = 1.0;
+            constexpr double thresholder_epsilon_ref              = 0.015625;// Thresholder computed epsilon_ref (derived from user value)
             ThresholdComputer<dim, convergence_order> thresholder = ThresholdComputer<dim, convergence_order>( maximum_level, reference_level, user_epsilon_ref );
             // 0.015625 should be the internal used epsilon_ref != provided epsilon_ref
             REQUIRE( thresholder.ThresholdOnLevel( 0 ) == Approx( std::pow( 2.0, 2.0 * -7.0 ) * thresholder_epsilon_ref ) );
@@ -153,18 +154,18 @@ SCENARIO( "Multiresolution thresholds are correctly computed", "[1rank]" ) {
             REQUIRE( thresholder.ThresholdOnLevel( 4 ) == Approx( std::pow( 2.0, 2.0 * -3.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 5 ) == Approx( std::pow( 2.0, 2.0 * -2.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0, 2.0 * -1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 2.0 *  0.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 2.0 *  1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 2.0 *  2.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 2.0 * 0.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 2.0 * 1.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 2.0 * 2.0 ) * thresholder_epsilon_ref ) );
          }
       }
 
       WHEN( "The convergence order is five and the dimension is three" ) {
          constexpr unsigned int convergence_order = 5;
-         constexpr Dimension dim = Dimension::Three;
+         constexpr Dimension dim                  = Dimension::Three;
          THEN( "The thresholds follows the equation eps_ref * 2 ^ - 6 * ( lmax - lref )  * 2 ^ - 3 * ( lmax - l ) " ) {
-            constexpr double user_epsilon_ref = 1.0;
-            constexpr double thresholder_epsilon_ref = 0.000244140625; // Thresholder computed epsilon_ref (derived from user value)
+            constexpr double user_epsilon_ref                     = 1.0;
+            constexpr double thresholder_epsilon_ref              = 0.000244140625;// Thresholder computed epsilon_ref (derived from user value)
             ThresholdComputer<dim, convergence_order> thresholder = ThresholdComputer<dim, convergence_order>( maximum_level, reference_level, user_epsilon_ref );
 
             REQUIRE( thresholder.ThresholdOnLevel( 0 ) == Approx( std::pow( 2.0, 3.0 * -7.0 ) * thresholder_epsilon_ref ) );
@@ -174,9 +175,9 @@ SCENARIO( "Multiresolution thresholds are correctly computed", "[1rank]" ) {
             REQUIRE( thresholder.ThresholdOnLevel( 4 ) == Approx( std::pow( 2.0, 3.0 * -3.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 5 ) == Approx( std::pow( 2.0, 3.0 * -2.0 ) * thresholder_epsilon_ref ) );
             REQUIRE( thresholder.ThresholdOnLevel( 6 ) == Approx( std::pow( 2.0, 3.0 * -1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 3.0 *  0.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 3.0 *  1.0 ) * thresholder_epsilon_ref ) );
-            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 3.0 *  2.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 7 ) == Approx( std::pow( 2.0, 3.0 * 0.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 8 ) == Approx( std::pow( 2.0, 3.0 * 1.0 ) * thresholder_epsilon_ref ) );
+            REQUIRE( thresholder.ThresholdOnLevel( 9 ) == Approx( std::pow( 2.0, 3.0 * 2.0 ) * thresholder_epsilon_ref ) );
          }
       }
    }

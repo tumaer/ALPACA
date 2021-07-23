@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INTERFACE_TERM_SOLVER_H
@@ -86,38 +87,34 @@ using GeometryCalculatorConcretization = GeometryCalculatorSetup::Concretize<geo
 class InterfaceTermSolver {
 
 private:
-
-   static constexpr double one_twelfth_  = 1.0/12.0;
+   static constexpr double one_twelfth_ = 1.0 / 12.0;
 
    MaterialManager const& material_manager_;
    GeometryCalculatorConcretization const geometry_calculator_;
    InterfaceStressTensorFluxes const interface_stress_tensor_fluxes_;
    HeatExchangeFluxes const heat_exchange_fluxes_;
 
-   void FillInterfaceNormalVelocityBuffer( Node const& node
-                                               , double (&u_interface_normal_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]) const;
+   void FillInterfaceNormalVelocityBuffer( Node const& node, double ( &u_interface_normal_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const;
 
-   void FillDeltaApertureBuffer( Node const& node
-                                 , double (&delta_aperture_field)[CC::ICX()][CC::ICY()][CC::ICZ()][3]) const;
+   void FillDeltaApertureBuffer( Node const& node, double ( &delta_aperture_field )[CC::ICX()][CC::ICY()][CC::ICZ()][3] ) const;
 
 public:
    InterfaceTermSolver() = delete;
    explicit InterfaceTermSolver( MaterialManager const& material_manager );
-   ~InterfaceTermSolver() = default;
+   ~InterfaceTermSolver()                            = default;
    InterfaceTermSolver( InterfaceTermSolver const& ) = delete;
    InterfaceTermSolver& operator=( InterfaceTermSolver const& ) = delete;
-   InterfaceTermSolver( InterfaceTermSolver&& ) = delete;
+   InterfaceTermSolver( InterfaceTermSolver&& )                 = delete;
    InterfaceTermSolver& operator=( InterfaceTermSolver&& ) = delete;
 
    void SolveInterfaceInteraction( Node& node ) const;
    void WeightFaceFluxes( Node const& node, MaterialName const material,
-      double (&face_fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1]) const;
+                          double ( &face_fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                          double ( &face_fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                          double ( &face_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1] ) const;
 
    void WeightVolumeForces( Node const& node, MaterialName const material,
-      double (&volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const;
-
+                            double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 };
 
-#endif // INTERFACE_TERM_SOLVER_H
+#endif// INTERFACE_TERM_SOLVER_H

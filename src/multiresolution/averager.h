@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef AVERAGER_H
@@ -85,15 +86,17 @@ private:
 public:
    Averager() = delete;
    explicit Averager( TopologyManager const& topology, CommunicationManager& communicator, Tree& tree );
-   ~Averager() = default;
+   ~Averager()                 = default;
    Averager( Averager const& ) = delete;
    Averager& operator=( Averager const& ) = delete;
-   Averager( Averager&& ) = delete;
+   Averager( Averager&& )                 = delete;
    Averager& operator=( Averager&& ) = delete;
 
-   void AverageFluid( std::vector<unsigned int> const& child_levels_descending );
+   void AverageMaterial( std::vector<unsigned int> const& child_levels_descending ) const;
+
+   void AverageParameters( std::vector<unsigned int> const child_levels_descending ) const;
 
    void AverageInterfaceTags( std::vector<unsigned int> const& levels_with_updated_parents_descending ) const;
 };
 
-#endif //AVERAGER_H
+#endif//AVERAGER_H

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
@@ -77,16 +78,15 @@ class ReconstructionStencilSingleLevelsetAdvector : public LevelsetAdvector<Reco
 
    friend LevelsetAdvector;
 
-   void AdvectImplementation(Node& node, unsigned int const stage = 0) const;
+   void AdvectImplementation( Node& node ) const;
 
 public:
-   explicit ReconstructionStencilSingleLevelsetAdvector() = default;
-   ~ReconstructionStencilSingleLevelsetAdvector() = default;
+   explicit ReconstructionStencilSingleLevelsetAdvector()                                            = default;
+   ~ReconstructionStencilSingleLevelsetAdvector()                                                    = default;
    ReconstructionStencilSingleLevelsetAdvector( ReconstructionStencilSingleLevelsetAdvector const& ) = delete;
    ReconstructionStencilSingleLevelsetAdvector& operator=( ReconstructionStencilSingleLevelsetAdvector const& ) = delete;
-   ReconstructionStencilSingleLevelsetAdvector( ReconstructionStencilSingleLevelsetAdvector&& ) = delete;
+   ReconstructionStencilSingleLevelsetAdvector( ReconstructionStencilSingleLevelsetAdvector&& )                 = delete;
    ReconstructionStencilSingleLevelsetAdvector& operator=( ReconstructionStencilSingleLevelsetAdvector&& ) = delete;
 };
 
-
-#endif //RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H
+#endif//RECONSTRUCTION_STENCIL_SINGLE_LEVELSET_ADVECTOR_H

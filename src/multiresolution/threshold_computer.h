@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef THRESHOLD_COMPUTER_H
@@ -72,7 +73,6 @@
 #include "enums/dimension_definition.h"
 #include "user_specifications/compile_time_constants.h"
 
-
 /**
  * @brief A class to provide the multiresolution threshold values for the given intput. According to \cite Harten1995 and \cite Roussel2003.
  * @tparam DIM Dimension of the current simulation.
@@ -81,7 +81,7 @@
 template<Dimension DIM, unsigned int A>
 class ThresholdComputer {
 
-   static constexpr double D_ = static_cast<double>( DTI( DIM ) ); //Capitalization according to paper
+   static constexpr double D_     = static_cast<double>( DTI( DIM ) );//Capitalization according to paper
    static constexpr double alpha_ = static_cast<double>( A );
    unsigned int const maximum_level_;
    double const reference_epsilon_;
@@ -93,7 +93,7 @@ class ThresholdComputer {
     * @return Epsilon Reference to be used in multiresolution analysis.
     */
    inline double ComputeReferenceEpsilon( double const user_epsilon_reference, unsigned int const user_level_of_reference ) const {
-      return user_epsilon_reference * std::pow( 2.0,  -1.0 * ( alpha_ + 1.0 ) * ( double( maximum_level_ ) - double( user_level_of_reference ) ) );
+      return user_epsilon_reference * std::pow( 2.0, -1.0 * ( alpha_ + 1.0 ) * ( double( maximum_level_ ) - double( user_level_of_reference ) ) );
    }
 
 public:
@@ -103,17 +103,15 @@ public:
     * @param user_reference_level Reference level provided by user input for the multiresolution threshold.
     * @param user_reference_epsilon Reference epsilon provided by user input for the multiresolution threshold.
     */
-   explicit ThresholdComputer( unsigned int const maximum_level, unsigned int const user_reference_level, double const user_reference_epsilon ) :
-      maximum_level_( maximum_level ),
-      reference_epsilon_( ComputeReferenceEpsilon( user_reference_epsilon, user_reference_level ) )
-   {
+   explicit ThresholdComputer( unsigned int const maximum_level, unsigned int const user_reference_level, double const user_reference_epsilon ) : maximum_level_( maximum_level ),
+                                                                                                                                                  reference_epsilon_( ComputeReferenceEpsilon( user_reference_epsilon, user_reference_level ) ) {
       // Empty besides initializer list
    }
-   ThresholdComputer() = delete;
-   ~ThresholdComputer() = default;
+   ThresholdComputer()                           = delete;
+   ~ThresholdComputer()                          = default;
    ThresholdComputer( ThresholdComputer const& ) = default;
    ThresholdComputer& operator=( ThresholdComputer const& ) = delete;
-   ThresholdComputer( ThresholdComputer&& ) = default;
+   ThresholdComputer( ThresholdComputer&& )                 = default;
    ThresholdComputer& operator=( ThresholdComputer&& ) = delete;
 
    /**
@@ -128,4 +126,4 @@ public:
 
 using Thresholder = ThresholdComputer<CC::DIM(), CC::STDO()>;
 
-#endif // THRESHOLD_COMPUTER_H
+#endif// THRESHOLD_COMPUTER_H

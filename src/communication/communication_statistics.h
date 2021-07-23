@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef COMMUNICATION_STATISTICS_H
@@ -71,7 +72,7 @@
 #include <string>
 
 /**
- * @brief The CommunicationStatistics struct gathers information about the MPI Communication.
+ * @brief The CommunicationStatistics struct gathers information about the MPI Communication for proper logging output.
  */
 struct CommunicationStatistics {
 public:
@@ -83,7 +84,6 @@ public:
    static long balance_recv_;
    static long average_level_send_;
    static long average_level_recv_;
-
 };
 
 std::string SummedCommunicationStatisticsString();

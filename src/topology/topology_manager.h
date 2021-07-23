@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,22 +63,22 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TOPOLOGY_MANAGER_H
 #define TOPOLOGY_MANAGER_H
 
-#include <cstdint>
+#include <unordered_map>
 #include <vector>
 #include <mpi.h>
-#include "simulation_setup.h"
+#include "communication/mpi_utilities.h"
 #include "topology_node.h"
 #include "user_specifications/compile_time_constants.h"
 #include "topology/id_periodic_information.h"
 
 /**
- * @brief The TopologyManager class handles all aspects relevant for MPI (distributed Memory) parallelization. I.e. overview of data-to-rank maps, sending datatypes, etc.
+ * @brief The TopologyManager class handles all aspects relevant for MPI ( distributed Memory ) parallelization. I.e. overview of data-to-rank maps, sending datatypes, etc.
  *        TopologyManager must not trigger changes in local data. It may only be informed about changes in the local trees. In such a case
  *        it updates the global information automatically and spreads the information to the threads.
  * @note TopologyManager does not have a link to any tree object as it is not interested in tree details, but only in "node counts".
@@ -86,113 +87,96 @@ class TopologyManager {
 
    unsigned int const maximum_level_;
    unsigned int const active_periodic_locations_;
-   std::array<unsigned int, 3> const level_zero_nodes_xyz_;
+   std::array<unsigned int, 3> const number_of_nodes_on_level_zero_;
 
-   std::vector<std::uint64_t> local_refine_list_;
+   std::vector<nid_t> local_refine_list_;
 
-   // use tuples of vectors (instead of the more intuitive vector of tuples) to ease the use in MPI communication
-   std::tuple<std::vector<std::uint64_t>,std::vector<MaterialName>> local_added_fluids_list_; //List holds id and added fluids (of this id) $USED ONLY IN MULTIPHASE VERSION$
-   std::tuple<std::vector<std::uint64_t>,std::vector<MaterialName>> local_removed_fluids_list_; //List holds id and removed fluids (of this id) $USED ONLY IN MULTIPHASE VERSION$
+   // use tuples of vectors ( instead of the more intuitive vector of tuples ) to ease the use in MPI communication
+   std::tuple<std::vector<nid_t>, std::vector<MaterialName>> local_added_materials_list_;  //List holds id and added materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
+   std::tuple<std::vector<nid_t>, std::vector<MaterialName>> local_removed_materials_list_;//List holds id and removed materials ( of this id ) $USED ONLY IN MULTIPHASE VERSION$
 
-   std::vector<TopologyNode> forest_; // A collection of (root) trees is a forest
+   std::unordered_map<nid_t, TopologyNode> forest_;
 
    unsigned int coarsenings_since_load_balance_;
    unsigned int refinements_since_load_balance_;
 
-   int PositionOfNodeInZeroTopology(std::uint64_t const id) const;
-   void AssignBalancedLoad();
-   void ListNodeToBalance(std::vector<std::tuple<std::uint64_t const, int const, int const>>& ids_current_future_rank_map);
-   void AssignTargetRankToLeaves(int const number_of_ranks);
+   void SetCurrentRanksAccordingToTargetRanks();
+   std::vector<std::tuple<nid_t const, int const, int const>> NodesToBalance();
 
-   std::vector<unsigned int> WeightsOnLevels() const;
+   void AssignTargetRanksToLeavesInList( std::vector<nid_t> const& leaves, int const number_of_ranks );
+   void AssignTargetRankToLeaves( int const number_of_ranks );
+
+   void AssignTargetRankToParents();
 
 public:
-   explicit TopologyManager( unsigned int const maximum_level = 0, unsigned int level_zero_blocks_x = 1, unsigned int level_zero_blocks_y = 1,
-                             unsigned int level_zero_blocks_z = 1, unsigned int active_periodic_locations = 0 );
-   ~TopologyManager() = default;
+   explicit TopologyManager( std::array<unsigned int, 3> level_zero_blocks = { 1, 1, 1 }, unsigned int const maximum_level = 0, unsigned int active_periodic_locations = 0 );
+   ~TopologyManager()                        = default;
    TopologyManager( TopologyManager const& ) = delete;
    TopologyManager& operator=( TopologyManager const& ) = delete;
-   TopologyManager( TopologyManager&& ) = delete;
+   TopologyManager( TopologyManager&& )                 = delete;
    TopologyManager& operator=( TopologyManager&& ) = delete;
 
-   int GetRankOfNode(std::uint64_t const id) const;
+   // Counters:
+   unsigned int MultiPhaseNodeCount() const;
+   unsigned int InterfaceLeafCount() const;
+   std::pair<unsigned int, unsigned int> NodeAndLeafCount() const;
+   std::pair<unsigned int, unsigned int> NodeAndBlockCount() const;
+   // Rank-wise counters:
+   std::vector<std::pair<unsigned int, unsigned int>> NodesAndLeavesPerRank( int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   std::vector<std::pair<unsigned int, unsigned int>> NodesAndBlocksPerRank( int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   std::vector<unsigned int> InterfaceLeavesPerRank( int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   // Offset-counters:
+   unsigned long long int LeafOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   unsigned long long int InterfaceLeafOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   unsigned long long int NodeOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
+   std::pair<unsigned long long int, unsigned long long int> NodeAndBlockOffsetOfRank( int const rank, int const number_of_ranks = MpiUtilities::NumberOfRanks() ) const;
 
+   //Single node testers:
+   bool NodeExists( nid_t const id ) const;
+   bool NodeIsOnRank( nid_t const id, int const rank ) const;
+   bool NodeIsLeaf( nid_t const id ) const;
+   bool IsNodeMultiPhase( nid_t const id ) const;
+   int GetRankOfNode( nid_t const id ) const;
+
+   bool NodeContainsMaterial( nid_t const node_id, MaterialName const material ) const;
+   std::vector<MaterialName> GetMaterialsOfNode( nid_t const id ) const;
+   MaterialName SingleMaterialOfNode( nid_t const id ) const;
+
+   // Topological questions:
+   bool FaceIsJump( nid_t const id, BoundaryLocation const location ) const;
+   bool IsExternalTopologyBoundary( BoundaryLocation const location, nid_t const id ) const;
+   std::vector<nid_t> GetNeighboringLeaves( nid_t const id, BoundaryLocation const location ) const;
+   nid_t GetTopologyNeighborId( nid_t const id, BoundaryLocation const location ) const;
+
+   // Simple Getters:
+   unsigned int GetMaximumLevel() const;
+   std::array<unsigned int, 3> GetNumberOfNodesOnLevelZero() const;
    unsigned int GetCurrentMaximumLevel() const;
+   bool IsLoadBalancingNecessary();
+
+   // Node listings:
+   std::vector<nid_t> LocalLeafIds() const;
+   std::vector<nid_t> LocalInterfaceLeafIds() const;
+   std::vector<nid_t> LeafIds() const;
+   std::vector<nid_t> LocalLeafIdsOnLevel( unsigned int const level ) const;
+   std::vector<nid_t> LeafIdsOnLevel( unsigned int const level ) const;
+   std::vector<nid_t> DescendantIdsOfNode( nid_t const id ) const;
+   std::vector<nid_t> LocalIds() const;
+   std::vector<nid_t> IdsOnLevel( unsigned int const level ) const;
+   std::vector<nid_t> LocalIdsOnLevel( unsigned int const level ) const;
+
+   // Node and/or topology altering:
+   void RefineNodeWithId( nid_t const id );
+   void CoarseNodeWithId( nid_t const parent_id );
+   void AddMaterialToNode( nid_t const id, MaterialName const material );
+   void RemoveMaterialFromNode( nid_t const id, MaterialName const material );
 
    bool UpdateTopology();
+   std::vector<std::tuple<nid_t const, int const, int const>> PrepareLoadBalancedTopology( int const number_of_ranks );
+   std::vector<unsigned int> RestoreTopology( std::vector<nid_t> ids, std::vector<unsigned short> number_of_phases, std::vector<MaterialName> materials );
 
-   bool NodeExists(std::uint64_t const id) const;
-   bool FaceIsJump(std::uint64_t const id, BoundaryLocation const location) const;
-   bool NodeIsOnRank(std::uint64_t const id, int const rank) const;
-   bool NodeIsLeaf(std::uint64_t const id) const;
-
-   void RefineNodeWithId(std::uint64_t const id);
-   void CoarseNodeWithId(std::uint64_t const parent_id);
-   std::string LeafRankDistribution(int const number_of_ranks);
-
-   std::vector<std::uint64_t> LocalLeafIds() const;
-   std::vector<std::uint64_t> LeafIds() const;
-   std::vector<std::uint64_t> LocalLeafIdsOnLevel(const unsigned int level) const;
-   std::vector<std::uint64_t> LeafIdsOnLevel(const unsigned int level) const;
-   std::vector<std::uint64_t> DescendantIdsOfNode(std::uint64_t const id) const;
-
-   std::vector<std::tuple<std::uint64_t const, int const, int const>> GetLoadBalancedTopology( int const number_of_ranks );
-
-   std::vector<std::uint64_t> GlobalIdsOnLevel(unsigned int const level) const;
-   std::vector<std::uint64_t> IdsOnLevelOfRank(unsigned int const level, int const rank_id) const;
-
-   bool IsLoadBalancingNecessary();
-   bool IsNodeMultiPhase(std::uint64_t const id) const;
-
-   void AddFluidToNode(std::uint64_t const id, const MaterialName material);
-   void RemoveFluidFromNode(std::uint64_t const id, const MaterialName material);
-   std::vector<MaterialName> GetFluidsOfNode(std::uint64_t const id) const;
-   MaterialName SingleFluidOfNode(std::uint64_t const id) const;
-   bool NodeContainsFluid(std::uint64_t const node_id, const MaterialName material) const;
-
-   std::pair<unsigned int, unsigned int> NodeAndLeafCount() const;
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndLeavesPerRank() const;
-
-   std::pair<unsigned int, unsigned int> NodeAndBlockCount() const;
-   std::vector<std::pair<unsigned int, unsigned int>> NodesAndBlocksPerRank() const;
-
-   unsigned int MultiPhaseNodeCount() const;
-
-   std::vector<unsigned int> RestoreTopology(std::vector<std::uint64_t> ids, std::vector<unsigned short> number_of_phases, std::vector<unsigned short> materials);
-
-   std::vector<std::uint64_t> GetNeighboringLeaves(const uint64_t id, BoundaryLocation const location) const;
-
-   long long unsigned int LeafOffsetOfRank( int const rank ) const;
-
-   /**
-    * @brief Gives the block ratio on level zero. I. e. number of blocks in the respective direction.
-    * @return Array sorted by X, Y, Z axis entries.
-    */
-   inline std::array<unsigned int, 3> GetLevelZeroBlockRatioXyz() const {
-      return level_zero_nodes_xyz_;
-   }
-
-   /**
-   * @brief Gives the id of a neighbor at the provided direction.
-   * @param id The id of the node whose neighbor is to be found.
-   * @param location Direction in which the neighbor is located.
-   * @return Id of the neighbor.
-   */
-   inline std::uint64_t GetTopologyNeighborId(std::uint64_t const id, BoundaryLocation const location) const{
-      return GetPeriodicNeighborId(id, location, level_zero_nodes_xyz_, active_periodic_locations_);
-   }
-
-   /**
-    * @brief Determines whether a location (including edges and corners) of a block is at the edge of the computational domain.
-    * @param location The  direction of the edge under consideration.
-    * @param id The id of the node under investigation.
-    * @param setup The simulation settings as provided by the user.
-    * @return True if the edge is a domain edge, false otherwise, i.e. internal edge.
-    * @note Does not check for dimensionality! I. e. callers responsibility to only call on existing locations (e. g. NOT Top in 1D).
-    */
-   inline bool IsExternalTopologyBoundary(BoundaryLocation const location, std::uint64_t const id)  const {
-      return PeriodicIsExternalBoundary(location, id, level_zero_nodes_xyz_, active_periodic_locations_);
-   }
+   // Formatted information
+   std::string LeafRankDistribution( int const number_of_ranks );
 };
 
-#endif // TOPOLOGY_MANAGER_H
+#endif// TOPOLOGY_MANAGER_H

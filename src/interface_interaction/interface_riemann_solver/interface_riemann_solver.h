@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef INTERFACE_RIEMANN_SOLVER_H
 #define INTERFACE_RIEMANN_SOLVER_H
-
 
 #include "materials/material_manager.h"
 
@@ -81,23 +81,22 @@ class InterfaceRiemannSolver {
    friend DerivedInterfaceRiemannSolver;
 
 protected:
-
    MaterialManager const& material_manager_;
 
    /**
     * @brief Constructor for the InterfaceRiemannSolver class.
-    * @param material_manager Contains information about the fluids present in the simulation.
+    * @param material_manager Contains information about the materials present in the simulation.
     */
    explicit InterfaceRiemannSolver( MaterialManager const& material_manager ) : material_manager_( material_manager ) {
       // Empty besides initializer list.
    }
 
 public:
-   InterfaceRiemannSolver() = delete;
-   ~InterfaceRiemannSolver() = default;
+   InterfaceRiemannSolver()                                = delete;
+   ~InterfaceRiemannSolver()                               = default;
    InterfaceRiemannSolver( InterfaceRiemannSolver const& ) = delete;
    InterfaceRiemannSolver& operator=( InterfaceRiemannSolver const& ) = delete;
-   InterfaceRiemannSolver( InterfaceRiemannSolver&& ) = delete;
+   InterfaceRiemannSolver( InterfaceRiemannSolver&& )                 = delete;
    InterfaceRiemannSolver& operator=( InterfaceRiemannSolver&& ) = delete;
 
    /**
@@ -114,13 +113,20 @@ public:
     * @return An array that contains following information in the given order: interface_velocity, interface_pressure_positive, interface_pressure_negative.
     */
    std::array<double, 3> SolveInterfaceRiemannProblem( double const& rho_left, double const& p_left, double const& velocity_normal_left, MaterialName const& material_left,
-       double const& rho_right, double const& p_right, double const& velocity_normal_right, MaterialName const& material_right,
-       double const& delta_p ) const {
+                                                       double const& rho_right, double const& p_right, double const& velocity_normal_right, MaterialName const& material_right,
+                                                       double const& delta_p ) const {
+      if constexpr( CC::SolidBoundaryActive() ) {
+         if( material_manager_.IsSolidBoundary( material_left ) ) {
+            return { velocity_normal_left, p_right, 0.0 };
+         }
+         if( material_manager_.IsSolidBoundary( material_right ) ) {
+            return { velocity_normal_right, 0.0, p_left };
+         }
+      }
       return static_cast<DerivedInterfaceRiemannSolver const&>( *this ).SolveInterfaceRiemannProblemImplementation( rho_left, p_left, velocity_normal_left, material_left,
-         rho_right, p_right, velocity_normal_right, material_right,
-         delta_p );
+                                                                                                                    rho_right, p_right, velocity_normal_right, material_right,
+                                                                                                                    delta_p );
    }
 };
 
-
-#endif //INTERFACE_RIEMANN_SOLVER_H
+#endif//INTERFACE_RIEMANN_SOLVER_H

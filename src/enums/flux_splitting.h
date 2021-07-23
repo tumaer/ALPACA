@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef FLUXSPLITTING_H
@@ -71,16 +72,20 @@
 #include <iostream>
 
 /**
- * @brief Identifier for flux splitting schemes to be used in Roe Riemann Solver
+ * @brief Identifier for flux splitting schemes to be used in Roe Riemann Solver.
  */
-enum class FluxSplitting { Roe, LocalLaxFriedrichs, GlobalLaxFriedrichs, Roe_M, LocalLaxFriedrichs_M };
+enum class FluxSplitting { Roe,
+                           LocalLaxFriedrichs,
+                           GlobalLaxFriedrichs,
+                           Roe_M,
+                           LocalLaxFriedrichs_M };
 
 /**
  * @brief Provides a string representation of the applied FluxSplitting type in Roe Riemann Solver (used for log file).
  * @param flux_type FluxSplitting identifier.
  * @return String representation for the given FluxSplitting type.
  */
-inline std::string FluxSplittingToString( FluxSplitting const flux_type) {
+inline std::string FluxSplittingToString( FluxSplitting const flux_type ) {
    switch( flux_type ) {
       case FluxSplitting::Roe:
          return "Roe";
@@ -97,4 +102,4 @@ inline std::string FluxSplittingToString( FluxSplitting const flux_type) {
    }
 }
 
-#endif // FLUXSPLITTING_H
+#endif// FLUXSPLITTING_H

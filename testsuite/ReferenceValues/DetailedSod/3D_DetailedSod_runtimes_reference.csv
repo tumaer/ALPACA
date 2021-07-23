@@ -1,0 +1,7 @@
+        Runtime,   MaximumLevel,     Inputfile,                                                                                                                                                          Executable
+4.6349363636363634e+01,1,          SodX,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+2.4720981818181813e+03,3,          SodX,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+4.638725454545454e+01,1,          SodY,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+2.477899090909091e+03,3,          SodY,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+4.6246745454545454e+01,1,          SodZ,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw
+2.486722727272727e+03,3,          SodZ,      ALPACA_3D_20_4_NavierStokes_RK3_FluxSplitting_Roe_Hllc_Einfeldt_Characteristic_WENO5_HOUC5_HjReconstructionStencil_Weno_Linearized_Fedkiw

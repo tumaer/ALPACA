@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef RECONSTRUCTION_STENCIL_SETUP_H
@@ -71,15 +72,18 @@
 #include "user_specifications/stencil_setup.h"
 #include "first_order.h"
 #include "weno3.h"
-#include "fourth_order_central.h"
+#include "weno_f3p.h"
 #include "weno5.h"
-#include "weno5_z.h"
-#include "weno5_hm.h"
-#include "weno-ao53.h"
-#include "teno5.h"
 #include "weno-cu6.h"
+#include "weno5_z.h"
+#include "weno5_nu6p.h"
+#include "teno5.h"
 #include "weno7.h"
 #include "weno9.h"
+#include "weno-ao53.h"
+#include "weno5_hm.h"
+#include "weno5_is.h"
+#include "fourth_order_central.h"
 
 /**
  * @brief A namespace to get a ReconstructionStencil type based on a specified constexpr.
@@ -88,7 +92,7 @@ namespace ReconstructionStencilSetup {
 
    /**
     * @brief Function returning the typedef of a ReconstructionStencil based on a constexpr template.
-    * 
+    *
     * @tparam ReconstructionStencils The constexpr template parameter to specify the exact ReconstructionStencil type.
     */
    template<ReconstructionStencils>
@@ -112,6 +116,13 @@ namespace ReconstructionStencilSetup {
     * @brief See generic implementation.
     */
    template<>
+   struct Concretize<ReconstructionStencils::WENOF3P> {
+      typedef WENOF3P type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
    struct Concretize<ReconstructionStencils::FourthOrderCentral> {
       typedef FourthOrderCentral type;
    };
@@ -126,6 +137,13 @@ namespace ReconstructionStencilSetup {
     * @brief See generic implementation.
     */
    template<>
+   struct Concretize<ReconstructionStencils::WENO5IS> {
+      typedef WENO5IS type;
+   };
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
    struct Concretize<ReconstructionStencils::WENO5Z> {
       typedef WENO5Z type;
    };
@@ -133,15 +151,15 @@ namespace ReconstructionStencilSetup {
     * @brief See generic implementation.
     */
    template<>
-   struct Concretize<ReconstructionStencils::WENO5HM> {
-      typedef WENO5HM type;
+   struct Concretize<ReconstructionStencils::WENOAO53> {
+      typedef WENOAO53 type;
    };
    /**
     * @brief See generic implementation.
     */
    template<>
-   struct Concretize<ReconstructionStencils::WENOAO53> {
-      typedef WENOAO53 type;
+   struct Concretize<ReconstructionStencils::WENO5NU6P> {
+      typedef WENO5NU6P type;
    };
    /**
     * @brief See generic implementation.
@@ -171,6 +189,14 @@ namespace ReconstructionStencilSetup {
    struct Concretize<ReconstructionStencils::WENO9> {
       typedef WENO9 type;
    };
-}
+   /**
+    * @brief See generic implementation.
+    */
+   template<>
+   struct Concretize<ReconstructionStencils::WENO5HM> {
+      typedef WENO5HM type;
+   };
 
-#endif // RECONSTRUCTION_STENCIL_SETUP_H
+}// namespace ReconstructionStencilSetup
+
+#endif// RECONSTRUCTION_STENCIL_SETUP_H

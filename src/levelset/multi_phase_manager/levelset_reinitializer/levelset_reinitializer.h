@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef LEVELSET_REINITIALIZER_H
 #define LEVELSET_REINITIALIZER_H
-
 
 #include "halo_manager.h"
 #include "user_specifications/numerical_setup.h"
@@ -85,37 +85,35 @@ class LevelsetReinitializer {
    friend DerivedLevelsetReinitializer;
 
 protected:
-   HaloManager& halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   HaloManager& halo_manager_;// TODO-19 NH Think about making it const (rats tail)
    LogWriter& logger_;
 
    /**
     * @brief The default constructor for a LevelsetReinitializer object.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit LevelsetReinitializer( HaloManager& halo_manager ) :
-       halo_manager_( halo_manager ),
-       logger_( LogWriter::Instance() )
-   {
+   explicit LevelsetReinitializer( HaloManager& halo_manager ) : halo_manager_( halo_manager ),
+                                                                 logger_( LogWriter::Instance() ) {
       // Empty Constructor, besides initializer list.
    }
 
 public:
-   LevelsetReinitializer() = delete;
-   ~LevelsetReinitializer() = default;
+   LevelsetReinitializer()                               = delete;
+   ~LevelsetReinitializer()                              = default;
    LevelsetReinitializer( LevelsetReinitializer const& ) = delete;
    LevelsetReinitializer& operator=( LevelsetReinitializer const& ) = delete;
-   LevelsetReinitializer( LevelsetReinitializer&& ) = delete;
+   LevelsetReinitializer( LevelsetReinitializer&& )                 = delete;
    LevelsetReinitializer& operator=( LevelsetReinitializer&& ) = delete;
 
    /**
     * @brief The method to reinitialize a level-set field.
     * @param nodes The nodes for which the level-set field is reinitialized.
-    * @param stage The current stage of the Runge-Kutta method.
+    * @param levelset_type  Level-set field type that is reinitialized.
+    * @param is_last_stage Flag if the method is called for the last stage of the applied Runge-Kutta method.
     */
-   void Reinitialize(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedLevelsetReinitializer const&>(*this).ReinitializeImplementation(nodes, stage);
+   void Reinitialize( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceDescriptionBufferType const levelset_type, bool const is_last_stage ) const {
+      static_cast<DerivedLevelsetReinitializer const&>( *this ).ReinitializeImplementation( nodes, levelset_type, is_last_stage );
    }
 };
 
-
-#endif //LEVELSET_REINITIALIZER_H
+#endif//LEVELSET_REINITIALIZER_H

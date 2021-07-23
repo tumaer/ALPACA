@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef ITERATIVE_LEVELSET_REINITIALIZER_BASE_H
@@ -70,7 +71,8 @@
 
 #include "levelset_reinitializer.h"
 #include "user_specifications/two_phase_constants.h"
-#include "mathematical_functions.h"
+#include "utilities/mathematical_functions.h"
+#include "utilities/buffer_operations_interface.h"
 #include "enums/interface_tag_definition.h"
 
 /**
@@ -90,115 +92,91 @@ class IterativeLevelsetReinitializerBase : public LevelsetReinitializer<DerivedI
     * @brief The default constructor for a LevelsetReinitializer object.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit IterativeLevelsetReinitializerBase( HaloManager& halo_manager ) :
-      LevelsetReinitializer<DerivedIterativeLevelsetReinitializer>( halo_manager )
-   {
+   explicit IterativeLevelsetReinitializerBase( HaloManager& halo_manager ) : LevelsetReinitializer<DerivedIterativeLevelsetReinitializer>( halo_manager ) {
       // Empty Constructor, besides initializer list.
    }
 
    /**
-    * @brief Calculate the Godunov Hamiltonian (GH) as described in \cite Min2010.
-    * @param derivatives A reference to the single components (level-set derivatives) for which the GH has to be calculated.
-    * @param old_levelset_sign The sign of the original level-set value.
-    * @return The GH as a double value.
+    * @brief Sets the cut-off in the levelset field of a node.
+    * @param node The node with levelset block which has to be reinitialized.
+    * @param levelset_type Level set buffer type which is reinitialized.
     */
-   double GetGodunovHamiltonian(double (&derivatives)[DTI(CC::DIM())][2], double const old_levelset_sign) const {
-      std::array<double, DTI(CC::DIM())> godunov_hamiltonian_contributions;
+   void CutOffSingleNode( Node& node, InterfaceDescriptionBufferType const levelset_type ) const {
 
-      for(unsigned int d = 0; d < DTI(CC::DIM()); ++d) {
-         derivatives[d][0] = std::max( 0.0 , old_levelset_sign * derivatives[d][0] );
-         derivatives[d][1] = std::min( 0.0 , old_levelset_sign * derivatives[d][1] );
-         godunov_hamiltonian_contributions[d] = std::max(derivatives[d][0]*derivatives[d][0] , derivatives[d][1]*derivatives[d][1]);
-      }
+      InterfaceBlock& interface_block                      = node.GetInterfaceBlock();
+      double( &levelset )[CC::TCX()][CC::TCY()][CC::TCZ()] = interface_block.GetInterfaceDescriptionBuffer( levelset_type )[InterfaceDescription::Levelset];
 
-      return std::sqrt(ConsistencyManagedSum(godunov_hamiltonian_contributions));
-   }
-
-   /**
-    * @brief Sets the cut-off in the levelset field of a node .
-    * @param node The node which has to be reinitialized.
-    */
-   void CutOffSingleNode(Node& node) const {
-
-      std::int8_t const  (&interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()] = node.GetInterfaceTags();
-      LevelsetBlock& levelset_block = node.GetLevelsetBlock();
-      double (&levelset)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiReinitialized();
-
-      //cells which are outside the reinitialization band are set to cut-off value
+      // Cells which have a levelset value greater than the cutoff value are set to cutoff.
       double const cutoff = CC::LSCOF();
-      for(unsigned int i = 0; i < CC::TCX(); ++i){
-         for(unsigned int j = 0; j < CC::TCY(); ++j){
-            for(unsigned int k = 0; k < CC::TCZ(); ++k){
-               if(std::abs(interface_tags[i][j][k]) > ITTI(IT::ReinitializationBand)) {
-                  levelset[i][j][k] = Signum(levelset[i][j][k]) * cutoff;
+      for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+         for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+            for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+               if( std::abs( levelset[i][j][k] ) > cutoff ) {
+                  levelset[i][j][k] = Signum( levelset[i][j][k] ) * cutoff;
                }
-            } //k
-         } //j
-      } //i
+            }//k
+         }   //j
+      }      //i
    }
 
    /**
     * @brief Reinitializes a single-level set field as described in \cite Sussman1994.
-    * @param nodes See base class.
-    * @param stage See base class.
+    * @param nodes Vector holding all nodes that have to be updated.
+    * @param levelset_type Level set buffer type which is reinitialized.
+    * @param is_last_stage whether it's the last RK stage or not.
     */
-   void ReinitializeImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-#ifndef PERFORMANCE
-      (void) stage; // Avoid compiler warning
-#endif
+   void ReinitializeImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceDescriptionBufferType const levelset_type, bool const is_last_stage ) const {
 
-      for(Node& node : nodes) {
-         LevelsetBlock& levelset_block = node.GetLevelsetBlock();
-         double const (&phi_reinitialized)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiReinitialized();
-         double (&phi_rhs)[CC::TCX()][CC::TCY()][CC::TCZ()] = levelset_block.GetPhiRightHandSide();
-
-         for(unsigned int i = 0; i < CC::TCX(); ++i) {
-            for(unsigned int j = 0; j < CC::TCY(); ++j) {
-               for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-                  phi_rhs[i][j][k] = phi_reinitialized[i][j][k];
-               } //k
-            } //j
-         } //i
+      InterfaceBlockBufferType const levelset_buffer_type = levelset_type == InterfaceDescriptionBufferType::Reinitialized ? InterfaceBlockBufferType::LevelsetReinitialized : InterfaceBlockBufferType::LevelsetIntegrated;
+      // Store the original levelset field in the right-hand side buffer to have a reference during reinitialization
+      if( levelset_type == InterfaceDescriptionBufferType::Reinitialized ) {
+         BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Reinitialized, InterfaceDescriptionBufferType::RightHandSide>( nodes );
+      } else {
+         BO::Interface::CopyInterfaceDescriptionBufferForNodeList<InterfaceDescriptionBufferType::Integrated, InterfaceDescriptionBufferType::RightHandSide>( nodes );
       }
 
+      // Carry out the actual reinitialization procedure
       double residuum = 0.0;
-      for(unsigned int iteration_number = 0; iteration_number < ReinitializationConstants::MaximumNumberOfIterations; ++iteration_number){
+      for( unsigned int iteration_number = 0; iteration_number < ReinitializationConstants::MaximumNumberOfIterations; ++iteration_number ) {
 
-
-         if constexpr(ReinitializationConstants::TrackConvergence) {
+         if constexpr( ReinitializationConstants::TrackConvergence ) {
             residuum = 0.0;
          }
-         for(auto& node : nodes) {
-            residuum = std::max(residuum, static_cast<DerivedIterativeLevelsetReinitializer const&>(*this).ReinitializeSingleNodeImplementation(node));
+         for( auto& node : nodes ) {
+            residuum = std::max( residuum, static_cast<DerivedIterativeLevelsetReinitializer const&>( *this ).ReinitializeSingleNodeImplementation( node, levelset_type, is_last_stage ) );
          }
 
          //halo update
-         halo_manager_.LevelsetHaloUpdateOnLmax( LevelsetBlockBufferType::PhiReinitialized );
-         if constexpr(ReinitializationConstants::TrackConvergence) {
-            MPI_Allreduce(MPI_IN_PLACE, &residuum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+         halo_manager_.InterfaceHaloUpdateOnLmax( levelset_buffer_type );
+         if constexpr( ReinitializationConstants::TrackConvergence ) {
+            MPI_Allreduce( MPI_IN_PLACE, &residuum, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD );
 
-            if(residuum < ReinitializationConstants::MaximumResiduum) {
-               if constexpr(GeneralTwoPhaseSettings::LogConvergenceInformation) {
-                  logger_.AppendDelayedLog("Reinit: " + std::to_string(static_cast<int>(iteration_number)) + " ");
+            if( residuum < ReinitializationConstants::MaximumResiduum ) {
+               if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
+                  logger_.BufferMessage( "Reinit: " + std::to_string( static_cast<int>( iteration_number ) ) + " " );
                }
                break;
-            } else if(iteration_number == ReinitializationConstants::MaximumNumberOfIterations - 1) {
-               if constexpr(GeneralTwoPhaseSettings::LogConvergenceInformation) {
-                  logger_.AppendDelayedLog("Reinit: nc   !!!   ");
+            } else if( iteration_number == ReinitializationConstants::MaximumNumberOfIterations - 1 ) {
+               if constexpr( GeneralTwoPhaseSettings::LogConvergenceInformation ) {
+                  logger_.BufferMessage( "Reinit: nc   !!!   " );
                }
             }
          }
       }
+
+      for( auto& node : nodes ) {
+         CutOffSingleNode( node, levelset_type );
+      }
+      halo_manager_.InterfaceHaloUpdateOnLmax( levelset_buffer_type );
    }
 
 public:
-   IterativeLevelsetReinitializerBase() = delete;
-   virtual ~IterativeLevelsetReinitializerBase() = default;
+   IterativeLevelsetReinitializerBase()                                            = delete;
+   virtual ~IterativeLevelsetReinitializerBase()                                   = default;
    IterativeLevelsetReinitializerBase( IterativeLevelsetReinitializerBase const& ) = delete;
    IterativeLevelsetReinitializerBase& operator=( IterativeLevelsetReinitializerBase const& ) = delete;
-   IterativeLevelsetReinitializerBase( IterativeLevelsetReinitializerBase&& ) = delete;
+   IterativeLevelsetReinitializerBase( IterativeLevelsetReinitializerBase&& )                 = delete;
    IterativeLevelsetReinitializerBase& operator=( IterativeLevelsetReinitializerBase&& ) = delete;
 };
 
-
-#endif //ITERATIVE_LEVELSET_REINITIALIZER_BASE_H
+#endif//ITERATIVE_LEVELSET_REINITIALIZER_BASE_H

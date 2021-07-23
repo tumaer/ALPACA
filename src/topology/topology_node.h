@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef TOPOLOGY_NODE_H
@@ -70,100 +71,51 @@
 
 #include <vector>
 #include <tuple>
-#include <cstdint>
-#include "materials/material_names.h"
+#include "topology/node_id_type.h"
+#include "materials/material_definitions.h"
 
-#include "space_filling_curves.h"
+namespace TopologyNodeConstants {
+   constexpr int unassigned_rank = -1;
+}// namespace TopologyNodeConstants
 
 /**
- * @brief The TopologyNode class organizes the light weight global (over MPI ranks) node information in a tree structure. Allowing the TopologyManager efficient searches.
+ * @brief The TopologyNode class organizes the light weight global ( over MPI ranks ) node information in a tree structure. Allowing the TopologyManager efficient searches.
  */
 class TopologyNode {
 
-   std::uint64_t const unique_id_;
    int current_rank_;
-   int future_rank_;
-   std::vector<TopologyNode> children_;
+   int target_rank_;
    bool is_leaf_;
    std::vector<MaterialName> materials_;
 
-   void Refine();
-
-   void AddFluid(MaterialName const material);
-   void RemoveFluid(MaterialName const material);
-   std::vector<MaterialName> GetFluids() const;
-   MaterialName GetSingleFluid() const;
-
-   TopologyNode& GetChildWithId(std::uint64_t const id);
-   const TopologyNode& GetChildWithId(std::uint64_t const id) const;
-
-   unsigned int Weight() const;
-
 public:
-   TopologyNode() = delete;
-   explicit TopologyNode(std::uint64_t const id, int const rank = -1);
-   ~TopologyNode() = default;
+   explicit TopologyNode( int const rank = TopologyNodeConstants::unassigned_rank );
+   explicit TopologyNode( std::vector<MaterialName> const& material, int const rank = TopologyNodeConstants::unassigned_rank );
+   ~TopologyNode()                     = default;
    TopologyNode( TopologyNode const& ) = delete;
    TopologyNode& operator=( TopologyNode const& ) = delete;
-   TopologyNode( TopologyNode&& ) = default; //Needed for usage in vector.
+   TopologyNode( TopologyNode&& )                 = delete;
    TopologyNode& operator=( TopologyNode&& ) = delete;
 
-   void Refine(std::uint64_t const id);
-   void Coarse(std::uint64_t const id);
+   void AddMaterial( MaterialName const material );
+   void RemoveMaterial( MaterialName const material );
 
-   int GetRank(std::uint64_t const id) const;
-   void NodeLeafCount(std::pair<unsigned int, unsigned int>& nodes_and_leaves) const;
-   void RankWiseNodeLeafCount(std::vector<std::pair<unsigned int, unsigned int>>& nodes_leaves_per_rank) const;
-   void NodeBlockCount(std::pair<unsigned int, unsigned int>& nodes_and_leaves) const;
-   unsigned int MultiPhaseNodeCount() const;
-   void RankWiseNodeBlockCount(std::vector<std::pair<unsigned int, unsigned int>>& nodes_blocks_per_rank) const;
-   unsigned int GetDepth() const;
+   std::vector<MaterialName> Materials() const;
+   MaterialName SingleMaterial() const;
+   std::size_t NumberOfMaterials() const;
 
-   void IdsOnLevel(unsigned int const level,std::vector<std::uint64_t>& ids) const;
-   void LocalIdsOnLevel(unsigned int const level,std::vector<std::uint64_t>& ids, int const local_rank) const;
+   void MakeParent();
+   void MakeLeaf();
 
-   unsigned int LocalLeaves(std::vector<std::uint64_t>& local_leaves, int const rank) const;
-   unsigned int GetLeafIds(std::vector<std::uint64_t>& leaves) const;
-   unsigned int LocalLeavesOnLevel(std::vector<std::uint64_t>& local_leaves, int const rank, unsigned int const level, unsigned int const current_level = 0) const;
-   unsigned int GetLeafIdsOnLevel(std::vector<std::uint64_t>& leaves, unsigned int const level, unsigned int const current_level = 0) const;
+   bool IsLeaf() const;
 
-   void SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, unsigned int const level = 0);
-   void SetTargetRankForLeaf(std::vector<std::vector<std::tuple<unsigned int,int>>>& count_rank_map, const HilbertPosition position,unsigned int const level = 0);
+   int Rank() const;
+   bool IsOnRank( int const rank ) const;
+   int TargetRank() const;
+   void AssignTargetRank( int const rank );
+   void SetCurrentRankAccordingToTargetRank();
 
-   void ListUnbalancedNodes(std::vector<std::tuple<std::uint64_t const, int const, int const> >& ids_current_future_rank_map);
-
-   int BalanceTargetRanks();
-   void SetCurrentRankOfLeaf(std::uint64_t const id, int const rank);
-
-   bool NodeExists(std::uint64_t const id) const;
-   bool NodeIsLeaf(std::uint64_t const id) const;
-
-   void ChildWeight(std::vector<unsigned int>& weights_on_level, unsigned int const current_level = 0) const;
-
-   void AddFluid(std::uint64_t const id, MaterialName const material);
-   void RemoveFluid(std::uint64_t const id, MaterialName const material);
-   std::vector<MaterialName> GetFluids(std::uint64_t const id) const;
-   MaterialName GetSingleFluid(std::uint64_t const id) const;
-
-   /**
-    * @brief Gives the id of this topology node.
-    * @return id.
-    */
-   inline std::uint64_t Id() const {return unique_id_;}
-
-   /**
-    * @brief Gives the current rank of the TopologyNode.
-    * @return Rank.
-    */
-   inline int GetRank() const {return current_rank_;}
-
-   /**
-    * @brief Specification of == operator for the id of topology nodes
-    * @param rhs right hand side value of == operator
-    * @return True if Ids of two nodes are equal, False otherwise 
-    */
-   inline bool operator==(std::uint64_t const rhs) {return (rhs == unique_id_);}
-   inline bool operator==(const TopologyNode& rhs) {return (rhs.Id() == unique_id_);}
+   bool IsBalanced() const;
 };
 
-#endif // TOPOLOGY_NODE_H
+#endif// TOPOLOGY_NODE_H

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef STENCIL_PROPERTIES_H
@@ -71,11 +72,22 @@
 /**
  * @brief Unique identifier whether a stencil is a derivative or reconstruction stencil.
  */
-enum class StencilType : unsigned short {Reconstruction = 0, Derivative = 1};
+enum class StencilType { Reconstruction,
+                         Derivative };
 
 /**
  * @brief Unique identifier to indicate whether a stencil should be applied UpwindLeft, UpwindRight or Central.
  */
-enum class StencilProperty : unsigned short {UpwindLeft = 0, UpwindRight = 1, Central = 2};
+enum class StencilProperty { UpwindLeft,
+                             UpwindRight,
+                             Central };
+using SP = StencilProperty;
 
-#endif // STENCIL_PROPERTIES_H
+/**
+ * @brief Unique identifier to indicate whether a stencil should reconstruct based on cell-centered values or based
+ *        on differences (HJ-WENO like reconstruction).
+ */
+enum class ReconstructionType { Values,
+                                Differences };
+
+#endif// STENCIL_PROPERTIES_H

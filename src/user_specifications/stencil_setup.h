@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,27 +63,47 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef STENCIL_SETUP_H
 #define STENCIL_SETUP_H
 
 // RECONSTRUCTION_STENCIL
-enum class ReconstructionStencils {FirstOrder, WENO3, FourthOrderCentral, WENO5, WENO5Z, WENOAO53, WENO5HM, TENO5, WENOCU6, WENO7, WENO9};
-constexpr ReconstructionStencils reconstruction_stencil = ReconstructionStencils::WENO5;
+enum class ReconstructionStencils { FirstOrder,
+                                    WENO3,
+                                    WENOF3P,
+                                    FourthOrderCentral,
+                                    WENO5,
+                                    WENO5AER,
+                                    WENO5IS,
+                                    WENO5Z,
+                                    WENOAO53,
+                                    WENO5HM,
+                                    WENO5NU6P,
+                                    TENO5,
+                                    WENOCU6,
+                                    WENO7,
+                                    WENO9 };
+constexpr ReconstructionStencils reconstruction_stencil                = ReconstructionStencils::WENO5;
+constexpr ReconstructionStencils levelset_reconstruction_stencil       = ReconstructionStencils::WENO3;
+constexpr ReconstructionStencils geometry_reconstruction_stencil       = ReconstructionStencils::WENO3;
 constexpr ReconstructionStencils viscous_fluxes_reconstruction_stencil = ReconstructionStencils::FourthOrderCentral;
-
+constexpr ReconstructionStencils heat_fluxes_reconstruction_stencil    = ReconstructionStencils::FourthOrderCentral;
 
 // DERIVATIVE_STENCIL
-enum class DerivativeStencils {CentralDifference, FourthOrderCentralDifference, FourthOrderCellFace, HOUC5};
+enum class DerivativeStencils { CentralDifference,
+                                FourthOrderCentralDifference,
+                                FourthOrderCellFace,
+                                HOUC5 };
 constexpr DerivativeStencils derivative_stencil = DerivativeStencils::HOUC5;
 
-constexpr DerivativeStencils viscous_fluxes_derivative_stencil = DerivativeStencils::FourthOrderCentralDifference;
-constexpr DerivativeStencils temperature_gradient_derivative_stencil_cell_face = DerivativeStencils::FourthOrderCellFace;
-constexpr DerivativeStencils temperature_gradient_derivative_stencil_cell_center = DerivativeStencils::FourthOrderCentralDifference;
+constexpr DerivativeStencils viscous_fluxes_derivative_stencil_cell_center = DerivativeStencils::FourthOrderCentralDifference;
+constexpr DerivativeStencils viscous_fluxes_derivative_stencil_cell_face   = DerivativeStencils::FourthOrderCellFace;
+constexpr DerivativeStencils heat_fluxes_derivative_stencil_cell_face      = DerivativeStencils::FourthOrderCellFace;
+constexpr DerivativeStencils heat_fluxes_derivative_stencil_cell_center    = DerivativeStencils::FourthOrderCentralDifference;
 
-constexpr DerivativeStencils normal_calculation_derivative_stencil = DerivativeStencils::CentralDifference;
+constexpr DerivativeStencils normal_calculation_derivative_stencil    = DerivativeStencils::CentralDifference;
 constexpr DerivativeStencils curvature_calculation_derivative_stencil = DerivativeStencils::FourthOrderCentralDifference;
 
-#endif // STENCIL_SETUP_H
+#endif// STENCIL_SETUP_H

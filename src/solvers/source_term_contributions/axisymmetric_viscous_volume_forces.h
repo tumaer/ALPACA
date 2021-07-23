@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef AXISYMMETRIC_VISCOUS_VOLUME_FORCES_H
@@ -71,7 +72,7 @@
 #include <vector>
 
 #include "materials/material_manager.h"
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * @brief This class calculates the viscous contribution to axisymmetric forces as described in \cite Meng2016b.
@@ -80,24 +81,21 @@ class AxisymmetricViscousVolumeForces {
 
 private:
    MaterialManager const& material_manager_;
-   static constexpr unsigned int dim_ = 2; //only sane configuration; enables unit testing
+   static constexpr unsigned int dim_ = 2;//only sane configuration; enables unit testing
 
-   void ComputeVelocityGradient( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                               , double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()]
-                               , double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size
-                               , double (&velocity_gradient)[CC::TCX()][CC::TCY()][1][dim_][dim_] ) const;
+   void ComputeVelocityGradient( double const ( &u )[CC::TCX()][CC::TCY()][CC::TCZ()], double const ( &v )[CC::TCX()][CC::TCY()][CC::TCZ()], double const ( &w )[CC::TCX()][CC::TCY()][CC::TCZ()], double const cell_size, double ( &velocity_gradient )[CC::TCX()][CC::TCY()][dim_][dim_] ) const;
 
 public:
    AxisymmetricViscousVolumeForces() = delete;
    explicit AxisymmetricViscousVolumeForces( MaterialManager const& material_manager );
-   ~AxisymmetricViscousVolumeForces() = default;
+   ~AxisymmetricViscousVolumeForces()                                        = default;
    AxisymmetricViscousVolumeForces( AxisymmetricViscousVolumeForces const& ) = delete;
-   AxisymmetricViscousVolumeForces( AxisymmetricViscousVolumeForces&& ) = delete;
+   AxisymmetricViscousVolumeForces( AxisymmetricViscousVolumeForces&& )      = delete;
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces const& ) = delete;
    AxisymmetricViscousVolumeForces& operator=( AxisymmetricViscousVolumeForces&& ) = delete;
 
-   void ComputeForces( std::pair<const MaterialName, Block> const& mat_block, double (&axisymmetric_viscous_volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
-                       double const cell_size, double const x_block_coordinate ) const;
+   void ComputeForces( std::pair<MaterialName const, Block> const& mat_block, double ( &axisymmetric_viscous_volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()],
+                       double const cell_size, double const node_origin_x ) const;
 };
 
-#endif //AXISYMMETRIC_VISCOUS_VOLUME_FORCES_H
+#endif//AXISYMMETRIC_VISCOUS_VOLUME_FORCES_H

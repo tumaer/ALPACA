@@ -1,0 +1,7 @@
+export ALPACA_ENVIRONMENT=SNG
+module unload mkl
+module load gcc/8
+export CC=icc
+export CXX=icpc
+module load cmake
+module load hdf5/1.8.20-intel-impi-frt-threadsafe

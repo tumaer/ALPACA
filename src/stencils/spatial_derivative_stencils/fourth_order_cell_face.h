@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef FOURTH_ORDER_CELL_FACE_H
@@ -71,7 +72,8 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief The FourthOrderCellFace class implements a fourth-order finite difference stencil for the derivative at cell faces based on cell center values.
+ * @brief Discretization of the SpatialDerivativeStencil class to evaluate the stencil with a 4th order central differencing scheme on the cell face.
+ *        See also base class.
  */
 class FourthOrderCellFace : public Stencil<FourthOrderCellFace> {
 
@@ -79,18 +81,22 @@ class FourthOrderCellFace : public Stencil<FourthOrderCellFace> {
 
    static constexpr StencilType stencil_type_ = StencilType::Derivative;
 
-   static constexpr unsigned int stencil_size_ = 4;
+   static constexpr unsigned int stencil_size_            = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   /**
+    * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const, double const cell_size ) const {
+      double const denominator = cell_size * 24.0;
+      double const result      = 27.0 * ( array[downstream_stencil_size_ + 1] - array[downstream_stencil_size_ + 0] ) - ( array[downstream_stencil_size_ + 2] - array[downstream_stencil_size_ - 1] );
+      return result / denominator;
+   }
 
 public:
-   explicit FourthOrderCellFace() = default;
-   ~FourthOrderCellFace() = default;
-   FourthOrderCellFace( FourthOrderCellFace const& ) = delete;
-   FourthOrderCellFace& operator=( FourthOrderCellFace const& ) = delete;
-   FourthOrderCellFace( FourthOrderCellFace&& ) = delete;
-   FourthOrderCellFace& operator=( FourthOrderCellFace&& ) = delete;
+   explicit constexpr FourthOrderCellFace() = default;
+   ~FourthOrderCellFace()                   = default;
 };
 
-#endif //FOURTH_ORDER_CELL_FACE_H
+#endif//FOURTH_ORDER_CELL_FACE_H

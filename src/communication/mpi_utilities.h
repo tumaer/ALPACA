@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef MPI_UTILITIES_H
@@ -77,12 +78,12 @@ namespace MpiUtilities {
    /**
     * @brief Reduces a bool across MPI ranks.
     * @param input local bool.
-    * @param operation The redcution operation. Default: or
+    * @param operation The redcution operation. Default: or.
     * @return Global results.
     */
    inline bool GloballyReducedBool( bool const input, MPI_Op const operation = MPI_LOR ) {
       bool result = input;
-      MPI_Allreduce(MPI_IN_PLACE, &result, 1, MPI_CXX_BOOL, operation, MPI_COMM_WORLD);
+      MPI_Allreduce( MPI_IN_PLACE, &result, 1, MPI_CXX_BOOL, operation, MPI_COMM_WORLD );
       return result;
    }
 
@@ -92,8 +93,18 @@ namespace MpiUtilities {
     */
    inline int MyRankId() {
       int rank_id = -1;
-      MPI_Comm_rank(MPI_COMM_WORLD,&rank_id);
+      MPI_Comm_rank( MPI_COMM_WORLD, &rank_id );
       return rank_id;
+   }
+
+   /**
+    * @brief Indicates whether the invoking rank is the master rank, i.e. rank 0.
+    * @return True if invoking is master, false otherwise.
+    */
+   inline bool MasterRank() {
+      int rank_id = -1;
+      MPI_Comm_rank( MPI_COMM_WORLD, &rank_id );
+      return rank_id == 0;
    }
 
    /**
@@ -102,7 +113,7 @@ namespace MpiUtilities {
     */
    inline int NumberOfRanks() {
       int communicator_size = -1;
-      MPI_Comm_size(MPI_COMM_WORLD,&communicator_size);
+      MPI_Comm_size( MPI_COMM_WORLD, &communicator_size );
       return communicator_size;
    }
 
@@ -110,10 +121,10 @@ namespace MpiUtilities {
    * @brief Gives the MPI_TAG_UB. Avoids handle creation, e.g. for const members in initializer list.
    * @return MPI_TAG_UB
    */
-   inline int MpiTagUb(){
-      int *tag_ub;
+   inline int MpiTagUb() {
+      int* tag_ub;
       int flag;
-      MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &tag_ub, &flag);
+      MPI_Comm_get_attr( MPI_COMM_WORLD, MPI_TAG_UB, &tag_ub, &flag );
       return *tag_ub;
    }
 
@@ -129,21 +140,21 @@ namespace MpiUtilities {
     *       Overrides the provided global_data array.
     */
    template<class T>
-   void LocalToGlobalData(std::vector<T> const& local_data, MPI_Datatype const type, int const number_of_ranks, std::vector<T>& global_data) {
-      int length = local_data.size(); // Must be int due to MPI standard.
-      std::vector<int> all_lengths(number_of_ranks);
-      MPI_Allgather(&length, 1, MPI_INT, all_lengths.data(), 1, MPI_INT, MPI_COMM_WORLD);
+   void LocalToGlobalData( std::vector<T> const& local_data, MPI_Datatype const type, int const number_of_ranks, std::vector<T>& global_data ) {
+      int length = local_data.size();// Must be int due to MPI standard.
+      std::vector<int> all_lengths( number_of_ranks );
+      MPI_Allgather( &length, 1, MPI_INT, all_lengths.data(), 1, MPI_INT, MPI_COMM_WORLD );
 
-      std::vector<int> offsets(number_of_ranks);
+      std::vector<int> offsets( number_of_ranks );
       int insert_key = 0;
-      for(int i = 0; i < number_of_ranks; ++i) {
+      for( int i = 0; i < number_of_ranks; ++i ) {
          offsets[i] = insert_key;
          insert_key += all_lengths[i];
       }
 
-      global_data.resize(std::accumulate(all_lengths.begin(), all_lengths.end(), 0));
-      MPI_Allgatherv(local_data.data(), length, type, global_data.data(), all_lengths.data(), offsets.data(), type, MPI_COMM_WORLD);
+      global_data.resize( std::accumulate( all_lengths.begin(), all_lengths.end(), 0 ) );
+      MPI_Allgatherv( local_data.data(), length, type, global_data.data(), all_lengths.data(), offsets.data(), type, MPI_COMM_WORLD );
    }
-}
+}// namespace MpiUtilities
 
-#endif // MPI_UTILITIES_H
+#endif// MPI_UTILITIES_H

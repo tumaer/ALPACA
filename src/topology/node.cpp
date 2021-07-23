@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,32 +63,32 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "node.h"
 #include <utility>
-#include "id_information.h"
 
 /**
- * @brief Constructs a node object holding blocks for all specified materials
- * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$
+ * @brief Constructs a node object holding blocks for all specified materials.
+ * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$.
  * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
- * @param materials The materials which are present in this node
- * @param initial_interface_tag Uniform initial interface tag of the node 
+ * @param materials The materials which are present in this node.
+ * @param initial_interface_tag Uniform initial interface tag of the node.
  */
-Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag) :
-   node_size_(DomainSizeOfId(id,node_size_on_level_zero)),
-   node_x_coordinate_(DomainCoordinatesOfId(id,node_size_)[0])
-{
-   for(MaterialName const& material : materials) {
-      phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
+Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials, std::int8_t const initial_interface_tag ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
+                                                                                                                                                         node_coordinates_( std::make_tuple( DomainCoordinatesOfId( id, node_size_ )[0],
+                                                                                                                                                                                             DomainCoordinatesOfId( id, node_size_ )[1],
+                                                                                                                                                                                             DomainCoordinatesOfId( id, node_size_ )[2] ) ) {
+   for( MaterialName const& material : materials ) {
+      phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
    }
 
-   for(unsigned int i = 0; i < CC::TCX(); ++i) {
-      for(unsigned int j = 0; j < CC::TCY(); ++j) {
-         for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-            interface_tags_[i][j][k] = initial_interface_tag;
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+            interface_tags_[i][j][k]            = initial_interface_tag;
+            integrated_interface_tags_[i][j][k] = initial_interface_tag;
          }
       }
    }
@@ -97,34 +98,36 @@ Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::ve
  * @brief Constructs a node object based on already existing fluid data.
  * @param id The unique id of this node. $CALLERS RESPONSIBILITY THAT IT IS INDEED UNIQUE!$
  * @param node_size_on_level_zero The size (= size of internal cells) of a node on level zero.
- * @param initial_interface_tags Buffer containing the full field of interface tags for this node
- * @param levelset_block Levelset block that is added to the node
+ * @param initial_interface_tags Buffer containing the full field of interface tags for this node.
+ * @param interface_block Interface block that is added to the node.
  */
-Node::Node(std::uint64_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
-   std::int8_t const (&initial_interface_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<LevelsetBlock> levelset_block) :
-   node_size_(DomainSizeOfId(id,node_size_on_level_zero)),
-   node_x_coordinate_(DomainCoordinatesOfId(id,node_size_)[0]),
-   levelset_block_(std::move(levelset_block))
-{
-   for(MaterialName const& material : materials) {
-      phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
+Node::Node( nid_t const id, double const node_size_on_level_zero, std::vector<MaterialName> const materials,
+            std::int8_t const ( &initial_interface_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], std::unique_ptr<InterfaceBlock> interface_block ) : node_size_( DomainSizeOfId( id, node_size_on_level_zero ) ),
+                                                                                                                                                node_coordinates_( std::make_tuple( DomainCoordinatesOfId( id, node_size_ )[0],
+                                                                                                                                                                                    DomainCoordinatesOfId( id, node_size_ )[1],
+                                                                                                                                                                                    DomainCoordinatesOfId( id, node_size_ )[2] ) ),
+                                                                                                                                                interface_block_( std::move( interface_block ) ) {
+   for( MaterialName const& material : materials ) {
+      phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
    }
 
-   for(unsigned int i = 0; i < CC::TCX(); ++i) {
-      for(unsigned int j = 0; j < CC::TCY(); ++j) {
-         for(unsigned int k = 0; k < CC::TCZ(); ++k) {
-            interface_tags_[i][j][k] = initial_interface_tags[i][j][k];
+   for( unsigned int i = 0; i < CC::TCX(); ++i ) {
+      for( unsigned int j = 0; j < CC::TCY(); ++j ) {
+         for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
+            interface_tags_[i][j][k]            = initial_interface_tags[i][j][k];
+            integrated_interface_tags_[i][j][k] = initial_interface_tags[i][j][k];
          }
       }
    }
 }
 
 /**
- * @brief Gives the X-coordinate of the coordinate of the node.
- * @return The X-coordinate of the first (most west-south-bottom) cell in the DOMAIN, i.e. not counting Halos.
+ * @brief Gives the coordinates of the node.
+ * @return Gives the X-coordinate of the first (most west-south-bottom), Y-coordinate of the first (most west-south-bottom)
+ * and the Z-coordinate of the first (most west-south-bottom) cell in the DOMAIN, i.e. not counting Halos.
  */
-double Node::GetBlockCoordinateX() const {
-   return node_x_coordinate_;
+std::tuple<double const, double const, double const> Node::GetBlockCoordinates() const {
+   return node_coordinates_;
 }
 
 /**
@@ -144,16 +147,16 @@ double Node::GetCellSize() const {
 }
 
 /**
- * @brief Returns the fluid data in a single-phase node.
- * @return The fluid data bundled in a Block object.
+ * @brief Returns the material data in a single-phase node.
+ * @return The material data bundled in a Block object.
  */
 Block& Node::GetSinglePhase() {
 #ifndef PERFORMANCE
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have a single block");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have a single block" );
    }
 #endif
-   return std::get<1>(*phases_.begin());
+   return std::get<1>( *phases_.begin() );
 }
 
 /**
@@ -161,11 +164,11 @@ Block& Node::GetSinglePhase() {
  */
 Block const& Node::GetSinglePhase() const {
 #ifndef PERFORMANCE
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have a single block");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have a single block" );
    }
 #endif
-   return std::get<1>(*phases_.cbegin());
+   return std::get<1>( *phases_.cbegin() );
 }
 
 /**
@@ -174,11 +177,11 @@ Block const& Node::GetSinglePhase() const {
  */
 MaterialName Node::GetSinglePhaseMaterial() const {
 #ifndef PERFORMANCE
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have a single material");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have a single material" );
    }
 #endif
-   return std::get<0>(*phases_.cbegin());
+   return std::get<0>( *phases_.cbegin() );
 }
 
 /**
@@ -187,9 +190,9 @@ MaterialName Node::GetSinglePhaseMaterial() const {
  */
 std::vector<MaterialName> Node::GetMaterials() const {
    std::vector<MaterialName> materials;
-   materials.reserve(phases_.size());
-   for(const auto& phase : phases_) {
-      materials.push_back(phase.first);
+   materials.reserve( phases_.size() );
+   for( auto const& phase : phases_ ) {
+      materials.push_back( phase.first );
    }
    return materials;
 }
@@ -210,36 +213,36 @@ std::unordered_map<MaterialName, Block> const& Node::GetPhases() const {
 }
 
 /**
- * @brief Returns the fluid data of the respective material.
- * @param material Name of the material for which the block should be returned
- * @return The fluid data as bundled in a Block object.
+ * @brief Returns the material data of the respective material.
+ * @param material Name of the material for which the block should be returned.
+ * @return The material data as bundled in a Block object.
  */
-Block& Node::GetPhaseByMaterial(MaterialName const material) {
-   return phases_.at(material);
+Block& Node::GetPhaseByMaterial( MaterialName const material ) {
+   return phases_.at( material );
 }
 
 /**
  * @brief Const overload.
  */
-Block const& Node::GetPhaseByMaterial(MaterialName const material) const {
-   return phases_.at(material);
+Block const& Node::GetPhaseByMaterial( MaterialName const material ) const {
+   return phases_.at( material );
 }
 
 /**
  * @brief Adds an empty block for the given material to the phases of this node.
  * @param material .
  */
-void Node::AddPhase(MaterialName const material) {
+void Node::AddPhase( MaterialName const material ) {
    // does not test if the material is already present
-   phases_.emplace(std::piecewise_construct, std::make_tuple(material), std::make_tuple());
+   phases_.emplace( std::piecewise_construct, std::make_tuple( material ), std::make_tuple() );
 }
 
 /**
  * @brief Removes the block for the given material from the phases of this node.
  * @param material .
  */
-void Node::RemovePhase(MaterialName const material) {
-   phases_.erase(material);
+void Node::RemovePhase( MaterialName const material ) {
+   phases_.erase( material );
 }
 
 /**
@@ -247,8 +250,8 @@ void Node::RemovePhase(MaterialName const material) {
  * @param material The material identifier to be checked for.
  * @return True if the material exists in this node. False otherwise.
  */
-bool Node::ContainsMaterial(MaterialName const material) const {
-   if(phases_.find(material) == phases_.end()) { //C++20 provides a contains function ...
+bool Node::ContainsMaterial( MaterialName const material ) const {
+   if( phases_.find( material ) == phases_.end() ) {//C++20 provides a contains function ...
       return false;
    } else {
       return true;
@@ -256,42 +259,42 @@ bool Node::ContainsMaterial(MaterialName const material) const {
 }
 
 /**
- * @brief Returns the LevelsetBlock of the node if it exists. Errors otherwise.
- * @return LevelsetBlock of the Node.
+ * @brief Returns the InterfaceBlock of the node if it exists. Errors otherwise.
+ * @return InterfaceBlock of the Node.
  */
-LevelsetBlock& Node::GetLevelsetBlock() {
+InterfaceBlock& Node::GetInterfaceBlock() {
 #ifndef PERFORMANCE
-   if(levelset_block_ == nullptr) {
-      throw std::logic_error("Do not request a LevelsetBlock on a Node that does not have one");
+   if( interface_block_ == nullptr ) {
+      throw std::logic_error( "Do not request a InterfaceBlock on a Node that does not have one" );
    } else {
-      return *levelset_block_;
+      return *interface_block_;
    }
 #else
-   return *levelset_block_;
+   return *interface_block_;
 #endif
 }
 
 /**
- * @brief Const overload of GetLevelsetBlock. See there for details.
+ * @brief Const overload of GetInterfaceBlock. See there for details.
  */
-LevelsetBlock const& Node::GetLevelsetBlock() const {
+InterfaceBlock const& Node::GetInterfaceBlock() const {
 #ifndef PERFORMANCE
-   if(levelset_block_ == nullptr) {
-      throw std::logic_error("Do not request a LevelsetBlock on a Node that does not have one");
+   if( interface_block_ == nullptr ) {
+      throw std::logic_error( "Do not request a InterfaceBlock on a Node that does not have one" );
    } else {
-      return *levelset_block_;
+      return *interface_block_;
    }
 #else
-   return *levelset_block_;
+   return *interface_block_;
 #endif
 }
 
 /**
  * @brief Sets the levelset block of this node. If nullptr is given (default) the current levelset block is released.
- * @param levelset_block The new levelset block for this node or empty.
+ * @param interface_block The new levelset block for this node or empty.
  */
-void Node::SetLevelsetBlock(std::unique_ptr<LevelsetBlock> levelset_block) {
-   levelset_block_ = std::move(levelset_block);
+void Node::SetInterfaceBlock( std::unique_ptr<InterfaceBlock> interface_block ) {
+   interface_block_ = std::move( interface_block );
 }
 
 /**
@@ -299,33 +302,87 @@ void Node::SetLevelsetBlock(std::unique_ptr<LevelsetBlock> levelset_block) {
  * @return The representative interface tag for this node.
  */
 std::int8_t Node::GetUniformInterfaceTag() const {
-   if(phases_.size() > 1) {
-      throw std::logic_error("Multi-Nodes do not have uniform tags");
+   if( phases_.size() > 1 ) {
+      throw std::logic_error( "Multi-Nodes do not have uniform tags" );
    } else {
-      return interface_tags_[CC::FICX()][CC::FICY()][CC::FICZ()]; //NH: We just return the corner. This seems to be the safest option.
+      return interface_tags_[CC::FICX()][CC::FICY()][CC::FICZ()];//NH: We just return the corner. This seems to be the safest option.
    }
 }
 
 /**
- * @brief Gives the Interface Tag Buffer.
+ * @brief Gives the Interface Tag Buffer. Implementation for the reinitialized buffer.
  * @return Interface tag buffer.
  */
-auto Node::GetInterfaceTags() -> std::int8_t (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return interface_tags_;
 }
 
 /**
  * @brief Const overlaod. See in non-const for details.
  */
-auto Node::GetInterfaceTags() const -> std::int8_t const (&)[CC::TCX()][CC::TCY()][CC::TCZ()] {
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
    return interface_tags_;
 }
 
 /**
- * @brief Indicates whether or not the node has a LevelsetBlock.
- * @return True if the node has a LevelsetBlock, false otherwise.
+ * @brief Gives the Interface Tag Buffer. Implementation for the integrated buffer.
+ * @return Interface tag buffer.
  */
-bool Node::HasLevelset() const {
-   return levelset_block_ == nullptr ? false : true;
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return integrated_interface_tags_;
 }
 
+/**
+ * @brief Const overlaod. See in non-const for details.
+ */
+template<>
+auto Node::GetInterfaceTags<InterfaceDescriptionBufferType::Integrated>() const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   return integrated_interface_tags_;
+}
+
+/**
+ * @brief Gives the Interface Tag Buffer.
+ * @param type Level set field buffer type.
+ * @return Interface tag buffer.
+ */
+auto Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) -> std::int8_t ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   switch( type ) {
+      case InterfaceDescriptionBufferType::Reinitialized: {
+         return interface_tags_;
+      }
+      case InterfaceDescriptionBufferType::Integrated: {
+         return integrated_interface_tags_;
+      }
+      default: {
+         throw std::logic_error( "Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) : type not defined" );
+      }
+   }
+}
+
+/**
+ * @brief Const overlaod. See in non-const for details.
+ */
+auto Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) const -> std::int8_t const ( & )[CC::TCX()][CC::TCY()][CC::TCZ()] {
+   switch( type ) {
+      case InterfaceDescriptionBufferType::Reinitialized: {
+         return interface_tags_;
+      }
+      case InterfaceDescriptionBufferType::Integrated: {
+         return integrated_interface_tags_;
+      }
+      default: {
+         throw std::logic_error( "Node::GetInterfaceTags( InterfaceDescriptionBufferType const type ) : type not defined" );
+      }
+   }
+}
+
+/**
+ * @brief Indicates whether or not the node has a InterfaceBlock.
+ * @return True if the node has a InterfaceBlock, false otherwise.
+ */
+bool Node::HasLevelset() const {
+   return interface_block_ == nullptr ? false : true;
+}

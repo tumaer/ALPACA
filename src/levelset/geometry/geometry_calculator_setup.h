@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef GEOMETRY_CALCULATOR_SETUP_H
@@ -71,7 +72,6 @@
 #include "user_specifications/numerical_setup.h"
 #include "geometry_calculator_marching_cubes.h"
 
-
 /**
  * @brief A namespace to get a GeometryCalculator type based on a specified constexpr.
  */
@@ -79,7 +79,7 @@ namespace GeometryCalculatorSetup {
 
    /**
     * @brief Function returning the typedef of a GeometryCalculator based on a constexpr template.
-    * 
+    *
     * @tparam GeometryCalculators The constexpr template parameter to specify the exact GeometryCalculator type.
     */
    template<GeometryCalculators>
@@ -93,6 +93,6 @@ namespace GeometryCalculatorSetup {
       typedef GeometryCalculatorMarchingCubes type;
    };
 
-}
+}// namespace GeometryCalculatorSetup
 
-#endif // GEOMETRY_CALCULATOR_SETUP_H
+#endif// GEOMETRY_CALCULATOR_SETUP_H

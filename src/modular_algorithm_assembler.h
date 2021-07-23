@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,117 +63,152 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef MODULAR_ALGORITHM_ASSEMBLER_H
 #define MODULAR_ALGORITHM_ASSEMBLER_H
 
 #include "halo_manager.h"
+#include "initial_condition/initial_condition.h"
 #include "integrator/time_integrator_setup.h"
 #include "levelset/multi_phase_manager/multi_phase_manager_setup.h"
-#include "prime_states/prime_state_handler_setup.h"
+#include "prime_states/prime_state_handler.h"
+#include "parameter/parameter_manager.h"
 #include "solvers/space_solver.h"
 #include "input_output/input_output_manager.h"
 #include "communication/communication_manager.h"
 #include "multiresolution/multiresolution.h"
 #include "multiresolution/averager.h"
 
-using TimeIntegratorConcretization = TimeIntegratorSetup::Concretize<time_integrator>::type;
+using TimeIntegratorConcretization    = TimeIntegratorSetup::Concretize<time_integrator>::type;
 using MultiPhaseManagerConcretization = MultiPhaseManagerSetup::Concretize<phase_manager>::type;
-using PrimeStateHandlerConcretization = PrimeStateHandlerSetup::Concretize<prime_state_handler>::type;
 
 /**
- *  @brief Executes the multiresolution Algorithm according to Kaiser et al. (to appear).
+ *  @brief Executes the multiresolution Algorithm according to Kaiser et al. ( to appear ).
  * Allows different temporal and spatial solvers.
- *  @note This class is the only object which may invoke state changes in Tree [and its nodes, and their blocks] (local data change) or in the
- *        TopologyManager (global data change). The correct order is to execute all local changes first and then propagate the changes to the
+ *  @note This class is the only object which may invoke state changes in Tree [and its nodes, and their blocks] ( local data change ) or in the
+ *        TopologyManager ( global data change ). The correct order is to execute all local changes first and then propagate the changes to the
  *        TopologyManager.
  */
 class ModularAlgorithmAssembler {
 
-   SimulationSetup const& setup_;
-   MaterialManager const& material_manager_;
+   // variables used specifically in this class
+   // variables for time control
+   double const start_time_;
+   double const end_time_;
+   double const cfl_number_;
 
+   double const cell_size_on_maximum_level_;
+   // source term variables (time computation)
+   std::array<double, 3> const gravity_;
+   // multiresolution variables
+   std::vector<unsigned int> const all_levels_;
+
+   // Additional classes used
    TimeIntegratorConcretization time_integrator_;
-
-   InputOutputManager& input_output_;
 
    Tree& tree_;
    TopologyManager& topology_;
    HaloManager& halo_manager_;
    CommunicationManager& communicator_;
 
+   MaterialManager const& material_manager_;
+   UnitHandler const& unit_handler_;
+   InputOutputManager& input_output_;
+
    Multiresolution const& multiresolution_;
-   Averager averager_;
+   Averager const averager_;
 
-   MultiPhaseManagerConcretization multi_phase_manager_;  //TODO-19 NH make const
+   MultiPhaseManagerConcretization const multi_phase_manager_;//TODO-19 NH make const
 
-   PrimeStateHandlerConcretization const prime_state_handler_;
+   PrimeStateHandler const prime_state_handler_;
+
+   ParameterManager const parameter_manager_;
 
    SpaceSolver const space_solver_;
 
    LogWriter& logger_;
 
-   void CreateNewSimulation();
-   void RestartSimulation();
+   void CreateNewSimulation( InitialCondition& initial_condition );
+   void FinalizeSimulationRestart( double const restart_time );
 
    void Advance();
-   void ProvideDebugInformation(const std::string debug_string, const bool plot_this_step, const bool print_this_step, unsigned int& debug_key) const;
+   void ProvideDebugInformation( std::string const debug_string, bool const plot_this_step, bool const print_this_step, double& debug_key ) const;
    void LogElapsedTimeSinceInProfileRuns( double const start_time, std::string const message );
 
-   void ComputeRightHandSide(const std::vector<unsigned int> levels,const unsigned int stage);
-   void SwapBuffers(const std::vector<unsigned int> updated_levels, const unsigned int stage) const;
-   void Integrate(const std::vector<unsigned int> updated_levels, const unsigned int stage);
-   void JumpFluxAdjustment(const std::vector<unsigned int> finished_levels_descending) const;
+   void ComputeRightHandSide( std::vector<unsigned int> const levels, unsigned int const stage );
+   void ComputeLevelsetRightHandSide( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage );
+   void SwapBuffers( std::vector<unsigned int> const updated_levels, unsigned int const stage ) const;
+   void Integrate( std::vector<unsigned int> const updated_levels, unsigned int const stage );
+   void IntegrateLevelset( std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage );
+   void JumpFluxAdjustment( std::vector<unsigned int> const finished_levels_descending ) const;
 
    double ComputeTimestepSize() const;
 
    void ResetAllJumpBuffers() const;
-   void ResetJumpConservativeBuffers(const std::vector<unsigned int> levels) const;
+   void ResetJumpConservativeBuffers( std::vector<unsigned int> const levels ) const;
 
-   void LoadBalancing(const std::vector<unsigned int> updated_levels, const bool force = false);
+   void LoadBalancing( std::vector<unsigned int> const updated_levels, bool const force = false );
 
-   void ImposeInitialCondition(const unsigned int level);
+   void ImposeInitialCondition( unsigned int const level, InitialCondition& initial_condition );
 
-   void UpdateInterfaceTags(const std::vector<unsigned int> levels_with_updated_parents_descending) const;
-   void SenseApproachingInterface(const std::vector<unsigned int> levels_ascending, bool refine_if_necessary = true);
-   void SenseVanishedInterface(const std::vector<unsigned int> levels_descending);
+   void UpdateInterfaceTags( std::vector<unsigned int> const levels_with_updated_parents_descending ) const;
+   void SenseApproachingInterface( std::vector<unsigned int> const levels_ascending, bool refine_if_necessary = true );
+   void SenseVanishedInterface( std::vector<unsigned int> const levels_descending );
 
-   void Remesh(const std::vector<unsigned int> levels_to_update_ascending);
-   void DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<std::uint64_t>& remove_list,
-                                 std::vector<std::uint64_t>& refine_list ) const;
+   void Remesh( std::vector<unsigned int> const levels_to_update_ascending );
+   void DetermineRemeshingNodes( std::vector<unsigned int> const parent_levels, std::vector<nid_t>& remove_list,
+                                 std::vector<nid_t>& refine_list ) const;
 
-   void RefineNode(const std::uint64_t node_id);
+   void RefineNode( nid_t const node_id );
 
    void UpdateTopology();
 
-   std::vector<unsigned int> GetLevels(const unsigned int timestep) const;
+   std::vector<unsigned int> GetLevels( unsigned int const timestep ) const;
 
    template<ConservativeBufferType C>
-   void ObtainPrimeStatesFromConservatives(const std::vector<unsigned int> updated_levels, const bool skip_levelset_nodes = false) const;
+   void ObtainPrimeStatesFromConservatives( std::vector<unsigned int> const updated_levels, bool const skip_interface_nodes = false ) const;
 
    template<ConservativeBufferType C>
-   void DoObtainPrimeStatesFromConservativesForNonLevelsetNodes(Node& node) const;
+   void DoObtainPrimeStatesFromConservativesForNonLevelsetNodes( Node& node ) const;
    template<ConservativeBufferType C>
-   void DoObtainPrimeStatesFromConservativesForLevelsetNodes(Node& node) const;
+   void DoObtainPrimeStatesFromConservativesForLevelsetNodes( Node& node ) const;
+
+   void UpdateParameters( std::vector<unsigned int> const updated_levels,
+                          bool const exist_multi_nodes_global,
+                          std::vector<std::reference_wrapper<Node>> const& nodes_needing_multiphase_treatment ) const;
 
    void LogNodeNumbers() const;
+   void LogPerformanceNumbers( std::vector<double> const& loop_times ) const;
+
+   std::vector<double> GenerateAllLevels() const;
 
 public:
    ModularAlgorithmAssembler() = delete;
-   explicit ModularAlgorithmAssembler( Tree& flower, TopologyManager& topology, HaloManager& halo_manager, CommunicationManager& communication,
-                                       Multiresolution const& multiresolution, MaterialManager const& material_manager,
-                                       SimulationSetup const& setup, InputOutputManager& io );
-   ~ModularAlgorithmAssembler() = default;
+   explicit ModularAlgorithmAssembler( double const start_time,
+                                       double const end_time,
+                                       double const cfl_number,
+                                       std::array<double, 3> const gravity,
+                                       std::vector<unsigned int> all_levels,
+                                       double const cell_size_on_maximum_level,
+                                       UnitHandler const& unit_handler,
+                                       Tree& tree,
+                                       TopologyManager& topology,
+                                       HaloManager& halo_manager,
+                                       CommunicationManager& communication,
+                                       Multiresolution const& multiresolution,
+                                       MaterialManager const& material_manager,
+                                       InputOutputManager& input_output );
+   ~ModularAlgorithmAssembler()                                  = default;
    ModularAlgorithmAssembler( ModularAlgorithmAssembler const& ) = delete;
    ModularAlgorithmAssembler& operator=( ModularAlgorithmAssembler const& ) = delete;
-   ModularAlgorithmAssembler( ModularAlgorithmAssembler&& ) = delete;
+   ModularAlgorithmAssembler( ModularAlgorithmAssembler&& )                 = delete;
    ModularAlgorithmAssembler& operator=( ModularAlgorithmAssembler&& ) = delete;
 
    void ComputeLoop();
 
-   void Initialization();
+   void Initialization( InitialCondition& initial_condition );
 };
 
-#endif // MODULAR_ALGORITHM_ASSEMBLER_H
+#endif// MODULAR_ALGORITHM_ASSEMBLER_H

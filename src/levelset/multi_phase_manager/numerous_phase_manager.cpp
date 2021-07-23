@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,51 +63,53 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "numerous_phase_manager.h"
 
 /**
  * @brief Default constructor for the NumerousPhaseManager. Calls the default constructor of the base class.
- * @param material_manager Instance of a material manager, which already has been inialized according to the user input.
- * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
+ * @param material_manager Instance of a material manager, which already has been initialized according to the user input.
+ * @param communicator Instance to a CommunicationManager which provides MPI-related methods.
  */
-NumerousPhaseManager::NumerousPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager ) :
-   MultiPhaseManager( material_manager, halo_manager )
-{
+NumerousPhaseManager::NumerousPhaseManager( MaterialManager const& material_manager, HaloManager& halo_manager ) : MultiPhaseManager( material_manager, halo_manager ) {
    // Empty Constructor, besides call of base class constructor.
 }
 
 /**
  * @brief Implements a cut-cell mixing procedure for multi-level set simulations. See also base class.
  * @param nodes See base class.
- * @param stage See base class.
  */
-void NumerousPhaseManager::MixImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-   for(Node& node : nodes) {
-      cut_cell_mixer_.Mix(node,stage);
+void NumerousPhaseManager::MixImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+   for( Node& node : nodes ) {
+      cut_cell_mixer_.Mix( node );
    }
 }
 
 /**
  * @brief See base class.
  * @param nodes See base class.
- * @param stage See base class.
  * @param is_last_stage See base class.
  */
-void NumerousPhaseManager::EnforceWellResolvedDistanceFunctionImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage, const bool is_last_stage) const {
-   (void) is_last_stage; //Avoid compiler warning
-   levelset_reinitializer_.Reinitialize(nodes,stage);
+void NumerousPhaseManager::EnforceWellResolvedDistanceFunctionImplementation( std::vector<std::reference_wrapper<Node>> const& nodes, bool const is_last_stage ) const {
+   levelset_reinitializer_.Reinitialize( nodes, InterfaceDescriptionBufferType::Reinitialized, is_last_stage );
 }
 
 /**
  * @brief See base class.
  * @param node See base class.
- * @param stage See base class.
  */
-void NumerousPhaseManager::ExtendImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-   ghost_fluid_extender_.Extend(nodes,stage);
+void NumerousPhaseManager::ExtendPrimeStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+   ghost_fluid_extender_.Extend( nodes );
+}
+
+/**
+ * @brief See base class.
+ * @param node See base class.
+ */
+void NumerousPhaseManager::ExtendInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const& nodes ) const {
+   interface_extender_.Extend( nodes );
 }
 
 /**
@@ -114,27 +117,32 @@ void NumerousPhaseManager::ExtendImplementation(std::vector<std::reference_wrapp
  * @param nodes See base class.
  * @param stage See base class.
  */
-void NumerousPhaseManager::PropagateLevelsetImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-   (void) nodes; // Avoid compiler warning.
-   (void) stage; // Avoid compiler warning.
-   throw std::logic_error("Not yet implemented: NumerousPhaseManager::PropagateLevelset");
+void NumerousPhaseManager::UpdateIntegratedBufferImplementation( std::vector<std::reference_wrapper<Node>> const&, bool const is_last_stage ) const {
+   (void)is_last_stage;
+   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::UpdateIntegratedBufferImplementation" );
+}
+
+/**
+ * @brief See base class.
+ * @param nodes See base class.
+ * @param stage See base class.
+ */
+void NumerousPhaseManager::PropagateLevelsetImplementation( std::vector<std::reference_wrapper<Node>> const& ) const {
+   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::PropagateLevelset" );
 }
 
 /**
  * @brief See base class.
  * @param nodes See base class.
  */
-void NumerousPhaseManager::InitializeVolumeFractionBufferImplementation(std::vector<std::reference_wrapper<Node>> const& nodes) const {
-   (void) nodes; // Avoid compiler warning.
-   throw std::logic_error("Not yet implemented: NumerousPhaseManager::InitializeVolumeFractionBuffer");
+void NumerousPhaseManager::InitializeVolumeFractionBufferImplementation( std::vector<std::reference_wrapper<Node>> const& ) const {
+   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::InitializeVolumeFractionBuffer" );
 }
 
 /**
  * @brief See base class.
  * @param nodes See base class.
  */
-void NumerousPhaseManager::ObtainInterfaceQuantitiesImplementation(std::vector<std::reference_wrapper<Node>> const& nodes, const bool reset_interface_states) const {
-   (void) nodes; // Avoid compiler warning.
-   (void) reset_interface_states; // Avoid compiler warning.
-   throw std::logic_error("Not yet implemented: NumerousPhaseManager::ObtainInterfaceQuantities");
+void NumerousPhaseManager::ObtainInterfaceStatesImplementation( std::vector<std::reference_wrapper<Node>> const&, bool const ) const {
+   throw std::logic_error( "Not yet implemented: NumerousPhaseManager::ObtainInterfaceStates" );
 }

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef VISCOUS_FLUXES_H
@@ -71,7 +72,7 @@
 #include <vector>
 
 #include "materials/material_manager.h"
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * @brief This class calculates the viscous source terms and adds them to a flux buffer.
@@ -81,32 +82,20 @@ class ViscousFluxes {
 private:
    MaterialManager const& material_manager_;
 
-   void ComputeVelocityGradient( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()], double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()], double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      double const cell_size, double (&velocity_gradient)[CC::TCX()][CC::TCY()][CC::TCZ()][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
+   void ComputeTauFluxes( double const ( &velocity_gradient_at_cell_faces )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )][DTI( CC::DIM() )][DTI( CC::DIM() )], std::vector<double> const viscosity, double ( &tau )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const;
 
-   void ComputeVelocityGradientAtCellFaces( double const (&velocity_gradient)[CC::TCX()][CC::TCY()][CC::TCZ()][DTI(CC::DIM())][DTI(CC::DIM())], double const cell_size,
-      double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()], double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()], double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      double (&velocity_gradient_at_cell_faces)[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())] ) const;
-
-   void ComputeVelocityAtCellFaces( double const (&u)[CC::TCX()][CC::TCY()][CC::TCZ()], double const (&v)[CC::TCX()][CC::TCY()][CC::TCZ()], double const (&w)[CC::TCX()][CC::TCY()][CC::TCZ()],
-      double const cell_size, double (&velocity_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())]) const;
-
-   void ComputeTau( double const (&velocity_gradient_at_cell_faces)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())][DTI(CC::DIM())],
-      std::vector<double> const viscosity, double (&tau)[CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1][DTI(CC::DIM())][DTI(CC::DIM())]) const;
+   void ComputeTauFluxes( double const ( &velocity_gradient_at_cell_faces )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )][DTI( CC::DIM() )][DTI( CC::DIM() )], double const ( &shear_viscosity_at_cell_faces )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )], double const bulk_viscosity, double ( &tau )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][DTI( CC::DIM() )][DTI( CC::DIM() )] ) const;
 
 public:
    ViscousFluxes() = delete;
    explicit ViscousFluxes( MaterialManager const& material_manager );
-   ~ViscousFluxes() = default;
+   ~ViscousFluxes()                      = default;
    ViscousFluxes( ViscousFluxes const& ) = delete;
-   ViscousFluxes( ViscousFluxes&& ) = delete;
+   ViscousFluxes( ViscousFluxes&& )      = delete;
    ViscousFluxes& operator=( ViscousFluxes const& ) = delete;
    ViscousFluxes& operator=( ViscousFluxes&& ) = delete;
 
-   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block,
-      double (&dissipative_flux_x)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&dissipative_flux_y)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
-      double (&dissipative_flux_z)[FF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1], double const cell_size ) const;
+   void ComputeFluxes( std::pair<MaterialName const, Block> const& mat_block, double ( &dissipative_flux_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1], double ( &dissipative_flux_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1], double ( &dissipative_flux_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1], double cell_size ) const;
 };
 
-#endif //VISCOUS_FLUXES_H
+#endif//VISCOUS_FLUXES_H

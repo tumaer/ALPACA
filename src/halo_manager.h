@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef HALO_MANAGER_H
@@ -71,39 +72,68 @@
 #include "communication/internal_halo_manager.h"
 #include "boundary_condition/external_halo_manager.h"
 #include "communication/communication_manager.h"
+#include "block_definitions/field_interface_definitions.h"
 
+/**
+ * @brief The halo manager class provides the functionality to handle halo updates from one node to another (internal) or to update the halos
+ *        lying in external boundaries.
+ */
 class HaloManager {
+
 private:
    Tree& tree_;
    ExternalHaloManager const& external_halo_manager_;
    InternalHaloManager& internal_halo_manager_;
-   CommunicationManager& communication_manager_;
+   CommunicationManager const& communication_manager_;
    unsigned int const maximum_level_;
-
 
 public:
    HaloManager() = delete;
    explicit HaloManager( Tree& tree, ExternalHaloManager const& external_halo_manager, InternalHaloManager& internal_halo_manager,
-                         CommunicationManager& communication_manager, unsigned int const maximum_level );
-
-   ~HaloManager() = default;
+                         CommunicationManager const& communication_manager, unsigned int const maximum_level );
+   ~HaloManager()                    = default;
    HaloManager( HaloManager const& ) = delete;
    HaloManager& operator=( HaloManager const& ) = delete;
-   HaloManager( HaloManager&& ) = delete;
+   HaloManager( HaloManager&& )                 = delete;
    HaloManager& operator=( HaloManager&& ) = delete;
 
-   void FluidHaloUpdate( std::vector<unsigned int> const& levels_ascending, FluidFieldType const field_type, bool const cut_jumps = false );
-   void FluidHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps = false );
-   void FluidHaloUpdateOnLmax( FluidFieldType const field_type, bool const cut_jumps = true );
+   void MaterialHaloUpdate( std::vector<unsigned int> const& levels_ascending, MaterialFieldType const field_type, bool const cut_jumps = false ) const;
+   void MaterialHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps = false ) const;
+   void MaterialHaloUpdateOnLmax( MaterialFieldType const field_type, bool const cut_jumps = true ) const;
+   void MaterialHaloUpdateOnLmaxMultis( MaterialFieldType const field_type ) const;
 
-   void FluidInternalHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type, bool const cut_jumps = false );
-   void FluidExternalHaloUpdateOnLevel( unsigned int const level, FluidFieldType const field_type );
+   void MaterialInternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type, bool const cut_jumps = false ) const;
+   void MaterialExternalHaloUpdateOnLevel( unsigned int const level, MaterialFieldType const field_type ) const;
 
-   void InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> const& updated_levels ) const;
-   void InterfaceTagHaloUpdateOnLmax();
+   /**
+    * @brief Calls an interface tag halo update on Lmax only.
+    * @tparam IDB Level-set buffer type.
+   */
+   template<InterfaceDescriptionBufferType IDB>
+   void InterfaceTagHaloUpdateOnLmax() const {
+      InterfaceTagHaloUpdateOnLevelList<IDB>( { maximum_level_ } );
+   }
 
-   void LevelsetHaloUpdateOnLevelList( std::vector<unsigned int> const updated_levels, LevelsetBlockBufferType const halo_type );
-   void LevelsetHaloUpdateOnLmax( LevelsetBlockBufferType const type );
+   /**
+    * @brief Adjusts the values in the interface tag buffer according to their type. (symmetry, internal ...).
+    * @param updated_levels The levels on which halos of nodes will be modified.
+    * @tparam IDB Level-set buffer type.
+    */
+   template<InterfaceDescriptionBufferType IDB>
+   void InterfaceTagHaloUpdateOnLevelList( std::vector<unsigned int> const& updated_levels ) const {
+      for( unsigned int const& level : updated_levels ) {
+         internal_halo_manager_.InterfaceTagHaloUpdateOnLevel( level, IDB );
+         // Update of domain boundaries
+         for( auto const& domain_boundary : communication_manager_.ExternalBoundaries( level ) ) {
+            nid_t const id                  = std::get<0>( domain_boundary );
+            BoundaryLocation const location = std::get<1>( domain_boundary );
+            external_halo_manager_.UpdateInterfaceTagExternal( tree_.GetNodeWithId( id ).GetInterfaceTags<IDB>(), location );
+         }
+      }//levels
+   }
+
+   void InterfaceHaloUpdateOnLevelList( std::vector<unsigned int> const updated_levels, InterfaceBlockBufferType const halo_type ) const;
+   void InterfaceHaloUpdateOnLmax( InterfaceBlockBufferType const type ) const;
 };
 
-#endif //HALO_MANAGER_H
+#endif//HALO_MANAGER_H

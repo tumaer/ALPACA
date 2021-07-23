@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,25 +63,15 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include "multiresolution/multiresolution.h"
 
 #include <bitset>
 #include "boundary_condition/boundary_specifications.h"
-#include "topology/id_information.h"
-#include "mathematical_functions.h"
 #include "enums/interface_tag_definition.h"
-#include "helper_functions.h"
-
-namespace {
-   constexpr unsigned int xyz_look_up_table_[3][8] = {
-      {CC::PIOLCFICX(), CC::PIOHCFICX(), CC::PIOLCFICX(), CC::PIOHCFICX(), CC::PIOLCFICX(), CC::PIOHCFICX(), CC::PIOLCFICX(), CC::PIOHCFICX()}, // X-Indecies
-      {CC::PIOLCFICY(), CC::PIOLCFICY(), CC::PIOHCFICY(), CC::PIOHCFICY(), CC::PIOLCFICY(), CC::PIOLCFICY(), CC::PIOHCFICY(), CC::PIOHCFICY()}, // Y-Indecies
-      {CC::PIOLCFICZ(), CC::PIOLCFICZ(), CC::PIOLCFICZ(), CC::PIOLCFICZ(), CC::PIOHCFICZ(), CC::PIOHCFICZ(), CC::PIOHCFICZ(), CC::PIOHCFICZ()}
-   };
-}
+#include "utilities/string_operations.h"
 
 /**
  * @brief Default constructor.
@@ -97,13 +88,14 @@ Multiresolution::Multiresolution( Thresholder&& thresholder ) : thresholder_( th
  * @param child_id The id of the child whose values are averaged into the parent.
  * @note Adds the average to the already present value in the parent buffer.
  */
-void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, SurfaceBuffer& parent_buffer, std::uint64_t const child_id ) {
+void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, SurfaceBuffer& parent_buffer, nid_t const child_id ) {
 
    //compute start index of second child in parent. 0 if dimension is not considered
-   static constexpr int x_index = int(CC::ICX())/2;
-   static constexpr int y_index = CC::DIM() != Dimension::One   ? int(CC::ICY())/2 : 0;
-   static constexpr int z_index = CC::DIM() == Dimension::Three ? int(CC::ICZ())/2 : 0;
+   static constexpr int x_index = int( CC::ICX() ) / 2;
+   static constexpr int y_index = CC::DIM() != Dimension::One ? int( CC::ICY() ) / 2 : 0;
+   static constexpr int z_index = CC::DIM() == Dimension::Three ? int( CC::ICZ() ) / 2 : 0;
 
+   // clang-format off
    // std::floors ensure automated adaptation to 1D/2D
    static constexpr int first_index_look_up_table[8][6] =   {//East,West,North,South,Top, Bottom
       {     -1,       0,      -1,       0,      -1,       0}, //child_0
@@ -126,99 +118,41 @@ void Multiresolution::AverageJumpBuffer( SurfaceBuffer const& child_buffer, Surf
       {     -1, x_index, y_index,      -1, z_index,      -1}, //c6
       {x_index,      -1, y_index,      -1, z_index,      -1}  //c7
    };
+   // clang-format on
 
    for( BoundaryLocation const location : CC::ANBS() ) {
-      auto const child_values  = GetBoundaryJump(child_buffer, location);
-      auto       parent_values = GetBoundaryJump(parent_buffer, location);
+      auto const child_values = GetBoundaryJump( child_buffer, location );
+      auto parent_values      = GetBoundaryJump( parent_buffer, location );
 
-      int const index_one_start = first_index_look_up_table[PositionOfNodeAmongSiblings(child_id)][LTI(location)];
-      int const index_two_start = second_index_look_up_table[PositionOfNodeAmongSiblings(child_id)][LTI(location)];
+      int const index_one_start = first_index_look_up_table[PositionOfNodeAmongSiblings( child_id )][LTI( location )];
+      int const index_two_start = second_index_look_up_table[PositionOfNodeAmongSiblings( child_id )][LTI( location )];
 
       int i_child = 0;
       int j_child = 0;
 
-      if(index_one_start >= 0 && index_two_start >= 0){
-         for(unsigned int e = 0; e < FF::ANOE(); ++e){
+      if( index_one_start >= 0 && index_two_start >= 0 ) {
+         for( unsigned int e = 0; e < MF::ANOE(); ++e ) {
             i_child = 0;
             // std::ceil need to ensure exactly one iteration if necessary.
-            for(unsigned int i=index_one_start; i < index_one_start + std::ceil(double(CC::ICY()) / 2); ++i){
+            for( unsigned int i = index_one_start; i < index_one_start + std::ceil( double( CC::ICY() ) / 2 ); ++i ) {
                j_child = 0;
-               for(unsigned int j = index_two_start; j < index_two_start + std::ceil(double(CC::ICZ()) / 2); ++j){
-                  if constexpr(CC::DIM() == Dimension::One) {
+               for( unsigned int j = index_two_start; j < index_two_start + std::ceil( double( CC::ICZ() ) / 2 ); ++j ) {
+                  if constexpr( CC::DIM() == Dimension::One ) {
                      parent_values[e][i][j] += child_values[e][i_child][j_child];
                   }
-                  if constexpr(CC::DIM() == Dimension::Two) {
-                     parent_values[e][i][j] += (child_values[e][i_child][j_child] + child_values[e][i_child+1][j_child ]) * 0.5;
+                  if constexpr( CC::DIM() == Dimension::Two ) {
+                     parent_values[e][i][j] += ( child_values[e][i_child][j_child] + child_values[e][i_child + 1][j_child] ) * 0.5;
                   }
-                  if constexpr(CC::DIM() == Dimension::Three) {
-                     parent_values[e][i][j] += ((child_values[e][i_child  ][j_child] + child_values[e][i_child+1][j_child+1])
-                        + (child_values[e][i_child+1][j_child] + child_values[e][i_child  ][j_child+1])) * 0.25;
+                  if constexpr( CC::DIM() == Dimension::Three ) {
+                     parent_values[e][i][j] += ( ( child_values[e][i_child][j_child] + child_values[e][i_child + 1][j_child + 1] ) + ( child_values[e][i_child + 1][j_child] + child_values[e][i_child][j_child + 1] ) ) * 0.25;
                   }
                   j_child += 2;
-               } //j
+               }//j
                i_child += 2;
-            } //i
-         } //eq
-      } //if
-   } //location
-}
-
-/**
- * @brief Averages the child values into the parent, i.e. conservative average of the eight (in 3D) child cells that make up one parent cell.
- * @param child_buffer The child's buffer.
- * @param parent_buffer The parent's buffer to receive the averaged values.
- * @param child_id The id of the child.
- * @note Overrides the values in the parent buffer.
- */
-void Multiresolution::Average( Conservatives const& child_buffer, Conservatives& parent_buffer, std::uint64_t const child_id ) {
-
-   unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings(child_id)];
-   unsigned int const y_start = CC::DIM()!=Dimension::One   ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings(child_id)] : 0;
-   unsigned int const z_start = CC::DIM()==Dimension::Three ? xyz_look_up_table_[2][PositionOfNodeAmongSiblings(child_id)] : 0;
-
-   unsigned int const x_end = x_start + CC::PSOCICX();
-   unsigned int const y_end = y_start + CC::PSOCICY();
-   unsigned int const z_end = z_start + CC::PSOCICZ();
-
-   unsigned int const i_child_start = CC::FICX();
-   unsigned int const j_child_start = CC::DIM()!=Dimension::One   ? CC::FICY() : 0;
-   unsigned int const k_child_start = CC::DIM()==Dimension::Three ? CC::FICZ() : 0;
-
-   unsigned int i_child = i_child_start;
-   unsigned int j_child = j_child_start;
-   unsigned int k_child = k_child_start;
-
-   for( Equation const eq : FF::ASOE()) {
-      auto const& child_values  = child_buffer[eq];
-      auto&       parent_values = parent_buffer[eq];
-
-      i_child = i_child_start;
-      for(unsigned int i = x_start; i < x_end; ++i) {
-         j_child = j_child_start;
-         for(unsigned int j = y_start; j < y_end; ++j) {
-            k_child = k_child_start;
-            for(unsigned int k = z_start; k < z_end; ++k) {
-               if constexpr(CC::DIM() == Dimension::One) {
-                  parent_values[i][j][k]  = ( child_values[i_child][j_child][k_child] + child_values[i_child+1][j_child][k_child]) * 0.5;
-               }
-               if constexpr(CC::DIM() == Dimension::Two) {
-                  parent_values[i][j][k]  = ((child_values[i_child  ][j_child][k_child] + child_values[i_child+1][j_child+1][k_child])
-                     + (child_values[i_child+1][j_child][k_child] + child_values[i_child  ][j_child+1][k_child])) * 0.25 ;
-               }
-               if constexpr(CC::DIM() == Dimension::Three) {
-                  parent_values[i][j][k] = 0.125 * ConsistencyManagedSum(
-                     child_values[i_child][j_child  ][k_child  ] + child_values[i_child+1][j_child+1][k_child+1],
-                     child_values[i_child][j_child]  [k_child+1] + child_values[i_child+1][j_child+1][k_child  ],
-                     child_values[i_child][j_child+1][k_child  ] + child_values[i_child+1][j_child  ][k_child+1],
-                     child_values[i_child][j_child+1][k_child+1] + child_values[i_child+1][j_child  ][k_child  ] );
-               }
-               k_child += 2;
-            } //k
-            j_child += 2;
-         } //j
-         i_child += 2;
-      } //i
-   } //eq
+            }//i
+         }   //eq
+      }      //if
+   }         //location
 }
 
 /**
@@ -230,16 +164,16 @@ void Multiresolution::Average( Conservatives const& child_buffer, Conservatives&
  * @param x_count,y_count,z_count Number of cells in X/Y/Z-direction that should be filled in the child!
  * @note No sanity checks on start or count values are done. Values in the child buffer are overriden.
  */
-void Multiresolution::Prediction( double const (&parent_values)[CC::TCX()][CC::TCY()][CC::TCZ()], double (&child_values)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                  std::uint64_t const child_id, unsigned int const x_start, unsigned int const x_count, unsigned int const y_start,
+void Multiresolution::Prediction( double const ( &parent_values )[CC::TCX()][CC::TCY()][CC::TCZ()], double ( &child_values )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                  nid_t const child_id, unsigned int const x_start, unsigned int const x_count, unsigned int const y_start,
                                   unsigned int const y_count, unsigned int const z_start, unsigned int const z_count ) {
 #ifndef PERFORMANCE
-   if(x_start % 2 != 0 || y_start % 2 != 0|| z_start % 2 != 0) {
-      throw std::logic_error("Fatal Error in Prediction starting indices not multiple of 2");
+   if( x_start % 2 != 0 || y_start % 2 != 0 || z_start % 2 != 0 ) {
+      throw std::logic_error( "Fatal Error in Prediction starting indices not multiple of 2" );
    }
 #endif
 
-   std::bitset<3> position(PositionOfNodeAmongSiblings(child_id));
+   std::bitset<3> position( PositionOfNodeAmongSiblings( child_id ) );
 
    unsigned int const x_offset = position.test( 0 ) ? CC::PIOHCH() : CC::PIOLCH();
    unsigned int const y_offset = position.test( 1 ) ? CC::PIOHCH() : CC::PIOLCH();
@@ -247,19 +181,19 @@ void Multiresolution::Prediction( double const (&parent_values)[CC::TCX()][CC::T
 
    // Compute the respective cells that need to be looped in the parent
    // integer divisions are automatically rounded to floor. This is intended in the expressions below.
-   unsigned int const parent_x_start = (x_start/2) + x_offset;
-   unsigned int const parent_y_start = CC::DIM()!=Dimension::One   ? ((y_start/2) + y_offset)         : 0;
-   unsigned int const parent_z_start = CC::DIM()==Dimension::Three ? ((z_start/2) + z_offset)         : 0;
-   unsigned int const parent_x_end   = parent_x_start + ( x_count / 2);
-   unsigned int const parent_y_end   = CC::DIM()!=Dimension::One   ? (parent_y_start + (y_count / 2)) : 1;
-   unsigned int const parent_z_end   = CC::DIM()==Dimension::Three ? (parent_z_start + (z_count / 2)) : 1;
+   unsigned int const parent_x_start = ( x_start / 2 ) + x_offset;
+   unsigned int const parent_y_start = CC::DIM() != Dimension::One ? ( ( y_start / 2 ) + y_offset ) : 0;
+   unsigned int const parent_z_start = CC::DIM() == Dimension::Three ? ( ( z_start / 2 ) + z_offset ) : 0;
+   unsigned int const parent_x_end   = parent_x_start + ( x_count / 2 );
+   unsigned int const parent_y_end   = CC::DIM() != Dimension::One ? ( parent_y_start + ( y_count / 2 ) ) : 1;
+   unsigned int const parent_z_end   = CC::DIM() == Dimension::Three ? ( parent_z_start + ( z_count / 2 ) ) : 1;
 
    unsigned int child_index_x = x_start;
-   unsigned int child_index_y = CC::DIM()!=Dimension::One   ? y_start : 0;
-   unsigned int child_index_z = CC::DIM()==Dimension::Three ? z_start : 0;
+   unsigned int child_index_y = CC::DIM() != Dimension::One ? y_start : 0;
+   unsigned int child_index_z = CC::DIM() == Dimension::Three ? z_start : 0;
 
-   constexpr double coefficient0 = -22.0/128.0;
-   constexpr double coefficient1 =   3.0/128.0;
+   constexpr double coefficient0 = -22.0 / 128.0;
+   constexpr double coefficient1 = 3.0 / 128.0;
 
    constexpr double coefficient00 = coefficient0 * coefficient0;
    constexpr double coefficient01 = coefficient0 * coefficient1;
@@ -287,13 +221,14 @@ void Multiresolution::Prediction( double const (&parent_values)[CC::TCX()][CC::T
    /**
     * According to \cite Harten1993.
     */
-   for(unsigned int i = parent_x_start; i < parent_x_end; ++i) {
+   for( unsigned int i = parent_x_start; i < parent_x_end; ++i ) {
       child_index_y = y_start;
-      for(unsigned int j = parent_y_start; j < parent_y_end; ++j) {
+      for( unsigned int j = parent_y_start; j < parent_y_end; ++j ) {
          child_index_z = z_start;
 
-         for(unsigned int k = parent_z_start; k < parent_z_end; ++k) {
+         for( unsigned int k = parent_z_start; k < parent_z_end; ++k ) {
 
+            // clang-format off
             //terms for 1D, 2D, 3D cases
             Qx = coefficient0 * (parent_values[i+1][j][k] - parent_values[i-1][j][k]) + coefficient1 * (parent_values[i+2][j][k] - parent_values[i-2][j][k]);
 
@@ -358,34 +293,34 @@ void Multiresolution::Prediction( double const (&parent_values)[CC::TCX()][CC::T
                child_values[child_index_x+1][child_index_y+1][child_index_z+1] = parent_values[i][j][k] + ConsistencyManagedSum(-Qx, -Qy, -Qz) + ConsistencyManagedSum( Qxy,  Qxz,  Qyz) - Qxyz;
             }
             child_index_z += 2;
-         } //k-loop
+            // clang-format on
+         }//k-loop
          child_index_y += 2;
-      } //j-loop
+      }//j-loop
       child_index_x += 2;
-   } //i-loop
+   }//i-loop
 }
-
 
 /**
  * @brief Implementation of Meta function for L-infinity norm. See meta function.
  */
 template<>
-RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block const& parent, Block const& child, std::uint64_t const child_id ) const {
+RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block const& parent, Block const& child, nid_t const child_id ) const {
 
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
 
-   for( Equation const eq : FF::EWA() ) {
-      double const (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer(eq);
-      Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
+   for( Equation const eq : MF::EWA() ) {
+      double const( &exact_values )[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer( eq );
+      Multiresolution::Prediction( parent.GetRightHandSideBuffer( eq ), predicted_values, child_id );
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-               max_detail = std::max(max_detail, std::abs(exact_values[i][j][k] - predicted_values[i][j][k])/std::abs(exact_values[i][j][k]));
-            } // Loop : k
-         } // Loop : j
-      } // Loop : i
-   } // Loop : Equation
+               max_detail = std::max( max_detail, std::abs( exact_values[i][j][k] - predicted_values[i][j][k] ) / std::abs( exact_values[i][j][k] ) );
+            }// Loop : k
+         }   // Loop : j
+      }      // Loop : i
+   }         // Loop : Equation
 
    return RemeshingDecision( max_detail, LevelOfNode( child_id ) );
 }
@@ -394,27 +329,27 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Linfinity>( Block co
  * @brief Implementation of meta function for L-one norm in three dimensions. See meta function.
  */
 template<>
-RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& parent, Block const& child, std::uint64_t const child_id ) const {
+RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& parent, Block const& child, nid_t const child_id ) const {
 
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
    double error_norm = 0.0;
 
-   double const one_number_of_cells = 1.0 / (CC::TCX()*CC::TCY()*CC::TCZ());
+   double const one_number_of_cells = 1.0 / ( CC::TCX() * CC::TCY() * CC::TCZ() );
 
-   for( Equation const eq : FF::EWA()) {
-      const double (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] =  child.GetRightHandSideBuffer(eq);
-      Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
+   for( Equation const eq : MF::EWA() ) {
+      double const( &exact_values )[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer( eq );
+      Multiresolution::Prediction( parent.GetRightHandSideBuffer( eq ), predicted_values, child_id );
       error_norm = 0.0;
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-               error_norm += std::abs(exact_values[i][j][k] - predicted_values[i][j][k])/std::abs(exact_values[i][j][k]);
+               error_norm += std::abs( exact_values[i][j][k] - predicted_values[i][j][k] ) / std::abs( exact_values[i][j][k] );
             }
          }
       }
-      max_detail = std::max(max_detail,error_norm*one_number_of_cells); // We save the maximum values over the eq-loops.
-   } // Loop : eq
+      max_detail = std::max( max_detail, error_norm * one_number_of_cells );// We save the maximum values over the eq-loops.
+   }                                                                        // Loop : eq
 
    return RemeshingDecision( max_detail, LevelOfNode( child_id ) );
 }
@@ -423,28 +358,28 @@ RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Lone>( Block const& 
  * @brief Implementation of meta function for L-two norm in three dimensions. See meta function.
  */
 template<>
-RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Ltwo>( Block const& parent, Block const& child, std::uint64_t const child_id ) const {
+RemeshIdentifier Multiresolution::ChildNeedsRemeshing<Norm::Ltwo>( Block const& parent, Block const& child, nid_t const child_id ) const {
 
    double predicted_values[CC::TCX()][CC::TCY()][CC::TCZ()];
    double max_detail = 0.0;
    double error_norm = 0.0;
 
-   double const one_number_of_cells = 1.0 / (CC::TCX()*CC::TCY()*CC::TCZ());
+   double const one_number_of_cells = 1.0 / ( CC::TCX() * CC::TCY() * CC::TCZ() );
 
-   for( Equation const eq : FF::EWA() ) {
-      double const (&exact_values)[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer(eq);
-      Multiresolution::Prediction(parent.GetRightHandSideBuffer(eq), predicted_values, child_id);
+   for( Equation const eq : MF::EWA() ) {
+      double const( &exact_values )[CC::TCX()][CC::TCY()][CC::TCZ()] = child.GetRightHandSideBuffer( eq );
+      Multiresolution::Prediction( parent.GetRightHandSideBuffer( eq ), predicted_values, child_id );
       error_norm = 0.0;
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
-               double const temp = (exact_values[i][j][k] - predicted_values[i][j][k]) / exact_values[i][j][k];
-               error_norm = error_norm + temp * temp;
+               double const temp = ( exact_values[i][j][k] - predicted_values[i][j][k] ) / exact_values[i][j][k];
+               error_norm        = error_norm + temp * temp;
             }
          }
       }
-      max_detail = std::max(max_detail, std::sqrt(error_norm) * one_number_of_cells);
-   } // loop : eq
+      max_detail = std::max( max_detail, std::sqrt( error_norm ) * one_number_of_cells );
+   }// loop : eq
 
    return RemeshingDecision( max_detail, LevelOfNode( child_id ) );
 }
@@ -462,7 +397,7 @@ RemeshIdentifier Multiresolution::RemeshingDecision( double const detail, unsign
     */
    constexpr double fifth_order_coefficient = 32.0;
 
-   double const epsilon_coarsen = thresholder_.ThresholdOnLevel( level );
+   double const epsilon_coarsen    = thresholder_.ThresholdOnLevel( level );
    double const epsilon_refinement = epsilon_coarsen * fifth_order_coefficient;
 
    if( detail <= epsilon_coarsen ) {
@@ -481,19 +416,19 @@ RemeshIdentifier Multiresolution::RemeshingDecision( double const detail, unsign
  * @param child_id The id of the child.
  * @note Not a real averaging. Only importance is that the cut cell markers are correctly propagated. Therefore a multiplication is (mis-)used.
  */
-void Multiresolution::PropagateCutCellTagsFromChildIntoParent( std::int8_t const (&child_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                               std::int8_t (&parent_tags)[CC::TCX()][CC::TCY()][CC::TCZ()], std::uint64_t const child_id ) {
+void Multiresolution::PropagateCutCellTagsFromChildIntoParent( std::int8_t const ( &child_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                               std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()], nid_t const child_id ) {
 
-   unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings(child_id)];
-   unsigned int const y_start = CC::DIM() != Dimension::One   ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings(child_id)] : 0;
-   unsigned int const z_start = CC::DIM() == Dimension::Three ? xyz_look_up_table_[2][PositionOfNodeAmongSiblings(child_id)] : 0;
+   unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings( child_id )];
+   unsigned int const y_start = CC::DIM() != Dimension::One ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings( child_id )] : 0;
+   unsigned int const z_start = CC::DIM() == Dimension::Three ? xyz_look_up_table_[2][PositionOfNodeAmongSiblings( child_id )] : 0;
 
    unsigned int const x_end = x_start + CC::PSOCICX();
    unsigned int const y_end = y_start + CC::PSOCICY();
    unsigned int const z_end = z_start + CC::PSOCICZ();
 
    constexpr unsigned int i_child_start = CC::FICX();
-   constexpr unsigned int j_child_start = CC::DIM() != Dimension::One   ? CC::FICY() : 0;
+   constexpr unsigned int j_child_start = CC::DIM() != Dimension::One ? CC::FICY() : 0;
    constexpr unsigned int k_child_start = CC::DIM() == Dimension::Three ? CC::FICZ() : 0;
 
    unsigned int i_child = i_child_start;
@@ -502,26 +437,24 @@ void Multiresolution::PropagateCutCellTagsFromChildIntoParent( std::int8_t const
 
    int overflow_safe_buffer = 0.0;
 
-   for(unsigned int i = x_start; i < x_end; ++i) {
+   for( unsigned int i = x_start; i < x_end; ++i ) {
       j_child = j_child_start;
-      for(unsigned int j = y_start; j < y_end; ++j) {
+      for( unsigned int j = y_start; j < y_end; ++j ) {
          k_child = k_child_start;
-         for(unsigned int k = z_start; k < z_end; ++k) {
+         for( unsigned int k = z_start; k < z_end; ++k ) {
             //ATTENTION: in the following, we multiply bools whith each other. This is fine as they are implicitely casted to int.
-            overflow_safe_buffer    =   (std::abs(child_tags[i_child][j_child  ][k_child  ]) > ITTI(IT::NewCutCell)) * (std::abs(child_tags[i_child+1][j_child  ][k_child  ]) > ITTI(IT::NewCutCell))
+            overflow_safe_buffer = ( std::abs( child_tags[i_child][j_child][k_child] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child + 1][j_child][k_child] ) > ITTI( IT::NewCutCell ) )
 #if DIMENSION == 1
 #elif DIMENSION == 2
-               * (std::abs(child_tags[i_child][j_child+1][k_child  ]) > ITTI(IT::NewCutCell)) * (std::abs(child_tags[i_child+1][j_child+1][k_child  ]) > ITTI(IT::NewCutCell))
+                                   * ( std::abs( child_tags[i_child][j_child + 1][k_child] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child + 1][j_child + 1][k_child] ) > ITTI( IT::NewCutCell ) )
 #else
-               * (std::abs(child_tags[i_child][j_child+1][k_child  ]) > ITTI(IT::NewCutCell)) * (std::abs(child_tags[i_child+1][j_child+1][k_child  ]) > ITTI(IT::NewCutCell))
-                                          * (std::abs(child_tags[i_child][j_child]  [k_child+1]) > ITTI(IT::NewCutCell)) * (std::abs(child_tags[i_child+1][j_child  ][k_child+1]) > ITTI(IT::NewCutCell))
-                                          * (std::abs(child_tags[i_child][j_child+1][k_child+1]) > ITTI(IT::NewCutCell)) * (std::abs(child_tags[i_child+1][j_child+1][k_child+1]) > ITTI(IT::NewCutCell))
+                                   * ( std::abs( child_tags[i_child][j_child + 1][k_child] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child + 1][j_child + 1][k_child] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child][j_child][k_child + 1] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child + 1][j_child][k_child + 1] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child][j_child + 1][k_child + 1] ) > ITTI( IT::NewCutCell ) ) * ( std::abs( child_tags[i_child + 1][j_child + 1][k_child + 1] ) > ITTI( IT::NewCutCell ) )
 #endif
-               ;
+                  ;
             // A cut cell is shown here as a ZERO, as we compare it to be larger than 1.
             // Mixed signs in the considered child cells are only possible if there is also a ZERO, hence overflow_safe_buffer would be ZERO as well.
             // It is therefore safe to use both the sign of overflow_safe_buffer and an arbitrary child cell to determine the sign (or ZERO) of the parent value.
-            parent_tags[i][j][k] = static_cast<std::int8_t>(Signum(overflow_safe_buffer)) * Signum(child_tags[i_child][j_child][k_child]) * ITTI(IT::BulkPhase);
+            parent_tags[i][j][k] = static_cast<std::int8_t>( Signum( overflow_safe_buffer ) ) * Signum( child_tags[i_child][j_child][k_child] ) * ITTI( IT::BulkPhase );
             k_child += 2;
          }
          j_child += 2;
@@ -536,50 +469,22 @@ void Multiresolution::PropagateCutCellTagsFromChildIntoParent( std::int8_t const
  * @param parent_tags The parent's tag array to be updated based on the child's tag.
  * @param child_id The id of the child.
  */
-void Multiresolution::PropagateUniformTagsFromChildIntoParent( std::int8_t const child_tag, std::int8_t (&parent_tags)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                                               std::uint64_t const child_id ) {
+void Multiresolution::PropagateUniformTagsFromChildIntoParent( std::int8_t const child_tag, std::int8_t ( &parent_tags )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                                               nid_t const child_id ) {
 
-   unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings(child_id)];
-   unsigned int const y_start = CC::DIM() != Dimension::One   ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings(child_id)] : 0;
-   unsigned int const z_start = CC::DIM() == Dimension::Three ? xyz_look_up_table_[2][PositionOfNodeAmongSiblings(child_id)] : 0;
+   unsigned int const x_start = xyz_look_up_table_[0][PositionOfNodeAmongSiblings( child_id )];
+   unsigned int const y_start = CC::DIM() != Dimension::One ? xyz_look_up_table_[1][PositionOfNodeAmongSiblings( child_id )] : 0;
+   unsigned int const z_start = CC::DIM() == Dimension::Three ? xyz_look_up_table_[2][PositionOfNodeAmongSiblings( child_id )] : 0;
 
    unsigned int const x_end = x_start + CC::PSOCICX();
    unsigned int const y_end = y_start + CC::PSOCICY();
    unsigned int const z_end = z_start + CC::PSOCICZ();
 
-   for(unsigned int i = x_start; i < x_end; ++i) {
-      for(unsigned int j = y_start; j < y_end; ++j) {
-         for(unsigned int k = z_start; k < z_end; ++k) {
+   for( unsigned int i = x_start; i < x_end; ++i ) {
+      for( unsigned int j = y_start; j < y_end; ++j ) {
+         for( unsigned int k = z_start; k < z_end; ++k ) {
             parent_tags[i][j][k] = child_tag;
          }
       }
    }
-}
-
-/**
- * @brief Creates a Multiresolution instance and logs the used thresholds.
- * @param maximum_level The maximum level used in the simulation.
- * @param user_reference_level The reference level provided from user input.
- * @param user_reference_epsilon The reference epsilon provided from user input.
- * @return A multiresolution instance with thresholding conditions according to given input.
- */
-Multiresolution InstantiateMultiresolution( unsigned int const maximum_level, unsigned int const user_reference_level, double const user_reference_epsilon ) {
-
-   if( user_reference_epsilon <= 0 ) { throw std::invalid_argument( "Epsilon_Reference must be greater zero" ); }
-
-   Thresholder thresholder = Thresholder( maximum_level, user_reference_level, user_reference_epsilon );
-
-   LogWriter& logger = LogWriter::Instance();
-   logger.AddBreakLine( true );
-   if( maximum_level > 1 ) {
-      logger.LogMessage( "Epsilon Level 0 and Level 1  : " + ToScientificNotationString( thresholder.ThresholdOnLevel( 1 ) ) );
-      logger.LogMessage( "Epsilon Level " + std::to_string( maximum_level - 1 ) + " and Level " + std::to_string( maximum_level ) + "  : "
-                         + ToScientificNotationString( thresholder.ThresholdOnLevel( maximum_level ) ) );
-   } else if( maximum_level == 1 ) {
-      logger.LogMessage("Homogenous Mesh - Level 1 cannot be coarsed. Provided Epsilon is ignored");
-   } else {
-      logger.LogMessage("Homogenous Mesh - Provided Epsilon is ignored");
-   }
-
-   return Multiresolution( std::move( thresholder ) );
 }

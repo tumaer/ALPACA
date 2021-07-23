@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,12 +63,11 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef SCALE_SEPARATOR_H
 #define SCALE_SEPARATOR_H
-
 
 #include "materials/material_manager.h"
 #include "user_specifications/numerical_setup.h"
@@ -80,8 +80,8 @@ class ScaleSeparator {
    friend DerivedScaleSeparator;
 
 protected:
-   const MaterialManager& material_manager_;
-   HaloManager& halo_manager_; // TODO-19 NH Think about making it const (rats tail)
+   MaterialManager const& material_manager_;
+   HaloManager& halo_manager_;// TODO-19 NH Think about making it const (rats tail)
 
    ScaleSeparator() = delete;
 
@@ -90,10 +90,8 @@ protected:
     * @param material_manager Instance of a MaterialManager, which already has been initialized according to the user input.
     * @param halo_manager Instance to a HaloManager which provides MPI-related methods.
     */
-   explicit ScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager ) :
-      material_manager_( material_manager ),
-      halo_manager_( halo_manager )
-   {
+   explicit ScaleSeparator( MaterialManager const& material_manager, HaloManager& halo_manager ) : material_manager_( material_manager ),
+                                                                                                   halo_manager_( halo_manager ) {
       // Empty Constructor, besides initializer list.
    }
 
@@ -103,13 +101,11 @@ public:
    /**
     * @brief Performs a scale separation procedure.
     * @param nodes The nodes for which scale separation should be done.
-    * @param stage The current stage of the RK scheme.
+    * @param buffer_type The level-set buffer type for which scale separation is done.
     */
-   void SeparateScales(std::vector<std::reference_wrapper<Node>> const& nodes, unsigned int const stage) const {
-      static_cast<DerivedScaleSeparator const&>(*this).SeparateScalesImplementation(nodes, stage);
+   void SeparateScales( std::vector<std::reference_wrapper<Node>> const& nodes, InterfaceBlockBufferType const buffer_type ) const {
+      static_cast<DerivedScaleSeparator const&>( *this ).SeparateScalesImplementation( nodes, buffer_type );
    }
-
 };
 
-
-#endif //SCALE_SEPARATOR_H
+#endif//SCALE_SEPARATOR_H

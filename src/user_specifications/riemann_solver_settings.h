@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef RIEMANN_SOLVER_SETTINGS_H
@@ -71,28 +72,34 @@
 #include "enums/flux_splitting.h"
 #include "enums/signal_speed.h"
 
-// RIEMANN_SOLVER
-enum class RiemannSolvers {Roe, Hllc, Hll};
-constexpr RiemannSolvers riemann_solver = RiemannSolvers::Roe;
+enum class ConvectiveTermSolvers { FluxSplitting,
+                                   FiniteVolume };
+constexpr ConvectiveTermSolvers convective_term_solver = ConvectiveTermSolvers::FluxSplitting;
 
-namespace RoeSolverSettings {
-/* FluxSplitting options are:
- * Roe | LocalLaxFriedrichs | GlobalLaxFriedrichs | Roe_M | LocalLaxFriedrichs_M
- * Roe_M and LocalLaxFriedrichs_M according to \cite Fleischmann20
- */
-constexpr FluxSplitting flux_splitting_scheme = FluxSplitting::Roe;
+namespace FluxSplittingSettings {
+   /* FluxSplitting options are:
+    * Roe | LocalLaxFriedrichs | GlobalLaxFriedrichs | Roe_M | LocalLaxFriedrichs_M
+    * Roe_M and LocalLaxFriedrichs_M according to \cite Fleischmann20
+    */
+   constexpr FluxSplitting flux_splitting_scheme = FluxSplitting::Roe;
 
-/* Phi in \cite Fleischmann20.
- * Limits the speed of sound in the eigenvalue calculation of Roe-M and LLF-M
- */
-constexpr double low_mach_number_limit_factor = 5.0;
-}
+   /* Phi in \cite Fleischmann20.
+    * Limits the speed of sound in the eigenvalue calculation of Roe-M and LLF-M
+    */
+   constexpr double low_mach_number_limit_factor = 5.0;
+}// namespace FluxSplittingSettings
 
-namespace HllSolverSettings {
-/* Signal Speed choices for HLL-type solvers are:
- * Einfeldt \cite Einfeldt88 | Davis \cite Davis88 | Toro \cite Toro94 | Arithmetic \cite Coralic14
- */
-constexpr SignalSpeed signal_speed_selection = SignalSpeed::Einfeldt;
-}
+namespace FiniteVolumeSettings {
+   // RIEMANN_SOLVER
+   enum class RiemannSolvers { Hllc,
+                               Hllc_LM,
+                               Hll };
+   constexpr RiemannSolvers riemann_solver = RiemannSolvers::Hllc;
 
-#endif // RIEMANN_SOLVER_SETTINGS_H
+   /* Signal Speed choices for HLL-type solvers are:
+    * Einfeldt \cite Einfeldt88 | Davis \cite Davis88 | Toro \cite Toro94 | Arithmetic \cite Coralic14
+    */
+   constexpr SignalSpeed signal_speed_selection = SignalSpeed::Einfeldt;
+}// namespace FiniteVolumeSettings
+
+#endif// RIEMANN_SOLVER_SETTINGS_H

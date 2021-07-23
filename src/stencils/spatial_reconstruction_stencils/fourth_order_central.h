@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef FOURTH_ORDER_CENTRAL_H
@@ -71,7 +72,7 @@
 #include "stencils/stencil.h"
 
 /**
- * @brief Discretization of the SpatialReconstructionStencil class to compute fourth-order central fluxes.
+ * @brief Discretization of the SpatialReconstructionStencil class to evaluate the stencil with a fourth-order central scheme.
  */
 class FourthOrderCentral : public Stencil<FourthOrderCentral> {
 
@@ -79,20 +80,24 @@ class FourthOrderCentral : public Stencil<FourthOrderCentral> {
 
    static constexpr StencilType stencil_type_ = StencilType::Reconstruction;
 
-   static constexpr double one_sixteenth_  = 1.0/16.0;
+   static constexpr double one_sixteenth_ = 1.0 / 16.0;
 
+   // Number of cells required for upwind and downwind stencils, as well as number of cells downstream of the cell
    static constexpr unsigned int stencil_size_            = 4;
    static constexpr unsigned int downstream_stencil_size_ = 1;
 
-   double ApplyImplementation( std::vector<double> const& array, int const stencil_offset, int const stencil_sign, double const cell_size ) const;
+   /**
+    * @brief Evaluates the stencil according to a fourth order central scheme. Also See base class.
+    * @note Hotpath function.
+    */
+   constexpr double ApplyImplementation( std::array<double, stencil_size_> const& array, std::array<int const, 2> const, double const ) const {
+      double const result = 9.0 * ( array[downstream_stencil_size_ - 0] + array[downstream_stencil_size_ + 1] ) - 1.0 * ( array[downstream_stencil_size_ - 1] + array[downstream_stencil_size_ + 2] );
+      return result * one_sixteenth_;
+   }
 
 public:
-   explicit FourthOrderCentral() = default;
-   ~FourthOrderCentral() = default;
-   FourthOrderCentral( FourthOrderCentral const& ) = delete;
-   FourthOrderCentral& operator=( FourthOrderCentral const& ) = delete;
-   FourthOrderCentral( FourthOrderCentral&& ) = delete;
-   FourthOrderCentral& operator=( FourthOrderCentral&& ) = delete;
+   explicit constexpr FourthOrderCentral() = default;
+   ~FourthOrderCentral()                   = default;
 };
 
-#endif // STENCIL_FOURTH_ORDER_CENTRAL_H
+#endif// STENCIL_FOURTH_ORDER_CENTRAL_H

@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef SIGNAL_SPEED_H
@@ -73,7 +74,10 @@
 /**
  * @brief Identifier for nonlinear signal speed to be used in HLL-type Riemann solvers.
  */
-enum class SignalSpeed { Einfeldt, Davis, Toro, Arithmetic };
+enum class SignalSpeed { Einfeldt,
+                         Davis,
+                         Toro,
+                         Arithmetic };
 
 /**
  * @brief Provides a string representation of the applied SignalSpeed choice in HLL-type Riemann solvers.
@@ -82,17 +86,17 @@ enum class SignalSpeed { Einfeldt, Davis, Toro, Arithmetic };
  */
 inline std::string SignalSpeedToString( SignalSpeed const signal_speed ) {
    switch( signal_speed ) {
-      case SignalSpeed::Einfeldt :
+      case SignalSpeed::Einfeldt:
          return "Einfeldt";
-      case SignalSpeed::Davis :
+      case SignalSpeed::Davis:
          return "Davis";
-      case SignalSpeed::Toro :
+      case SignalSpeed::Toro:
          return "Toro";
-      case SignalSpeed::Arithmetic :
+      case SignalSpeed::Arithmetic:
          return "Arithmetic";
       default:
          return "ERROR: This signal speed is not (yet) defined!";
    }
 }
 
-#endif // SIGNAL_SPEED_H
+#endif// SIGNAL_SPEED_H

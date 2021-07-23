@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,10 +63,10 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include "topology/topology_manager.h"
 #include "topology/tree.h"
 #include "communication/mpi_utilities.h"
@@ -76,9 +77,9 @@
 
 namespace {
    // Some useful constants
-   constexpr std::uint64_t root_id = 0x1400000;
-   auto const child_ids = IdsOfChildren( root_id );
-}
+   constexpr nid_t root_id = 0x1400000;
+   auto const child_ids    = IdsOfChildren( root_id );
+}// namespace
 
 namespace {
    /**
@@ -88,7 +89,7 @@ namespace {
     * @tparam T value type.
     */
    template<typename T>
-   void FillThreeDimensionalBufferWithValue( T (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], T value ) {
+   void FillThreeDimensionalBufferWithValue( T ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], T value ) {
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
@@ -104,7 +105,7 @@ namespace {
     * @tparam T value type.
     */
    template<typename T>
-   void FillThreeDimensionalBufferWithArbitratyValues( T (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
+   void FillThreeDimensionalBufferWithArbitratyValues( T ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
       for( unsigned int i = 0; i < CC::TCX(); ++i ) {
          for( unsigned int j = 0; j < CC::TCY(); ++j ) {
             for( unsigned int k = 0; k < CC::TCZ(); ++k ) {
@@ -121,14 +122,14 @@ namespace {
     * @note Undefined if topology does not have the first eight nodes on level one.
     */
    void AddMaterialToAllNodesInOneParentEightChildrenTopologyAndUpdate( TopologyManager& topology, MaterialName material ) {
-      topology.AddFluidToNode( root_id, material );
+      topology.AddMaterialToNode( root_id, material );
       for( auto const c : child_ids ) {
-         topology.AddFluidToNode( c, material );
+         topology.AddMaterialToNode( c, material );
       }
       topology.UpdateTopology();
    }
 
-}
+}// namespace
 
 namespace {
    /**
@@ -137,7 +138,7 @@ namespace {
     * @param value Value to poulate the buffers with.
     */
    void FillNodesRightHandSideEquationBuffersWithValue( Node& node, double const value ) {
-      for( auto const eq : FF::ASOE() ) {
+      for( auto const eq : MF::ASOE() ) {
          FillThreeDimensionalBufferWithValue( node.GetSinglePhase().GetRightHandSideBuffer( eq ), value );
       }
    }
@@ -147,21 +148,21 @@ namespace {
     * @param node Single-phase node whose buffers are to be filled.
     */
    void FillNodesRightHandSideEquationBuffersWithArbitraryValues( Node& node ) {
-      for( auto const eq : FF::ASOE() ) {
+      for( auto const eq : MF::ASOE() ) {
          FillThreeDimensionalBufferWithArbitratyValues( node.GetSinglePhase().GetRightHandSideBuffer( eq ) );
       }
    }
 
-}
+}// namespace
 
-namespace{
+namespace {
    /**
     * @brief Fills the interface tag buffer of the given node with the provided value.
     * @param node The node whose interface are to be filled.
     * @param The interface tag value to put into every cell of the interface tag buffer.
     */
    void SetNodesInterfaceTags( Node& node, InterfaceTag const value ) {
-      FillThreeDimensionalBufferWithValue( node.GetInterfaceTags(), ITTI( value ) );
+      FillThreeDimensionalBufferWithValue( node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>(), ITTI( value ) );
    }
 
    /*
@@ -170,7 +171,7 @@ namespace{
     * @param The interface tag value to put into the corner cells.
     */
    void SetCornerTagsToValue( Node& node, InterfaceTag const value ) {
-      auto& interface_tags = node.GetInterfaceTags();
+      auto& interface_tags                               = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       interface_tags[CC::FICX()][CC::FICY()][CC::FICZ()] = ITTI( value );
       interface_tags[CC::LICX()][CC::FICY()][CC::FICZ()] = ITTI( value );
       interface_tags[CC::FICX()][CC::LICY()][CC::FICZ()] = ITTI( value );
@@ -186,26 +187,26 @@ namespace{
     * @param parent The node which has received the averaged tags.
     */
    void VerifyCornerTagsAveragedIntoParent( Node const& parent ) {
-      auto parent_tags = parent.GetInterfaceTags();
-      REQUIRE( parent_tags[CC::FICX()                    ][CC::FICY()                    ][CC::FICZ()                    ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY()                    ][CC::FICZ()                    ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX()                    ][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ()                    ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ()                    ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX()                    ][CC::FICY()                    ][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY()                    ][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX()                    ][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
+      auto parent_tags = parent.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
+      REQUIRE( parent_tags[CC::FICX()][CC::FICY()][CC::FICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY()][CC::FICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX()][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX()][CC::FICY()][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY()][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX()][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
       REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 - 1][CC::FICY() + CC::ICX() / 2 - 1][CC::FICZ() + CC::ICX() / 2 - 1] == ITTI( IT::OldCutCell ) );
 
       REQUIRE( parent_tags[CC::FICX() + 1][CC::FICY() + 1][CC::FICZ() + 1] != ITTI( IT::OldCutCell ) );
 
       REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::FICY() + CC::ICX() / 2][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::LICX()                ][CC::FICY() + CC::ICX() / 2][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::LICY()                ][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::LICX()                ][CC::LICY()                ][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::FICY() + CC::ICX() / 2][CC::LICZ()                ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::LICX()                ][CC::FICY() + CC::ICX() / 2][CC::LICZ()                ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::LICY()                ][CC::LICZ()                ] == ITTI( IT::OldCutCell ) );
-      REQUIRE( parent_tags[CC::LICX()                ][CC::LICY()                ][CC::LICZ()                ] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::LICX()][CC::FICY() + CC::ICX() / 2][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::LICY()][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::LICX()][CC::LICY()][CC::FICZ() + CC::ICX() / 2] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::FICY() + CC::ICX() / 2][CC::LICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::LICX()][CC::FICY() + CC::ICX() / 2][CC::LICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2][CC::LICY()][CC::LICZ()] == ITTI( IT::OldCutCell ) );
+      REQUIRE( parent_tags[CC::LICX()][CC::LICY()][CC::LICZ()] == ITTI( IT::OldCutCell ) );
 
       REQUIRE( parent_tags[CC::FICX() + CC::ICX() / 2 + 1][CC::FICY() + CC::ICX() / 2 + 1][CC::FICZ() + CC::ICX() / 2 + 1] != ITTI( IT::OldCutCell ) );
    }
@@ -215,7 +216,7 @@ namespace{
     * @param node The node whose interface tag buffer is to be examined.
     */
    void VerifyHomogenousBulkTags( Node const& node ) {
-      auto const& tags = node.GetInterfaceTags();
+      auto const& tags = node.GetInterfaceTags<InterfaceDescriptionBufferType::Reinitialized>();
       for( unsigned int i = CC::LICX(); i < CC::FICX(); ++i ) {
          for( unsigned int j = CC::LICY(); j < CC::FICY(); ++j ) {
             for( unsigned int k = CC::LICZ(); k < CC::FICZ(); ++k ) {
@@ -224,7 +225,7 @@ namespace{
          }
       }
    }
-}
+}// namespace
 
 namespace {
 
@@ -235,9 +236,8 @@ namespace {
     * @tparam buffer value type.
     */
    template<typename T>
-   T AverageAroundGivenIndices( T const (&buffer)[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const x, unsigned int const y, unsigned int const z ) {
-      return   buffer[x][y][z]     + buffer[x + 1][y][z]     + buffer[x][y + 1][z]     + buffer[x + 1][y + 1][z]
-             + buffer[x][y][z + 1] + buffer[x + 1][y][z + 1] + buffer[x][y + 1][z + 1] + buffer[x + 1][y + 1][z + 1];
+   T AverageAroundGivenIndices( T const ( &buffer )[CC::TCX()][CC::TCY()][CC::TCZ()], unsigned int const x, unsigned int const y, unsigned int const z ) {
+      return buffer[x][y][z] + buffer[x + 1][y][z] + buffer[x][y + 1][z] + buffer[x + 1][y + 1][z] + buffer[x][y][z + 1] + buffer[x + 1][y][z + 1] + buffer[x][y + 1][z + 1] + buffer[x + 1][y + 1][z + 1];
    }
 
    /**
@@ -248,11 +248,11 @@ namespace {
     * @tparam buffer value type.
     */
    template<class T>
-   void VerifyAveragedFluidValues( T const (&parent_values)[CC::TCX()][CC::TCY()][CC::TCZ()], T const (&child0_values)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                    T const (&child1_values)[CC::TCX()][CC::TCY()][CC::TCZ()], T const (&child2_values)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                    T const (&child3_values)[CC::TCX()][CC::TCY()][CC::TCZ()], T const (&child4_values)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                    T const (&child5_values)[CC::TCX()][CC::TCY()][CC::TCZ()], T const (&child6_values)[CC::TCX()][CC::TCY()][CC::TCZ()],
-                                    T const (&child7_values)[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
+   void VerifyAveragedMaterialValues( T const ( &parent_values )[CC::TCX()][CC::TCY()][CC::TCZ()], T const ( &child0_values )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                      T const ( &child1_values )[CC::TCX()][CC::TCY()][CC::TCZ()], T const ( &child2_values )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                      T const ( &child3_values )[CC::TCX()][CC::TCY()][CC::TCZ()], T const ( &child4_values )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                      T const ( &child5_values )[CC::TCX()][CC::TCY()][CC::TCZ()], T const ( &child6_values )[CC::TCX()][CC::TCY()][CC::TCZ()],
+                                      T const ( &child7_values )[CC::TCX()][CC::TCY()][CC::TCZ()] ) {
 
       unsigned int const x_child_start = CC::FICX();
       unsigned int const y_child_start = CC::FICY();
@@ -264,13 +264,13 @@ namespace {
          for( unsigned y = CC::FICY(); y < CC::FICY() + CC::ICY() / 2; y++ ) {
             unsigned int z_child = z_child_start;
             for( unsigned z = CC::FICZ(); z < CC::FICZ() + CC::ICZ() / 2; z++ ) {
-               REQUIRE( 8 * parent_values[x                ][y                ][z                ] == Approx( AverageAroundGivenIndices( child0_values, x_child, y_child, z_child ) ) );
-               REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y                ][z                ] == Approx( AverageAroundGivenIndices( child1_values, x_child, y_child, z_child ) ) );
-               REQUIRE( 8 * parent_values[x                ][y + CC::ICY() / 2][z                ] == Approx( AverageAroundGivenIndices( child2_values, x_child, y_child, z_child ) ) );
-               REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y + CC::ICY() / 2][z                ] == Approx( AverageAroundGivenIndices( child3_values, x_child, y_child, z_child ) ) );
-               REQUIRE( 8 * parent_values[x                ][y                ][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child4_values, x_child, y_child, z_child ) ) );
-               REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y                ][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child5_values, x_child, y_child, z_child ) ) );
-               REQUIRE( 8 * parent_values[x                ][y + CC::ICY() / 2][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child6_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x][y][z] == Approx( AverageAroundGivenIndices( child0_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y][z] == Approx( AverageAroundGivenIndices( child1_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x][y + CC::ICY() / 2][z] == Approx( AverageAroundGivenIndices( child2_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y + CC::ICY() / 2][z] == Approx( AverageAroundGivenIndices( child3_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x][y][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child4_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child5_values, x_child, y_child, z_child ) ) );
+               REQUIRE( 8 * parent_values[x][y + CC::ICY() / 2][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child6_values, x_child, y_child, z_child ) ) );
                REQUIRE( 8 * parent_values[x + CC::ICX() / 2][y + CC::ICY() / 2][z + CC::ICZ() / 2] == Approx( AverageAroundGivenIndices( child7_values, x_child, y_child, z_child ) ) );
                z_child += 2;
             }
@@ -279,42 +279,41 @@ namespace {
          x_child += 2;
       }
    }
-}
+}// namespace
 
-SCENARIO( "Averaging on a simple topology", "[1rank],[2rank]" ) {
-   GIVEN( "A topology and a corresponding tree with one parent on level zero and its eight children holding just one fluid" ) {
+SCENARIO( "Averaging material data yields correct results on a simple topology", "[1rank],[2rank]" ) {
+   GIVEN( "A topology and a corresponding tree with one parent on level zero and its eight children holding just one material" ) {
       constexpr unsigned int maximum_level = 1;
-      constexpr MaterialName material = MaterialName::StiffenedGas;
-      TopologyManager topology = TopologyManager( maximum_level );
+      constexpr MaterialName material      = MaterialName::MaterialOne;
+      int const my_rank                    = MpiUtilities::MyRankId();
+      TopologyManager topology             = TopologyManager( { 1, 1, 1 }, maximum_level, 0 );
       topology.UpdateTopology();
 
-
       Tree tree = Tree( topology, maximum_level, 1.0 );
-      int const my_rank = MpiUtilities::MyRankId();
       if( topology.NodeIsOnRank( root_id, my_rank ) ) {
-         tree.CreateNode( root_id, {material} );
+         tree.CreateNode( root_id, { material } );
       }
 
       topology.RefineNodeWithId( root_id );
       topology.UpdateTopology();
       AddMaterialToAllNodesInOneParentEightChildrenTopologyAndUpdate( topology, material );
 
-      for( auto const id : topology.LocalLeafIds() ){
-         tree.CreateNode( id, {material} );
+      for( auto const id : topology.LocalLeafIds() ) {
+         tree.CreateNode( id, { material } );
       }
 
-      WHEN( "Fluid values are set differently between children and parent and averaged into parent" ) {
+      WHEN( "Material values are set differently between children and parent and averaged into parent" ) {
          if( topology.NodeIsOnRank( root_id, my_rank ) ) { FillNodesRightHandSideEquationBuffersWithValue( tree.GetNodeWithId( root_id ), 42.0 ); }
-         if( topology.NodeIsOnRank( child_ids[1], my_rank ) ) { FillNodesRightHandSideEquationBuffersWithValue( tree.GetNodeWithId( child_ids[1] ),  1.0 ); }
-         if( topology.NodeIsOnRank( child_ids[2], my_rank ) ) { FillNodesRightHandSideEquationBuffersWithValue( tree.GetNodeWithId( child_ids[2] ),  2.0 ); }
+         if( topology.NodeIsOnRank( child_ids[1], my_rank ) ) { FillNodesRightHandSideEquationBuffersWithValue( tree.GetNodeWithId( child_ids[1] ), 1.0 ); }
+         if( topology.NodeIsOnRank( child_ids[2], my_rank ) ) { FillNodesRightHandSideEquationBuffersWithValue( tree.GetNodeWithId( child_ids[2] ), 2.0 ); }
          if( topology.NodeIsOnRank( child_ids[7], my_rank ) ) { FillNodesRightHandSideEquationBuffersWithValue( tree.GetNodeWithId( child_ids[7] ), -3.0 ); }
          if( topology.NodeIsOnRank( child_ids[5], my_rank ) ) { FillNodesRightHandSideEquationBuffersWithArbitraryValues( tree.GetNodeWithId( child_ids[5] ) ); }
 
          CommunicationManager communicator( topology, maximum_level );
          Averager averager( topology, communicator, tree );
-         averager.AverageFluid( {maximum_level} );
+         averager.AverageMaterial( { maximum_level } );
 
-         THEN( "Fluid averages in the parent are according to child values" ) {
+         THEN( "Material averages in the parent are according to child values" ) {
             double empty_buffer[CC::TCX()][CC::TCY()][CC::TCZ()];
             double one_buffer[CC::TCX()][CC::TCY()][CC::TCZ()];
             double two_buffer[CC::TCX()][CC::TCY()][CC::TCZ()];
@@ -326,16 +325,16 @@ SCENARIO( "Averaging on a simple topology", "[1rank],[2rank]" ) {
             FillThreeDimensionalBufferWithValue( negative_three_buffer, -3.0 );
             FillThreeDimensionalBufferWithArbitratyValues( arbitrary_buffer );
             if( topology.NodeIsOnRank( root_id, my_rank ) ) {
-               for( auto const eq : FF::ASOE() ) {
-                  VerifyAveragedFluidValues( tree.GetNodeWithId( root_id ).GetSinglePhase().GetRightHandSideBuffer( eq ), empty_buffer, one_buffer,
-                                              two_buffer, empty_buffer, empty_buffer, arbitrary_buffer, empty_buffer, negative_three_buffer );
+               for( auto const eq : MF::ASOE() ) {
+                  VerifyAveragedMaterialValues( tree.GetNodeWithId( root_id ).GetSinglePhase().GetRightHandSideBuffer( eq ), empty_buffer, one_buffer,
+                                                two_buffer, empty_buffer, empty_buffer, arbitrary_buffer, empty_buffer, negative_three_buffer );
                }
             }
          }
       }
 
       WHEN( "Corner interfaces tags in children are cut cells, the rest bulk and an average is created" ) {
-         if( topology.NodeIsOnRank( root_id, my_rank ) )   { SetNodesInterfaceTags( tree.GetNodeWithId( root_id ), IT::BulkPhase ); }
+         if( topology.NodeIsOnRank( root_id, my_rank ) ) { SetNodesInterfaceTags( tree.GetNodeWithId( root_id ), IT::BulkPhase ); }
          if( topology.NodeIsOnRank( child_ids[0], my_rank ) ) { SetNodesInterfaceTags( tree.GetNodeWithId( child_ids[0] ), IT::BulkPhase ); }
          if( topology.NodeIsOnRank( child_ids[7], my_rank ) ) { SetNodesInterfaceTags( tree.GetNodeWithId( child_ids[7] ), IT::BulkPhase ); }
          if( topology.NodeIsOnRank( child_ids[0], my_rank ) ) { SetCornerTagsToValue( tree.GetNodeWithId( child_ids[0] ), IT::NewCutCell ); }
@@ -345,13 +344,13 @@ SCENARIO( "Averaging on a simple topology", "[1rank],[2rank]" ) {
          Averager averager( topology, communicator, tree );
 
          THEN( "The parent interface tags remain all bulk given a single-phase topology when averaged" ) {
-            averager.AverageInterfaceTags( {maximum_level} );
+            averager.AverageInterfaceTags( { maximum_level } );
             if( topology.NodeIsOnRank( root_id, my_rank ) ) { VerifyHomogenousBulkTags( tree.GetNodeWithId( root_id ) ); }
          }
 
          THEN( "The cut cells are propagated down into the parent on a (faked) multi-phase topology when averaged" ) {
             AddMaterialToAllNodesInOneParentEightChildrenTopologyAndUpdate( topology, material );
-            averager.AverageInterfaceTags( {maximum_level} );
+            averager.AverageInterfaceTags( { maximum_level } );
             if( topology.NodeIsOnRank( root_id, my_rank ) ) { VerifyCornerTagsAveragedIntoParent( tree.GetNodeWithId( root_id ) ); }
          }
       }

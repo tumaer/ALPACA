@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef DIMENSION_DEFINITION_H
@@ -70,15 +71,18 @@
 
 #include <type_traits>
 
-//ATTENTION: it is absolutely neccesary to keep 1D = 1, 2D = 2 and 3D = 3. Otherwise, the code will break. If additional Dimension types are required, please append them.
-//NH: NEVER EVER change the underlying type.
 /**
  * @brief Identifier for the dimensions to be simulated, i.e. one-dimensional, two-dimensional or three-dimensional.
+ *
+ * @note It is absolutely neccesary to keep 1D = 1, 2D = 2 and 3D = 3. Otherwise, the code will break. If additional Dimension types are required, please append them.
+ *       NEVER EVER change the underlying type.
  */
-enum class Dimension : unsigned int { One = 1, Two = 2, Three = 3 };
+enum class Dimension : unsigned int { One   = 1,
+                                      Two   = 2,
+                                      Three = 3 };
 
 /**
- * @brief Converts a dimension identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Dimension to Index"
+ * @brief Converts a dimension identifier to a (C++11 standard compliant, i. e. positive) array index. "DTI = Dimension To Index".
  * @param d The dimension identifier.
  * @return Index to be used in Arrays.
  */
@@ -86,4 +90,4 @@ constexpr std::underlying_type<Dimension>::type DTI( Dimension const d ) {
    return static_cast<typename std::underlying_type<Dimension>::type>( d );
 }
 
-#endif // DIMENSION_DEFINITION_H
+#endif// DIMENSION_DEFINITION_H

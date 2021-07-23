@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef SOURCE_TERM_SOLVER_H
@@ -75,7 +76,7 @@
 #include "solvers/source_term_contributions/axisymmetric_viscous_volume_forces.h"
 #include "solvers/source_term_contributions/gravitational_force.h"
 #include "solvers/source_term_contributions/heat_fluxes.h"
-#include "block.h"
+#include "block_definitions/block.h"
 #include "materials/material_manager.h"
 #include "user_specifications/compile_time_constants.h"
 
@@ -92,18 +93,18 @@ class SourceTermSolver {
 
 public:
    SourceTermSolver() = delete;
-   explicit SourceTermSolver( MaterialManager const& material_manager, std::array<double,3> const gravity );
-   ~SourceTermSolver() = default;
+   explicit SourceTermSolver( MaterialManager const& material_manager, std::array<double, 3> const gravity );
+   ~SourceTermSolver()                         = default;
    SourceTermSolver( SourceTermSolver const& ) = delete;
    SourceTermSolver& operator=( SourceTermSolver const& ) = delete;
-   SourceTermSolver( SourceTermSolver&& ) = delete;
+   SourceTermSolver( SourceTermSolver&& )                 = delete;
    SourceTermSolver& operator=( SourceTermSolver&& ) = delete;
 
-   void Sources( std::pair<const MaterialName, Block> const& mat_block, double const cell_size, double const x_block_coordinate,
-      double (&face_fluxes_x)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_y)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&face_fluxes_z)[FF::ANOE()][CC::ICX()+1][CC::ICY()+1][CC::ICZ()+1],
-      double (&volume_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
+   void Sources( std::pair<MaterialName const, Block> const& mat_block, double const cell_size, double const node_origin_x,
+                 double ( &face_fluxes_x )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                 double ( &face_fluxes_y )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                 double ( &face_fluxes_z )[MF::ANOE()][CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1],
+                 double ( &volume_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 };
 
-#endif // SOURCE_TERM_SOLVER_H
+#endif// SOURCE_TERM_SOLVER_H

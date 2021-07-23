@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,7 +63,7 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #include <mpi.h>
@@ -71,10 +72,10 @@
 
 long CommunicationStatistics::no_jump_halos_recv_ = 0;
 long CommunicationStatistics::no_jump_halos_send_ = 0;
-long CommunicationStatistics::jump_halos_recv_ = 0;
-long CommunicationStatistics::jump_halos_send_ = 0;
-long CommunicationStatistics::balance_send_ = 0;
-long CommunicationStatistics::balance_recv_ = 0;
+long CommunicationStatistics::jump_halos_recv_    = 0;
+long CommunicationStatistics::jump_halos_send_    = 0;
+long CommunicationStatistics::balance_send_       = 0;
+long CommunicationStatistics::balance_recv_       = 0;
 long CommunicationStatistics::average_level_send_ = 0;
 long CommunicationStatistics::average_level_recv_ = 0;
 
@@ -86,7 +87,7 @@ std::string SummedCommunicationStatisticsString() {
 
    //Logging Stats
    std::string statistics;
-   statistics.append( " Ranks: " + std::to_string(MpiUtilities::NumberOfRanks()) + " | " );
+   statistics.append( " Ranks: " + std::to_string( MpiUtilities::NumberOfRanks() ) + " | " );
 
    long global_statistic;
    MPI_Allreduce( &CommunicationStatistics::balance_send_, &global_statistic, 1, MPI_LONG, MPI_SUM, MPI_COMM_WORLD );

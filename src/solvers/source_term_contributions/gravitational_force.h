@@ -53,6 +53,7 @@
 * 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
 * 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
 * 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
+* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
@@ -62,13 +63,13 @@
 *                                                                                        *
 ******************************************************************************************
 *                                                                                        *
-* Munich, July 1st, 2020                                                                 *
+* Munich, February 10th, 2021                                                            *
 *                                                                                        *
 *****************************************************************************************/
 #ifndef GRAVITATIONAL_FORCE_H
 #define GRAVITATIONAL_FORCE_H
 
-#include "block.h"
+#include "block_definitions/block.h"
 
 /**
  * This class calculates the gravitational forces and adds them to a buffer.
@@ -81,14 +82,13 @@ private:
 public:
    GravitationalForce() = delete;
    explicit GravitationalForce( std::array<double, 3> const gravity );
-   ~GravitationalForce() = default;
+   ~GravitationalForce()                           = default;
    GravitationalForce( GravitationalForce const& ) = delete;
-   GravitationalForce( GravitationalForce&& ) = delete;
+   GravitationalForce( GravitationalForce&& )      = delete;
    GravitationalForce& operator=( GravitationalForce const& ) = delete;
    GravitationalForce& operator=( GravitationalForce&& ) = delete;
 
-   void ComputeForces( Block const& block, double (&gravity_forces)[FF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()]) const;
-
+   void ComputeForces( Block const& block, double ( &gravity_forces )[MF::ANOE()][CC::ICX()][CC::ICY()][CC::ICZ()] ) const;
 };
 
-#endif //GRAVITATIONAL_FORCE_H
+#endif//GRAVITATIONAL_FORCE_H
