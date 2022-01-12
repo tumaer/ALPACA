@@ -68,9 +68,6 @@
 *****************************************************************************************/
 #include <mpi.h>
 #include <fenv.h> // Floating-Point raising exceptions.
-#ifdef __APPLE__
-#include <xmmintrin.h>
-#endif
 
 #include "instantiation/input_output/instantiation_input_reader.h"
 #include "input_output/log_writer/log_writer.h"
@@ -87,13 +84,7 @@ namespace Alpaca {
       MPI_Init( NULL, NULL );
       //Triggers signals on floating point errors, i.e. prohibits quiet NaNs and alike
 #ifndef PERFORMANCE
-#ifdef __linux__
       feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
-#endif
-#ifdef __APPLE__
-      _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID);
-#endif
-#endif
 
       //NH Seperate Scope for MPI.
       {

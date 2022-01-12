@@ -69,10 +69,7 @@
 #include "input_output/input_output_manager.h"
 #include <mpi.h>
 #include <filesystem>
-#include <fenv.h>// Floating-Point raising exceptions.
-#ifdef __APPLE__
-#include <xmmintrin.h>
-#endif
+#include <fenv_wrapper.h>// Floating-Point raising exceptions.
 
 #include "instantiation/input_output/instantiation_input_reader.h"
 #include "instantiation/input_output/instantiation_log_writer.h"
@@ -91,12 +88,7 @@ int main( int argc, char* argv[] ) {
 
    MPI_Init( &argc, &argv );
    //Triggers signals on floating point errors, i.e. prohibits quiet NaNs and alike
-#ifdef __linux__
    feenableexcept( FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
-#endif
-#ifdef __APPLE__
-   _MM_SET_EXCEPTION_MASK( _MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID );
-#endif
 
    //NH separate scope for MPI.
    {

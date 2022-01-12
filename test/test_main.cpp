@@ -68,9 +68,6 @@
 #define APPROVALS_CATCH_EXISTING_MAIN
 #include <ApprovalTests.hpp>
 #include <mpi.h>
-#ifdef __APPLE__
-#include <xmmintrin.h>
-#endif
 #include <tuple>
 #include <vector>
 #include <regex>
