@@ -1,0 +1,48 @@
+cff-version: 1.2.0
+title: ALPACA - Adaptive Level-set PArallel Code Alpaca
+message: >-
+  Please cite this software using the metadata from 'preferred-citation'.
+type: software
+license: GPL-3.0
+authors: >-
+  See respective AUTHORS file
+repository-code: 'https://gitlab.lrz.de/nanoshock/ALPACA'
+keywords:
+  - compressible flow
+  - multiresolution
+  - adaptive local time stepping
+  - high-order methods
+  - level set
+  - multiphase flow
+abstract: >-
+  ALPACA is an MPI-parallelized C++ code framework to simulate compressible multiphase flow physics. It allows for advanced high-resolution sharp-interface modeling empowered with efficient multiresolution compression. The modular code structure offers a broad flexibility to select among many most-recent numerical methods covering WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-Kutta time integration schemes, level-set methods and many more.
+preferred-citation:
+  authors:
+    - family-names: Hoppe
+      given-names: Nils
+    - family-names: Adami
+      given-names: Stefan
+    - family-names: Adams
+      given-names: Nikolaus A.
+  title: A parallel modular computing environment for three-dimensional multiresolution simulations of compressible flows
+  doi: 10.1016/j.cma.2021.114486
+  year: 2022
+  authors:
+    - family-names: Hoppe
+      given-names: Nils
+    - family-names: Winter
+      given-names: Josef M.
+    - family-names: Adami
+      given-names: Stefan
+    - family-names: Adams
+      given-names: Nikolaus A.
+  title: ALPACA - a level-set based sharp-interface multiresolution solver for conservation laws
+  doi: 10.1016/j.cpc.2021.108246
+  year: 2022
+identifiers:
+  - type: doi
+    value: 10.14459/2022mp1647482
+    description: Concept DOI
+  - type: doi
+    value: 10.14459/2022mp1647482.001
+    description: Current Version DOI

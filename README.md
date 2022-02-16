@@ -8,22 +8,40 @@ l '>
 ||    ||
 ''    ''
 ```
-*ALPACA* is a MPI-parallelized C++ code framework to simulate compressible multiphase flow physics. It allows for advanced high-resolution sharp-interface modeling empowered with efficient multiresolution compression. The modular code structure offers a broad flexibility to select among many most-recent numerical methods covering WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-Kutta time integration schemes, level-set methods and many more.
+*ALPACA* is an MPI-parallelized C++ code framework to simulate compressible multiphase flow physics. It allows for advanced high-resolution sharp-interface modeling empowered with efficient multiresolution compression. The modular code structure offers a broad flexibility to select among many most-recent numerical methods covering WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-Kutta time integration schemes, level-set methods and many more.
 
 # Terms of usage
 
-*ALPACA* is free software (GNU GPLv3), see the [LICENSE file](LICENSE) and/or sourcefile header in the repository. If you use *ALPACA*, please cite the following paper:
-
+*ALPACA* is free software (GNU GPLv3), see the [LICENSE file](LICENSE). Note *ALPACA* relies on third party libraries published under differing open-source licences. See the respecive submodules for details. If you use *ALPACA*, please cite [our paper](https://doi.org/10.1016/j.cma.2021.114486):
 ```
-@article{Hoppe2020,
-title = "A modular massively parallel computing environment for three-dimensional multiresolution simulations of compressible flows", 
-author = "Nils Hoppe and Stefan Adami and Nikolaus A. Adams",
-year = "2020",
-eprint = "2012.04385",
-archivePrefix = "arXiv",
-primaryClass = "physics.comp-ph"
+@article{Hoppe2022,
+title = {A parallel modular computing environment for three-dimensional multiresolution simulations of compressible flows},
+journal = {Computer Methods in Applied Mechanics and Engineering},
+volume = {391},
+pages = {114486},
+year = {2022},
+issn = {0045-7825},
+doi = {10.1016/j.cma.2021.114486},
+author = {Nils Hoppe and Stefan Adami and Nikolaus A. Adams},
 }
 ```
+if you conduct multiphase simulations, please also cite [our paper on the level set features](https://doi.org/10.1016/j.cpc.2021.108246) of *ALPACA*:
+```
+@article{HoppeWinter2022,
+title = {ALPACA - a level-set based sharp-interface multiresolution solver for conservation laws},
+journal = {Computer Physics Communications},
+volume = {272},
+pages = {108246},
+year = {2022},
+issn = {0010-4655},
+doi = {10.1016/j.cpc.2021.108246},
+author = {Nils Hoppe and Josef M. Winter and Stefan Adami and Nikolaus A. Adams},
+}
+```
+
+# Releases
+
+This git repository provides rolling updates. Major releases are also versioned and archived. The current relase is found [here](http://doi.org/10.14459/2022mp1647482)
 
 # First steps
 To get started with *ALPACA*, please obtain a copy of the repository.
@@ -153,12 +171,7 @@ The [wiki pages](../../wikis) contain introductory information on [installation 
 
 # Collaborations
 
-We are highly interested in fruitful collaborations and hope to provide a
-useful tool to other research groups and interested scientists. If you are
-working with *ALPACA*, we highly appreciate your comments and experiences to
-improve the code. If you work on new features, please feel free to
-[contact us](mailto:nanoshock@aer.mw.tum.de?subject=Interest%20on%20collaboration)
-to avoid redundant developments.
+We are highly interested in fruitful collaborations and hope to provide a useful tool to other research groups and interested scientists. If you are working with *ALPACA*, we highly appreciate your comments and experiences to improve the code. If you work on new features, please feel free to [contact us](mailto:nanoshock.aer@ed.tum.de?subject=Interest%20on%20collaboration) to avoid redundant developments.
 
 # Q&A
 
