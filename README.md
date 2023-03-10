@@ -1,6 +1,11 @@
 # ALPACA
 
-## About
+[![Supported Platforms](https://img.shields.io/badge/platforms-linux%20|%20osx-blue)](https://warpx.readthedocs.io/en/latest/install/users.html)
+[![Language: C++17](https://img.shields.io/badge/language-C%2B%2B17-orange.svg)](https://isocpp.org/)
+[![Language: Python](https://img.shields.io/badge/language-Python-orange.svg)](https://python.org/)
+[![License ALPACA](https://img.shields.io/badge/license-GPL--3-blue)](https://spdx.org/licenses/GPL-3.0-only.html)
+
+## Overview
 
 *ALPACA* is an MPI-parallelized C++ code framework to simulate compressible multiphase flow physics. It allows for advanced high-resolution sharp-interface modeling empowered with efficient multiresolution compression. The modular code structure offers a broad flexibility to select among many most-recent numerical methods covering WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-Kutta time integration schemes, level-set methods and many more.
 
