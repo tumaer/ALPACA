@@ -14,8 +14,6 @@ keywords:
   - high-order methods
   - level set
   - multiphase flow
-abstract: >-
-  ALPACA is an MPI-parallelized C++ code framework to simulate compressible multiphase flow physics. It allows for advanced high-resolution sharp-interface modeling empowered with efficient multiresolution compression. The modular code structure offers a broad flexibility to select among many most-recent numerical methods covering WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-Kutta time integration schemes, level-set methods and many more.
 preferred-citation:
   authors:
     - family-names: Hoppe
@@ -27,6 +25,7 @@ preferred-citation:
   title: A parallel modular computing environment for three-dimensional multiresolution simulations of compressible flows
   doi: 10.1016/j.cma.2021.114486
   year: 2022
+levelset-citation:
   authors:
     - family-names: Hoppe
       given-names: Nils
