@@ -13,4 +13,4 @@ jobs:
       with:
         source: 'src'
         style: 'llvm'
-        clangFormatVersion: 14
+        clangFormatVersion: 11
