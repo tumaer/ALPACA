@@ -1,0 +1,16 @@
+name: Clang-Format
+
+on: [push]
+
+jobs:
+  build:
+    name: Format
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: DoozyX/clang-format-lint-action@v0.11
+      with:
+        source: 'src'
+        style: 'llvm'
+        clangFormatVersion: 14
