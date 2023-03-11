@@ -51,7 +51,7 @@ For further instructions, first steps, and API documentation, please consult the
 
 ## Academic Usage
 
-If you use *ALPACA* in an academic setting, please cite [our papers](./CITATION.cff).
+If you use *ALPACA* in an academic setting, please cite [our papers](./CITATION.bib).
 
 ## Acknowledgments
 
