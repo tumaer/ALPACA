@@ -1,241 +1,244 @@
-/*****************************************************************************************
-*                                                                                        *
-* This file is part of ALPACA                                                            *
-*                                                                                        *
-******************************************************************************************
-*                                                                                        *
-*  \\                                                                                    *
-*  l '>                                                                                  *
-*  | |                                                                                   *
-*  | |                                                                                   *
-*  | alpaca~                                                                             *
-*  ||    ||                                                                              *
-*  ''    ''                                                                              *
-*                                                                                        *
-* ALPACA is a MPI-parallelized C++ code framework to simulate compressible multiphase    *
-* flow physics. It allows for advanced high-resolution sharp-interface modeling          *
-* empowered with efficient multiresolution compression. The modular code structure       *
-* offers a broad flexibility to select among many most-recent numerical methods covering *
-* WENO/T-ENO, Riemann solvers (complete/incomplete), strong-stability preserving Runge-  *
-* Kutta time integration schemes, level set methods and many more.                       *
-*                                                                                        *
-* This code is developed by the 'Nanoshock group' at the Chair of Aerodynamics and       *
-* Fluid Mechanics, Technical University of Munich.                                       *
-*                                                                                        *
-******************************************************************************************
-*                                                                                        *
-* LICENSE                                                                                *
-*                                                                                        *
-* ALPACA - Adaptive Level-set PArallel Code Alpaca                                       *
-* Copyright (C) 2020 Nikolaus A. Adams and contributors (see AUTHORS list)               *
-*                                                                                        *
-* This program is free software: you can redistribute it and/or modify it under          *
-* the terms of the GNU General Public License as published by the Free Software          *
-* Foundation version 3.                                                                  *
-*                                                                                        *
-* This program is distributed in the hope that it will be useful, but WITHOUT ANY        *
-* WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A        *
-* PARTICULAR PURPOSE. See the GNU General Public License for more details.               *
-*                                                                                        *
-* You should have received a copy of the GNU General Public License along with           *
-* this program (gpl-3.0.txt).  If not, see <https://www.gnu.org/licenses/gpl-3.0.html>   *
-*                                                                                        *
-******************************************************************************************
-*                                                                                        *
-* THIRD-PARTY tools                                                                      *
-*                                                                                        *
-* Please note, several third-party tools are used by ALPACA. These tools are not shipped *
-* with ALPACA but available as git submodule (directing to their own repositories).      *
-* All used third-party tools are released under open-source licences, see their own      *
-* license agreement in 3rdParty/ for further details.                                    *
-*                                                                                        *
-* 1. tiny_xml           : See LICENSE_TINY_XML.txt for more information.                 *
-* 2. expression_toolkit : See LICENSE_EXPRESSION_TOOLKIT.txt for more information.       *
-* 3. FakeIt             : See LICENSE_FAKEIT.txt for more information                    *
-* 4. Catch2             : See LICENSE_CATCH2.txt for more information                    *
-* 5. ApprovalTests.cpp  : See LICENSE_APPROVAL_TESTS.txt for more information            *
-*                                                                                        *
-******************************************************************************************
-*                                                                                        *
-* CONTACT                                                                                *
-*                                                                                        *
-* nanoshock@aer.mw.tum.de                                                                *
-*                                                                                        *
-******************************************************************************************
-*                                                                                        *
-* Munich, February 10th, 2021                                                            *
-*                                                                                        *
-*****************************************************************************************/
+//===---------------------- eigendecomposition.h --------------------------===//
+//
+//                                 ALPACA
+//
+// Part of ALPACA, under the GNU General Public License as published by
+// the Free Software Foundation version 3.
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// If using this code in an academic setting, please cite the following:
+// @article{hoppe2022parallel,
+//  title={A parallel modular computing environment for three-dimensional
+//  multiresolution simulations of compressible flows},
+//  author={Hoppe, Nils and Adami, Stefan and Adams, Nikolaus A},
+//  journal={Computer Methods in Applied Mechanics and Engineering},
+//  volume={391},
+//  pages={114486},
+//  year={2022},
+//  publisher={Elsevier}
+// }
+//
+//===----------------------------------------------------------------------===//
 #ifndef EIGENVALUE_CALCULATOR_H
 #define EIGENVALUE_CALCULATOR_H
 
-#include <cmath>
 #include "utilities/mathematical_functions.h"
+#include <cmath>
 
-#include "materials/material_manager.h"
 #include "block_definitions/block.h"
+#include "enums/direction_definition.h"
+#include "materials/material_manager.h"
 #include "user_specifications/compile_time_constants.h"
 #include "user_specifications/riemann_solver_settings.h"
-#include "enums/direction_definition.h"
 
 /**
- * @brief The RoeEigenvalues class computes Roe eigenvalues and eigenvectors within one block. For further information consult
- *        \cite Roe1981.
- *        For characteristic decomposition, especially the eigenvectors used here, consult \cite Fedkiw1999a.
+ * @brief The RoeEigenvalues class computes Roe eigenvalues and eigenvectors
+ * within one block. For further information consult \cite Roe1981. For
+ * characteristic decomposition, especially the eigenvectors used here, consult
+ * \cite Fedkiw1999a.
  */
 class EigenDecomposition {
 
-   MaterialManager const& material_manager_;
+  MaterialManager const &material_manager_;
 
-   // Using static to cheat constness (for this global variable okay - don't do this at home (we are what you a call Experts) ;)
-   static double global_eigenvalues_[DTI( CC::DIM() )][MF::ANOE()];
+  // Using static to cheat constness (for this global variable okay - don't do
+  // this at home (we are what you a call Experts) ;)
+  static double global_eigenvalues_[DTI(CC::DIM())][MF::ANOE()];
 
 public:
-   EigenDecomposition() = delete;
-   explicit EigenDecomposition( MaterialManager const& material_manager );
-   ~EigenDecomposition()                           = default;
-   EigenDecomposition( EigenDecomposition const& ) = delete;
-   EigenDecomposition& operator=( EigenDecomposition const& ) = delete;
-   EigenDecomposition( EigenDecomposition&& )                 = delete;
-   EigenDecomposition& operator=( EigenDecomposition&& ) = delete;
+  EigenDecomposition() = delete;
+  explicit EigenDecomposition(MaterialManager const &material_manager);
+  ~EigenDecomposition() = default;
+  EigenDecomposition(EigenDecomposition const &) = delete;
+  EigenDecomposition &operator=(EigenDecomposition const &) = delete;
+  EigenDecomposition(EigenDecomposition &&) = delete;
+  EigenDecomposition &operator=(EigenDecomposition &&) = delete;
 
-   template<Direction DIR>
-   void ComputeRoeEigendecomposition( std::pair<MaterialName const, Block> const& mat_block,
-                                      double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                                      double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                                      double ( &fluxfunction_eigenvalues )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const;
+  template <Direction DIR>
+  void ComputeRoeEigendecomposition(
+      std::pair<MaterialName const, Block> const &mat_block,
+      double (&roe_eigenvectors_left)[CC::ICX() + 1][CC::ICY() + 1]
+                                     [CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+      double (&roe_eigenvectors_right)[CC::ICX() + 1][CC::ICY() + 1]
+                                      [CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+      double (&fluxfunction_eigenvalues)[CC::ICX() + 1][CC::ICY() + 1]
+                                        [CC::ICZ() + 1][MF::ANOE()]) const;
 
-   void ComputeMaxEigenvaluesOnBlock( std::pair<MaterialName const, Block> const& mat_block, double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
-   void SetGlobalEigenvalues( double ( &eigenvalues )[DTI( CC::DIM() )][MF::ANOE()] ) const;
-   auto GetGlobalEigenvalues() const -> double const ( & )[DTI( CC::DIM() )][MF::ANOE()];
+  void ComputeMaxEigenvaluesOnBlock(
+      std::pair<MaterialName const, Block> const &mat_block,
+      double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const;
+  void
+  SetGlobalEigenvalues(double (&eigenvalues)[DTI(CC::DIM())][MF::ANOE()]) const;
+  auto GetGlobalEigenvalues() const
+      -> double const (&)[DTI(CC::DIM())][MF::ANOE()];
 };
 
 namespace {
-   /**
-    * @brief Save the wavespeeds in the fluxfunction_eigenvalues buffer.
-    * Taking care of num-of-eq and multiple material waves for higher dimensions.
-    * @param eigenvalues (indirect return parameter) .
-    * @param u_minus_c .
-    * @param u .
-    * @param u_plus_c .
-    */
-   inline void SaveForAllFields( double ( &eigenvalues )[MF::ANOE()], double const u_minus_c, double const u, double const u_plus_c ) {
-      eigenvalues[0]              = u_minus_c;
-      eigenvalues[MF::ANOE() - 1] = u_plus_c;
-      for( unsigned int l = 1; l < MF::ANOE() - 1; ++l ) {
-         eigenvalues[l] = u;
-      }
-   }
-
-   /**
-    * @brief Get the minor direction identifier for the given (template parameter) principal direction.
-    * @param minor_index 0 or 1 for the first or second minor direction, respectively.
-    * @tparam The principal direction.
-    * @return Direction identifier.
-    */
-   template<Direction>
-   constexpr Direction GetMinorDirection( unsigned int const minor_index );
-
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   constexpr Direction GetMinorDirection<Direction::X>( unsigned int const minor_index ) {
-      constexpr std::array<Direction, 2> minor_directions = { Direction::Y, Direction::Z };
-      return minor_directions[minor_index];
-   }
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   constexpr Direction GetMinorDirection<Direction::Y>( unsigned int const minor_index ) {
-      constexpr std::array<Direction, 2> minor_directions = { Direction::X, Direction::Z };
-      return minor_directions[minor_index];
-   }
-   /**
-    * @brief See generic implementation.
-    */
-   template<>
-   constexpr Direction GetMinorDirection<Direction::Z>( unsigned int const minor_index ) {
-      constexpr std::array<Direction, 2> minor_directions = { Direction::X, Direction::Y };
-      return minor_directions[minor_index];
-   }
-
-   /**
-    * @brief Transforms the given values from characteristic space back into physical space via the given eigenvectors.
-    *        Underlying summations are done consistently in order to preserve symmetry.
-    * @param characteristic_values Values in characteristic space.
-    * @return Values in physical space.
-    */
-   inline std::array<double, MF::ANOE()> const TransformToPhysicalSpace( std::array<double, MF::ANOE()> const& characteristic_values, double const ( &roe_eigenvectors_right )[MF::ANOE()][MF::ANOE()] ) {
-      std::array<double, MF::ANOE()> physical_values;
-
-      for( unsigned int l = 0; l < MF::ANOE(); ++l ) {
-         physical_values[l] = 0.0;
-         // sum up linear contributions
-         for( unsigned int n = 1; n < MF::ANOE() - 1; ++n ) {
-            physical_values[l] += characteristic_values[n] * roe_eigenvectors_right[l][n];
-         }// n: characteristic fields
-         // Non-linear contributions have to be added together to maintain full symmetry
-         physical_values[l] += ( characteristic_values[0] * roe_eigenvectors_right[l][0] +
-                                 characteristic_values[MF::ANOE() - 1] * roe_eigenvectors_right[l][MF::ANOE() - 1] );
-      }// l: conservatives
-
-      return physical_values;
-   }
-}// namespace
+/**
+ * @brief Save the wavespeeds in the fluxfunction_eigenvalues buffer.
+ * Taking care of num-of-eq and multiple material waves for higher dimensions.
+ * @param eigenvalues (indirect return parameter) .
+ * @param u_minus_c .
+ * @param u .
+ * @param u_plus_c .
+ */
+inline void SaveForAllFields(double (&eigenvalues)[MF::ANOE()],
+                             double const u_minus_c, double const u,
+                             double const u_plus_c) {
+  eigenvalues[0] = u_minus_c;
+  eigenvalues[MF::ANOE() - 1] = u_plus_c;
+  for (unsigned int l = 1; l < MF::ANOE() - 1; ++l) {
+    eigenvalues[l] = u;
+  }
+}
 
 /**
- * @brief Computes the Roe left and right eigenvectors and the Roe eigenvalues in x-direction according to \cite Fedkiw1999a.
- * @param mat_block The block and material information of the phase under consideration.
- * @param roe_eigenvectors_left Reference to an array which is filled with the computed eigenvectors (indirect return parameter).
- * @param roe_eigenvectors_right Reference to an array which is filled with the computed eigenvectors (indirect return parameter).
- * @param fluxfunction_eigenvalues Reference to an array which is filled with the computed eigenvalues (indirect return parameter).
+ * @brief Get the minor direction identifier for the given (template parameter)
+ * principal direction.
+ * @param minor_index 0 or 1 for the first or second minor direction,
+ * respectively.
+ * @tparam The principal direction.
+ * @return Direction identifier.
+ */
+template <Direction>
+constexpr Direction GetMinorDirection(unsigned int const minor_index);
+
+/**
+ * @brief See generic implementation.
+ */
+template <>
+constexpr Direction
+GetMinorDirection<Direction::X>(unsigned int const minor_index) {
+  constexpr std::array<Direction, 2> minor_directions = {Direction::Y,
+                                                         Direction::Z};
+  return minor_directions[minor_index];
+}
+/**
+ * @brief See generic implementation.
+ */
+template <>
+constexpr Direction
+GetMinorDirection<Direction::Y>(unsigned int const minor_index) {
+  constexpr std::array<Direction, 2> minor_directions = {Direction::X,
+                                                         Direction::Z};
+  return minor_directions[minor_index];
+}
+/**
+ * @brief See generic implementation.
+ */
+template <>
+constexpr Direction
+GetMinorDirection<Direction::Z>(unsigned int const minor_index) {
+  constexpr std::array<Direction, 2> minor_directions = {Direction::X,
+                                                         Direction::Y};
+  return minor_directions[minor_index];
+}
+
+/**
+ * @brief Transforms the given values from characteristic space back into
+ * physical space via the given eigenvectors. Underlying summations are done
+ * consistently in order to preserve symmetry.
+ * @param characteristic_values Values in characteristic space.
+ * @return Values in physical space.
+ */
+inline std::array<double, MF::ANOE()> const TransformToPhysicalSpace(
+    std::array<double, MF::ANOE()> const &characteristic_values,
+    double const (&roe_eigenvectors_right)[MF::ANOE()][MF::ANOE()]) {
+  std::array<double, MF::ANOE()> physical_values;
+
+  for (unsigned int l = 0; l < MF::ANOE(); ++l) {
+    physical_values[l] = 0.0;
+    // sum up linear contributions
+    for (unsigned int n = 1; n < MF::ANOE() - 1; ++n) {
+      physical_values[l] +=
+          characteristic_values[n] * roe_eigenvectors_right[l][n];
+    } // n: characteristic fields
+    // Non-linear contributions have to be added together to maintain full
+    // symmetry
+    physical_values[l] +=
+        (characteristic_values[0] * roe_eigenvectors_right[l][0] +
+         characteristic_values[MF::ANOE() - 1] *
+             roe_eigenvectors_right[l][MF::ANOE() - 1]);
+  } // l: conservatives
+
+  return physical_values;
+}
+} // namespace
+
+/**
+ * @brief Computes the Roe left and right eigenvectors and the Roe eigenvalues
+ * in x-direction according to \cite Fedkiw1999a.
+ * @param mat_block The block and material information of the phase under
+ * consideration.
+ * @param roe_eigenvectors_left Reference to an array which is filled with the
+ * computed eigenvectors (indirect return parameter).
+ * @param roe_eigenvectors_right Reference to an array which is filled with the
+ * computed eigenvectors (indirect return parameter).
+ * @param fluxfunction_eigenvalues Reference to an array which is filled with
+ * the computed eigenvalues (indirect return parameter).
  * @note Hotpath function.
  */
-template<Direction DIR>
-void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName const, Block> const& mat_block,
-                                                       double ( &roe_eigenvectors_left )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                                                       double ( &roe_eigenvectors_right )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
-                                                       double ( &fluxfunction_eigenvalues )[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1][MF::ANOE()] ) const {
+template <Direction DIR>
+void EigenDecomposition::ComputeRoeEigendecomposition(
+    std::pair<MaterialName const, Block> const &mat_block,
+    double (&roe_eigenvectors_left)[CC::ICX() + 1][CC::ICY() + 1][CC::ICZ() + 1]
+                                   [MF::ANOE()][MF::ANOE()],
+    double (&roe_eigenvectors_right)[CC::ICX() + 1][CC::ICY() + 1]
+                                    [CC::ICZ() + 1][MF::ANOE()][MF::ANOE()],
+    double (&fluxfunction_eigenvalues)[CC::ICX() + 1][CC::ICY() + 1]
+                                      [CC::ICZ() + 1][MF::ANOE()]) const {
 
-   constexpr int total_to_internal_offset_x = CC::FICX() - 1;
-   constexpr int total_to_internal_offset_y = CC::DIM() != Dimension::One ? int( CC::FICY() ) - 1 : -1;
-   constexpr int total_to_internal_offset_z = CC::DIM() == Dimension::Three ? int( CC::FICZ() ) - 1 : -1;
+  constexpr int total_to_internal_offset_x = CC::FICX() - 1;
+  constexpr int total_to_internal_offset_y =
+      CC::DIM() != Dimension::One ? int(CC::FICY()) - 1 : -1;
+  constexpr int total_to_internal_offset_z =
+      CC::DIM() == Dimension::Three ? int(CC::FICZ()) - 1 : -1;
 
-   constexpr unsigned int start_x = DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
-   constexpr unsigned int start_y = DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
-   constexpr unsigned int start_z = DIR == Direction::Z ? CC::FICZ() - 1 : CC::FICZ();
+  constexpr unsigned int start_x =
+      DIR == Direction::X ? CC::FICX() - 1 : CC::FICX();
+  constexpr unsigned int start_y =
+      DIR == Direction::Y ? CC::FICY() - 1 : CC::FICY();
+  constexpr unsigned int start_z =
+      DIR == Direction::Z ? CC::FICZ() - 1 : CC::FICZ();
 
-   constexpr unsigned int x_varying = DIR == Direction::X ? 1 : 0;
-   constexpr unsigned int y_varying = DIR == Direction::Y ? 1 : 0;
-   constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
+  constexpr unsigned int x_varying = DIR == Direction::X ? 1 : 0;
+  constexpr unsigned int y_varying = DIR == Direction::Y ? 1 : 0;
+  constexpr unsigned int z_varying = DIR == Direction::Z ? 1 : 0;
 
-   // indices of principal and first/second minor momentum/velocity within the three-packs MF::AME and MF::AV
-   constexpr unsigned int principal = DTI( DIR );
-   constexpr unsigned int minor1    = DTI( GetMinorDirection<DIR>( 0 ) );
-   constexpr unsigned int minor2    = DTI( GetMinorDirection<DIR>( 1 ) );
+  // indices of principal and first/second minor momentum/velocity within the
+  // three-packs MF::AME and MF::AV
+  constexpr unsigned int principal = DTI(DIR);
+  constexpr unsigned int minor1 = DTI(GetMinorDirection<DIR>(0));
+  constexpr unsigned int minor2 = DTI(GetMinorDirection<DIR>(1));
 
-   // Index of eigenvectors for characteristic fields due to principal momentum
-   constexpr unsigned int ev_principal = DTI( CC::DIM() );
+  // Index of eigenvectors for characteristic fields due to principal momentum
+  constexpr unsigned int ev_principal = DTI(CC::DIM());
 
-   // Access the pair's elements directly.
-   auto const& [material, block] = mat_block;
+  // Access the pair's elements directly.
+  auto const &[material, block] = mat_block;
 
-   // We need to use the conservative buffer for density as the prime state is only consistent (if zero) after last RK stage
-   Conservatives const& conservatives                        = block.GetAverageBuffer();
-   double const( &density )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetAverageBuffer( Equation::Mass );
-   double const( &energy )[CC::TCX()][CC::TCY()][CC::TCZ()]  = block.GetAverageBuffer( Equation::Energy );
+  // We need to use the conservative buffer for density as the prime state is
+  // only consistent (if zero) after last RK stage
+  Conservatives const &conservatives = block.GetAverageBuffer();
+  double const(&density)[CC::TCX()][CC::TCY()][CC::TCZ()] =
+      block.GetAverageBuffer(Equation::Mass);
+  double const(&energy)[CC::TCX()][CC::TCY()][CC::TCZ()] =
+      block.GetAverageBuffer(Equation::Energy);
 
-   PrimeStates const& prime_states                            = block.GetPrimeStateBuffer();
-   double const( &pressure )[CC::TCX()][CC::TCY()][CC::TCZ()] = block.GetPrimeStateBuffer( PrimeState::Pressure );
+  PrimeStates const &prime_states = block.GetPrimeStateBuffer();
+  double const(&pressure)[CC::TCX()][CC::TCY()][CC::TCZ()] =
+      block.GetPrimeStateBuffer(PrimeState::Pressure);
 
-   double const gruneisen_coefficient_material = CC::GruneisenDensityDependent() ? 0.0 : material_manager_.GetMaterial( material ).GetEquationOfState().Gruneisen();
+  double const gruneisen_coefficient_material =
+      CC::GruneisenDensityDependent() ? 0.0
+                                      : material_manager_.GetMaterial(material)
+                                            .GetEquationOfState()
+                                            .Gruneisen();
 
-   for( unsigned int i = start_x; i <= CC::LICX(); ++i ) {
-      for( unsigned int j = start_y; j <= CC::LICY(); ++j ) {
-         for( unsigned int k = start_z; k <= CC::LICZ(); ++k ) {
-            // clang-format off
+  for (unsigned int i = start_x; i <= CC::LICX(); ++i) {
+    for (unsigned int j = start_y; j <= CC::LICY(); ++j) {
+      for (unsigned int k = start_z; k <= CC::LICZ(); ++k) {
+        // clang-format off
             // Indices of neighbor cell
             unsigned int const in = i + x_varying;
             unsigned int const jn = j + y_varying;
@@ -457,10 +460,10 @@ void EigenDecomposition::ComputeRoeEigendecomposition( std::pair<MaterialName co
                }
             }
 
-            // clang-format on
-         }// k
-      }   // j
-   }      // i
+        // clang-format on
+      } // k
+    }   // j
+  }     // i
 }
 
-#endif// EIGENVALUE_CALCULATOR_H
+#endif // EIGENVALUE_CALCULATOR_H
