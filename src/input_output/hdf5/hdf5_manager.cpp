@@ -27,7 +27,8 @@
  * @brief Default constructor (private).
  * @note can only be used to create a singleton hdf5 writer.
  */
-Hdf5Manager::Hdf5Manager() { /** Empty constructor */ }
+Hdf5Manager::Hdf5Manager() { /** Empty constructor */
+}
 
 /**
  * @brief Destructor checks whether a file is still open and closes it.
