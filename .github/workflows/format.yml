@@ -1,6 +1,11 @@
 name: Clang-Format
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
 
 jobs:
   build:
