@@ -35,7 +35,35 @@ On clusters, the two are likely going to be available as module to load. Outside
 <details>
   <summary>MPI Installation Instructions</summary>
   
-  blub
+  To install and setup MPI, we have the choice of using [OpenMPI](https://www.open-mpi.org), and [MPICH](https://www.mpich.org). This instruction here is for OpenMPI, but applies equally as much for MPICH. Creating the build directory:
+
+  ```bash
+  mkdir mpi-build && export MPI_BUILD_DIR=$(PWD)/mpi-build
+  ```
+  
+  To then begin the installation of MPI, we first have to download the source:
+
+  ```bash
+  wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
+  tar -xzf openmpi-4.1.5.tar.gz && cd openmpi-4.1.5
+  ```
+
+  We then have to configure our installation, and compile the library:
+
+  ```bash
+  ./configure --prefix=$MPI_BUILD_DIR
+  make -j && make install
+  ```
+  
+  After which we are left to export the MPI directories:
+
+  ```bash
+  export PATH=$(MPI_BUILD_DIR)/bin:$PATH
+  export LD_LIBRARY_PATH=$(MPI_BUILD_DIR)/lib:$LD_LIBRARY_PATH
+  ```
+
+  > If your cluster environment comes with its own MPI library, you should **always** prefer using the system MPI library over doing a source install.
+
 </details>
 
 <details>
@@ -60,7 +88,7 @@ to build, we then invoke CMake again
 cmake --build ../alpaca-build/
 ```
 
-> We highly recommend using ``ccache`` together with CMake. To do, add the following flags to the configuration step of CMake
+> We highly recommend using ``ccache`` together with CMake. To do so, add the following flags to the configuration step of CMake:
 >
 > ```bash
 > -DCMAKE_C_COMPILER_LAUNCHER=ccache
