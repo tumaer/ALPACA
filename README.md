@@ -30,7 +30,42 @@ After which we first need to install ALPACA's dependencies, ALPACA depends on
 * MPI
 * HDF5
 
-> Further build instructions to be added.
+On clusters, the two are likely going to be available as module to load. Outside of such computing environment, we need to make sure that we have them available on our system.
+
+<details>
+  <summary>MPI Installation Instructions</summary>
+  
+  blub
+</details>
+
+<details>
+  <summary>HDF5 Installation Instructions</summary>
+  
+  blub
+</details>
+
+Having MPI & HDF5, we can then install ALPACA with
+
+```bash
+cmake -GNinja -B ../alpaca-build/ -S . \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=mpicc \
+    -DCMAKE_CXX_COMPILER=mpicxx \
+    -DHDF5_DIR=/path/to/HDF5
+```
+
+to build, we then invoke CMake again
+
+```bash
+cmake --build ../alpaca-build/
+```
+
+> We highly recommend using ``ccache`` together with CMake. To do, add the following flags to the configuration step of CMake
+>
+> ```bash
+> -DCMAKE_C_COMPILER_LAUNCHER=ccache
+> -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+> ```
 
 ### Testing
 
