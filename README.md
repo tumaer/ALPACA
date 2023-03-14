@@ -72,7 +72,8 @@ On clusters, the two are likely going to be available as module to load. Outside
   To install HDF5, we roughly follow the same outlines as the ones for the MPI installation. Creating the build directory:
 
   ```bash
-  mkdir hdf5-build && export HDF5_BUILD_DIR=$(PWD)/hdf5-build
+  mkdir hdf5-build && export HDF5_BUILD_DIR=$(pwd)/hdf5-build
+  mkdir hdf5-install && export HDF5_INSTALL_DIR=$(pwd)/hdf5-install
   ```
 
   To then begin the installation of [HDF5](https://www.hdfgroup.org/downloads/hdf5/source-code/), we have to get the source, and then unpack it:
@@ -92,15 +93,21 @@ On clusters, the two are likely going to be available as module to load. Outside
   After which we have to configure our installation, and then compile the library:
 
   ```bash
-  ./configure --prefix=$HDF5_BUILD_DIR --enable-cxx --enable-parallel --enable-unsupported
-  make -j && make install
+  cmake -GNinja -B ../hdf5-build/ -S . \
+      -DCMAKE_INSTALL_DIR=$(pwd)/../hdf5-install \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_C_COMPILER=$(pwd)/../mpi-build/bin/mpicc \
+      -DCMAKE_CXX_COMPILER=$(pwd)/../mpi-build/bin/mpic++ \
+      -DHDF5_ENABLE_PARALLEL=On \
+      -DHDF5_BUILD_CPP_LIB=On \
+      -DALLOW_UNSUPPORTED=On
   ```
-
-  And then export the path variables:
-
+  
+  To then build and install from the build directory
+  
   ```bash
-  export LD_LIBRARY_PATH=$HDF5_BUILD_DIR/include:$LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH=$HDF5_BUILD_DIR/lib:$LD_LIBRARY_PATH
+  cd $HDF5_BUILD_DIR
+  ninja && ninja install
   ```
 
 </details>
@@ -112,8 +119,7 @@ cmake -GNinja -B ../alpaca-build/ -S . \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_COMPILER=mpicc \
     -DCMAKE_CXX_COMPILER=mpicxx \
-    -DHDF5_DIR=$HDF5_BUILD_DIR \
-    -DMPI_DIR=$MPI_BUILD_DIR
+    -DHDF5_DIR=$HDF5_INSTALL_DIR/cmake
 ```
 
 to build, we then invoke CMake again
