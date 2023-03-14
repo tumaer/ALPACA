@@ -23,4 +23,4 @@ jobs:
       run: |
          cmake -GNinja -B ${{github.workspace}}/build -S . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpic++
     - name: build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
