@@ -115,7 +115,7 @@ endif( MPI_CXX_LINK_FLAGS )
 # Define the UserExpressions executable, encapsulating the expression toolkit from the rest of the program
 find_library(UserExpr NAMES UserExpressions PATHS ${CMAKE_CURRENT_BINARY_DIR})
 if(NOT UserExpr)
-   MESSAGE( STATUS "UserExpressions not found - will be build" )
+   MESSAGE( STATUS "UserExpressions not found - will be built" )
    add_library(UserExpressions STATIC src/user_expression.cpp )
    if( IPOPOSSIBLE AND NOT DBG )
       set_property(TARGET UserExpressions PROPERTY INTERPROCEDURAL_OPTIMIZATION True)

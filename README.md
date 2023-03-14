@@ -134,7 +134,7 @@ cmake --build ../alpaca-build/
 To validate the installation, we recommend running unit-tests after the completed installation. To do so
 
 ```bash
-make Paco -j 4
+ninja Paco -j 4
 ```
 
 after which we can run single-, as well as two-core tests to verify the correctness of the installation.
