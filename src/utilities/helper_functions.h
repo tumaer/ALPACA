@@ -25,6 +25,7 @@
 #include <array>
 #include <string>
 #include <unordered_map>
+#include <stdexcept>
 
 // Check existence of parameter in unordered map
 template <typename T>
