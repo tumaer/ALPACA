@@ -26,6 +26,8 @@
 #include <string>
 #include <unordered_map>
 
+#using <stdexcept>
+
 // Check existence of parameter in unordered map
 template <typename T>
 T GetCheckedParameter(std::unordered_map<std::string, T> const &parameter_map,
