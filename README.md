@@ -30,14 +30,111 @@ After which we first need to install ALPACA's dependencies, ALPACA depends on
 * MPI
 * HDF5
 
-> Further build instructions to be added.
+On clusters, the two are likely going to be available as module to load. Outside of such computing environment, we need to make sure that we have them available on our system.
+
+<details>
+  <summary>MPI Installation Instructions</summary>
+  
+  To install and setup MPI, we have the choice of using [OpenMPI](https://www.open-mpi.org), and [MPICH](https://www.mpich.org). This instruction here is for OpenMPI, but applies equally as much for MPICH. Creating the build directory:
+
+  ```bash
+  mkdir mpi-build && export MPI_BUILD_DIR=$(PWD)/mpi-build
+  ```
+  
+  To then begin the installation of MPI, we first have to download the source:
+
+  ```bash
+  wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.5.tar.gz
+  tar -xzf openmpi-4.1.5.tar.gz && cd openmpi-4.1.5
+  ```
+
+  We then have to configure our installation, and compile the library:
+
+  ```bash
+  ./configure --prefix=$MPI_BUILD_DIR
+  make -j && make install
+  ```
+  
+  After which we are left to export the MPI directories:
+
+  ```bash
+  export PATH=$MPI_BUILD_DIR/bin:$PATH
+  export LD_LIBRARY_PATH=$MPI_BUILD_DIR/lib:$LD_LIBRARY_PATH
+  ```
+
+  > If your cluster environment comes with its own MPI library, you should **always** prefer using the system MPI library over doing a source install.
+
+</details>
+
+<details>
+  <summary>HDF5 Installation Instructions</summary>
+  
+  To install HDF5, we roughly follow the same outlines as the ones for the MPI installation. Creating the build directory:
+
+  ```bash
+  mkdir hdf5-build && export HDF5_BUILD_DIR=$(PWD)/hdf5-build
+  ```
+
+  To then begin the installation of [HDF5](https://www.hdfgroup.org/downloads/hdf5/source-code/), we have to get the source, and then unpack it:
+
+  ```bash
+  wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.23/src/hdf5-1.8.23.tar.gz
+  tar -xzf hdf5-1.8.23.tar.gz && cd hdf5-1.8.23
+  ```
+
+  Set the compilers to be the MPI-compilers:
+
+  ```bash
+  export CXX=mpic++
+  export CC=mpicc
+  ```
+
+  After which we have to configure our installation, and then compile the library:
+
+  ```bash
+  ./configure --prefix=$HDF5_BUILD_DIR --enable-cxx --enable-parallel --enable-unsupported
+  make -j && make install
+  ```
+
+  And then export the path variables:
+
+  ```bash
+  export LD_LIBRARY_PATH=$HDF5_BUILD_DIR/include:$LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH=$HDF5_BUILD_DIR/lib:$LD_LIBRARY_PATH
+  ```
+
+</details>
+
+Having MPI & HDF5, we can then install ALPACA with
+
+```bash
+cmake -GNinja -B ../alpaca-build/ -S . \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER=mpicc \
+    -DCMAKE_CXX_COMPILER=mpicxx \
+    -DHDF5_DIR=$HDF5_BUILD_DIR \
+    -DMPI_DIR=$MPI_BUILD_DIR
+```
+
+to build, we then invoke CMake again
+
+```bash
+cmake --build ../alpaca-build/
+```
+
+> We highly recommend using ``ccache`` together with CMake. To do so, add the following flags to the configuration step of CMake:
+>
+> ```bash
+> -DCMAKE_C_COMPILER_LAUNCHER=ccache
+> -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+> ```
 
 ### Testing
 
 To validate the installation, we recommend running unit-tests after the completed installation. To do so
 
 ```bash
-make Paco -j 4
+ninja Paco -j 4
 ```
 
 after which we can run single-, as well as two-core tests to verify the correctness of the installation.

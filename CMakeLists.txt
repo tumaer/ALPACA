@@ -1,12 +1,13 @@
-cmake_minimum_required( VERSION 3.10 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
 set( ALPACA_ENV "$ENV{ALPACA_ENVIRONMENT}" )
 # Set the compilers to be used to build the targets.
 # Note, this has to be done before defining the project.
 INCLUDE("./cmake/compiler.cmake")
 
-PROJECT( ALPACA )
-set( CMAKE_CXX_STANDARD 20 )
+project(ALPACA LANGUAGES CXX C)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 INCLUDE( FindMPI REQUIRED )
 include_directories( ${MPI_CXX_INCLUDE_DIRS} )
@@ -14,16 +15,12 @@ include_directories( ${MPI_CXX_INCLUDE_DIRS} )
 INCLUDE( FindHDF5 REQUIRED )
 include_directories( ${HDF5_INCLUDE_DIRS} )
 
-# Define the present git hash as compiler macro.
-INCLUDE("./cmake/git_hash.cmake")
 # Define warning flags used for compilation.
 INCLUDE("./cmake/warning_flags.cmake")
 # Define performance flags used for compilation (machine dependent).
 INCLUDE("./cmake/performance_flags.cmake")
 # Define an option to chosse the dimension of the build.
 INCLUDE("./cmake/dimension.cmake")
-# Define a target to create the doxygen documentation.
-INCLUDE("./cmake/documentation.cmake")
 
 # Include directories to know all necessary ALPACA headers.
 INCLUDE_DIRECTORIES(src)
@@ -115,7 +112,7 @@ endif( MPI_CXX_LINK_FLAGS )
 # Define the UserExpressions executable, encapsulating the expression toolkit from the rest of the program
 find_library(UserExpr NAMES UserExpressions PATHS ${CMAKE_CURRENT_BINARY_DIR})
 if(NOT UserExpr)
-   MESSAGE( STATUS "UserExpressions not found - will be build" )
+   MESSAGE( STATUS "UserExpressions not found - will be built" )
    add_library(UserExpressions STATIC src/user_expression.cpp )
    if( IPOPOSSIBLE AND NOT DBG )
       set_property(TARGET UserExpressions PROPERTY INTERPROCEDURAL_OPTIMIZATION True)

@@ -1,9 +1,0 @@
-execute_process(COMMAND git rev-parse HEAD OUTPUT_VARIABLE GIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if(GIT_HASH STREQUAL "")
-    MESSAGE( STATUS "Not a git repository!")
-    set(GIT_HASH "NONE")
-endif(GIT_HASH STREQUAL "")
-
-MESSAGE( STATUS "Current git hash: ${GIT_HASH}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D GITHASH=${GIT_HASH}")
