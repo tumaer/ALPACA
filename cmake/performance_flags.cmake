@@ -1,6 +1,6 @@
 message( STATUS "Set performance flags" )
 
-set(STANDARD_FLAGS "-m64 -g -std=c++17")
+set(STANDARD_FLAGS "-m64 -g")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STANDARD_FLAGS}")
 
 # Make the performance option avaible
