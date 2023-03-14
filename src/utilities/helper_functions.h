@@ -23,9 +23,9 @@
 #define HELPER_FUNCTIONS_H
 
 #include <array>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <stdexcept>
 
 // Check existence of parameter in unordered map
 template <typename T>
