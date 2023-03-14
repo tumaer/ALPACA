@@ -1,0 +1,26 @@
+name: Build CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install dependencies
+      run: |
+         sudo apt-get install -y mpich libhdf5-mpich-dev cmake ninja-build gcc g++
+    - uses: actions/checkout@v3
+    - name: cmake
+      run: |
+         cmake -GNinja -B ${{github.workspace}}/build -S . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpic++
+    - name: build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}
