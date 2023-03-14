@@ -7,6 +7,7 @@ INCLUDE("./cmake/compiler.cmake")
 
 project(ALPACA LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 INCLUDE( FindMPI REQUIRED )
 include_directories( ${MPI_CXX_INCLUDE_DIRS} )
